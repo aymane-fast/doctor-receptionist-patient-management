@@ -68,9 +68,14 @@ class AppointmentController extends Controller
             'doctor_id' => 'required|exists:users,id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required|date_format:H:i',
+            'status' => 'nullable|in:scheduled,in_progress,completed,cancelled',
             'reason' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
+
+        if (empty($validated['status'])) {
+            $validated['status'] = 'scheduled';
+        }
 
         // Check for conflicts
         $existingAppointment = Appointment::where('doctor_id', $validated['doctor_id'])
