@@ -17,11 +17,13 @@ class Appointment extends Model
         'status',
         'reason',
         'notes',
+        'is_current',
     ];
 
     protected $casts = [
         'appointment_date' => 'date',
         'appointment_time' => 'datetime:H:i',
+        'is_current' => 'boolean',
     ];
 
     /**

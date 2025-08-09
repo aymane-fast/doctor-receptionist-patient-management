@@ -21,6 +21,36 @@
         </div>
     </div>
 
+    <!-- Current Patients By Doctor -->
+    @if(isset($currentByDoctor) && $currentByDoctor->count())
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-user-clock text-blue-600 mr-2"></i>
+            Current Patients (Today)
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach($currentByDoctor as $docId => $curr)
+            <div class="border border-gray-200 rounded-lg p-4">
+                <div class="text-sm text-gray-500">Dr. {{ $curr->doctor->name }}</div>
+                <div class="font-semibold text-gray-900">{{ $curr->patient->full_name }}</div>
+                <div class="text-gray-600 text-sm">{{ $curr->appointment_time->format('g:i A') }}</div>
+                <div class="mt-3 space-x-2">
+                    <form action="{{ route('appointments.mark-current-done') }}" method="POST" class="inline">
+                        @csrf
+                        <input type="hidden" name="doctor_id" value="{{ $curr->doctor_id }}">
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">Mark Done</button>
+                    </form>
+                    <form action="{{ route('appointments.set-current', $curr) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">Reassign</button>
+                    </form>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="bg-white rounded-lg shadow p-6">
@@ -120,6 +150,10 @@
                                         @else bg-red-100 text-red-800 @endif">
                                         {{ ucfirst($appointment->status) }}
                                     </span>
+                                 <form action="{{ route('appointments.set-current', $appointment) }}" method="POST" class="inline">
+                                     @csrf
+                                     <button type="submit" class="text-blue-600 hover:text-blue-800 text-sm">Set Current</button>
+                                 </form>
                                     <a href="{{ route('appointments.show', $appointment) }}" class="text-blue-600 hover:text-blue-800">
                                         <i class="fas fa-eye"></i>
                                     </a>

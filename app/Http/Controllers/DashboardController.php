@@ -36,6 +36,37 @@ class DashboardController extends Controller
             ->orderBy('appointment_time')
             ->get();
 
+        $currentAppointment = Appointment::with('patient')
+            ->where('doctor_id', Auth::id())
+            ->today()
+            ->where('is_current', true)
+            ->first();
+
+        // Auto-assign first scheduled appointment as current if none is set
+        if (!$currentAppointment) {
+            $firstScheduled = Appointment::with('patient')
+                ->where('doctor_id', Auth::id())
+                ->today()
+                ->where('status', 'scheduled')
+                ->orderBy('appointment_time')
+                ->first();
+
+            if ($firstScheduled) {
+                // Clear any strays just in case
+                Appointment::where('doctor_id', Auth::id())
+                    ->today()
+                    ->where('is_current', true)
+                    ->update(['is_current' => false]);
+
+                $firstScheduled->update([
+                    'is_current' => true,
+                    'status' => 'in_progress',
+                ]);
+
+                $currentAppointment = $firstScheduled;
+            }
+        }
+
         $upcomingAppointments = Appointment::with('patient')
             ->where('doctor_id', Auth::id())
             ->upcoming()
@@ -64,7 +95,7 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
-        return view('dashboard.doctor', compact('todayAppointments', 'upcomingAppointments', 'recentRecords', 'stats'));
+        return view('dashboard.doctor', compact('todayAppointments', 'currentAppointment', 'upcomingAppointments', 'recentRecords', 'stats'));
     }
 
     /**
@@ -76,6 +107,12 @@ class DashboardController extends Controller
             ->today()
             ->orderBy('appointment_time')
             ->get();
+
+        $currentByDoctor = Appointment::with(['patient', 'doctor'])
+            ->today()
+            ->where('is_current', true)
+            ->get()
+            ->keyBy('doctor_id');
 
         $upcomingAppointments = Appointment::with(['patient', 'doctor'])
             ->upcoming()
@@ -95,6 +132,6 @@ class DashboardController extends Controller
             'new_patients_this_week' => Patient::where('created_at', '>=', now()->startOfWeek())->count(),
         ];
 
-        return view('dashboard.receptionist', compact('todayAppointments', 'upcomingAppointments', 'recentPatients', 'stats'));
+        return view('dashboard.receptionist', compact('todayAppointments', 'currentByDoctor', 'upcomingAppointments', 'recentPatients', 'stats'));
     }
 }

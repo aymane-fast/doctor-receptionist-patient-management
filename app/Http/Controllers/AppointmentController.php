@@ -172,4 +172,76 @@ class AppointmentController extends Controller
 
         return back()->with('success', 'Appointment status updated successfully!');
     }
+
+    /**
+     * Set the current patient for the doctor's queue
+     */
+    public function setCurrent(Request $request, Appointment $appointment)
+    {
+        // Only receptionists or the owning doctor can set current
+        if (!(Auth::user()->isReceptionist() || (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id()))) {
+            abort(403);
+        }
+
+        // Clear any existing current for this doctor for today
+        Appointment::where('doctor_id', $appointment->doctor_id)
+            ->whereDate('appointment_date', $appointment->appointment_date)
+            ->where('is_current', true)
+            ->update(['is_current' => false]);
+
+        // Mark this appointment as current and in progress if scheduled
+        $appointment->is_current = true;
+        if ($appointment->status === 'scheduled') {
+            $appointment->status = 'in_progress';
+        }
+        $appointment->save();
+
+        return back()->with('success', 'Current patient set.');
+    }
+
+    /**
+     * Mark the current patient as done and move to next
+     */
+    public function markCurrentDone(Request $request)
+    {
+        $request->validate([
+            'doctor_id' => 'nullable|exists:users,id',
+        ]);
+
+        $doctorId = $request->doctor_id ?: Auth::id();
+
+        // Only receptionists can specify a doctor; doctors can only mark their own
+        if ($request->doctor_id && !Auth::user()->isReceptionist()) {
+            abort(403);
+        }
+
+        // Find current appointment for today
+        $current = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', today())
+            ->where('is_current', true)
+            ->first();
+
+        if ($current) {
+            $current->update([
+                'is_current' => false,
+                'status' => 'completed',
+            ]);
+        }
+
+        // Auto-assign the next scheduled appointment today as current
+        $next = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', today())
+            ->where('status', 'scheduled')
+            ->orderBy('appointment_time')
+            ->first();
+
+        if ($next) {
+            $next->update([
+                'is_current' => true,
+                'status' => 'in_progress',
+            ]);
+        }
+
+        return back()->with('success', $current ? 'Marked current as done.' : 'No current appointment.') ;
+    }
 }
