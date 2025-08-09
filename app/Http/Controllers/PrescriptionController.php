@@ -83,6 +83,16 @@ class PrescriptionController extends Controller
         return view('prescriptions.show', compact('prescription'));
     }
 
+    public function print(Prescription $prescription)
+    {
+        if (!Auth::user()->isDoctor() || $prescription->doctor_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $prescription->load(['patient', 'doctor']);
+        return view('prescriptions.print', compact('prescription'));
+    }
+
     public function edit(Prescription $prescription)
     {
         if (!Auth::user()->isDoctor() || $prescription->doctor_id !== Auth::id()) {

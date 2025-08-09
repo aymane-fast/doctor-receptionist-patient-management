@@ -8,6 +8,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DoctorController;
 
 // Public routes
 Route::get('/', function () {
@@ -28,6 +29,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/doctor/current', [DoctorController::class, 'current'])->name('doctor.current');
     
     // Patient management (accessible by both roles)
     Route::resource('patients', PatientController::class);
@@ -41,6 +43,7 @@ Route::middleware('auth')->group(function () {
     // Medical records (doctors only)
     Route::resource('medical-records', MedicalRecordController::class);
     Route::resource('prescriptions', PrescriptionController::class);
+    Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');
     
     // Document management (accessible by both roles)
     Route::resource('documents', DocumentController::class);

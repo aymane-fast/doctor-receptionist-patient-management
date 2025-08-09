@@ -3,6 +3,55 @@
 @section('title', 'Prescription Details')
 
 @section('content')
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">
+            <i class="fas fa-prescription text-purple-600 mr-2"></i>
+            Prescription
+        </h1>
+        <div class="space-x-2">
+            <a href="{{ route('prescriptions.index') }}" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded">Back</a>
+            <a href="{{ route('prescriptions.print', $prescription) }}" target="_blank" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Print</a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <div class="text-sm text-gray-500">Patient</div>
+                <div class="text-lg font-semibold text-gray-900">{{ $prescription->patient->full_name }}</div>
+                <div class="text-gray-600">{{ $prescription->patient->patient_id }}</div>
+            </div>
+            <div>
+                <div class="text-sm text-gray-500">Doctor</div>
+                <div class="text-lg font-semibold text-gray-900">Dr. {{ $prescription->doctor->name }}</div>
+                <div class="text-gray-600">Date: {{ $prescription->prescribed_date->format('M j, Y') }}</div>
+            </div>
+        </div>
+        <div class="border-t border-gray-200 mt-6 pt-6">
+            <div class="text-sm text-gray-500">Medication</div>
+            <div class="text-lg font-semibold text-gray-900">{{ $prescription->medication_name }} ({{ $prescription->dosage }})</div>
+            <div class="text-gray-700">Frequency: {{ $prescription->frequency }} • Duration: {{ $prescription->duration_days }} days</div>
+            <div class="mt-4">
+                <div class="text-sm text-gray-500">Instructions</div>
+                <div class="text-gray-800">{{ $prescription->instructions }}</div>
+            </div>
+            @if($prescription->notes)
+            <div class="mt-4">
+                <div class="text-sm text-gray-500">Notes</div>
+                <div class="text-gray-800">{{ $prescription->notes }}</div>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+@endsection
+
+@extends('layouts.app')
+
+@section('title', 'Prescription Details')
+
+@section('content')
 <div class="container mx-auto px-4 py-6">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">

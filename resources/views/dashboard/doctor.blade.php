@@ -18,13 +18,7 @@
                 </div>
             </div>
             <div class="space-x-2">
-                <a href="{{ route('patients.show', $currentAppointment->patient_id) }}" class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded">History</a>
-                <a href="{{ route('medical-records.create', ['patient_id' => $currentAppointment->patient_id, 'appointment_id' => $currentAppointment->id]) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">New Record</a>
-                <a href="{{ route('prescriptions.create', ['patient_id' => $currentAppointment->patient_id]) }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Prescription</a>
-                <form action="{{ route('appointments.mark-current-done') }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Mark Done</button>
-                </form>
+                <a href="{{ route('doctor.current') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Open Workspace</a>
             </div>
         </div>
     </div>

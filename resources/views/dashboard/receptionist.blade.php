@@ -40,10 +40,6 @@
                         <input type="hidden" name="doctor_id" value="{{ $curr->doctor_id }}">
                         <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">Mark Done</button>
                     </form>
-                    <form action="{{ route('appointments.set-current', $curr) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">Reassign</button>
-                    </form>
                 </div>
             </div>
             @endforeach

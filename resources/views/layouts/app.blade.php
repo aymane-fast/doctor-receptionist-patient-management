@@ -33,6 +33,9 @@
                                 <i class="fas fa-calendar mr-1"></i> Appointments
                             </a>
                             @if(auth()->user()->isDoctor())
+                            <a href="{{ route('doctor.current') }}" class="hover:text-blue-200 transition">
+                                <i class="fas fa-user-clock mr-1"></i> Current
+                            </a>
                             <a href="{{ route('medical-records.index') }}" class="hover:text-blue-200 transition">
                                 <i class="fas fa-file-medical mr-1"></i> Medical Records
                             </a>
