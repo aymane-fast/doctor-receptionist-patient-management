@@ -17,18 +17,30 @@ class AppointmentController extends Controller
     {
         $query = Appointment::with(['patient', 'doctor']);
 
+        // Text search across patient name, patient number, phone, id card
+        if ($request->filled('search')) {
+            $search = trim($request->string('search'));
+            $query->whereHas('patient', function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('patient_id', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('id_card_number', 'like', "%{$search}%");
+            });
+        }
+
         // Filter by date
-        if ($request->has('date')) {
+        if ($request->filled('date')) {
             $query->whereDate('appointment_date', $request->date);
         }
 
         // Filter by status
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         // Filter by doctor for receptionists
-        if ($request->has('doctor_id') && Auth::user()->isReceptionist()) {
+        if ($request->filled('doctor_id') && Auth::user()->isReceptionist()) {
             $query->where('doctor_id', $request->doctor_id);
         }
 
@@ -37,9 +49,10 @@ class AppointmentController extends Controller
             $query->where('doctor_id', Auth::id());
         }
 
-        $appointments = $query->latest('appointment_date')
-                             ->latest('appointment_time')
-                             ->paginate(15);
+        $appointments = $query->orderBy('appointment_date', 'desc')
+                             ->orderBy('appointment_time', 'desc')
+                             ->paginate(15)
+                             ->appends($request->query());
 
         $doctors = User::where('role', 'doctor')->get();
         $patients = Patient::all();
