@@ -34,6 +34,9 @@
                 <div class="text-sm text-gray-500">Dr. {{ $curr->doctor->name }}</div>
                 <div class="font-semibold text-gray-900">{{ $curr->patient->full_name }}</div>
                 <div class="text-gray-600 text-sm">{{ $curr->appointment_time->format('g:i A') }}</div>
+                @if(isset($nextByDoctor[$docId]) && $nextByDoctor[$docId])
+                <div class="mt-2 text-xs text-gray-500">Next up: {{ $nextByDoctor[$docId]->patient->full_name }} at {{ $nextByDoctor[$docId]->appointment_time->format('g:i A') }}</div>
+                @endif
                 <div class="mt-3 space-x-2">
                     <form action="{{ route('appointments.mark-current-done') }}" method="POST" class="inline">
                         @csrf
@@ -108,13 +111,13 @@
 
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Today's Appointments -->
+     <!-- Today's Appointments -->
         <div class="bg-white rounded-lg shadow">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-gray-900">
                         <i class="fas fa-calendar-day text-blue-600 mr-2"></i>
-                        Today's Appointments
+                     Today's Appointments <span class="text-sm text-gray-500">({{ $stats['today_appointments'] }})</span>
                     </h2>
                     <a href="{{ route('appointments.create') }}" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition">
                         <i class="fas fa-plus mr-1"></i> Book Appointment
@@ -160,7 +163,8 @@
                             @endif
                         </div>
                         @endforeach
-                    </div>
+                </div>
+                <div class="mt-4">{{ $todayAppointments->links() }}</div>
                 @else
                     <div class="text-center py-8">
                         <i class="fas fa-calendar-times text-gray-400 text-4xl mb-4"></i>
@@ -170,7 +174,7 @@
             </div>
         </div>
 
-        <!-- Recent Patients -->
+     <!-- Recent Patients -->
         <div class="bg-white rounded-lg shadow">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
@@ -210,7 +214,8 @@
                             <p class="text-sm text-gray-600 mt-2">{{ $patient->phone }}</p>
                         </div>
                         @endforeach
-                    </div>
+                </div>
+                <div class="mt-4">{{ $recentPatients->links() }}</div>
                 @else
                     <div class="text-center py-8">
                         <i class="fas fa-user-plus text-gray-400 text-4xl mb-4"></i>

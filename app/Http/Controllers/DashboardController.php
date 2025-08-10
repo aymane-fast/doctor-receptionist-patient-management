@@ -106,7 +106,7 @@ class DashboardController extends Controller
         $todayAppointments = Appointment::with(['patient', 'doctor'])
             ->today()
             ->orderBy('appointment_time')
-            ->get();
+            ->paginate(10, ['*'], 'today_page');
 
         $currentByDoctor = Appointment::with(['patient', 'doctor'])
             ->today()
@@ -121,17 +121,31 @@ class DashboardController extends Controller
             ->orderBy('appointment_time')
             ->get();
 
-        $recentPatients = Patient::latest()
-            ->limit(5)
-            ->get();
+        $recentPatients = Patient::latest()->paginate(5, ['*'], 'recent_patients_page');
 
         $stats = [
             'total_patients' => Patient::count(),
-            'today_appointments' => $todayAppointments->count(),
+            'today_appointments' => Appointment::today()->count(),
             'scheduled_appointments' => Appointment::where('status', 'scheduled')->count(),
             'new_patients_this_week' => Patient::where('created_at', '>=', now()->startOfWeek())->count(),
         ];
 
-        return view('dashboard.receptionist', compact('todayAppointments', 'currentByDoctor', 'upcomingAppointments', 'recentPatients', 'stats'));
+        // Compute next-up per doctor
+        $doctorIdsToday = Appointment::today()->pluck('doctor_id')->unique();
+        $nextByDoctor = [];
+        foreach ($doctorIdsToday as $docId) {
+            $current = $currentByDoctor->get($docId);
+            $nextQuery = Appointment::with(['patient', 'doctor'])
+                ->where('doctor_id', $docId)
+                ->today()
+                ->where('status', 'scheduled')
+                ->orderBy('appointment_time');
+            if ($current) {
+                $nextQuery->whereTime('appointment_time', '>', $current->appointment_time);
+            }
+            $nextByDoctor[$docId] = $nextQuery->first();
+        }
+
+        return view('dashboard.receptionist', compact('todayAppointments', 'currentByDoctor', 'nextByDoctor', 'upcomingAppointments', 'recentPatients', 'stats'));
     }
 }
