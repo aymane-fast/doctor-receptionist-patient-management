@@ -13,12 +13,14 @@ class Prescription extends Model
         'patient_id',
         'doctor_id',
         'medical_record_id',
+        'prescribed_date',
+        // legacy columns to satisfy existing schema
         'medication_name',
         'dosage',
         'frequency',
         'duration_days',
         'instructions',
-        'prescribed_date',
+        'notes',
     ];
 
     protected $casts = [
@@ -47,5 +49,10 @@ class Prescription extends Model
     public function medicalRecord()
     {
         return $this->belongsTo(MedicalRecord::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(PrescriptionItem::class);
     }
 }

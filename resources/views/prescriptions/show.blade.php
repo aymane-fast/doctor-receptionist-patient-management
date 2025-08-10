@@ -29,19 +29,18 @@
             </div>
         </div>
         <div class="border-t border-gray-200 mt-6 pt-6">
-            <div class="text-sm text-gray-500">Medication</div>
-            <div class="text-lg font-semibold text-gray-900">{{ $prescription->medication_name }} ({{ $prescription->dosage }})</div>
-            <div class="text-gray-700">Frequency: {{ $prescription->frequency }} • Duration: {{ $prescription->duration_days }} days</div>
-            <div class="mt-4">
-                <div class="text-sm text-gray-500">Instructions</div>
-                <div class="text-gray-800">{{ $prescription->instructions }}</div>
+            <div class="text-sm text-gray-500 mb-2">Medications</div>
+            <div class="space-y-3">
+                @foreach($prescription->items as $item)
+                <div class="p-4 border border-gray-200 rounded">
+                    <div class="text-lg font-semibold text-gray-900">{{ $item->medication_name }} ({{ $item->dosage }})</div>
+                    <div class="text-gray-700">Frequency: {{ $item->frequency }}@if($item->duration_days) • Duration: {{ $item->duration_days }} days @endif</div>
+                    @if($item->instructions)
+                    <div class="text-gray-700">Instructions: {{ $item->instructions }}</div>
+                    @endif
+                </div>
+                @endforeach
             </div>
-            @if($prescription->notes)
-            <div class="mt-4">
-                <div class="text-sm text-gray-500">Notes</div>
-                <div class="text-gray-800">{{ $prescription->notes }}</div>
-            </div>
-            @endif
         </div>
     </div>
 </div>

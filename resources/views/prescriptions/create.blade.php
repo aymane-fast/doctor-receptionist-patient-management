@@ -77,97 +77,51 @@
                             @enderror
                         </div>
 
-                        <!-- Status -->
-                        <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
-                                Status
-                            </label>
-                            <select id="status" name="status" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                <option value="expired" {{ old('status') == 'expired' ? 'selected' : '' }}>Expired</option>
-                            </select>
-                            @error('status')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <!-- No status field; state managed implicitly -->
                     </div>
                 </div>
 
-                <!-- Medication Details -->
+                <!-- Medication Items (multiple) -->
                 <div class="border-b border-gray-200 pb-6 mb-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Medication Details</h2>
-                    
-                    <!-- Medication Name -->
-                    <div class="mb-6">
-                        <label for="medication_name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Medication Name <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="medication_name" name="medication_name" 
-                               value="{{ old('medication_name') }}" required
-                               placeholder="Enter medication name..."
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        @error('medication_name')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Dosage -->
-                        <div>
-                            <label for="dosage" class="block text-sm font-medium text-gray-700 mb-2">
-                                Dosage <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" id="dosage" name="dosage" 
-                                   value="{{ old('dosage') }}" required
-                                   placeholder="e.g., 500mg"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            @error('dosage')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Frequency -->
-                        <div>
-                            <label for="frequency" class="block text-sm font-medium text-gray-700 mb-2">
-                                Frequency <span class="text-red-500">*</span>
-                            </label>
-                            <select id="frequency" name="frequency" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select frequency</option>
-                                <option value="Once daily" {{ old('frequency') == 'Once daily' ? 'selected' : '' }}>Once daily</option>
-                                <option value="Twice daily" {{ old('frequency') == 'Twice daily' ? 'selected' : '' }}>Twice daily</option>
-                                <option value="Three times daily" {{ old('frequency') == 'Three times daily' ? 'selected' : '' }}>Three times daily</option>
-                                <option value="Four times daily" {{ old('frequency') == 'Four times daily' ? 'selected' : '' }}>Four times daily</option>
-                                <option value="Every 4 hours" {{ old('frequency') == 'Every 4 hours' ? 'selected' : '' }}>Every 4 hours</option>
-                                <option value="Every 6 hours" {{ old('frequency') == 'Every 6 hours' ? 'selected' : '' }}>Every 6 hours</option>
-                                <option value="Every 8 hours" {{ old('frequency') == 'Every 8 hours' ? 'selected' : '' }}>Every 8 hours</option>
-                                <option value="Every 12 hours" {{ old('frequency') == 'Every 12 hours' ? 'selected' : '' }}>Every 12 hours</option>
-                                <option value="As needed" {{ old('frequency') == 'As needed' ? 'selected' : '' }}>As needed (PRN)</option>
-                                <option value="Weekly" {{ old('frequency') == 'Weekly' ? 'selected' : '' }}>Weekly</option>
-                                <option value="Other" {{ old('frequency') == 'Other' ? 'selected' : '' }}>Other</option>
-                            </select>
-                            @error('frequency')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Duration -->
-                        <div>
-                            <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">
-                                Duration <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" id="duration" name="duration" 
-                                   value="{{ old('duration') }}" required
-                                   placeholder="e.g., 7 days, 2 weeks"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            @error('duration')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Medications</h2>
+                    <div id="items">
+                        <div class="item grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Medication *</label>
+                                <input type="text" name="items[0][medication_name]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="e.g., Amoxicillin">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dosage *</label>
+                                <input type="text" name="items[0][dosage]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="500mg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Frequency *</label>
+                                <select name="items[0][frequency]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                    <option value="">Select</option>
+                                    <option>Once daily</option>
+                                    <option>Twice daily</option>
+                                    <option>Three times daily</option>
+                                    <option>Four times daily</option>
+                                    <option>Every 4 hours</option>
+                                    <option>Every 6 hours</option>
+                                    <option>Every 8 hours</option>
+                                    <option>Every 12 hours</option>
+                                    <option>As needed</option>
+                                    <option>Weekly</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Duration (days)</label>
+                                <input type="number" name="items[0][duration_days]" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="7">
+                            </div>
+                            <div class="md:col-span-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Instructions (optional)</label>
+                                <input type="text" name="items[0][instructions]" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Before meals">
+                            </div>
                         </div>
                     </div>
+                    <button type="button" id="add-item" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded">+ Add another medication</button>
                 </div>
 
                 <!-- Additional Information -->
@@ -232,15 +186,8 @@
 
                     <!-- Instructions -->
                     <div class="mt-6">
-                        <label for="instructions" class="block text-sm font-medium text-gray-700 mb-2">
-                            Instructions for Use <span class="text-red-500">*</span>
-                        </label>
-                        <textarea id="instructions" name="instructions" rows="4" required
-                                  placeholder="Detailed instructions for the patient on how to take the medication..."
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('instructions') }}</textarea>
-                        @error('instructions')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
+                        <textarea name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('notes') }}</textarea>
                     </div>
 
                     <!-- Notes -->
@@ -271,5 +218,49 @@
             </form>
         </div>
     </div>
+<script>
+let itemIndex = 1;
+document.getElementById('add-item').addEventListener('click', () => {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'item grid grid-cols-1 md:grid-cols-4 gap-4 mb-4';
+  wrapper.innerHTML = `
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Medication *</label>
+      <input type="text" name="items[${itemIndex}][medication_name]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="e.g., Amoxicillin">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Dosage *</label>
+      <input type="text" name="items[${itemIndex}][dosage]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="500mg">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Frequency *</label>
+      <select name="items[${itemIndex}][frequency]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+        <option value="">Select</option>
+        <option>Once daily</option>
+        <option>Twice daily</option>
+        <option>Three times daily</option>
+        <option>Four times daily</option>
+        <option>Every 4 hours</option>
+        <option>Every 6 hours</option>
+        <option>Every 8 hours</option>
+        <option>Every 12 hours</option>
+        <option>As needed</option>
+        <option>Weekly</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Duration (days)</label>
+      <input type="number" name="items[${itemIndex}][duration_days]" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="7">
+    </div>
+    <div class="md:col-span-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Instructions (optional)</label>
+      <input type="text" name="items[${itemIndex}][instructions]" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Before meals">
+    </div>
+  `;
+  document.getElementById('items').appendChild(wrapper);
+  itemIndex++;
+});
+</script>
 </div>
 @endsection

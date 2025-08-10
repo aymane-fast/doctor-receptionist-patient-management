@@ -57,17 +57,32 @@ class PrescriptionController extends Controller
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'medical_record_id' => 'nullable|exists:medical_records,id',
-            'medication_name' => 'required|string|max:255',
-            'dosage' => 'required|string|max:255',
-            'frequency' => 'required|string|max:255',
-            'duration_days' => 'required|integer|min:1',
-            'instructions' => 'required|string',
             'prescribed_date' => 'required|date|before_or_equal:today',
+            'items' => 'required|array|min:1',
+            'items.*.medication_name' => 'required|string|max:255',
+            'items.*.dosage' => 'required|string|max:255',
+            'items.*.frequency' => 'required|string|max:255',
+            'items.*.duration_days' => 'nullable|integer|min:1',
+            'items.*.instructions' => 'nullable|string',
+            'notes' => 'nullable|string',
         ]);
 
-        $validated['doctor_id'] = Auth::id();
+        $prescription = Prescription::create([
+            'patient_id' => $validated['patient_id'],
+            'doctor_id' => Auth::id(),
+            'medical_record_id' => $validated['medical_record_id'] ?? null,
+            'prescribed_date' => $validated['prescribed_date'],
+            // legacy columns required by current schema
+            'medication_name' => 'Multiple medications',
+            'dosage' => '-',
+            'frequency' => '-',
+            'duration_days' => 0,
+            'instructions' => null,
+        ]);
 
-        $prescription = Prescription::create($validated);
+        foreach ($validated['items'] as $item) {
+            $prescription->items()->create($item);
+        }
 
         return redirect()->route('prescriptions.show', $prescription)
             ->with('success', 'Prescription created successfully!');
@@ -79,7 +94,7 @@ class PrescriptionController extends Controller
             abort(403);
         }
 
-        $prescription->load(['patient', 'doctor', 'medicalRecord']);
+        $prescription->load(['patient', 'doctor', 'medicalRecord', 'items']);
         return view('prescriptions.show', compact('prescription'));
     }
 
@@ -89,7 +104,7 @@ class PrescriptionController extends Controller
             abort(403);
         }
 
-        $prescription->load(['patient', 'doctor']);
+        $prescription->load(['patient', 'doctor', 'items']);
         return view('prescriptions.print', compact('prescription'));
     }
 

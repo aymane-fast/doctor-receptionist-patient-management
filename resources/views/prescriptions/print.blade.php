@@ -33,10 +33,17 @@
     </div>
 
     <div class="box">
-        <div class="title">Medication</div>
-        <div>{{ $prescription->medication_name }} ({{ $prescription->dosage }})</div>
-        <div>Frequency: {{ $prescription->frequency }}</div>
-        <div>Duration: {{ $prescription->duration_days }} days</div>
+        <div class="title">Medications</div>
+        <ul>
+        @foreach($prescription->items as $item)
+            <li>
+                {{ $item->medication_name }} ({{ $item->dosage }}) — {{ $item->frequency }}@if($item->duration_days), {{ $item->duration_days }} days @endif
+                @if($item->instructions)
+                    <div>Instructions: {{ $item->instructions }}</div>
+                @endif
+            </li>
+        @endforeach
+        </ul>
     </div>
 
     <div class="box">
