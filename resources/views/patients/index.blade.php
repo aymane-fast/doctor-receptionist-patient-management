@@ -88,32 +88,29 @@
                         </div>
                         
                         <div class="space-y-3 mb-4">
-                            <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
-                                <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
-                                    <i class="fas fa-birthday-cake text-amber-600 text-xs"></i>
+                            <!-- Age and Gender side by side -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
+                                    <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-birthday-cake text-amber-600 text-xs"></i>
+                                    </div>
+                                    <span class="font-medium">{{ $patient->age }} years</span>
                                 </div>
-                                <span class="font-medium">{{ $patient->age }} years old</span>
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
-                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                                    <i class="fas fa-venus-mars text-purple-600 text-xs"></i>
+                                <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
+                                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-venus-mars text-purple-600 text-xs"></i>
+                                    </div>
+                                    <span class="font-medium">{{ ucfirst($patient->gender) }}</span>
                                 </div>
-                                <span class="font-medium">{{ ucfirst($patient->gender) }}</span>
                             </div>
+                            
+                            <!-- Phone number full width -->
                             <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
                                 <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
                                     <i class="fas fa-phone text-emerald-600 text-xs"></i>
                                 </div>
                                 <span class="font-medium">{{ $patient->phone }}</span>
                             </div>
-                            @if($patient->email)
-                            <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
-                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                    <i class="fas fa-envelope text-blue-600 text-xs"></i>
-                                </div>
-                                <span class="font-medium">{{ Str::limit($patient->email, 20) }}</span>
-                            </div>
-                            @endif
                         </div>
 
                         <div class="pt-4 border-t border-gray-100">
