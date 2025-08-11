@@ -73,7 +73,7 @@ class PatientSeeder extends Seeder
                 'first_name' => 'Eman',
                 'last_name' => 'Hassan',
                 'birth_date' => '1985-09-30',
-                'gender' => 'other',
+                'gender' => 'male',
                 'phone' => '+1555000005',
                 'email' => 'eman.hassan@example.com',
                 'address' => '505 Maple St, Fairview',
