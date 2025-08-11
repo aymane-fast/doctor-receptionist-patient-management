@@ -34,7 +34,7 @@ class DashboardController extends Controller
             ->where('doctor_id', Auth::id())
             ->today()
             ->orderBy('appointment_time')
-            ->get();
+            ->paginate(10, ['*'], 'doc_today_page');
 
         $currentAppointment = Appointment::with('patient')
             ->where('doctor_id', Auth::id())
@@ -78,14 +78,15 @@ class DashboardController extends Controller
         $recentRecords = MedicalRecord::with('patient')
             ->where('doctor_id', Auth::id())
             ->latest()
-            ->limit(5)
-            ->get();
+            ->paginate(5, ['*'], 'doc_records_page');
 
         $stats = [
             'total_patients' => Patient::whereHas('appointments', function($query) {
                 $query->where('doctor_id', Auth::id());
             })->count(),
-            'today_appointments' => $todayAppointments->count(),
+            'today_appointments' => Appointment::where('doctor_id', Auth::id())
+                ->today()
+                ->count(),
             'pending_appointments' => Appointment::where('doctor_id', Auth::id())
                 ->where('status', 'scheduled')
                 ->count(),

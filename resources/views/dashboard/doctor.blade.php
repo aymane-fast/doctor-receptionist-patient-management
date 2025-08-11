@@ -148,6 +148,7 @@
                         </div>
                         @endforeach
                     </div>
+                    <div class="mt-4">{{ $todayAppointments->links() }}</div>
                 @else
                     <div class="text-center py-8">
                         <i class="fas fa-calendar-times text-gray-400 text-4xl mb-4"></i>
@@ -195,6 +196,7 @@
                         </div>
                         @endforeach
                     </div>
+                    <div class="mt-4">{{ $recentRecords->links() }}</div>
                 @else
                     <div class="text-center py-8">
                         <i class="fas fa-file-medical text-gray-400 text-4xl mb-4"></i>
