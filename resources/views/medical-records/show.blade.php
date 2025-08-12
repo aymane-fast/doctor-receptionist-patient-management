@@ -261,10 +261,6 @@
                        class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
                         <i class="fas fa-prescription-bottle mr-2"></i>Patient's Prescriptions
                     </a>
-                    <a href="{{ route('documents.index', ['patient_id' => $medicalRecord->patient_id]) }}" 
-                       class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-                        <i class="fas fa-file-alt mr-2"></i>Patient's Documents
-                    </a>
                     <a href="{{ route('appointments.index', ['patient_id' => $medicalRecord->patient_id]) }}" 
                        class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
                         <i class="fas fa-calendar mr-2"></i>Patient's Appointments

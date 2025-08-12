@@ -82,11 +82,4 @@ class Patient extends Model
         return $this->hasMany(Prescription::class);
     }
 
-    /**
-     * Patient's documents
-     */
-    public function documents()
-    {
-        return $this->hasMany(Document::class);
-    }
 }

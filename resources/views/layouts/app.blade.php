@@ -137,10 +137,6 @@
                                 <span>Prescriptions</span>
                             </a>
                             @endif
-                            <a href="{{ route('documents.index') }}" class="px-4 py-2 rounded-lg text-white/90 hover:bg-white/20 hover:text-white transition-all duration-200 flex items-center space-x-2">
-                                <i class="fas fa-folder"></i>
-                                <span>Documents</span>
-                            </a>
                         </div>
                         
                         <!-- User Profile -->

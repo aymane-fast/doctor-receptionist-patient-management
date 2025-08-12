@@ -88,12 +88,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Prescription::class, 'doctor_id');
     }
-
-    /**
-     * Uploaded documents
-     */
-    public function uploadedDocuments()
-    {
-        return $this->hasMany(Document::class, 'uploaded_by');
-    }
 }

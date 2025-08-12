@@ -7,7 +7,6 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\PrescriptionController;
-use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DoctorController;
 
 // Public routes
@@ -44,8 +43,4 @@ Route::middleware('auth')->group(function () {
     Route::resource('medical-records', MedicalRecordController::class);
     Route::resource('prescriptions', PrescriptionController::class);
     Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');
-    
-    // Document management (accessible by both roles)
-    Route::resource('documents', DocumentController::class);
-    Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
 });

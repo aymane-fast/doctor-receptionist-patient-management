@@ -263,14 +263,6 @@
                         </div>
                         <i class="fas fa-arrow-right text-emerald-400 group-hover:text-emerald-600"></i>
                     </a>
-                    <a href="{{ route('documents.index', ['patient_id' => $appointment->patient_id]) }}" 
-                       class="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-2xl hover:from-purple-100 hover:to-purple-200 transition-all duration-200 group">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-file-alt text-purple-600 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-purple-600 font-medium">Documents</span>
-                        </div>
-                        <i class="fas fa-arrow-right text-purple-400 group-hover:text-purple-600"></i>
-                    </a>
                 </div>
             </div>
             @endif
