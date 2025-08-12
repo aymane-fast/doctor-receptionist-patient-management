@@ -3,32 +3,50 @@
 @section('title', 'Create Prescription')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <div class="max-w-3xl mx-auto">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">Create New Prescription</h1>
-            <a href="{{ route('prescriptions.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i>Back to Prescriptions
+<div class="space-y-6">
+    <!-- Modern Header -->
+    <div class="glass-effect rounded-2xl p-6 modern-shadow">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-prescription-bottle-alt text-purple-600 text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        <span class="text-gradient">Create New Prescription</span>
+                    </h1>
+                    <p class="text-gray-600 mt-1">Prescribe medications for patient treatment</p>
+                </div>
+            </div>
+            <a href="{{ route('prescriptions.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+                <i class="fas fa-arrow-left text-sm"></i>
+                <span>Back to Prescriptions</span>
             </a>
         </div>
+    </div>
 
         <!-- Prescription Form -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <form action="{{ route('prescriptions.store') }}" method="POST">
+        <div class="glass-effect rounded-2xl modern-shadow overflow-hidden">
+            <form action="{{ route('prescriptions.store') }}" method="POST" class="space-y-6">
                 @csrf
                 
                 <!-- Patient and Basic Info -->
-                <div class="border-b border-gray-200 pb-6 mb-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Patient Information</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 pb-0">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-user text-white text-sm"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900">Patient & Prescription Information</h3>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-4">
                         <!-- Patient Selection -->
                         <div>
-                            <label for="patient_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="patient_id" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
                                 Patient <span class="text-red-500">*</span>
                             </label>
                             <select id="patient_id" name="patient_id" required 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror">
                                 <option value="">Select a patient</option>
                                 @foreach($patients as $patient)
                                     <option value="{{ $patient->id }}" 
@@ -38,224 +56,156 @@
                                 @endforeach
                             </select>
                             @error('patient_id')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                <span>{{ $message }}</span>
+                            </p>
                             @enderror
                         </div>
 
-                        <!-- Medical Record Link -->
-                        @if(request('medical_record_id'))
-                        <input type="hidden" name="medical_record_id" value="{{ request('medical_record_id') }}">
-                        @else
-                        <div>
-                            <label for="medical_record_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                Related Medical Record
-                            </label>
-                            <select id="medical_record_id" name="medical_record_id" 
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">No medical record</option>
-                                @foreach($medicalRecords as $record)
-                                    <option value="{{ $record->id }}" {{ old('medical_record_id') == $record->id ? 'selected' : '' }}>
-                                        {{ $record->patient->first_name }} {{ $record->patient->last_name }} - 
-                                        {{ \Carbon\Carbon::parse($record->visit_date)->format('M j, Y') }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @endif
-
                         <!-- Prescribed Date -->
                         <div>
-                            <label for="prescribed_date" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="prescribed_date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
                                 Prescribed Date <span class="text-red-500">*</span>
                             </label>
                             <input type="date" id="prescribed_date" name="prescribed_date" 
                                    value="{{ old('prescribed_date', date('Y-m-d')) }}" required
                                    max="{{ date('Y-m-d') }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('prescribed_date') border-red-500 @enderror">
                             @error('prescribed_date')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                <span>{{ $message }}</span>
+                            </p>
                             @enderror
                         </div>
-
-                        <!-- No status field; state managed implicitly -->
                     </div>
                 </div>
 
-                <!-- Medication Items (multiple) -->
-                <div class="border-b border-gray-200 pb-6 mb-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Medications</h2>
-                    <div id="items">
-                        <div class="item grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Medication *</label>
-                                <input type="text" name="items[0][medication_name]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="e.g., Amoxicillin">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Dosage *</label>
-                                <input type="text" name="items[0][dosage]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="500mg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Frequency *</label>
-                                <select name="items[0][frequency]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                                    <option value="">Select</option>
-                                    <option>Once daily</option>
-                                    <option>Twice daily</option>
-                                    <option>Three times daily</option>
-                                    <option>Four times daily</option>
-                                    <option>Every 4 hours</option>
-                                    <option>Every 6 hours</option>
-                                    <option>Every 8 hours</option>
-                                    <option>Every 12 hours</option>
-                                    <option>As needed</option>
-                                    <option>Weekly</option>
-                                    <option>Other</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Duration (days)</label>
-                                <input type="number" name="items[0][duration_days]" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="7">
-                            </div>
-                            <div class="md:col-span-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Instructions (optional)</label>
-                                <input type="text" name="items[0][instructions]" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Before meals">
-                            </div>
+                <div class="border-t border-gray-200"></div>
+
+                <!-- Medication Items -->
+                <div class="p-6">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-pills text-white text-sm"></i>
                         </div>
+                        <h3 class="text-lg font-bold text-gray-900">Medications</h3>
                     </div>
-                    <button type="button" id="add-item" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded">+ Add another medication</button>
-                </div>
-
-                <!-- Additional Information -->
-                <div class="border-b border-gray-200 pb-6 mb-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Additional Information</h2>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Start Date -->
-                        <div>
-                            <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
-                                Start Date
-                            </label>
-                            <input type="date" id="start_date" name="start_date" 
-                                   value="{{ old('start_date') }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            @error('start_date')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- End Date -->
-                        <div>
-                            <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">
-                                End Date
-                            </label>
-                            <input type="date" id="end_date" name="end_date" 
-                                   value="{{ old('end_date') }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            @error('end_date')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Quantity -->
-                        <div>
-                            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">
-                                Quantity
-                            </label>
-                            <input type="text" id="quantity" name="quantity" 
-                                   value="{{ old('quantity') }}"
-                                   placeholder="e.g., 30 tablets, 100ml"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            @error('quantity')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Refills -->
-                        <div>
-                            <label for="refills" class="block text-sm font-medium text-gray-700 mb-2">
-                                Number of Refills
-                            </label>
-                            <input type="number" id="refills" name="refills" 
-                                   value="{{ old('refills', 0) }}" 
-                                   min="0" max="12"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            @error('refills')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
+                    <div id="items" class="space-y-4">
+                        <div class="item bg-white border-2 border-gray-200 rounded-xl p-4">
+                            <div class="grid md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Medication <span class="text-red-500">*</span></label>
+                                    <input type="text" name="items[0][medication_name]" required 
+                                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" 
+                                           placeholder="e.g., Amoxicillin">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Dosage <span class="text-red-500">*</span></label>
+                                    <input type="text" name="items[0][dosage]" required 
+                                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" 
+                                           placeholder="500mg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Frequency <span class="text-red-500">*</span></label>
+                                    <select name="items[0][frequency]" required 
+                                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200">
+                                        <option value="">Select frequency</option>
+                                        <option>Once daily</option>
+                                        <option>Twice daily</option>
+                                        <option>Three times daily</option>
+                                        <option>Four times daily</option>
+                                        <option>Every 4 hours</option>
+                                        <option>Every 6 hours</option>
+                                        <option>Every 8 hours</option>
+                                        <option>Every 12 hours</option>
+                                        <option>As needed</option>
+                                        <option>Weekly</option>
+                                        <option>Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Duration (days)</label>
+                                    <input type="number" name="items[0][duration_days]" min="1" 
+                                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" 
+                                           placeholder="7">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Instructions</label>
+                                <input type="text" name="items[0][instructions]" 
+                                       class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" 
+                                       placeholder="Take with food, before meals, etc.">
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Instructions -->
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
-                        <textarea name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('notes') }}</textarea>
-                    </div>
-
-                    <!-- Notes -->
-                    <div class="mt-6">
-                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
-                            Additional Notes
-                        </label>
-                        <textarea id="notes" name="notes" rows="3"
-                                  placeholder="Any additional notes or warnings for the patient or pharmacist..."
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('notes') }}</textarea>
-                        @error('notes')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    
+                    <button type="button" id="add-item" class="mt-4 bg-gradient-to-r from-purple-100 to-purple-50 hover:from-purple-200 hover:to-purple-100 text-purple-800 px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 border border-purple-200">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Another Medication</span>
+                    </button>
                 </div>
 
                 <!-- Form Actions -->
-                <div class="flex items-center justify-end space-x-3">
-                    <a href="{{ route('prescriptions.index') }}" 
-                       class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg transition-colors">
-                        Cancel
-                    </a>
-                    <button type="submit" 
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
-                        <i class="fas fa-save mr-2"></i>Create Prescription
-                    </button>
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-b-2xl">
+                    <div class="flex flex-col sm:flex-row items-center justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+                        <a href="{{ route('prescriptions.index') }}" 
+                           class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-3 rounded-xl font-medium transition-all duration-200 text-center">
+                            Cancel
+                        </a>
+                        <button type="submit" 
+                                class="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
+                            <i class="fas fa-save"></i>
+                            <span>Create Prescription</span>
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
+
 <script>
 let itemIndex = 1;
 document.getElementById('add-item').addEventListener('click', () => {
   const wrapper = document.createElement('div');
-  wrapper.className = 'item grid grid-cols-1 md:grid-cols-4 gap-4 mb-4';
+  wrapper.className = 'item bg-white border-2 border-gray-200 rounded-xl p-4';
   wrapper.innerHTML = `
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Medication *</label>
-      <input type="text" name="items[${itemIndex}][medication_name]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="e.g., Amoxicillin">
+    <div class="grid md:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Medication <span class="text-red-500">*</span></label>
+        <input type="text" name="items[${itemIndex}][medication_name]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" placeholder="e.g., Amoxicillin">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Dosage <span class="text-red-500">*</span></label>
+        <input type="text" name="items[${itemIndex}][dosage]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" placeholder="500mg">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Frequency <span class="text-red-500">*</span></label>
+        <select name="items[${itemIndex}][frequency]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200">
+          <option value="">Select frequency</option>
+          <option>Once daily</option>
+          <option>Twice daily</option>
+          <option>Three times daily</option>
+          <option>Four times daily</option>
+          <option>Every 4 hours</option>
+          <option>Every 6 hours</option>
+          <option>Every 8 hours</option>
+          <option>Every 12 hours</option>
+          <option>As needed</option>
+          <option>Weekly</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Duration (days)</label>
+        <input type="number" name="items[${itemIndex}][duration_days]" min="1" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" placeholder="7">
+      </div>
     </div>
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Dosage *</label>
-      <input type="text" name="items[${itemIndex}][dosage]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="500mg">
-    </div>
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Frequency *</label>
-      <select name="items[${itemIndex}][frequency]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-        <option value="">Select</option>
-        <option>Once daily</option>
-        <option>Twice daily</option>
-        <option>Three times daily</option>
-        <option>Four times daily</option>
-        <option>Every 4 hours</option>
-        <option>Every 6 hours</option>
-        <option>Every 8 hours</option>
-        <option>Every 12 hours</option>
-        <option>As needed</option>
-        <option>Weekly</option>
-        <option>Other</option>
-      </select>
-    </div>
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Duration (days)</label>
-      <input type="number" name="items[${itemIndex}][duration_days]" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="7">
-    </div>
-    <div class="md:col-span-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1">Instructions (optional)</label>
-      <input type="text" name="items[${itemIndex}][instructions]" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Before meals">
+    <div class="mt-3">
+      <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Instructions</label>
+      <input type="text" name="items[${itemIndex}][instructions]" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" placeholder="Take with food, before meals, etc.">
     </div>
   `;
   document.getElementById('items').appendChild(wrapper);
