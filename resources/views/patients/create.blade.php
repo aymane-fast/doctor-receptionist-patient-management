@@ -295,17 +295,81 @@
 
             <!-- Submit Section -->
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-8 rounded-b-3xl">
+                <!-- Quick Booking Option -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 mb-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-clock text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-gray-900 mb-2">Walk-in Patient?</h4>
+                            <p class="text-gray-600 text-sm mb-4">For patients who need immediate attention, you can automatically book them for the next available slot today.</p>
+                            
+                            <div class="flex items-center space-x-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="book_today" name="book_today" value="1" class="w-5 h-5 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                    <span class="text-sm font-medium text-gray-700">Book appointment for today</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Appointment Details (shown when checkbox is checked) -->
+                            <div id="appointment_details" class="hidden mt-4 p-4 bg-white rounded-xl border border-blue-200">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Reason for Visit</label>
+                                        <input type="text" name="appointment_reason" placeholder="e.g., General checkup, Follow-up..." class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Priority</label>
+                                        <select name="appointment_priority" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500">
+                                            <option value="normal">Normal</option>
+                                            <option value="urgent">Urgent</option>
+                                            <option value="emergency">Emergency</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                    <p class="text-sm text-blue-700">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        <strong>Auto-scheduling:</strong> The appointment will be scheduled for the next available time slot today after existing appointments.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="flex flex-col sm:flex-row items-center justify-end space-y-4 sm:space-y-0 sm:space-x-4">
                     <a href="{{ route('patients.index') }}" class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-8 py-3 rounded-2xl font-medium transition-all duration-200 text-center">
                         Cancel
                     </a>
                     <button type="submit" class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-2xl font-medium transition-all duration-200 deep-shadow flex items-center justify-center space-x-2">
                         <i class="fas fa-save"></i>
-                        <span>Create Patient</span>
+                        <span id="submit_text">Create Patient</span>
                     </button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bookTodayCheckbox = document.getElementById('book_today');
+    const appointmentDetails = document.getElementById('appointment_details');
+    const submitText = document.getElementById('submit_text');
+    
+    bookTodayCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            appointmentDetails.classList.remove('hidden');
+            submitText.textContent = 'Create Patient & Book Today';
+        } else {
+            appointmentDetails.classList.add('hidden');
+            submitText.textContent = 'Create Patient';
+        }
+    });
+});
+</script>
+@endpush
 @endsection

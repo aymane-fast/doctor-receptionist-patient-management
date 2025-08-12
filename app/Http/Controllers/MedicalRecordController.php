@@ -33,12 +33,12 @@ class MedicalRecordController extends Controller
             $query->whereDate('visit_date', $request->date);
         }
 
-        $records = $query->latest('visit_date')->paginate(15);
+        $medicalRecords = $query->latest('visit_date')->paginate(15);
         $patients = Patient::whereHas('appointments', function($q) {
             $q->where('doctor_id', Auth::id());
         })->get();
 
-        return view('medical-records.index', compact('records', 'patients'));
+        return view('medical-records.index', compact('medicalRecords', 'patients'));
     }
 
     /**

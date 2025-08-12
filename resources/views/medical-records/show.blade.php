@@ -210,11 +210,6 @@
                         <i class="fas fa-prescription-bottle mr-2"></i>Add Prescription
                     </a>
                     
-                    <a href="{{ route('documents.create', ['patient_id' => $medicalRecord->patient_id]) }}" 
-                       class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors block text-center">
-                        <i class="fas fa-file-upload mr-2"></i>Upload Document
-                    </a>
-                    
                     <a href="{{ route('appointments.create', ['patient_id' => $medicalRecord->patient_id]) }}" 
                        class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors block text-center">
                         <i class="fas fa-calendar-plus mr-2"></i>Schedule Follow-up

@@ -18,10 +18,21 @@
                     <p class="text-gray-600 mt-2 text-lg">Manage patient information and records efficiently</p>
                 </div>
             </div>
-            <a href="{{ route('patients.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 deep-shadow hover:shadow-xl flex items-center space-x-3">
-                <i class="fas fa-plus"></i>
-                <span>Add New Patient</span>
-            </a>
+            <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3">
+                @if(auth()->user()->isDoctor())
+                <!-- Walk-in Patient Button -->
+                <button onclick="openWalkInModal()" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                    <i class="fas fa-running"></i>
+                    <span>Walk-in Patient</span>
+                </button>
+                @endif
+                
+                <!-- Regular Add Patient Button -->
+                <a href="{{ route('patients.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 deep-shadow hover:shadow-xl flex items-center space-x-3">
+                    <i class="fas fa-plus"></i>
+                    <span>Add New Patient</span>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -172,4 +183,124 @@
         </div>
     </div>
 </div>
+
+<!-- Walk-in Patient Modal -->
+<div id="walkInModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full transform scale-95 opacity-0 transition-all duration-300" id="walkInContent">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-running text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Walk-in Patient</h3>
+                        <p class="text-sm text-gray-600">Quick registration & booking</p>
+                    </div>
+                </div>
+                <button onclick="closeWalkInModal()" class="text-gray-400 hover:text-gray-600 p-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form action="{{ route('patients.store') }}" method="POST" class="space-y-4">
+                @csrf
+                <input type="hidden" name="book_today" value="1">
+                <input type="hidden" name="appointment_priority" value="normal">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">First Name *</label>
+                        <input type="text" name="first_name" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name *</label>
+                        <input type="text" name="last_name" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
+                    <input type="tel" name="phone" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Birth Date *</label>
+                        <input type="date" name="birth_date" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Gender *</label>
+                        <select name="gender" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Address *</label>
+                    <textarea name="address" required rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500 resize-none"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Reason for Visit</label>
+                    <input type="text" name="appointment_reason" placeholder="e.g., General checkup, Follow-up..." class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
+                </div>
+                
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-clock text-emerald-600"></i>
+                        <span class="text-sm font-medium text-emerald-700">Auto-booking for today's next available slot</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3 pt-4">
+                    <button type="button" onclick="closeWalkInModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-3 rounded-xl font-medium transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200">
+                        Register & Book
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function openWalkInModal() {
+    const modal = document.getElementById('walkInModal');
+    const content = document.getElementById('walkInContent');
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function closeWalkInModal() {
+    const modal = document.getElementById('walkInModal');
+    const content = document.getElementById('walkInContent');
+    
+    content.classList.remove('scale-100', 'opacity-100');
+    content.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
+
+// Close modal when clicking outside
+document.getElementById('walkInModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeWalkInModal();
+    }
+});
+</script>
+@endpush
 @endsection

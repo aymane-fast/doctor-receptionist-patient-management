@@ -58,12 +58,70 @@ class PatientController extends Controller
             'chronic_conditions' => 'nullable|string',
             'emergency_contact_name' => 'nullable|string|max:255',
             'emergency_contact_phone' => 'nullable|string|max:255',
+            
+            // Quick booking validation
+            'book_today' => 'nullable|boolean',
+            'appointment_reason' => 'nullable|string|max:500',
+            'appointment_priority' => 'nullable|in:normal,urgent,emergency',
         ]);
 
         $patient = Patient::create($validated);
 
+        // Handle automatic appointment booking for today
+        if ($request->has('book_today') && $request->book_today) {
+            $this->createTodayAppointment($patient, $request);
+            
+            return redirect()->route('patients.show', $patient)
+                            ->with('success', 'Patient created successfully and appointment booked for today!');
+        }
+
         return redirect()->route('patients.show', $patient)
                         ->with('success', 'Patient created successfully!');
+    }
+
+    /**
+     * Create an appointment for today for a new patient
+     */
+    private function createTodayAppointment($patient, $request)
+    {
+        // Get the authenticated user (should be a doctor for this feature)
+        $doctor = auth()->user();
+        
+        // Get today's date
+        $today = now()->format('Y-m-d');
+        
+        // Find the last appointment today for this doctor
+        $lastAppointment = \App\Models\Appointment::where('doctor_id', $doctor->id)
+                                                ->whereDate('appointment_date', $today)
+                                                ->orderBy('appointment_time', 'desc')
+                                                ->first();
+        
+        // Calculate next available time slot
+        if ($lastAppointment) {
+            // Add 30 minutes to the last appointment time
+            $nextTime = \Carbon\Carbon::parse($lastAppointment->appointment_time)->addMinutes(30);
+        } else {
+            // Start from 9:00 AM if no appointments today
+            $nextTime = \Carbon\Carbon::parse('09:00');
+        }
+        
+        // Ensure we don't go beyond working hours (6 PM)
+        $endOfDay = \Carbon\Carbon::parse('18:00');
+        if ($nextTime->gt($endOfDay)) {
+            $nextTime = \Carbon\Carbon::parse('09:00')->addDay(); // Next day at 9 AM
+            $today = now()->addDay()->format('Y-m-d');
+        }
+        
+        // Create the appointment
+        \App\Models\Appointment::create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'appointment_date' => $today,
+            'appointment_time' => $nextTime->format('H:i:s'),
+            'reason' => $request->appointment_reason ?: 'Walk-in consultation',
+            'status' => $request->appointment_priority === 'emergency' ? 'urgent' : 'scheduled',
+            'notes' => 'Auto-scheduled walk-in patient',
+        ]);
     }
 
     /**
@@ -71,7 +129,7 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
-        $patient->load(['appointments.doctor', 'medicalRecords.doctor', 'prescriptions.doctor', 'documents']);
+        $patient->load(['appointments.doctor', 'medicalRecords.doctor', 'prescriptions.doctor']);
         
         $recentAppointments = $patient->appointments()
                                     ->with('doctor')
