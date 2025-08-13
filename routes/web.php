@@ -26,9 +26,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 
 // Protected routes
 Route::middleware('auth')->group(function () {
-    // Dashboard
+    // Dashboard (accessible by both roles)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/doctor/current', [DoctorController::class, 'current'])->name('doctor.current');
     
     // Patient management (accessible by both roles)
     Route::resource('patients', PatientController::class);
@@ -38,8 +37,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
     Route::post('/appointments/{appointment}/set-current', [AppointmentController::class, 'setCurrent'])->name('appointments.set-current');
     Route::post('/appointments/current/mark-done', [AppointmentController::class, 'markCurrentDone'])->name('appointments.mark-current-done');
-    
-    // Medical records (doctors only)
+});
+
+// Doctor-only routes
+Route::middleware(['auth', 'role:doctor'])->group(function () {
+    Route::get('/doctor/current', [DoctorController::class, 'current'])->name('doctor.current');
     Route::resource('medical-records', MedicalRecordController::class);
     Route::resource('prescriptions', PrescriptionController::class);
     Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');
