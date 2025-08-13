@@ -74,7 +74,18 @@
             @if($patients->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($patients as $patient)
-                    <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 card-hover modern-shadow group">
+                    <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 card-hover modern-shadow group {{ $patient->allergies ? 'border-red-200' : '' }}">
+                        <!-- Allergy Alert Banner -->
+                        @if($patient->allergies)
+                        <div class="mb-4 bg-red-50 border border-red-200 rounded-xl p-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                <span class="text-sm font-bold text-red-700">ALLERGIES:</span>
+                                <span class="text-sm text-red-600">{{ $patient->allergies }}</span>
+                            </div>
+                        </div>
+                        @endif
+                        
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-center space-x-4">
                                 <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center group-hover:from-blue-200 group-hover:to-blue-300 transition-colors">
@@ -92,7 +103,7 @@
                                 <a href="{{ route('patients.show', $patient) }}" class="w-9 h-9 bg-blue-100 hover:bg-blue-200 rounded-xl flex items-center justify-center transition-colors group/btn">
                                     <i class="fas fa-eye text-blue-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                 </a>
-                                <a href="{{ route('patients.edit', $patient) }}" class="w-9 h-9 bg-emerald-100 hover:bg-emerald-200 rounded-xl flex items-center justify-center transition-colors group/btn">
+                                <a href="{{ route('patients.edit', $patient) }}" class="w-9 h-9 bg-emerald-100 hover:bg-emerald-200 rounded-xl flex items-center justify-center transition-colors group/btn" onclick="return confirmEdit('{{ $patient->full_name }}')">
                                     <i class="fas fa-edit text-emerald-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                 </a>
                             </div>
@@ -133,7 +144,8 @@
                                     </span>
                                 </div>
                                 <a href="{{ route('appointments.create', ['patient_id' => $patient->id]) }}" 
-                                   class="bg-gradient-to-r from-emerald-100 to-emerald-50 hover:from-emerald-200 hover:to-emerald-100 text-emerald-800 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center space-x-2 border border-emerald-200">
+                                   class="bg-gradient-to-r from-emerald-100 to-emerald-50 hover:from-emerald-200 hover:to-emerald-100 text-emerald-800 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center space-x-2 border border-emerald-200"
+                                   onclick="return confirmAppointment('{{ $patient->full_name }}', {{ $patient->allergies ? 'true' : 'false' }}, '{{ $patient->allergies }}')">
                                     <i class="fas fa-calendar-plus"></i>
                                     <span>Book Appointment</span>
                                 </a>
@@ -246,6 +258,15 @@
                 </div>
                 
                 <div>
+                    <label class="block text-sm font-semibold text-red-700 mb-2">
+                        <i class="fas fa-exclamation-triangle text-red-600 mr-1"></i>
+                        Allergies (Important!)
+                    </label>
+                    <input type="text" name="allergies" placeholder="e.g., Penicillin, Peanuts, None..." class="w-full px-3 py-2 border border-red-300 rounded-xl focus:outline-none focus:border-red-500 bg-red-50">
+                    <p class="text-xs text-red-600 mt-1">Please list any known allergies for patient safety</p>
+                </div>
+                
+                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Reason for Visit</label>
                     <input type="text" name="appointment_reason" placeholder="e.g., General checkup, Follow-up..." class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
                 </div>
@@ -293,6 +314,22 @@ function closeWalkInModal() {
     setTimeout(() => {
         modal.classList.add('hidden');
     }, 300);
+}
+
+// Confirmation dialog for editing patient
+function confirmEdit(patientName) {
+    return confirm(`Are you sure you want to edit patient record for "${patientName}"?\n\nThis action will allow you to modify sensitive medical information.`);
+}
+
+// Confirmation dialog with allergy alert for appointment booking
+function confirmAppointment(patientName, hasAllergies, allergies) {
+    let message = `Book appointment for "${patientName}"?`;
+    
+    if (hasAllergies) {
+        message += `\n\n⚠️ ALLERGY ALERT ⚠️\nThis patient has allergies: ${allergies}\n\nPlease ensure medical staff is notified.`;
+    }
+    
+    return confirm(message);
 }
 
 // Close modal when clicking outside

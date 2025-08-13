@@ -4,6 +4,21 @@
 
 @section('content')
 <div class="space-y-8">
+    <!-- Critical Allergy Alert -->
+    @if($patient->allergies)
+    <div class="bg-red-50 border-2 border-red-300 rounded-2xl p-6 shadow-lg animate-pulse-glow">
+        <div class="flex items-center justify-center space-x-3">
+            <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+            </div>
+            <div class="text-center">
+                <h3 class="text-xl font-bold text-red-700 mb-1">⚠️ ALLERGY ALERT ⚠️</h3>
+                <p class="text-red-600 font-medium">{{ $patient->allergies }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Modern Header -->
     <div class="glass-effect rounded-3xl p-8 modern-shadow">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
@@ -33,12 +48,14 @@
             </div>
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('appointments.create', ['patient_id' => $patient->id]) }}" 
-                   class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow">
+                   class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow"
+                   onclick="return confirmAppointment('{{ $patient->full_name }}', {{ $patient->allergies ? 'true' : 'false' }}, '{{ $patient->allergies }}')">
                     <i class="fas fa-calendar-plus"></i>
                     <span>Book Appointment</span>
                 </a>
                 <a href="{{ route('patients.edit', $patient) }}" 
-                   class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                   class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2"
+                   onclick="return confirmEdit('{{ $patient->full_name }}')">
                     <i class="fas fa-edit"></i>
                     <span>Edit Patient</span>
                 </a>
@@ -337,4 +354,24 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+// Confirmation dialog for editing patient
+function confirmEdit(patientName) {
+    return confirm(`Are you sure you want to edit patient record for "${patientName}"?\n\nThis action will allow you to modify sensitive medical information.`);
+}
+
+// Confirmation dialog with allergy alert for appointment booking
+function confirmAppointment(patientName, hasAllergies, allergies) {
+    let message = `Book appointment for "${patientName}"?`;
+    
+    if (hasAllergies) {
+        message += `\n\n⚠️ ALLERGY ALERT ⚠️\nThis patient has allergies: ${allergies}\n\nPlease ensure medical staff is notified.`;
+    }
+    
+    return confirm(message);
+}
+</script>
+@endpush
 @endsection
