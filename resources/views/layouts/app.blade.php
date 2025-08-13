@@ -134,6 +134,10 @@
                                     <span class="text-xs font-medium">Prescriptions</span>
                                 </a>
                                 @endif
+                                <a href="{{ route('settings.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('settings.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
+                                    <i class="fas fa-cog text-lg mb-1"></i>
+                                    <span class="text-xs font-medium">Settings</span>
+                                </a>
                             </div>
                             @endauth
                         </div>
@@ -261,6 +265,9 @@
                         <i class="fas fa-prescription w-5 mr-3"></i>Prescriptions
                     </a>
                     @endif
+                    <a href="{{ route('settings.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('settings.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                        <i class="fas fa-cog w-5 mr-3"></i>Settings
+                    </a>
                     @endauth
                 </div>
             </div>
