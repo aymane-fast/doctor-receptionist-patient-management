@@ -5,30 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Medical Management System')</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    colors: {
+                        'header-gray': '#f5f5f5',
+                        'banner-gradient': 'linear-gradient(135deg, #667eea 0%,rgb(0, 6, 58) 100%)',
+                    },
                     fontFamily: {
                         'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
-                    },
-                    colors: {
-                        'primary': {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        }
                     }
                 }
             }
@@ -88,110 +76,173 @@
         .animate-pulse-glow {
             animation: pulse-glow 3s ease-in-out infinite;
         }
+        
+        .header-shadow {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .font-professional {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
     </style>
     @stack('styles')
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-blue-50 font-sans">
+<body class="bg-gray-100 font-sans">
     <div class="min-h-screen">
-        <!-- Modern Navigation -->
-        <nav class="gradient-bg shadow-2xl">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="flex justify-between items-center py-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center animate-pulse-glow">
-                            <i class="fas fa-heartbeat text-2xl text-white"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-xl font-bold text-white">MediCare Pro</h1>
-                            <p class="text-blue-100 text-xs">Advanced Medical Management</p>
-                        </div>
-                    </div>
-                    
-                    @auth
-                    <div class="flex items-center space-x-6">
-                        <!-- Navigation Links -->
-                        <div class="hidden md:flex space-x-1">
-                            <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-lg text-white/90 hover:bg-white/20 hover:text-white transition-all duration-200 flex items-center space-x-2">
-                                <i class="fas fa-tachometer-alt"></i>
-                                <span>Dashboard</span>
-                            </a>
-                            <a href="{{ route('patients.index') }}" class="px-4 py-2 rounded-lg text-white/90 hover:bg-white/20 hover:text-white transition-all duration-200 flex items-center space-x-2">
-                                <i class="fas fa-users"></i>
-                                <span>Patients</span>
-                            </a>
-                            <a href="{{ route('appointments.index') }}" class="px-4 py-2 rounded-lg text-white/90 hover:bg-white/20 hover:text-white transition-all duration-200 flex items-center space-x-2">
-                                <i class="fas fa-calendar"></i>
-                                <span>Appointments</span>
-                            </a>
-                            @if(auth()->user()->isDoctor())
-                            <a href="{{ route('doctor.current') }}" class="px-4 py-2 rounded-lg text-white/90 hover:bg-white/20 hover:text-white transition-all duration-200 flex items-center space-x-2">
-                                <i class="fas fa-user-clock"></i>
-                                <span>Current</span>
-                            </a>
-                            <a href="{{ route('medical-records.index') }}" class="px-4 py-2 rounded-lg text-white/90 hover:bg-white/20 hover:text-white transition-all duration-200 flex items-center space-x-2">
-                                <i class="fas fa-file-medical"></i>
-                                <span>Records</span>
-                            </a>
-                            <a href="{{ route('prescriptions.index') }}" class="px-4 py-2 rounded-lg text-white/90 hover:bg-white/20 hover:text-white transition-all duration-200 flex items-center space-x-2">
-                                <i class="fas fa-prescription"></i>
-                                <span>Prescriptions</span>
-                            </a>
-                            @endif
-                        </div>
-                        
-                        <!-- User Profile -->
-                        <div class="flex items-center space-x-3">
-                            <div class="flex items-center space-x-3 bg-white/10 rounded-xl px-4 py-2">
-                                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-user text-white"></i>
+        <!-- Fixed Header -->
+        <header class="fixed top-0 left-0 right-0 z-50 bg-header-gray header-shadow">
+            <!-- Top Navigation Bar -->
+            <nav class="bg-header-gray border-b border-gray-200 font-professional">
+                <div class="max-w-7xl mx-auto px-4">
+                    <div class="flex justify-between items-center py-3">
+                        <!-- Left Section: Logo and Navigation -->
+                        <div class="flex items-center space-x-6">
+                            <!-- Logo -->
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-heartbeat text-white text-xl"></i>
                                 </div>
-                                <div class="text-right hidden md:block">
-                                    <div class="text-sm font-medium text-white">{{ auth()->user()->name }}</div>
-                                    <div class="text-xs text-blue-100">{{ ucfirst(auth()->user()->role) }}</div>
+                                <h1 class="text-xl font-bold text-gray-900">Medical Management</h1>
+                            </div>
+                            
+                            <!-- Navigation Links -->
+                            @auth
+                            <div class="hidden md:flex items-center space-x-1">
+                                <a href="{{ route('dashboard') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('dashboard') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
+                                    <i class="fas fa-tachometer-alt text-lg mb-1"></i>
+                                    <span class="text-xs font-medium">Dashboard</span>
+                                </a>
+                                <a href="{{ route('patients.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('patients.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
+                                    <i class="fas fa-users text-lg mb-1"></i>
+                                    <span class="text-xs font-medium">Patients</span>
+                                </a>
+                                <a href="{{ route('appointments.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('appointments.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
+                                    <i class="fas fa-calendar text-lg mb-1"></i>
+                                    <span class="text-xs font-medium">Appointments</span>
+                                </a>
+                                @if(auth()->user()->isDoctor())
+                                <a href="{{ route('doctor.current') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('doctor.current') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
+                                    <i class="fas fa-user-clock text-lg mb-1"></i>
+                                    <span class="text-xs font-medium">Current</span>
+                                </a>
+                                <a href="{{ route('medical-records.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('medical-records.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
+                                    <i class="fas fa-file-medical text-lg mb-1"></i>
+                                    <span class="text-xs font-medium">Records</span>
+                                </a>
+                                <a href="{{ route('prescriptions.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('prescriptions.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
+                                    <i class="fas fa-prescription text-lg mb-1"></i>
+                                    <span class="text-xs font-medium">Prescriptions</span>
+                                </a>
+                                @endif
+                            </div>
+                            @endauth
+                        </div>
+
+                        <!-- Right Section: User Actions -->
+                        @auth
+                        <div class="flex items-center space-x-4">
+                            <!-- Your Patients Counter -->
+                            <div class="hidden lg:flex items-center space-x-2 bg-white rounded-lg px-3 py-2 shadow-sm">
+                                <i class="fas fa-users text-blue-600"></i>
+                                <span class="text-sm font-medium text-gray-700">Your Patients</span>
+                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">{{ \App\Models\Patient::count() }}</span>
+                                <!-- Mini Avatar Group -->
+                                <div class="flex -space-x-2">
+                                    <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-xs font-bold">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                                    </div>
+                                    <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-xs font-bold">M</span>
+                                    </div>
+                                    <div class="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-xs font-bold">+{{ max(0, \App\Models\Patient::count() - 2) }}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <form method="POST" action="{{ route('logout') }}" class="inline">
-                                @csrf
-                                <button type="submit" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl transition-all duration-200 flex items-center space-x-2">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    <span class="hidden md:inline">Logout</span>
+
+                            <!-- Notifications and Settings -->
+                            <div class="flex items-center space-x-2">
+                                <button class="p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                                    <i class="fas fa-headphones text-lg"></i>
                                 </button>
-                            </form>
+                                <button class="p-2 text-gray-600 hover:text-blue-600 transition-colors relative">
+                                    <i class="fas fa-bell text-lg"></i>
+                                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">3</span>
+                                </button>
+                                <button class="p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                                    <i class="fas fa-cog text-lg"></i>
+                                </button>
+                            </div>
+
+                            <!-- User Profile -->
+                            <div class="flex items-center space-x-3">
+                                <div class="text-right hidden sm:block">
+                                    <div class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</div>
+                                    <div class="text-xs text-gray-500">{{ auth()->user()->email }}</div>
+                                </div>
+                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white text-sm font-bold">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                                </div>
+                                <form method="POST" action="{{ route('logout') }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-gray-600 hover:text-blue-600 transition-colors">
+                                        <i class="fas fa-sign-out-alt text-lg"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        @endauth
+
+                        <!-- Mobile Menu Button -->
+                        <div class="md:hidden">
+                            <button id="mobile-menu-btn" class="p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                                <i class="fas fa-bars text-lg"></i>
+                            </button>
                         </div>
                     </div>
+                </div>
+            </nav>
+            
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-200 shadow-lg">
+                <div class="px-4 py-3 space-y-2">
+                    @auth
+                    <a href="{{ route('dashboard') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('dashboard') ? 'bg-blue-50 text-blue-600' : '' }}">
+                        <i class="fas fa-tachometer-alt w-5 mr-3"></i>Dashboard
+                    </a>
+                    <a href="{{ route('patients.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('patients.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                        <i class="fas fa-users w-5 mr-3"></i>Patients
+                    </a>
+                    <a href="{{ route('appointments.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('appointments.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                        <i class="fas fa-calendar w-5 mr-3"></i>Appointments
+                    </a>
+                    @if(auth()->user()->isDoctor())
+                    <a href="{{ route('doctor.current') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('doctor.current') ? 'bg-blue-50 text-blue-600' : '' }}">
+                        <i class="fas fa-user-clock w-5 mr-3"></i>Current Patient
+                    </a>
+                    <a href="{{ route('medical-records.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('medical-records.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                        <i class="fas fa-file-medical w-5 mr-3"></i>Medical Records
+                    </a>
+                    <a href="{{ route('prescriptions.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('prescriptions.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                        <i class="fas fa-prescription w-5 mr-3"></i>Prescriptions
+                    </a>
+                    @endif
                     @endauth
                 </div>
             </div>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="max-w-7xl mx-auto py-8 px-4">
-            <!-- Modern Alerts -->
+        </header>
+        <!-- Main Content with Header Offset -->
+        <main class="pt-24 max-w-7xl mx-auto py-8 px-4">
+            <!-- Alerts -->
             @if(session('success'))
-            <div class="bg-gradient-to-r from-emerald-50 to-emerald-100 border-l-4 border-emerald-400 text-emerald-700 p-4 rounded-r-xl mb-6 modern-shadow" role="alert">
-                <div class="flex items-center">
-                    <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
-                        <i class="fas fa-check-circle text-emerald-600"></i>
-                    </div>
-                    <div>
-                        <p class="font-medium">Success!</p>
-                        <p class="text-sm">{{ session('success') }}</p>
-                    </div>
-                </div>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
+                <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
             </div>
             @endif
 
             @if(session('error'))
-            <div class="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-400 text-red-700 p-4 rounded-r-xl mb-6 modern-shadow" role="alert">
-                <div class="flex items-center">
-                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                        <i class="fas fa-exclamation-circle text-red-600"></i>
-                    </div>
-                    <div>
-                        <p class="font-medium">Error!</p>
-                        <p class="text-sm">{{ session('error') }}</p>
-                    </div>
-                </div>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+                <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
             </div>
             @endif
 
@@ -199,6 +250,19 @@
         </main>
     </div>
 
+    <!-- JavaScript for mobile menu -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileBtn && mobileMenu) {
+                mobileBtn.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>
