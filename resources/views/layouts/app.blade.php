@@ -141,54 +141,88 @@
                         <!-- Right Section: User Actions -->
                         @auth
                         <div class="flex items-center space-x-4">
-                            <!-- Your Patients Counter -->
-                            <div class="hidden lg:flex items-center space-x-2 bg-white rounded-lg px-3 py-2 shadow-sm">
-                                <i class="fas fa-users text-blue-600"></i>
-                                <span class="text-sm font-medium text-gray-700">Your Patients</span>
-                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">{{ \App\Models\Patient::count() }}</span>
-                                <!-- Mini Avatar Group -->
-                                <div class="flex -space-x-2">
-                                    <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                                        <span class="text-white text-xs font-bold">{{ substr(auth()->user()->name, 0, 1) }}</span>
-                                    </div>
-                                    <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                        <span class="text-white text-xs font-bold">M</span>
-                                    </div>
-                                    <div class="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
-                                        <span class="text-white text-xs font-bold">+{{ max(0, \App\Models\Patient::count() - 2) }}</span>
-                                    </div>
+                            <!-- Today's Stats -->
+                            <div class="hidden lg:flex items-center space-x-4">
+                                <!-- Today's Appointments -->
+                                <div class="flex items-center space-x-2 bg-white rounded-lg px-3 py-2 shadow-sm">
+                                    <i class="fas fa-calendar-day text-blue-600"></i>
+                                    <span class="text-sm font-medium text-gray-700">Today</span>
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">
+                                        {{ \App\Models\Appointment::whereDate('appointment_date', today())->count() }}
+                                    </span>
                                 </div>
+
+                                <!-- Pending Appointments -->
+                                @php
+                                    $pendingCount = \App\Models\Appointment::where('status', 'scheduled')
+                                        ->whereDate('appointment_date', today())
+                                        ->count();
+                                @endphp
+                                @if($pendingCount > 0)
+                                <div class="flex items-center space-x-2 bg-orange-50 rounded-lg px-3 py-2 shadow-sm">
+                                    <i class="fas fa-clock text-orange-600"></i>
+                                    <span class="text-sm font-medium text-gray-700">Waiting</span>
+                                    <span class="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded-full">{{ $pendingCount }}</span>
+                                </div>
+                                @endif
                             </div>
 
-                            <!-- Notifications and Settings -->
+                            <!-- Quick Actions -->
                             <div class="flex items-center space-x-2">
-                                <button class="p-2 text-gray-600 hover:text-blue-600 transition-colors">
-                                    <i class="fas fa-headphones text-lg"></i>
-                                </button>
-                                <button class="p-2 text-gray-600 hover:text-blue-600 transition-colors relative">
-                                    <i class="fas fa-bell text-lg"></i>
-                                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">3</span>
-                                </button>
-                                <button class="p-2 text-gray-600 hover:text-blue-600 transition-colors">
-                                    <i class="fas fa-cog text-lg"></i>
+                                <!-- Quick Add Patient -->
+                                <a href="{{ route('patients.create') }}" 
+                                   class="p-2 text-gray-600 hover:text-green-600 transition-colors" 
+                                   title="Add New Patient">
+                                    <i class="fas fa-user-plus text-lg"></i>
+                                </a>
+                                
+                                <!-- Quick Add Appointment -->
+                                <a href="{{ route('appointments.create') }}" 
+                                   class="p-2 text-gray-600 hover:text-blue-600 transition-colors" 
+                                   title="New Appointment">
+                                    <i class="fas fa-calendar-plus text-lg"></i>
+                                </a>
+
+                                <!-- Search -->
+                                <button class="p-2 text-gray-600 hover:text-purple-600 transition-colors" 
+                                        title="Search">
+                                    <i class="fas fa-search text-lg"></i>
                                 </button>
                             </div>
 
-                            <!-- User Profile -->
+                            <!-- User Profile with Dynamic Status -->
                             <div class="flex items-center space-x-3">
                                 <div class="text-right hidden sm:block">
                                     <div class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</div>
-                                    <div class="text-xs text-gray-500">{{ auth()->user()->email }}</div>
+                                    <div class="text-xs text-gray-500 flex items-center">
+                                        @if(auth()->user()->isDoctor())
+                                            <span class="w-2 h-2 bg-green-400 rounded-full mr-1"></span>
+                                            Available
+                                        @else
+                                            <span class="w-2 h-2 bg-blue-400 rounded-full mr-1"></span>
+                                            {{ ucfirst(auth()->user()->role) }}
+                                        @endif
+                                    </div>
                                 </div>
-                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                                     <span class="text-white text-sm font-bold">{{ substr(auth()->user()->name, 0, 1) }}</span>
                                 </div>
-                                <form method="POST" action="{{ route('logout') }}" class="inline">
-                                    @csrf
-                                    <button type="submit" class="text-gray-600 hover:text-blue-600 transition-colors">
-                                        <i class="fas fa-sign-out-alt text-lg"></i>
+                                
+                                <!-- User Menu Dropdown -->
+                                <div class="relative">
+                                    <button class="text-gray-600 hover:text-blue-600 transition-colors" onclick="toggleUserMenu()">
+                                        <i class="fas fa-chevron-down text-sm"></i>
                                     </button>
-                                </form>
+                                    <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border hidden">
+                                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile Settings</a>
+                                        <form method="POST" action="{{ route('logout') }}" class="block">
+                                            @csrf
+                                            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50">
+                                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         @endauth
@@ -250,9 +284,10 @@
         </main>
     </div>
 
-    <!-- JavaScript for mobile menu -->
+    <!-- Clean JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu functionality
             const mobileBtn = document.getElementById('mobile-menu-btn');
             const mobileMenu = document.getElementById('mobile-menu');
             
@@ -261,7 +296,32 @@
                     mobileMenu.classList.toggle('hidden');
                 });
             }
+            
+            // Close user menu when clicking outside
+            document.addEventListener('click', function(e) {
+                const userMenu = document.getElementById('user-menu');
+                if (userMenu && !e.target.closest('.relative')) {
+                    userMenu.classList.add('hidden');
+                }
+            });
         });
+        
+        // Toggle user menu
+        function toggleUserMenu() {
+            const userMenu = document.getElementById('user-menu');
+            if (userMenu) {
+                userMenu.classList.toggle('hidden');
+            }
+        }
+        
+        // Real-time stats update (optional)
+        function updateStats() {
+            // This could fetch updated stats via AJAX
+            console.log('Stats updated');
+        }
+        
+        // Update stats every 30 seconds
+        setInterval(updateStats, 30000);
     </script>
     @stack('scripts')
 </body>
