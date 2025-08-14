@@ -150,11 +150,12 @@
                                     </span>
                                     
                                     <!-- Quick Status Update -->
-                                    <div class="relative group">
-                                        <button class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-all duration-200">
+                                    <div class="relative">
+                                        <button onclick="toggleStatusDropdown({{ $appointment->id }})" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-all duration-200">
                                             <i class="fas fa-edit text-gray-500 text-xs"></i>
                                         </button>
-                                        <div class="absolute right-0 top-10 bg-white border border-gray-200 rounded-2xl shadow-xl py-2 z-20 hidden group-hover:block min-w-40">
+                                        <div id="status-dropdown-{{ $appointment->id }}" class="absolute right-0 top-10 bg-white border border-gray-200 rounded-2xl shadow-xl py-2 z-20 hidden min-w-40">
+                                            @if($appointment->status != 'scheduled')
                                             <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
@@ -163,6 +164,9 @@
                                                     <i class="fas fa-clock text-yellow-600 mr-2"></i>Scheduled
                                                 </button>
                                             </form>
+                                            @endif
+                                            
+                                            @if($appointment->status != 'in_progress')
                                             <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
@@ -171,6 +175,9 @@
                                                     <i class="fas fa-play text-blue-600 mr-2"></i>In Progress
                                                 </button>
                                             </form>
+                                            @endif
+                                            
+                                            @if($appointment->status != 'completed')
                                             <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
@@ -179,14 +186,19 @@
                                                     <i class="fas fa-check text-green-600 mr-2"></i>Completed
                                                 </button>
                                             </form>
+                                            @endif
+                                            
+                                            @if($appointment->status != 'cancelled')
                                             <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="cancelled">
-                                                <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors">
+                                                <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors" 
+                                                        onclick="return confirm('Are you sure you want to cancel this appointment?')">
                                                     <i class="fas fa-times text-red-600 mr-2"></i>Cancelled
                                                 </button>
                                             </form>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -247,13 +259,41 @@
 
 @push('scripts')
 <script>
-// Auto-hide dropdown menus when clicking outside
-document.addEventListener('click', function(event) {
-    const dropdowns = document.querySelectorAll('.group');
-    dropdowns.forEach(dropdown => {
-        if (!dropdown.contains(event.target)) {
-            dropdown.classList.remove('hover');
+// Toggle status dropdown for specific appointment
+function toggleStatusDropdown(appointmentId) {
+    const dropdown = document.getElementById('status-dropdown-' + appointmentId);
+    const allDropdowns = document.querySelectorAll('[id^="status-dropdown-"]');
+    
+    // Hide all other dropdowns first
+    allDropdowns.forEach(dd => {
+        if (dd.id !== 'status-dropdown-' + appointmentId) {
+            dd.classList.add('hidden');
         }
+    });
+    
+    // Toggle current dropdown
+    dropdown.classList.toggle('hidden');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    // Check if click is outside any dropdown button or dropdown content
+    if (!event.target.closest('[onclick^="toggleStatusDropdown"]') && 
+        !event.target.closest('[id^="status-dropdown-"]')) {
+        const allDropdowns = document.querySelectorAll('[id^="status-dropdown-"]');
+        allDropdowns.forEach(dropdown => {
+            dropdown.classList.add('hidden');
+        });
+    }
+});
+
+// Prevent dropdown from closing when clicking inside it
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdowns = document.querySelectorAll('[id^="status-dropdown-"]');
+    dropdowns.forEach(dropdown => {
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
     });
 });
 </script>
