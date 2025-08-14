@@ -74,18 +74,7 @@
             @if($patients->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($patients as $patient)
-                    <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 card-hover modern-shadow group {{ $patient->allergies ? 'border-red-200' : '' }}">
-                        <!-- Allergy Alert Banner -->
-                        @if($patient->allergies)
-                        <div class="mb-4 bg-red-50 border border-red-200 rounded-xl p-3">
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-exclamation-triangle text-red-600"></i>
-                                <span class="text-sm font-bold text-red-700">ALLERGIES:</span>
-                                <span class="text-sm text-red-600">{{ $patient->allergies }}</span>
-                            </div>
-                        </div>
-                        @endif
-                        
+                    <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 card-hover modern-shadow group">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-center space-x-4">
                                 <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center group-hover:from-blue-200 group-hover:to-blue-300 transition-colors">
