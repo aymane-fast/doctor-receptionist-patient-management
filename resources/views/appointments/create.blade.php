@@ -4,6 +4,25 @@
 
 @section('content')
 <div class="space-y-6">
+    <!-- Working Hours Warning (if outside hours) -->
+    @if(!\App\Models\Setting::isWithinWorkingHours())
+        @php $nextWorking = \App\Models\Setting::getNextWorkingTime(); @endphp
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+            <div class="flex items-center">
+                <i class="fas fa-clock text-orange-600 mr-3 text-lg"></i>
+                <div>
+                    <h4 class="font-semibold text-orange-800">Outside Working Hours</h4>
+                    <p class="text-orange-700 text-sm">
+                        The clinic is currently closed. Appointments can only be scheduled during working hours.
+                        @if($nextWorking)
+                            <br><strong>Next available:</strong> {{ $nextWorking->format('l, M j \a\t g:i A') }}
+                        @endif
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Modern Header -->
     <div class="glass-effect rounded-2xl p-6 modern-shadow">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">

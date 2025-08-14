@@ -100,6 +100,22 @@ class Setting extends Model
     }
 
     /**
+     * Check if a specific time is within working hours
+     */
+    public static function isTimeWithinWorkingHours($datetime)
+    {
+        $day = strtolower($datetime->format('l'));
+        $workingHours = self::getWorkingHours($day);
+        
+        if (!$workingHours['is_working']) {
+            return false;
+        }
+        
+        $time = $datetime->format('H:i');
+        return $time >= $workingHours['start_time'] && $time <= $workingHours['end_time'];
+    }
+
+    /**
      * Get all working days with hours
      */
     public static function getAllWorkingHours()

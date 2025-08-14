@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
+use App\Models\Setting;
+use Carbon\Carbon;
 
 class PatientController extends Controller
 {
@@ -69,7 +71,20 @@ class PatientController extends Controller
 
         // Handle automatic appointment booking for today
         if ($request->has('book_today') && $request->book_today) {
-            $this->createTodayAppointment($patient, $request);
+            // Check if we're within working hours for appointments
+            if (!Setting::isWithinWorkingHours()) {
+                $nextWorking = Setting::getNextWorkingTime();
+                $errorMessage = 'Cannot book appointment outside working hours. ';
+                if ($nextWorking) {
+                    $errorMessage .= 'Next available time is ' . $nextWorking->format('l, M j \a\t g:i A') . '.';
+                }
+                return back()->withErrors(['book_today' => $errorMessage])->withInput();
+            }
+            
+            $appointmentResult = $this->createTodayAppointment($patient, $request);
+            if (!$appointmentResult['success']) {
+                return back()->withErrors(['book_today' => $appointmentResult['message']])->withInput();
+            }
             
             return redirect()->route('patients.show', $patient)
                             ->with('success', 'Patient created successfully and appointment booked for today!');
@@ -87,33 +102,51 @@ class PatientController extends Controller
         // Get the authenticated user (should be a doctor for this feature)
         $doctor = auth()->user();
         
-        // Get today's date
-        $today = now()->format('Y-m-d');
+        // Get today's date and time
+        $today = Carbon::now()->format('Y-m-d');
+        $currentTime = Carbon::now();
+        
+        // Get today's working hours
+        $dayName = strtolower($currentTime->format('l'));
+        $workingHours = Setting::getWorkingHours($dayName);
+        
+        if (!$workingHours['is_working']) {
+            return [
+                'success' => false,
+                'message' => 'Cannot book appointment today - we are closed on ' . ucfirst($dayName) . '.'
+            ];
+        }
         
         // Find the last appointment today for this doctor
-        $lastAppointment = \App\Models\Appointment::where('doctor_id', $doctor->id)
-                                                ->whereDate('appointment_date', $today)
-                                                ->orderBy('appointment_time', 'desc')
-                                                ->first();
+        $lastAppointment = Appointment::where('doctor_id', $doctor->id)
+                                     ->whereDate('appointment_date', $today)
+                                     ->orderBy('appointment_time', 'desc')
+                                     ->first();
         
         // Calculate next available time slot
         if ($lastAppointment) {
             // Add 30 minutes to the last appointment time
-            $nextTime = \Carbon\Carbon::parse($lastAppointment->appointment_time)->addMinutes(30);
+            $nextTime = Carbon::parse($today . ' ' . $lastAppointment->appointment_time)->addMinutes(30);
         } else {
-            // Start from 9:00 AM if no appointments today
-            $nextTime = \Carbon\Carbon::parse('09:00');
+            // Start from current time or working start time, whichever is later
+            $workingStart = Carbon::parse($today . ' ' . $workingHours['start_time']);
+            $nextTime = $currentTime->gt($workingStart) ? $currentTime->copy()->addMinutes(15) : $workingStart;
         }
         
-        // Ensure we don't go beyond working hours (6 PM)
-        $endOfDay = \Carbon\Carbon::parse('18:00');
-        if ($nextTime->gt($endOfDay)) {
-            $nextTime = \Carbon\Carbon::parse('09:00')->addDay(); // Next day at 9 AM
-            $today = now()->addDay()->format('Y-m-d');
+        // Check if appointment would be within working hours
+        $workingEnd = Carbon::parse($today . ' ' . $workingHours['end_time']);
+        $appointmentEnd = $nextTime->copy()->addMinutes(30); // Assume 30-minute appointments
+        
+        if ($appointmentEnd->gt($workingEnd)) {
+            return [
+                'success' => false,
+                'message' => 'Cannot book appointment - would extend past working hours. Working hours today are ' . 
+                           $workingHours['start_time'] . ' - ' . $workingHours['end_time'] . '.'
+            ];
         }
         
         // Create the appointment
-        \App\Models\Appointment::create([
+        Appointment::create([
             'patient_id' => $patient->id,
             'doctor_id' => $doctor->id,
             'appointment_date' => $today,
@@ -122,6 +155,8 @@ class PatientController extends Controller
             'status' => $request->appointment_priority === 'emergency' ? 'urgent' : 'scheduled',
             'notes' => 'Auto-scheduled walk-in patient',
         ]);
+        
+        return ['success' => true];
     }
 
     /**

@@ -274,6 +274,32 @@
         </header>
         <!-- Main Content with Header Offset -->
         <main class="pt-24 max-w-7xl mx-auto py-8 px-4">
+            <!-- Working Hours Status Alert -->
+            @auth
+            @if(!\App\Models\Setting::isWithinWorkingHours())
+                @php $nextWorking = \App\Models\Setting::getNextWorkingTime(); @endphp
+                <div id="clinic-status-alert" class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-4 rounded-r-lg">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="fas fa-clock text-orange-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-orange-800">Currently Outside Working Hours</h4>
+                                <p class="text-orange-700 text-sm">
+                                    Appointment scheduling is limited. You can view records and configure settings.
+                                    @if($nextWorking)
+                                        <br><strong>Next opening:</strong> {{ $nextWorking->format('M j, Y \a\t g:i A') }}
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="dismissAlert()" class="text-orange-600 hover:text-orange-800 p-1">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            @endif
+            @endauth
+            
             <!-- Alerts -->
             @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
@@ -321,10 +347,49 @@
             }
         }
         
-        // Real-time stats update (optional)
+        // Dismiss clinic status alert
+        function dismissAlert() {
+            const alert = document.getElementById('clinic-status-alert');
+            if (alert) {
+                alert.style.display = 'none';
+                // Store dismissal in localStorage to remember for session
+                localStorage.setItem('clinic-alert-dismissed', Date.now());
+            }
+        }
+        
+        // Check if alert was dismissed recently
+        document.addEventListener('DOMContentLoaded', function() {
+            const dismissed = localStorage.getItem('clinic-alert-dismissed');
+            if (dismissed) {
+                const dismissTime = parseInt(dismissed);
+                const now = Date.now();
+                const fiveMinutes = 5 * 60 * 1000;
+                
+                // Hide alert if dismissed within last 5 minutes
+                if ((now - dismissTime) < fiveMinutes) {
+                    const alert = document.getElementById('clinic-status-alert');
+                    if (alert) {
+                        alert.style.display = 'none';
+                    }
+                }
+            }
+        });
+        
+        // Real-time stats and working status update
         function updateStats() {
-            // This could fetch updated stats via AJAX
-            console.log('Stats updated');
+            // Update working status every 30 seconds
+            fetch('/api/settings/working-status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update any working status indicators
+                    const alert = document.getElementById('clinic-status-alert');
+                    if (alert && !data.is_working) {
+                        alert.classList.remove('hidden');
+                    } else if (alert && data.is_working) {
+                        alert.classList.add('hidden');
+                    }
+                })
+                .catch(error => console.log('Status update failed:', error));
         }
         
         // Update stats every 30 seconds

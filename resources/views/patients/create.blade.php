@@ -297,6 +297,24 @@
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-8 rounded-b-3xl">
                 <!-- Quick Booking Option -->
                 <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 mb-6">
+                    @if(!\App\Models\Setting::isWithinWorkingHours())
+                        @php $nextWorking = \App\Models\Setting::getNextWorkingTime(); @endphp
+                        <div class="bg-orange-100 border border-orange-300 rounded-xl p-4 mb-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle text-orange-600 mr-3"></i>
+                                <div>
+                                    <h5 class="font-semibold text-orange-800">Outside Working Hours</h5>
+                                    <p class="text-orange-700 text-sm">
+                                        Walk-in appointments are not available outside working hours.
+                                        @if($nextWorking)
+                                            Next available: {{ $nextWorking->format('l, M j \a\t g:i A') }}
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    
                     <div class="flex items-start space-x-4">
                         <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-clock text-white"></i>
@@ -306,8 +324,13 @@
                             <p class="text-gray-600 text-sm mb-4">For patients who need immediate attention, you can automatically book them for the next available slot today.</p>
                             
                             <div class="flex items-center space-x-3">
-                                <label class="flex items-center space-x-3 cursor-pointer">
-                                    <input type="checkbox" id="book_today" name="book_today" value="1" class="w-5 h-5 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                                <label class="flex items-center space-x-3 cursor-pointer {{ !\App\Models\Setting::isWithinWorkingHours() ? 'opacity-50 cursor-not-allowed' : '' }}">
+                                    <input type="checkbox" 
+                                           id="book_today" 
+                                           name="book_today" 
+                                           value="1" 
+                                           {{ !\App\Models\Setting::isWithinWorkingHours() ? 'disabled' : '' }}
+                                           class="w-5 h-5 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
                                     <span class="text-sm font-medium text-gray-700">Book appointment for today</span>
                                 </label>
                             </div>

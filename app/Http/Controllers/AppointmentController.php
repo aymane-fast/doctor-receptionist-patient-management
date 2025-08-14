@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
+use App\Models\Setting;
+use Carbon\Carbon;
 
 class AppointmentController extends Controller
 {
@@ -90,6 +92,38 @@ class AppointmentController extends Controller
             $validated['status'] = 'scheduled';
         }
 
+        // Validate appointment is during working hours
+        $appointmentDateTime = Carbon::parse($validated['appointment_date'] . ' ' . $validated['appointment_time']);
+        
+        if (!Setting::isTimeWithinWorkingHours($appointmentDateTime)) {
+            $workingHours = Setting::getWorkingHours($appointmentDateTime->format('l'));
+            $errorMessage = 'Appointment time is outside working hours. ';
+            
+            if ($workingHours && $workingHours['is_working']) {
+                $errorMessage .= 'Working hours for ' . $appointmentDateTime->format('l') . ' are ' . 
+                               $workingHours['start_time'] . ' - ' . $workingHours['end_time'] . '.';
+            } else {
+                $errorMessage .= 'We are closed on ' . $appointmentDateTime->format('l') . '.';
+            }
+            
+            return back()->withErrors(['appointment_time' => $errorMessage]);
+        }
+
+        // Check if appointment is too close to end of working hours (less than 30 minutes)
+        $dayName = strtolower($appointmentDateTime->format('l'));
+        $workingHours = Setting::getWorkingHours($dayName);
+        if ($workingHours && $workingHours['is_working']) {
+            $endTime = Carbon::parse($validated['appointment_date'] . ' ' . $workingHours['end_time']);
+            $appointmentEndTime = $appointmentDateTime->copy()->addMinutes(30); // Assume 30-minute appointments
+            
+            if ($appointmentEndTime->gt($endTime)) {
+                return back()->withErrors(['appointment_time' => 
+                    'Appointment would extend past working hours. Last appointment should be scheduled at least 30 minutes before closing time (' . 
+                    $workingHours['end_time'] . ').'
+                ]);
+            }
+        }
+
         // Check for conflicts
         $existingAppointment = Appointment::where('doctor_id', $validated['doctor_id'])
                                         ->whereDate('appointment_date', $validated['appointment_date'])
@@ -142,6 +176,40 @@ class AppointmentController extends Controller
             'reason' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
+
+        // Validate appointment is during working hours (only if not completed/cancelled)
+        if (!in_array($validated['status'], ['completed', 'cancelled'])) {
+            $appointmentDateTime = Carbon::parse($validated['appointment_date'] . ' ' . $validated['appointment_time']);
+            
+            if (!Setting::isTimeWithinWorkingHours($appointmentDateTime)) {
+                $workingHours = Setting::getWorkingHours($appointmentDateTime->format('l'));
+                $errorMessage = 'Appointment time is outside working hours. ';
+                
+                if ($workingHours && $workingHours['is_working']) {
+                    $errorMessage .= 'Working hours for ' . $appointmentDateTime->format('l') . ' are ' . 
+                                   $workingHours['start_time'] . ' - ' . $workingHours['end_time'] . '.';
+                } else {
+                    $errorMessage .= 'We are closed on ' . $appointmentDateTime->format('l') . '.';
+                }
+                
+                return back()->withErrors(['appointment_time' => $errorMessage]);
+            }
+
+            // Check if appointment is too close to end of working hours
+            $dayName = strtolower($appointmentDateTime->format('l'));
+            $workingHours = Setting::getWorkingHours($dayName);
+            if ($workingHours && $workingHours['is_working']) {
+                $endTime = Carbon::parse($validated['appointment_date'] . ' ' . $workingHours['end_time']);
+                $appointmentEndTime = $appointmentDateTime->copy()->addMinutes(30);
+                
+                if ($appointmentEndTime->gt($endTime)) {
+                    return back()->withErrors(['appointment_time' => 
+                        'Appointment would extend past working hours. Last appointment should be scheduled at least 30 minutes before closing time (' . 
+                        $workingHours['end_time'] . ').'
+                    ]);
+                }
+            }
+        }
 
         // Check for conflicts (excluding current appointment)
         $existingAppointment = Appointment::where('doctor_id', $validated['doctor_id'])
