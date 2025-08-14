@@ -111,7 +111,6 @@
                             <option value="">Select Gender</option>
                             <option value="male" {{ old('gender', $patient->gender) == 'male' ? 'selected' : '' }}>Male</option>
                             <option value="female" {{ old('gender', $patient->gender) == 'female' ? 'selected' : '' }}>Female</option>
-                            <option value="other" {{ old('gender', $patient->gender) == 'other' ? 'selected' : '' }}>Other</option>
                         </select>
                         @error('gender')
                         <p class="mt-2 text-sm text-red-600 flex items-center space-x-2">
