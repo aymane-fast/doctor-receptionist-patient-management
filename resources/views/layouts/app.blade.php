@@ -187,11 +187,12 @@
                                     <i class="fas fa-calendar-plus text-lg"></i>
                                 </a>
 
-                                <!-- Search -->
-                                <button class="p-2 text-gray-600 hover:text-purple-600 transition-colors" 
-                                        title="Search">
-                                    <i class="fas fa-search text-lg"></i>
-                                </button>
+                                <!-- Settings -->
+                                <a href="{{ route('settings.index') }}" 
+                                   class="p-2 text-gray-600 hover:text-purple-600 transition-colors" 
+                                   title="Settings">
+                                    <i class="fas fa-cog text-lg"></i>
+                                </a>
                             </div>
 
                             <!-- User Profile with Dynamic Status -->
