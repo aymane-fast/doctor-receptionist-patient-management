@@ -110,15 +110,15 @@
                             <div class="hidden md:flex items-center space-x-1">
                                 <a href="{{ route('dashboard') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('dashboard') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
                                     <i class="fas fa-tachometer-alt text-lg mb-1"></i>
-                                    <span class="text-xs font-medium">Dashboard</span>
+                                    <span class="text-xs font-medium">{{ __('common.dashboard') }}</span>
                                 </a>
                                 <a href="{{ route('patients.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('patients.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
                                     <i class="fas fa-users text-lg mb-1"></i>
-                                    <span class="text-xs font-medium">Patients</span>
+                                    <span class="text-xs font-medium">{{ __('common.patients') }}</span>
                                 </a>
                                 <a href="{{ route('appointments.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('appointments.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
                                     <i class="fas fa-calendar text-lg mb-1"></i>
-                                    <span class="text-xs font-medium">Appointments</span>
+                                    <span class="text-xs font-medium">{{ __('common.appointments') }}</span>
                                 </a>
                                 @if(auth()->user()->isDoctor())
                                 <a href="{{ route('doctor.current') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('doctor.current') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
@@ -127,16 +127,16 @@
                                 </a>
                                 <a href="{{ route('medical-records.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('medical-records.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
                                     <i class="fas fa-file-medical text-lg mb-1"></i>
-                                    <span class="text-xs font-medium">Records</span>
+                                    <span class="text-xs font-medium">{{ __('common.medical_records') }}</span>
                                 </a>
                                 <a href="{{ route('prescriptions.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('prescriptions.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
                                     <i class="fas fa-prescription text-lg mb-1"></i>
-                                    <span class="text-xs font-medium">Prescriptions</span>
+                                    <span class="text-xs font-medium">{{ __('common.prescriptions') }}</span>
                                 </a>
                                 @endif
                                 <a href="{{ route('settings.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('settings.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
                                     <i class="fas fa-cog text-lg mb-1"></i>
-                                    <span class="text-xs font-medium">Settings</span>
+                                    <span class="text-xs font-medium">{{ __('common.settings') }}</span>
                                 </a>
                             </div>
                             @endauth
@@ -197,6 +197,27 @@
 
                             <!-- User Profile with Dynamic Status -->
                             <div class="flex items-center space-x-3">
+                                <!-- Language Switcher -->
+                                <div class="relative">
+                                    <button onclick="toggleLanguageMenu()" class="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors">
+                                        <span class="text-lg">{{ language_flag(app()->getLocale()) }}</span>
+                                        <span class="text-sm font-medium">{{ strtoupper(app()->getLocale()) }}</span>
+                                        <i class="fas fa-chevron-down text-xs"></i>
+                                    </button>
+                                    <div id="language-menu" class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border hidden z-50">
+                                        @foreach(\App\Models\Setting::getAvailableLanguages() as $code => $name)
+                                            <a href="{{ route('language.switch', $code) }}" 
+                                               class="flex items-center space-x-2 px-4 py-2 text-sm hover:bg-gray-100 {{ app()->getLocale() == $code ? 'bg-blue-50 text-blue-600' : 'text-gray-700' }}">
+                                                <span>{{ language_flag($code) }}</span>
+                                                <span>{{ $name }}</span>
+                                                @if(app()->getLocale() == $code)
+                                                    <i class="fas fa-check text-blue-600 ml-auto"></i>
+                                                @endif
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+
                                 <div class="text-right hidden sm:block">
                                     <div class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</div>
                                     <div class="text-xs text-gray-500 flex items-center">
@@ -279,16 +300,16 @@
             @auth
             @if(!\App\Models\Setting::isWithinWorkingHours())
                 @php $nextWorking = \App\Models\Setting::getNextWorkingTime(); @endphp
-                <div id="clinic-status-alert" class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-4 rounded-r-lg">
+                                <div id="clinic-status-alert" class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-4 rounded-r-lg">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
                             <i class="fas fa-clock text-orange-600 mr-3"></i>
                             <div>
-                                <h4 class="font-semibold text-orange-800">Currently Outside Working Hours</h4>
+                                <h4 class="font-semibold text-orange-800">{{ __('dashboard.currently_outside_hours') }}</h4>
                                 <p class="text-orange-700 text-sm">
-                                    Appointment scheduling is limited. You can view records and configure settings.
+                                    {{ __('dashboard.scheduling_limited') }}
                                     @if($nextWorking)
-                                        <br><strong>Next opening:</strong> {{ $nextWorking->format('M j, Y \a\t g:i A') }}
+                                        <br><strong>{{ __('dashboard.next_opening') }}:</strong> {{ $nextWorking->format('M j, Y \a\t g:i A') }}
                                     @endif
                                 </p>
                             </div>
@@ -334,8 +355,14 @@
             // Close user menu when clicking outside
             document.addEventListener('click', function(e) {
                 const userMenu = document.getElementById('user-menu');
+                const languageMenu = document.getElementById('language-menu');
+                
                 if (userMenu && !e.target.closest('.relative')) {
                     userMenu.classList.add('hidden');
+                }
+                
+                if (languageMenu && !e.target.closest('.relative')) {
+                    languageMenu.classList.add('hidden');
                 }
             });
         });
@@ -345,6 +372,14 @@
             const userMenu = document.getElementById('user-menu');
             if (userMenu) {
                 userMenu.classList.toggle('hidden');
+            }
+        }
+        
+        // Toggle language menu
+        function toggleLanguageMenu() {
+            const languageMenu = document.getElementById('language-menu');
+            if (languageMenu) {
+                languageMenu.classList.toggle('hidden');
             }
         }
         

@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -18,6 +19,15 @@ return new class extends Migration
             $table->string('type')->default('string');
             $table->timestamps();
         });
+        
+        // Insert default language setting
+        DB::table('settings')->insert([
+            'key' => 'app_language',
+            'value' => 'en',
+            'type' => 'string',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**

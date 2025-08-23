@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Doctor Dashboard')
+@section('title', __('dashboard.doctor_dashboard'))
 
 @section('content')
 <div class="space-y-8">
@@ -16,7 +16,7 @@
                     <i class="fas fa-user text-white text-3xl"></i>
                 </div>
                 <div>
-                    <div class="text-sm text-blue-100 mb-1">Current Patient</div>
+                    <div class="text-sm text-blue-100 mb-1">{{ __('dashboard.current_patient') }}</div>
                     <div class="text-3xl font-bold text-white mb-2">{{ $currentAppointment->patient->full_name }}</div>
                     <div class="flex items-center space-x-4 text-blue-100">
                         <span><i class="fas fa-clock mr-2"></i>{{ $currentAppointment->appointment_time->format('g:i A') }}</span>
@@ -27,7 +27,7 @@
             <div>
                 <a href="{{ route('doctor.current') }}" class="bg-white hover:bg-gray-100 text-blue-700 font-semibold px-8 py-4 rounded-2xl transition-all duration-200 deep-shadow hover:shadow-xl flex items-center space-x-3">
                     <i class="fas fa-arrow-right"></i>
-                    <span>Open Workspace</span>
+                    <span>{{ __('dashboard.open_workspace') }}</span>
                 </a>
             </div>
         </div>
@@ -43,9 +43,9 @@
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">
-                        Welcome back, <span class="text-gradient">Dr. {{ auth()->user()->name }}</span>
+                        {{ __('dashboard.welcome_back') }}, <span class="text-gradient">Dr. {{ auth()->user()->name }}</span>
                     </h1>
-                    <p class="text-gray-600 mt-2 text-lg">Here's what's happening in your practice today</p>
+                    <p class="text-gray-600 mt-2 text-lg">{{ __('dashboard.manage_consultations') }}</p>
                 </div>
             </div>
             <div class="text-right bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4">
@@ -69,9 +69,9 @@
                 </div>
             </div>
             <div>
-                <h3 class="text-sm font-medium text-blue-700 mb-1">Total Patients</h3>
+                <h3 class="text-sm font-medium text-blue-700 mb-1">{{ __('dashboard.total_patients') }}</h3>
                 <p class="text-3xl font-bold text-blue-900 mb-1">{{ $stats['total_patients'] }}</p>
-                <p class="text-xs text-blue-600">Active in system</p>
+                <p class="text-xs text-blue-600">{{ __('dashboard.active_in_system') }}</p>
             </div>
         </div>
 
@@ -86,9 +86,9 @@
                 </div>
             </div>
             <div>
-                <h3 class="text-sm font-medium text-emerald-700 mb-1">Today's Schedule</h3>
+                <h3 class="text-sm font-medium text-emerald-700 mb-1">{{ __('dashboard.todays_schedule') }}</h3>
                 <p class="text-3xl font-bold text-emerald-900 mb-1">{{ $stats['today_appointments'] }}</p>
-                <p class="text-xs text-emerald-600">Appointments today</p>
+                <p class="text-xs text-emerald-600">{{ __('dashboard.appointments_today') }}</p>
             </div>
         </div>
 
@@ -103,9 +103,9 @@
                 </div>
             </div>
             <div>
-                <h3 class="text-sm font-medium text-amber-700 mb-1">Pending</h3>
+                <h3 class="text-sm font-medium text-amber-700 mb-1">{{ __('dashboard.pending') }}</h3>
                 <p class="text-3xl font-bold text-amber-900 mb-1">{{ $stats['pending_appointments'] }}</p>
-                <p class="text-xs text-amber-600">Awaiting attention</p>
+                <p class="text-xs text-amber-600">{{ __('dashboard.awaiting_attention') }}</p>
             </div>
         </div>
 
@@ -120,9 +120,9 @@
                 </div>
             </div>
             <div>
-                <h3 class="text-sm font-medium text-purple-700 mb-1">Completed</h3>
+                <h3 class="text-sm font-medium text-purple-700 mb-1">{{ __('dashboard.completed') }}</h3>
                 <p class="text-3xl font-bold text-purple-900 mb-1">{{ $stats['completed_today'] }}</p>
-                <p class="text-xs text-purple-600">Finished today</p>
+                <p class="text-xs text-purple-600">{{ __('dashboard.finished_today') }}</p>
             </div>
         </div>
     </div>
@@ -137,11 +137,11 @@
                         <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                             <i class="fas fa-calendar-day text-white"></i>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900">Today's Schedule</h2>
+                        <h2 class="text-xl font-bold text-gray-900">{{ __('dashboard.todays_schedule') }}</h2>
                     </div>
                     <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
                         <i class="fas fa-plus"></i>
-                        <span>New</span>
+                        <span>{{ __('common.add') }}</span>
                     </a>
                 </div>
             </div>
@@ -188,8 +188,8 @@
                         <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-calendar-times text-gray-400 text-2xl"></i>
                         </div>
-                        <p class="text-gray-500 font-medium">No appointments today</p>
-                        <p class="text-gray-400 text-sm">Enjoy your free schedule!</p>
+                        <p class="text-gray-500 font-medium">{{ __('dashboard.no_appointments_today') }}</p>
+                        <p class="text-gray-400 text-sm">{{ __('dashboard.enjoy_free_schedule') }}</p>
                     </div>
                 @endif
             </div>
@@ -203,11 +203,11 @@
                         <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
                             <i class="fas fa-file-medical text-white"></i>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900">Medical Records</h2>
+                        <h2 class="text-xl font-bold text-gray-900">{{ __('dashboard.medical_records') }}</h2>
                     </div>
                     <a href="{{ route('medical-records.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
                         <i class="fas fa-plus"></i>
-                        <span>New Record</span>
+                        <span>{{ __('dashboard.new_record') }}</span>
                     </a>
                 </div>
             </div>
@@ -245,8 +245,8 @@
                         <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-file-medical text-gray-400 text-2xl"></i>
                         </div>
-                        <p class="text-gray-500 font-medium">No recent records</p>
-                        <p class="text-gray-400 text-sm">Start creating medical records</p>
+                        <p class="text-gray-500 font-medium">{{ __('dashboard.no_recent_records') }}</p>
+                        <p class="text-gray-400 text-sm">{{ __('dashboard.start_creating_records') }}</p>
                     </div>
                 @endif
             </div>
@@ -259,47 +259,47 @@
             <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
                 <i class="fas fa-bolt text-white"></i>
             </div>
-            <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
+            <h2 class="text-xl font-bold text-gray-900">{{ __('dashboard.quick_actions') }}</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <a href="{{ route('patients.create') }}" class="group bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 border-2 border-gray-100 hover:border-blue-200 rounded-2xl p-6 transition-all duration-300 card-hover">
                 <div class="w-12 h-12 bg-blue-100 group-hover:bg-blue-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
                     <i class="fas fa-user-plus text-blue-600 text-xl"></i>
                 </div>
-                <span class="block text-center text-sm font-semibold text-gray-900">Add Patient</span>
-                <span class="block text-center text-xs text-gray-500 mt-1">Register new</span>
+                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.add_patient') }}</span>
+                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.register_new') }}</span>
             </a>
             
             <a href="{{ route('appointments.create') }}" class="group bg-white hover:bg-gradient-to-br hover:from-emerald-50 hover:to-emerald-100 border-2 border-gray-100 hover:border-emerald-200 rounded-2xl p-6 transition-all duration-300 card-hover">
                 <div class="w-12 h-12 bg-emerald-100 group-hover:bg-emerald-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
                     <i class="fas fa-calendar-plus text-emerald-600 text-xl"></i>
                 </div>
-                <span class="block text-center text-sm font-semibold text-gray-900">Schedule</span>
-                <span class="block text-center text-xs text-gray-500 mt-1">New appointment</span>
+                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.schedule') }}</span>
+                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.new_appointment') }}</span>
             </a>
             
             <a href="{{ route('medical-records.create') }}" class="group bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-purple-100 border-2 border-gray-100 hover:border-purple-200 rounded-2xl p-6 transition-all duration-300 card-hover">
                 <div class="w-12 h-12 bg-purple-100 group-hover:bg-purple-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
                     <i class="fas fa-file-medical-alt text-purple-600 text-xl"></i>
                 </div>
-                <span class="block text-center text-sm font-semibold text-gray-900">Medical Record</span>
-                <span class="block text-center text-xs text-gray-500 mt-1">Create new</span>
+                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.medical_record') }}</span>
+                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.create_new') }}</span>
             </a>
             
             <a href="{{ route('prescriptions.create') }}" class="group bg-white hover:bg-gradient-to-br hover:from-orange-50 hover:to-orange-100 border-2 border-gray-100 hover:border-orange-200 rounded-2xl p-6 transition-all duration-300 card-hover">
                 <div class="w-12 h-12 bg-orange-100 group-hover:bg-orange-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
                     <i class="fas fa-prescription text-orange-600 text-xl"></i>
                 </div>
-                <span class="block text-center text-sm font-semibold text-gray-900">Prescription</span>
-                <span class="block text-center text-xs text-gray-500 mt-1">Write new</span>
+                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.prescription') }}</span>
+                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.write_new') }}</span>
             </a>
             
             <a href="{{ route('patients.index') }}" class="group bg-white hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 border-2 border-gray-100 hover:border-gray-200 rounded-2xl p-6 transition-all duration-300 card-hover">
                 <div class="w-12 h-12 bg-gray-100 group-hover:bg-gray-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
                     <i class="fas fa-search text-gray-600 text-xl"></i>
                 </div>
-                <span class="block text-center text-sm font-semibold text-gray-900">Search</span>
-                <span class="block text-center text-xs text-gray-500 mt-1">Find patients</span>
+                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.search') }}</span>
+                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.find_patients') }}</span>
             </a>
         </div>
     </div>

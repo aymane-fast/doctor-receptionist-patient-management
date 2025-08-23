@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'failed' => 'Ces identifiants ne correspondent pas à nos enregistrements.',
+    'password' => 'Le mot de passe fourni est incorrect.',
+    'throttle' => 'Trop de tentatives de connexion. Veuillez réessayer dans :seconds secondes.',
+    'login_title' => 'Connectez-vous à votre compte',
+    'login_subtitle' => 'Bon retour ! Veuillez entrer vos détails.',
+    'email_address' => 'Adresse email',
+    'password_label' => 'Mot de passe',
+    'remember_me' => 'Se souvenir de moi',
+    'forgot_password' => 'Mot de passe oublié ?',
+    'sign_in' => 'Se connecter',
+    'dont_have_account' => "Vous n'avez pas de compte ?",
+    'sign_up' => "S'inscrire",
+    'register_title' => 'Créez votre compte',
+    'register_subtitle' => 'Bienvenue ! Veuillez remplir les détails pour commencer.',
+    'first_name' => 'Prénom',
+    'last_name' => 'Nom de famille',
+    'confirm_password' => 'Confirmer le mot de passe',
+    'already_have_account' => 'Vous avez déjà un compte ?',
+    'reset_password' => 'Réinitialiser le mot de passe',
+    'reset_password_subtitle' => 'Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.',
+    'send_reset_link' => 'Envoyer le lien de réinitialisation',
+    'back_to_login' => 'Retour à la connexion',
+];

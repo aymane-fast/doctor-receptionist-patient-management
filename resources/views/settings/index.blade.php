@@ -12,10 +12,49 @@
                     <i class="fas fa-cog text-purple-600 text-2xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
+                    <h1 class="text-2xl font-bold text-gray-900">{{ __('common.settings') }}</h1>
                     <p class="text-gray-600">Configure working hours and system preferences</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Language Settings -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
+                <i class="fas fa-language text-green-600 mr-2"></i>
+                {{ __('common.language') }} {{ __('common.settings') }}
+            </h3>
+            <p class="text-gray-600 text-sm">Choose your preferred language for the application interface.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @foreach(\App\Models\Setting::getAvailableLanguages() as $code => $name)
+                <div class="border-2 rounded-lg p-4 transition-all duration-200 hover:shadow-md
+                    {{ app()->getLocale() == $code ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300' }}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl">{{ language_flag($code) }}</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">{{ $name }}</h4>
+                                <p class="text-sm text-gray-500">{{ strtoupper($code) }}</p>
+                            </div>
+                        </div>
+                        @if(app()->getLocale() == $code)
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">{{ __('common.active') }}</span>
+                                <i class="fas fa-check text-blue-600"></i>
+                            </div>
+                        @else
+                            <a href="{{ route('language.switch', $code) }}" 
+                               class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                {{ __('common.select') }}
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
         </div>
     </div>
 

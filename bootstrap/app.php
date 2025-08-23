@@ -14,6 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             'working.hours' => \App\Http\Middleware\CheckWorkingHours::class,
+            'locale' => \App\Http\Middleware\SetLocale::class,
+        ]);
+        
+        // Apply SetLocale middleware to web routes globally
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

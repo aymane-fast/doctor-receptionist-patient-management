@@ -129,4 +129,39 @@ class Setting extends Model
         
         return $workingHours;
     }
+
+    /**
+     * Get the current application language
+     */
+    public static function getLanguage()
+    {
+        return self::get('app_language', 'en');
+    }
+
+    /**
+     * Set the application language
+     */
+    public static function setLanguage($language)
+    {
+        return self::set('app_language', $language, 'string');
+    }
+
+    /**
+     * Get available languages
+     */
+    public static function getAvailableLanguages()
+    {
+        return [
+            'en' => 'English',
+            'fr' => 'Français'
+        ];
+    }
+
+    /**
+     * Check if a language is supported
+     */
+    public static function isLanguageSupported($language)
+    {
+        return array_key_exists($language, self::getAvailableLanguages());
+    }
 }
