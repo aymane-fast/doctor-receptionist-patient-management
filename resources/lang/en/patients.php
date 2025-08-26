@@ -85,4 +85,40 @@ return [
     'create_patient' => 'Create Patient',
     'create_patient_book_today' => 'Create Patient & Book Today',
     'required' => '*',
+    
+    // Edit patient page specific
+    'edit_patient_title' => 'Edit Patient',
+    'update_patient_info' => 'Update patient information and records',
+    'view_patient' => 'View Patient',
+    'update_patient' => 'Update Patient',
+    'delete_patient' => 'Delete Patient',
+    'delete_confirmation' => 'Are you sure you want to delete this patient? This action cannot be undone and will remove all associated data including appointments and medical records.',
+    
+    // Index page specific
+    'patient_management' => 'Patient Management',
+    'manage_efficiently' => 'Manage patient information and records efficiently',
+    'search_placeholder' => 'Search by name, patient ID, or phone number...',
+    'clear' => 'Clear',
+    'years' => 'years',
+    'added' => 'Added',
+    'no_patients_registered' => 'No patients registered yet',
+    'no_match_search' => 'No patients match your search criteria. Try adjusting your search terms.',
+    'start_building_database' => 'Start building your patient database by adding your first patient.',
+    'view_all_patients' => 'View All Patients',
+    'add_first_patient' => 'Add First Patient',
+    
+    // Walk-in modal
+    'walkin_quick_registration' => 'Quick registration & booking',
+    'birth_date' => 'Birth Date',
+    'select' => 'Select',
+    'allergies_important' => 'Allergies (Important!)',
+    'allergies_walkin_placeholder' => 'e.g., Penicillin, Peanuts, None...',
+    'allergies_safety_note' => 'Please list any known allergies for patient safety',
+    'auto_booking_today' => 'Auto-booking for today\'s next available slot',
+    'register_and_book' => 'Register & Book',
+    
+    // Confirmation dialogs
+    'edit_confirmation' => 'Are you sure you want to edit patient record for ":name"?\n\nThis action will allow you to modify sensitive medical information.',
+    'appointment_confirmation' => 'Book appointment for ":name"?',
+    'allergy_alert' => '⚠️ ALLERGY ALERT ⚠️\nThis patient has allergies: :allergies\n\nPlease ensure medical staff is notified.',
 ];

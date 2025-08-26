@@ -85,4 +85,40 @@ return [
     'create_patient' => 'Créer le patient',
     'create_patient_book_today' => 'Créer le patient et réserver aujourd\'hui',
     'required' => '*',
+    
+    // Edit patient page specific
+    'edit_patient_title' => 'Modifier le patient',
+    'update_patient_info' => 'Mettre à jour les informations et dossiers du patient',
+    'view_patient' => 'Voir le patient',
+    'update_patient' => 'Mettre à jour le patient',
+    'delete_patient' => 'Supprimer le patient',
+    'delete_confirmation' => 'Êtes-vous sûr de vouloir supprimer ce patient ? Cette action ne peut pas être annulée et supprimera toutes les données associées y compris les rendez-vous et dossiers médicaux.',
+    
+    // Index page specific
+    'patient_management' => 'Gestion des patients',
+    'manage_efficiently' => 'Gérer efficacement les informations et dossiers des patients',
+    'search_placeholder' => 'Rechercher par nom, ID patient, ou numéro de téléphone...',
+    'clear' => 'Effacer',
+    'years' => 'ans',
+    'added' => 'Ajouté',
+    'no_patients_registered' => 'Aucun patient inscrit encore',
+    'no_match_search' => 'Aucun patient ne correspond à vos critères de recherche. Essayez d\'ajuster vos termes de recherche.',
+    'start_building_database' => 'Commencez à créer votre base de données de patients en ajoutant votre premier patient.',
+    'view_all_patients' => 'Voir tous les patients',
+    'add_first_patient' => 'Ajouter le premier patient',
+    
+    // Walk-in modal
+    'walkin_quick_registration' => 'Inscription et réservation rapides',
+    'birth_date' => 'Date de naissance',
+    'select' => 'Sélectionner',
+    'allergies_important' => 'Allergies (Important !)',
+    'allergies_walkin_placeholder' => 'ex: Pénicilline, Arachides, Aucune...',
+    'allergies_safety_note' => 'Veuillez lister toutes les allergies connues pour la sécurité du patient',
+    'auto_booking_today' => 'Réservation automatique pour le prochain créneau disponible aujourd\'hui',
+    'register_and_book' => 'Inscrire et réserver',
+    
+    // Confirmation dialogs
+    'edit_confirmation' => 'Êtes-vous sûr de vouloir modifier le dossier du patient ":name" ?\n\nCette action vous permettra de modifier des informations médicales sensibles.',
+    'appointment_confirmation' => 'Réserver un rendez-vous pour ":name" ?',
+    'allergy_alert' => '⚠️ ALERTE ALLERGIE ⚠️\nCe patient a des allergies : :allergies\n\nVeuillez vous assurer que le personnel médical soit informé.',
 ];
