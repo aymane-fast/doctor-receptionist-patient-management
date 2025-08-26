@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Prescriptions')
+@section('title', __('prescriptions.title'))
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Prescriptions</h1>
+        <h1 class="text-3xl font-bold text-gray-900">{{ __('prescriptions.title') }}</h1>
         <div class="flex items-center space-x-3">
             <!-- Filter by Patient -->
             <form method="GET" action="{{ route('prescriptions.index') }}" class="flex items-center space-x-2">
                 <select name="patient_id" onchange="this.form.submit()" 
                         class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">All Patients</option>
+                    <option value="">{{ __('prescriptions.all_patients') }}</option>
                     @foreach($patients as $patient)
                         <option value="{{ $patient->id }}" {{ request('patient_id') == $patient->id ? 'selected' : '' }}>
                             {{ $patient->first_name }} {{ $patient->last_name }}
@@ -22,7 +22,7 @@
             </form>
             
             <a href="{{ route('prescriptions.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                <i class="fas fa-plus mr-2"></i>New Prescription
+                <i class="fas fa-plus mr-2"></i>{{ __('prescriptions.new_prescription') }}
             </a>
         </div>
     </div>
@@ -44,7 +44,7 @@
                                         {{ $prescription->patient->first_name }} {{ $prescription->patient->last_name }}
                                     </h3>
                                     <p class="text-gray-600">
-                                        Prescribed by Dr. {{ $prescription->doctor->name }} • 
+                                        {{ __('prescriptions.prescribed_by') }} Dr. {{ $prescription->doctor->name }} • 
                                         {{ $prescription->patient->phone }}
                                     </p>
                                 </div>
@@ -57,26 +57,26 @@
                                 @elseif($prescription->status == 'cancelled') bg-red-100 text-red-800
                                 @elseif($prescription->status == 'expired') bg-gray-100 text-gray-800
                                 @endif">
-                                {{ ucfirst($prescription->status) }}
+                                {{ __('prescriptions.' . $prescription->status) }}
                             </span>
                         </div>
 
                         <!-- Prescription Details -->
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 mb-1">Medication</label>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">{{ __('prescriptions.medication_name') }}</label>
                                 <p class="text-gray-900 font-semibold">{{ $prescription->medication_name }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 mb-1">Dosage</label>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">{{ __('prescriptions.dosage') }}</label>
                                 <p class="text-gray-900">{{ $prescription->dosage }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 mb-1">Frequency</label>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">{{ __('prescriptions.frequency') }}</label>
                                 <p class="text-gray-900">{{ $prescription->frequency }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 mb-1">Duration</label>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">{{ __('prescriptions.duration') }}</label>
                                 <p class="text-gray-900">{{ $prescription->duration }}</p>
                             </div>
                         </div>
@@ -84,18 +84,18 @@
                         <!-- Dates -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 mb-1">Prescribed Date</label>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">{{ __('prescriptions.prescribed_date') }}</label>
                                 <p class="text-gray-900">{{ \Carbon\Carbon::parse($prescription->prescribed_date)->format('M j, Y') }}</p>
                             </div>
                             @if($prescription->start_date)
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 mb-1">Start Date</label>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">{{ __('prescriptions.start_date') }}</label>
                                 <p class="text-gray-900">{{ \Carbon\Carbon::parse($prescription->start_date)->format('M j, Y') }}</p>
                             </div>
                             @endif
                             @if($prescription->end_date)
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 mb-1">End Date</label>
+                                <label class="block text-sm font-medium text-gray-500 mb-1">{{ __('prescriptions.end_date') }}</label>
                                 <p class="text-gray-900">{{ \Carbon\Carbon::parse($prescription->end_date)->format('M j, Y') }}</p>
                             </div>
                             @endif
@@ -104,7 +104,7 @@
                         <!-- Instructions -->
                         @if($prescription->instructions)
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Instructions</label>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">{{ __('prescriptions.instructions') }}</label>
                             <p class="text-gray-900">{{ Str::limit($prescription->instructions, 200) }}</p>
                         </div>
                         @endif
@@ -113,13 +113,13 @@
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             @if($prescription->quantity)
                             <div>
-                                <label class="block text-gray-500">Quantity</label>
+                                <label class="block text-gray-500">{{ __('prescriptions.quantity') }}</label>
                                 <p class="font-semibold">{{ $prescription->quantity }}</p>
                             </div>
                             @endif
                             @if($prescription->refills !== null)
                             <div>
-                                <label class="block text-gray-500">Refills</label>
+                                <label class="block text-gray-500">{{ __('prescriptions.refills') }}</label>
                                 <p class="font-semibold">{{ $prescription->refills }}</p>
                             </div>
                             @endif
@@ -141,17 +141,17 @@
 
                 <!-- Prescription Footer -->
                 <div class="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between text-sm text-gray-500">
-                    <span>Created {{ $prescription->created_at->diffForHumans() }}</span>
+                    <span>{{ __('prescriptions.created') }} {{ $prescription->created_at->diffForHumans() }}</span>
                     <div class="flex items-center space-x-4">
                         @if($prescription->medicalRecord)
                             <a href="{{ route('medical-records.show', $prescription->medicalRecord) }}" 
                                class="text-blue-600 hover:text-blue-800 transition-colors">
-                                <i class="fas fa-file-medical mr-1"></i>Medical Record
+                                <i class="fas fa-file-medical mr-1"></i>{{ __('prescriptions.medical_record') }}
                             </a>
                         @endif
                         @if($prescription->status == 'active' && $prescription->end_date && \Carbon\Carbon::parse($prescription->end_date)->isPast())
                             <span class="text-orange-600 font-medium">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>Expired
+                                <i class="fas fa-exclamation-triangle mr-1"></i>{{ __('prescriptions.expired') }}
                             </span>
                         @endif
                     </div>
@@ -162,17 +162,17 @@
                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-prescription-bottle text-gray-400 text-2xl"></i>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">No Prescriptions Found</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ __('prescriptions.no_prescriptions_found') }}</h3>
                 <p class="text-gray-600 mb-6">
                     @if(request('patient_id'))
-                        No prescriptions found for the selected patient.
+                        {{ __('prescriptions.no_prescriptions_for_patient') }}
                     @else
-                        There are no prescriptions in the system yet.
+                        {{ __('prescriptions.no_prescriptions_yet') }}
                     @endif
                 </p>
                 <a href="{{ route('prescriptions.create') }}" 
                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
-                    <i class="fas fa-plus mr-2"></i>Create First Prescription
+                    <i class="fas fa-plus mr-2"></i>{{ __('prescriptions.create_first_prescription') }}
                 </a>
             </div>
         @endforelse

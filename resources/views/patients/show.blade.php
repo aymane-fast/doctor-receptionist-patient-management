@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $patient->full_name . ' - Patient Details')
+@section('title', $patient->full_name . ' - ' . __('patients.patient_details'))
 
 @section('content')
 <div class="space-y-6">
@@ -10,7 +10,7 @@
         <div class="flex items-center justify-center space-x-3">
             <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
             <div class="text-center">
-                <span class="text-lg font-bold text-red-700">⚠️ ALLERGY ALERT:</span>
+                <span class="text-lg font-bold text-red-700">{{ __('patients.allergy_alert_header') }}</span>
                 <span class="text-red-600 font-medium ml-2">{{ $patient->allergies }}</span>
             </div>
         </div>
@@ -28,7 +28,7 @@
                     <h1 class="text-2xl font-bold text-gray-900">{{ $patient->full_name }}</h1>
                     <div class="flex items-center space-x-4 mt-1">
                         <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-lg text-sm font-medium">{{ $patient->patient_id }}</span>
-                        <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-lg text-sm font-medium">{{ $patient->age }} years</span>
+                        <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-lg text-sm font-medium">{{ $patient->age }} {{ __('patients.years') }}</span>
                         <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-lg text-sm font-medium">{{ ucfirst($patient->gender) }}</span>
                     </div>
                 </div>
@@ -38,18 +38,18 @@
                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
                    onclick="return confirmAppointment('{{ $patient->full_name }}', {{ $patient->allergies ? 'true' : 'false' }}, '{{ $patient->allergies }}')">
                     <i class="fas fa-calendar-plus"></i>
-                    <span>Book</span>
+                    <span>{{ __('patients.book') }}</span>
                 </a>
                 <a href="{{ route('patients.edit', $patient) }}" 
                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
                    onclick="return confirmEdit('{{ $patient->full_name }}')">
                     <i class="fas fa-edit"></i>
-                    <span>Edit</span>
+                    <span>{{ __('patients.edit') }}</span>
                 </a>
                 <a href="{{ route('patients.index') }}" 
                    class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
                     <i class="fas fa-arrow-left"></i>
-                    <span>Back</span>
+                    <span>{{ __('patients.back') }}</span>
                 </a>
             </div>
         </div>
@@ -63,27 +63,27 @@
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-user-circle text-blue-600 mr-2"></i>
-                    Personal Info
+                    {{ __('patients.personal_info') }}
                 </h3>
                 <div class="space-y-3">
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Phone:</span>
+                        <span class="text-gray-600">{{ __('patients.phone') }}:</span>
                         <span class="font-medium">{{ $patient->phone }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Email:</span>
-                        <span class="font-medium">{{ $patient->email ?: 'Not provided' }}</span>
+                        <span class="text-gray-600">{{ __('patients.email') }}:</span>
+                        <span class="font-medium">{{ $patient->email ?: __('patients.not_provided') }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Birth Date:</span>
+                        <span class="text-gray-600">{{ __('patients.birth_date') }}:</span>
                         <span class="font-medium">{{ $patient->birth_date->format('M d, Y') }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">ID Card:</span>
-                        <span class="font-medium">{{ $patient->id_card_number ?: 'Not provided' }}</span>
+                        <span class="text-gray-600">{{ __('patients.id_card') }}:</span>
+                        <span class="font-medium">{{ $patient->id_card_number ?: __('patients.not_provided') }}</span>
                     </div>
                     <div class="pt-2 border-t border-gray-100">
-                        <span class="text-gray-600 block text-sm mb-1">Address:</span>
+                        <span class="text-gray-600 block text-sm mb-1">{{ __('patients.address') }}:</span>
                         <span class="font-medium text-sm">{{ $patient->address }}</span>
                     </div>
                 </div>
@@ -93,18 +93,18 @@
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-heartbeat text-red-600 mr-2"></i>
-                    Medical Info
+                    {{ __('patients.medical_info') }}
                 </h3>
                 <div class="space-y-3">
                     <div>
-                        <span class="text-gray-600 block">Allergies:</span>
+                        <span class="text-gray-600 block">{{ __('patients.allergies') }}:</span>
                         <span class="font-medium {{ $patient->allergies ? 'text-red-600' : 'text-gray-500' }}">
-                            {{ $patient->allergies ?: 'None reported' }}
+                            {{ $patient->allergies ?: __('patients.none_reported') }}
                         </span>
                     </div>
                     <div>
-                        <span class="text-gray-600 block">Chronic Conditions:</span>
-                        <span class="font-medium">{{ $patient->chronic_conditions ?: 'None reported' }}</span>
+                        <span class="text-gray-600 block">{{ __('patients.chronic_conditions') }}:</span>
+                        <span class="font-medium">{{ $patient->chronic_conditions ?: __('patients.none_reported') }}</span>
                     </div>
                 </div>
             </div>
@@ -113,16 +113,16 @@
             <div class="bg-white rounded-xl shadow-sm p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-phone-alt text-orange-600 mr-2"></i>
-                    Emergency Contact
+                    {{ __('patients.emergency_contact') }}
                 </h3>
                 <div class="space-y-3">
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Name:</span>
-                        <span class="font-medium">{{ $patient->emergency_contact_name ?: 'Not provided' }}</span>
+                        <span class="text-gray-600">{{ __('patients.name') }}:</span>
+                        <span class="font-medium">{{ $patient->emergency_contact_name ?: __('patients.not_provided') }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Phone:</span>
-                        <span class="font-medium">{{ $patient->emergency_contact_phone ?: 'Not provided' }}</span>
+                        <span class="text-gray-600">{{ __('patients.phone') }}:</span>
+                        <span class="font-medium">{{ $patient->emergency_contact_phone ?: __('patients.not_provided') }}</span>
                     </div>
                 </div>
             </div>
@@ -135,11 +135,11 @@
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                         <i class="fas fa-calendar text-green-600 mr-2"></i>
-                        Recent Appointments
+                        {{ __('patients.recent_appointments') }}
                     </h3>
                     <a href="{{ route('appointments.create', ['patient_id' => $patient->id]) }}" 
                        class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        + New Appointment
+                        + {{ __('patients.new_appointment') }}
                     </a>
                 </div>
                 @if($patient->appointments->count() > 0)
@@ -164,7 +164,7 @@
                 @else
                     <div class="text-center py-8">
                         <i class="fas fa-calendar-times text-gray-400 text-3xl mb-3"></i>
-                        <p class="text-gray-500">No appointments yet</p>
+                        <p class="text-gray-500">{{ __('patients.no_appointments_yet') }}</p>
                     </div>
                 @endif
             </div>
@@ -175,11 +175,11 @@
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                         <i class="fas fa-file-medical text-purple-600 mr-2"></i>
-                        Medical Records
+                        {{ __('patients.medical_records') }}
                     </h3>
                     <a href="{{ route('medical-records.create', ['patient_id' => $patient->id]) }}" 
                        class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        + New Record
+                        + {{ __('patients.new_record') }}
                     </a>
                 </div>
                 @if($patient->medicalRecords->count() > 0)
@@ -205,7 +205,7 @@
                 @else
                     <div class="text-center py-8">
                         <i class="fas fa-file-medical text-gray-400 text-3xl mb-3"></i>
-                        <p class="text-gray-500">No medical records yet</p>
+                        <p class="text-gray-500">{{ __('patients.no_medical_records_yet') }}</p>
                     </div>
                 @endif
             </div>
@@ -218,15 +218,15 @@
 <script>
 // Confirmation dialog for editing patient
 function confirmEdit(patientName) {
-    return confirm(`Are you sure you want to edit patient record for "${patientName}"?\n\nThis action will allow you to modify sensitive medical information.`);
+    return confirm(`{{ __('patients.edit_confirmation', ['name' => '${patientName}']) }}`.replace('${patientName}', patientName));
 }
 
 // Confirmation dialog with allergy alert for appointment booking
 function confirmAppointment(patientName, hasAllergies, allergies) {
-    let message = `Book appointment for "${patientName}"?`;
+    let message = `{{ __('patients.appointment_confirmation', ['name' => '${patientName}']) }}`.replace('${patientName}', patientName);
     
     if (hasAllergies) {
-        message += `\n\n⚠️ ALLERGY ALERT ⚠️\nThis patient has allergies: ${allergies}\n\nPlease ensure medical staff is notified.`;
+        message += `\n\n{{ __('patients.allergy_alert', ['allergies' => '${allergies}']) }}`.replace('${allergies}', allergies);
     }
     
     return confirm(message);
