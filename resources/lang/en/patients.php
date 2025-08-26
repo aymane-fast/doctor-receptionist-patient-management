@@ -50,4 +50,39 @@ return [
     'prescription_history' => 'Prescription History',
     'active_patients' => 'Active Patients',
     'inactive_patients' => 'Inactive Patients',
+    
+    // Create patient page specific
+    'add_new_patient' => 'Add New Patient',
+    'create_comprehensive_profile' => 'Create a comprehensive patient profile',
+    'back_to_patients' => 'Back to Patients',
+    'select_gender' => 'Select Gender',
+    'id_card_number' => 'ID Card Number (Optional)',
+    'address_placeholder' => 'Enter full address...',
+    'emergency_contact_name' => 'Emergency Contact Name',
+    'emergency_contact_phone' => 'Emergency Contact Phone',
+    'known_allergies' => 'Known Allergies',
+    'allergies_placeholder' => 'List any known allergies (e.g., penicillin, nuts, latex)...',
+    'chronic_conditions' => 'Chronic Conditions',
+    'chronic_conditions_placeholder' => 'List any chronic conditions (e.g., diabetes, hypertension)...',
+    
+    // Walk-in appointment section
+    'outside_working_hours' => 'Outside Working Hours',
+    'walkin_not_available' => 'Walk-in appointments are not available outside working hours.',
+    'next_available' => 'Next available',
+    'walkin_patient' => 'Walk-in Patient?',
+    'walkin_description' => 'For patients who need immediate attention, you can automatically book them for the next available slot today.',
+    'book_appointment_today' => 'Book appointment for today',
+    'reason_for_visit' => 'Reason for Visit',
+    'reason_placeholder' => 'e.g., General checkup, Follow-up...',
+    'priority' => 'Priority',
+    'normal' => 'Normal',
+    'urgent' => 'Urgent',
+    'emergency' => 'Emergency',
+    'auto_scheduling_info' => 'Auto-scheduling: The appointment will be scheduled for the next available time slot today after existing appointments.',
+    
+    // Form buttons and actions
+    'cancel' => 'Cancel',
+    'create_patient' => 'Create Patient',
+    'create_patient_book_today' => 'Create Patient & Book Today',
+    'required' => '*',
 ];

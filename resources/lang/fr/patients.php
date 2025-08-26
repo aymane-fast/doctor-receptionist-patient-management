@@ -50,4 +50,39 @@ return [
     'prescription_history' => 'Historique des ordonnances',
     'active_patients' => 'Patients actifs',
     'inactive_patients' => 'Patients inactifs',
+    
+    // Create patient page specific
+    'add_new_patient' => 'Ajouter un nouveau patient',
+    'create_comprehensive_profile' => 'Créer un profil de patient complet',
+    'back_to_patients' => 'Retour aux patients',
+    'select_gender' => 'Sélectionner le sexe',
+    'id_card_number' => 'Numéro de carte d\'identité (Optionnel)',
+    'address_placeholder' => 'Entrez l\'adresse complète...',
+    'emergency_contact_name' => 'Nom du contact d\'urgence',
+    'emergency_contact_phone' => 'Téléphone du contact d\'urgence',
+    'known_allergies' => 'Allergies connues',
+    'allergies_placeholder' => 'Listez toutes les allergies connues (ex: pénicilline, noix, latex)...',
+    'chronic_conditions' => 'Conditions chroniques',
+    'chronic_conditions_placeholder' => 'Listez toutes les conditions chroniques (ex: diabète, hypertension)...',
+    
+    // Walk-in appointment section
+    'outside_working_hours' => 'En dehors des heures de travail',
+    'walkin_not_available' => 'Les rendez-vous sans rendez-vous ne sont pas disponibles en dehors des heures de travail.',
+    'next_available' => 'Prochaine disponibilité',
+    'walkin_patient' => 'Patient sans rendez-vous?',
+    'walkin_description' => 'Pour les patients qui ont besoin d\'attention immédiate, vous pouvez automatiquement les réserver pour le prochain créneau disponible aujourd\'hui.',
+    'book_appointment_today' => 'Réserver un rendez-vous pour aujourd\'hui',
+    'reason_for_visit' => 'Motif de la visite',
+    'reason_placeholder' => 'ex: Contrôle général, Suivi...',
+    'priority' => 'Priorité',
+    'normal' => 'Normal',
+    'urgent' => 'Urgent',
+    'emergency' => 'Urgence',
+    'auto_scheduling_info' => 'Planification automatique : Le rendez-vous sera programmé pour le prochain créneau disponible aujourd\'hui après les rendez-vous existants.',
+    
+    // Form buttons and actions
+    'cancel' => 'Annuler',
+    'create_patient' => 'Créer le patient',
+    'create_patient_book_today' => 'Créer le patient et réserver aujourd\'hui',
+    'required' => '*',
 ];
