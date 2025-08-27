@@ -23,4 +23,20 @@ return [
     'reset_password_subtitle' => 'Enter your email address and we\'ll send you a link to reset your password.',
     'send_reset_link' => 'Send password reset link',
     'back_to_login' => 'Back to login',
+    
+    // Register page additions
+    'create_new_user' => 'Create New User',
+    'register_doctor_receptionist' => 'Register a new doctor or receptionist',
+    'full_name' => 'Full Name',
+    'role' => 'Role',
+    'select_role' => 'Select Role',
+    'doctor' => 'Doctor',
+    'receptionist' => 'Receptionist',
+    'phone' => 'Phone',
+    'phone_optional' => 'Phone (Optional)',
+    'address' => 'Address',
+    'address_optional' => 'Address (Optional)',
+    'create_user' => 'Create User',
+    'sign_in_here' => 'Sign in here',
+    'medical_management_system' => 'Medical Management System',
 ];

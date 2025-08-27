@@ -306,15 +306,15 @@ function closeWalkInModal() {
 
 // Confirmation dialog for editing patient
 function confirmEdit(patientName) {
-    return confirm(`Are you sure you want to edit patient record for "${patientName}"?\n\nThis action will allow you to modify sensitive medical information.`);
+    return confirm(`{{ __('patients.confirm_edit_prefix') }} "${patientName}"?\n\n{{ __('patients.edit_warning') }}`);
 }
 
 // Confirmation dialog with allergy alert for appointment booking
 function confirmAppointment(patientName, hasAllergies, allergies) {
-    let message = `Book appointment for "${patientName}"?`;
+    let message = `{{ __('patients.book_appointment_for') }} "${patientName}"?`;
     
     if (hasAllergies) {
-        message += `\n\n⚠️ ALLERGY ALERT ⚠️\nThis patient has allergies: ${allergies}\n\nPlease ensure medical staff is notified.`;
+        message += `\n\n⚠️ {{ __('patients.allergy_alert') }} ⚠️\n{{ __('patients.patient_has_allergies') }}: ${allergies}\n\n{{ __('patients.notify_medical_staff') }}`;
     }
     
     return confirm(message);

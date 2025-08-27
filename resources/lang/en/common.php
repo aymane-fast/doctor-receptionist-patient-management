@@ -61,4 +61,22 @@ return [
     'language' => 'Language',
     'english' => 'English',
     'french' => 'French',
+    
+    // Settings related
+    'working_hours' => 'Working Hours',
+    'working_hours_description' => 'Set the working hours for your practice. Appointments can only be booked during these times.',
+    'configure_preferences' => 'Configure working hours and system preferences',
+    'monday' => 'Monday',
+    'tuesday' => 'Tuesday',
+    'wednesday' => 'Wednesday',
+    'thursday' => 'Thursday',
+    'friday' => 'Friday',
+    'saturday' => 'Saturday',
+    'sunday' => 'Sunday',
+    'start_time' => 'Start Time',
+    'end_time' => 'End Time',
+    'save_working_hours' => 'Save Working Hours',
+    'today_schedule' => "Today's Schedule",
+    'emergency_mode' => 'Emergency Mode',
+    'emergency_mode_description' => 'Temporarily allow appointments outside working hours',
 ];

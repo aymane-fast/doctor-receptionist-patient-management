@@ -23,4 +23,20 @@ return [
     'reset_password_subtitle' => 'Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.',
     'send_reset_link' => 'Envoyer le lien de réinitialisation',
     'back_to_login' => 'Retour à la connexion',
+    
+    // Register page additions
+    'create_new_user' => 'Créer un Nouvel Utilisateur',
+    'register_doctor_receptionist' => 'Enregistrer un nouveau médecin ou réceptionniste',
+    'full_name' => 'Nom Complet',
+    'role' => 'Rôle',
+    'select_role' => 'Sélectionner le Rôle',
+    'doctor' => 'Médecin',
+    'receptionist' => 'Réceptionniste',
+    'phone' => 'Téléphone',
+    'phone_optional' => 'Téléphone (Optionnel)',
+    'address' => 'Adresse',
+    'address_optional' => 'Adresse (Optionnelle)',
+    'create_user' => 'Créer Utilisateur',
+    'sign_in_here' => 'Connectez-vous ici',
+    'medical_management_system' => 'Système de Gestion Médicale',
 ];

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Medical Management System</title>
+    <title>{{ __('auth.register') }} - {{ __('auth.medical_management_system') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -11,8 +11,8 @@
     <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg">
         <div class="text-center mb-8">
             <i class="fas fa-heartbeat text-4xl text-blue-600 mb-4"></i>
-            <h1 class="text-2xl font-bold text-gray-800">Create New User</h1>
-            <p class="text-gray-600 mt-2">Register a new doctor or receptionist</p>
+            <h1 class="text-2xl font-bold text-gray-800">{{ __('auth.create_new_user') }}</h1>
+            <p class="text-gray-600 mt-2">{{ __('auth.register_doctor_receptionist') }}</p>
         </div>
 
         @if($errors->any())
@@ -30,7 +30,7 @@
             
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-user mr-1"></i> Full Name
+                    <i class="fas fa-user mr-1"></i> {{ __('auth.full_name') }}
                 </label>
                 <input type="text" 
                        id="name" 
@@ -42,7 +42,7 @@
 
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-envelope mr-1"></i> Email Address
+                    <i class="fas fa-envelope mr-1"></i> {{ __('auth.email_address') }}
                 </label>
                 <input type="email" 
                        id="email" 
@@ -54,21 +54,21 @@
 
             <div>
                 <label for="role" class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-user-tag mr-1"></i> Role
+                    <i class="fas fa-user-tag mr-1"></i> {{ __('auth.role') }}
                 </label>
                 <select id="role" 
                         name="role" 
                         required 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Select Role</option>
-                    <option value="doctor" {{ old('role') == 'doctor' ? 'selected' : '' }}>Doctor</option>
-                    <option value="receptionist" {{ old('role') == 'receptionist' ? 'selected' : '' }}>Receptionist</option>
+                    <option value="">{{ __('auth.select_role') }}</option>
+                    <option value="doctor" {{ old('role') == 'doctor' ? 'selected' : '' }}>{{ __('auth.doctor') }}</option>
+                    <option value="receptionist" {{ old('role') == 'receptionist' ? 'selected' : '' }}>{{ __('auth.receptionist') }}</option>
                 </select>
             </div>
 
             <div>
                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-phone mr-1"></i> Phone (Optional)
+                    <i class="fas fa-phone mr-1"></i> {{ __('auth.phone_optional') }}
                 </label>
                 <input type="text" 
                        id="phone" 
@@ -79,7 +79,7 @@
 
             <div>
                 <label for="address" class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-map-marker-alt mr-1"></i> Address (Optional)
+                    <i class="fas fa-map-marker-alt mr-1"></i> {{ __('auth.address_optional') }}
                 </label>
                 <textarea id="address" 
                           name="address" 
@@ -89,7 +89,7 @@
 
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-lock mr-1"></i> Password
+                    <i class="fas fa-lock mr-1"></i> {{ __('auth.password_label') }}
                 </label>
                 <input type="password" 
                        id="password" 
@@ -100,7 +100,7 @@
 
             <div>
                 <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-lock mr-1"></i> Confirm Password
+                    <i class="fas fa-lock mr-1"></i> {{ __('auth.confirm_password') }}
                 </label>
                 <input type="password" 
                        id="password_confirmation" 
@@ -111,14 +111,14 @@
 
             <button type="submit" 
                     class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
-                <i class="fas fa-user-plus mr-2"></i> Create User
+                <i class="fas fa-user-plus mr-2"></i> {{ __('auth.create_user') }}
             </button>
         </form>
 
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">
-                Already have an account? 
-                <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-800 font-medium">Sign in here</a>
+                {{ __('auth.already_have_account') }} 
+                <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-800 font-medium">{{ __('auth.sign_in_here') }}</a>
             </p>
         </div>
     </div>

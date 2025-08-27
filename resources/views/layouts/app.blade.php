@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Medical Management System')</title>
+    <title>@yield('title', __('common.medical_management_system'))</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -176,21 +176,21 @@
                                 <!-- Quick Add Patient -->
                                 <a href="{{ route('patients.create') }}" 
                                    class="p-2 text-gray-600 hover:text-green-600 transition-colors" 
-                                   title="Add New Patient">
+                                   title="{{ __('patients.add_new_patient') }}">
                                     <i class="fas fa-user-plus text-lg"></i>
                                 </a>
                                 
                                 <!-- Quick Add Appointment -->
                                 <a href="{{ route('appointments.create') }}" 
                                    class="p-2 text-gray-600 hover:text-blue-600 transition-colors" 
-                                   title="New Appointment">
+                                   title="{{ __('appointments.new_appointment') }}">
                                     <i class="fas fa-calendar-plus text-lg"></i>
                                 </a>
 
                                 <!-- Settings -->
                                 <a href="{{ route('settings.index') }}" 
                                    class="p-2 text-gray-600 hover:text-purple-600 transition-colors" 
-                                   title="Settings">
+                                   title="{{ __('common.settings') }}">
                                     <i class="fas fa-cog text-lg"></i>
                                 </a>
                             </div>
@@ -240,11 +240,11 @@
                                         <i class="fas fa-chevron-down text-sm"></i>
                                     </button>
                                     <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border hidden">
-                                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile Settings</a>
+                                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ __('common.profile_settings') }}</a>
                                         <form method="POST" action="{{ route('logout') }}" class="block">
                                             @csrf
                                             <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50">
-                                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                                <i class="fas fa-sign-out-alt mr-2"></i>{{ __('auth.logout') }}
                                             </button>
                                         </form>
                                     </div>
@@ -268,27 +268,27 @@
                 <div class="px-4 py-3 space-y-2">
                     @auth
                     <a href="{{ route('dashboard') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('dashboard') ? 'bg-blue-50 text-blue-600' : '' }}">
-                        <i class="fas fa-tachometer-alt w-5 mr-3"></i>Dashboard
+                        <i class="fas fa-tachometer-alt w-5 mr-3"></i>{{ __('common.dashboard') }}
                     </a>
                     <a href="{{ route('patients.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('patients.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                        <i class="fas fa-users w-5 mr-3"></i>Patients
+                        <i class="fas fa-users w-5 mr-3"></i>{{ __('common.patients') }}
                     </a>
                     <a href="{{ route('appointments.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('appointments.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                        <i class="fas fa-calendar w-5 mr-3"></i>Appointments
+                        <i class="fas fa-calendar w-5 mr-3"></i>{{ __('common.appointments') }}
                     </a>
                     @if(auth()->user()->isDoctor())
                     <a href="{{ route('doctor.current') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('doctor.current') ? 'bg-blue-50 text-blue-600' : '' }}">
                         <i class="fas fa-user-clock w-5 mr-3"></i>Current Patient
                     </a>
                     <a href="{{ route('medical-records.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('medical-records.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                        <i class="fas fa-file-medical w-5 mr-3"></i>Medical Records
+                        <i class="fas fa-file-medical w-5 mr-3"></i>{{ __('common.medical_records') }}
                     </a>
                     <a href="{{ route('prescriptions.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('prescriptions.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                        <i class="fas fa-prescription w-5 mr-3"></i>Prescriptions
+                        <i class="fas fa-prescription w-5 mr-3"></i>{{ __('common.prescriptions') }}
                     </a>
                     @endif
                     <a href="{{ route('settings.index') }}" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg {{ request()->routeIs('settings.*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                        <i class="fas fa-cog w-5 mr-3"></i>Settings
+                        <i class="fas fa-cog w-5 mr-3"></i>{{ __('common.settings') }}
                     </a>
                     @endauth
                 </div>

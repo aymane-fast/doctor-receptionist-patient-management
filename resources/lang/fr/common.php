@@ -61,4 +61,22 @@ return [
     'language' => 'Langue',
     'english' => 'Anglais',
     'french' => 'Français',
+    
+    // Settings related
+    'working_hours' => 'Heures de Travail',
+    'working_hours_description' => 'Définissez les heures de travail de votre cabinet. Les rendez-vous ne peuvent être pris que pendant ces heures.',
+    'configure_preferences' => 'Configurer les heures de travail et les préférences système',
+    'monday' => 'Lundi',
+    'tuesday' => 'Mardi',
+    'wednesday' => 'Mercredi',
+    'thursday' => 'Jeudi',
+    'friday' => 'Vendredi',
+    'saturday' => 'Samedi',
+    'sunday' => 'Dimanche',
+    'start_time' => 'Heure de Début',
+    'end_time' => 'Heure de Fin',
+    'save_working_hours' => 'Sauvegarder les Heures de Travail',
+    'today_schedule' => "Programme d'Aujourd'hui",
+    'emergency_mode' => 'Mode Urgence',
+    'emergency_mode_description' => 'Permettre temporairement les rendez-vous en dehors des heures de travail',
 ];

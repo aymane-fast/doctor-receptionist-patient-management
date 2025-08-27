@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Settings')
+@section('title', __('common.settings'))
 
 @section('content')
 <div class="space-y-6">
@@ -13,7 +13,7 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">{{ __('common.settings') }}</h1>
-                    <p class="text-gray-600">Configure working hours and system preferences</p>
+                    <p class="text-gray-600">{{ __('common.configure_preferences') }}</p>
                 </div>
             </div>
         </div>
@@ -63,9 +63,9 @@
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
                 <i class="fas fa-clock text-blue-600 mr-2"></i>
-                Working Hours
+                {{ __('common.working_hours') }}
             </h3>
-            <p class="text-gray-600 text-sm">Set the working hours for your practice. Appointments can only be booked during these times.</p>
+            <p class="text-gray-600 text-sm">{{ __('common.working_hours_description') }}</p>
         </div>
 
         <form action="{{ route('settings.working-hours') }}" method="POST" class="space-y-6">
@@ -74,13 +74,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @php
                     $days = [
-                        'monday' => 'Monday',
-                        'tuesday' => 'Tuesday', 
-                        'wednesday' => 'Wednesday',
-                        'thursday' => 'Thursday',
-                        'friday' => 'Friday',
-                        'saturday' => 'Saturday',
-                        'sunday' => 'Sunday'
+                        'monday' => __('common.monday'),
+                        'tuesday' => __('common.tuesday'), 
+                        'wednesday' => __('common.wednesday'),
+                        'thursday' => __('common.thursday'),
+                        'friday' => __('common.friday'),
+                        'saturday' => __('common.saturday'),
+                        'sunday' => __('common.sunday')
                     ];
                 @endphp
                 
@@ -101,7 +101,7 @@
                     
                     <div id="{{ $day }}_hours" class="space-y-3 {{ $workingHours[$day]['is_working'] ? '' : 'opacity-50 pointer-events-none' }}">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.start_time') }}</label>
                             <input type="time" 
                                    name="{{ $day }}_start" 
                                    value="{{ $workingHours[$day]['start_time'] }}"
@@ -110,7 +110,7 @@
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.end_time') }}</label>
                             <input type="time" 
                                    name="{{ $day }}_end" 
                                    value="{{ $workingHours[$day]['end_time'] }}"
@@ -130,7 +130,7 @@
                         <span class="font-medium text-gray-900">
                             Current Status: 
                             <span class="{{ \App\Models\Setting::isWithinWorkingHours() ? 'text-green-700' : 'text-red-700' }}">
-                                {{ \App\Models\Setting::isWithinWorkingHours() ? 'Open' : 'Closed' }}
+                                {{ \App\Models\Setting::isWithinWorkingHours() ? __('common.open') : __('common.closed') }}
                             </span>
                         </span>
                     </div>
@@ -148,7 +148,7 @@
             <div class="flex items-center space-x-4 pt-4 border-t border-gray-200">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
                     <i class="fas fa-save"></i>
-                    <span>Save Working Hours</span>
+                    <span>{{ __('common.save_working_hours') }}</span>
                 </button>
                 
                 <button type="button" onclick="setDefaultHours()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
@@ -165,7 +165,7 @@
         <div class="bg-white rounded-xl shadow-sm p-6">
             <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
                 <i class="fas fa-calendar-day text-green-600 mr-2"></i>
-                Today's Schedule
+                {{ __('common.today_schedule') }}
             </h4>
             @php 
                 $today = strtolower(\Illuminate\Support\Carbon::now()->format('l'));
@@ -206,9 +206,9 @@
         <div class="bg-white rounded-xl shadow-sm p-6">
             <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
                 <i class="fas fa-exclamation-triangle text-orange-600 mr-2"></i>
-                Emergency Mode
+                {{ __('common.emergency_mode') }}
             </h4>
-            <p class="text-sm text-gray-600 mb-3">Temporarily allow appointments outside working hours</p>
+            <p class="text-sm text-gray-600 mb-3">{{ __('common.emergency_mode_description') }}</p>
             <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                 Enable Emergency Mode
             </button>

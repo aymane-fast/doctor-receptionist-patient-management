@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Appointment')
+@section('title', __('appointments.edit_appointment'))
 
 @section('content')
 <div class="space-y-6">
@@ -13,14 +13,14 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">
-                        <span class="text-gradient">Edit Appointment</span>
+                        <span class="text-gradient">{{ __('appointments.edit_appointment') }}</span>
                     </h1>
-                    <p class="text-gray-600 mt-1">Update appointment details and information</p>
+                    <p class="text-gray-600 mt-1">{{ __('appointments.update_appointment_description') }}</p>
                 </div>
             </div>
             <a href="{{ route('appointments.show', $appointment) }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
                 <i class="fas fa-arrow-left"></i>
-                <span>Back to Details</span>
+                <span>{{ __('appointments.back_to_details') }}</span>
             </a>
         </div>
     </div>
@@ -37,18 +37,18 @@
                         <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                             <i class="fas fa-users text-white text-sm"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900">Patient & Doctor Selection</h3>
+                        <h3 class="text-lg font-bold text-gray-900">{{ __('appointments.patient_information') }}</h3>
                     </div>
                     
                     <div class="grid md:grid-cols-2 gap-4">
                         <!-- Patient Selection -->
                         <div>
                             <label for="patient_id" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                Patient <span class="text-red-500">*</span>
+                                {{ __('patients.patient') }} <span class="text-red-500">*</span>
                             </label>
                             <select id="patient_id" name="patient_id" required 
                                     class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror">
-                                <option value="">Select a patient</option>
+                                <option value="">{{ __('appointments.select_patient') }}</option>
                                 @foreach($patients as $patient)
                                     <option value="{{ $patient->id }}" 
                                             {{ (old('patient_id', $appointment->patient_id) == $patient->id) ? 'selected' : '' }}>
@@ -152,10 +152,10 @@
                             </label>
                             <select id="status" name="status" 
                                     class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('status') border-red-500 @enderror">
-                                <option value="scheduled" {{ old('status', $appointment->status) == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                                <option value="in_progress" {{ old('status', $appointment->status) == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>Completed</option>
-                                <option value="cancelled" {{ old('status', $appointment->status) == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                <option value="scheduled" {{ old('status', $appointment->status) == 'scheduled' ? 'selected' : '' }}>{{ __('appointments.scheduled') }}</option>
+                                <option value="in_progress" {{ old('status', $appointment->status) == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
+                                <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
+                                <option value="cancelled" {{ old('status', $appointment->status) == 'cancelled' ? 'selected' : '' }}>{{ __('appointments.cancelled') }}</option>
                             </select>
                             @error('status')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
@@ -231,7 +231,7 @@
                             @method('DELETE')
                             <button type="submit" 
                                     class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-xl transition-all duration-200 flex items-center space-x-2"
-                                    onclick="return confirm('Are you sure you want to delete this appointment? This action cannot be undone.')">
+                                    onclick="return confirm('{{ __('appointments.confirm_delete') }}')">
                                 <i class="fas fa-trash text-sm"></i>
                                 <span>Delete</span>
                             </button>

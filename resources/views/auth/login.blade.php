@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Medical Management System</title>
+    <title>{{ __('auth.login') }} - {{ __('auth.medical_management_system') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -11,8 +11,8 @@
     <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
         <div class="text-center mb-8">
             <i class="fas fa-heartbeat text-4xl text-blue-600 mb-4"></i>
-            <h1 class="text-2xl font-bold text-gray-800">Medical Management System</h1>
-            <p class="text-gray-600 mt-2">Sign in to your account</p>
+            <h1 class="text-2xl font-bold text-gray-800">{{ __('auth.medical_management_system') }}</h1>
+            <p class="text-gray-600 mt-2">{{ __('auth.sign_in_to_account') }}</p>
         </div>
 
         @if($errors->any())
@@ -34,7 +34,7 @@
             
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-envelope mr-1"></i> Email Address
+                    <i class="fas fa-envelope mr-1"></i> {{ __('auth.email_address') }}
                 </label>
                 <input type="email" 
                        id="email" 
@@ -46,7 +46,7 @@
 
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-lock mr-1"></i> Password
+                    <i class="fas fa-lock mr-1"></i> {{ __('auth.password') }}
                 </label>
                 <input type="password" 
                        id="password" 
@@ -57,14 +57,14 @@
 
             <button type="submit" 
                     class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
-                <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+                <i class="fas fa-sign-in-alt mr-2"></i> {{ __('auth.sign_in') }}
             </button>
         </form>
 
         <div class="mt-6 text-center">
             <p class="text-sm text-gray-600">
-                Need to create a user? 
-                <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-800 font-medium">Register here</a>
+                {{ __('auth.need_account') }} 
+                <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-800 font-medium">{{ __('auth.register_here') }}</a>
             </p>
         </div>
     </div>

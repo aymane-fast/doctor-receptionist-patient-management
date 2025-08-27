@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Appointment Details')
+@section('title', __('appointments.appointment_details'))
 
 @section('content')
 <div class="space-y-8">
@@ -13,19 +13,19 @@
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">
-                        <span class="text-gradient">Appointment Details</span>
+                        <span class="text-gradient">{{ __('appointments.appointment_details') }}</span>
                     </h1>
-                    <p class="text-gray-600 mt-2 text-lg">Comprehensive appointment information and actions</p>
+                    <p class="text-gray-600 mt-2 text-lg">{{ __('appointments.appointment_details_comprehensive') }}</p>
                 </div>
             </div>
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('appointments.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
                     <i class="fas fa-arrow-left"></i>
-                    <span>Back to Appointments</span>
+                    <span>{{ __('appointments.back_to_list') }}</span>
                 </a>
                 <a href="{{ route('appointments.edit', $appointment) }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
                     <i class="fas fa-edit"></i>
-                    <span>Edit</span>
+                    <span>{{ __('appointments.edit') }}</span>
                 </a>
             </div>
         </div>
@@ -41,7 +41,7 @@
                         <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                             <i class="fas fa-user text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900">Patient Information</h2>
+                        <h2 class="text-2xl font-bold text-gray-900">{{ __('appointments.patient_information') }}</h2>
                     </div>
                     <div class="flex items-center space-x-6 p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl">
                         <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center">
@@ -75,7 +75,7 @@
                         <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
                             <i class="fas fa-user-md text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900">Doctor Information</h2>
+                        <h2 class="text-2xl font-bold text-gray-900">{{ __('appointments.doctor_information') }}</h2>
                     </div>
                     <div class="flex items-center space-x-6 p-6 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-2xl">
                         <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-2xl flex items-center justify-center">
@@ -97,18 +97,18 @@
                         <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
                             <i class="fas fa-info text-white"></i>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900">Appointment Details</h2>
+                        <h2 class="text-2xl font-bold text-gray-900">{{ __('appointments.appointment_details') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-2">
-                            <label class="block text-sm font-bold text-gray-500 uppercase tracking-wider">Date</label>
+                            <label class="block text-sm font-bold text-gray-500 uppercase tracking-wider">{{ __('appointments.date') }}</label>
                             <p class="text-xl font-bold text-gray-900 bg-gray-50 p-4 rounded-2xl">
                                 {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('l, F j, Y') }}
                             </p>
                         </div>
 
                         <div class="space-y-2">
-                            <label class="block text-sm font-bold text-gray-500 uppercase tracking-wider">Time</label>
+                            <label class="block text-sm font-bold text-gray-500 uppercase tracking-wider">{{ __('appointments.time') }}</label>
                             <p class="text-xl font-bold text-gray-900 bg-gray-50 p-4 rounded-2xl flex items-center space-x-2">
                                 <i class="fas fa-clock text-gray-400"></i>
                                 <span>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A') }}</span>
@@ -116,7 +116,7 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label class="block text-sm font-bold text-gray-500 uppercase tracking-wider">Status</label>
+                            <label class="block text-sm font-bold text-gray-500 uppercase tracking-wider">{{ __('appointments.status') }}</label>
                             <div class="bg-gray-50 p-4 rounded-2xl">
                                 <span class="inline-flex items-center px-4 py-2 rounded-2xl text-base font-bold
                                     @if($appointment->status == 'scheduled') bg-yellow-100 text-yellow-800
@@ -146,7 +146,7 @@
 
                         @if($appointment->notes)
                         <div class="md:col-span-2 space-y-2">
-                            <label class="block text-sm font-bold text-gray-500 uppercase tracking-wider">Notes</label>
+                            <label class="block text-sm font-bold text-gray-500 uppercase tracking-wider">{{ __('appointments.notes') }}</label>
                             <p class="text-lg text-gray-900 bg-gray-50 p-4 rounded-2xl leading-relaxed">{{ $appointment->notes }}</p>
                         </div>
                         @endif
@@ -163,7 +163,7 @@
                     <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-bolt text-white"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900">Quick Actions</h3>
+                    <h3 class="text-xl font-bold text-gray-900">{{ __('appointments.quick_actions') }}</h3>
                 </div>
                 <div class="space-y-4">
                     @if($appointment->status != 'completed' && $appointment->status != 'cancelled')
@@ -173,7 +173,7 @@
                             <input type="hidden" name="status" value="completed">
                             <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-4 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
                                 <i class="fas fa-check"></i>
-                                <span>Mark as Completed</span>
+                                <span>{{ __('appointments.mark_completed') }}</span>
                             </button>
                         </form>
                     @endif
@@ -185,7 +185,7 @@
                             <input type="hidden" name="status" value="confirmed">
                             <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-4 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
                                 <i class="fas fa-check-circle"></i>
-                                <span>Confirm Appointment</span>
+                                <span>{{ __('appointments.confirm_appointment') }}</span>
                             </button>
                         </form>
                     @endif
@@ -196,9 +196,9 @@
                             @method('PUT')
                             <input type="hidden" name="status" value="cancelled">
                             <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-4 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2"
-                                    onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                                    onclick="return confirm('{{ __('appointments.cancel_confirmation') }}')">>
                                 <i class="fas fa-times"></i>
-                                <span>Cancel Appointment</span>
+                                <span>{{ __('appointments.cancel_appointment') }}</span>
                             </button>
                         </form>
                     @endif
@@ -207,7 +207,7 @@
                         <a href="{{ route('medical-records.create', ['patient_id' => $appointment->patient_id, 'appointment_id' => $appointment->id]) }}" 
                            class="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-4 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
                             <i class="fas fa-file-medical"></i>
-                            <span>Add Medical Record</span>
+                            <span>{{ __('appointments.add_medical_record') }}</span>
                         </a>
                     @endif
                 </div>
@@ -219,19 +219,19 @@
                     <div class="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-info-circle text-white"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900">Appointment Info</h3>
+                    <h3 class="text-xl font-bold text-gray-900">{{ __('appointments.appointment_info') }}</h3>
                 </div>
                 <div class="space-y-4">
                     <div class="flex justify-between items-center py-3 border-b border-gray-100">
-                        <span class="text-gray-500 font-medium">Created:</span>
+                        <span class="text-gray-500 font-medium">{{ __('appointments.created') }}:</span>
                         <span class="text-gray-900 font-semibold">{{ $appointment->created_at->format('M j, Y') }}</span>
                     </div>
                     <div class="flex justify-between items-center py-3 border-b border-gray-100">
-                        <span class="text-gray-500 font-medium">Last Updated:</span>
+                        <span class="text-gray-500 font-medium">{{ __('appointments.last_updated') }}:</span>
                         <span class="text-gray-900 font-semibold">{{ $appointment->updated_at->format('M j, Y') }}</span>
                     </div>
                     <div class="flex justify-between items-center py-3">
-                        <span class="text-gray-500 font-medium">Appointment ID:</span>
+                        <span class="text-gray-500 font-medium">{{ __('appointments.appointment_id') }}:</span>
                         <span class="text-gray-900 font-semibold">#{{ $appointment->id }}</span>
                     </div>
                 </div>
@@ -244,14 +244,14 @@
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-link text-white"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900">Related Records</h3>
+                    <h3 class="text-xl font-bold text-gray-900">{{ __('appointments.related_records') }}</h3>
                 </div>
                 <div class="space-y-3">
                     <a href="{{ route('medical-records.index', ['patient_id' => $appointment->patient_id]) }}" 
                        class="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl hover:from-blue-100 hover:to-blue-200 transition-all duration-200 group">
                         <div class="flex items-center space-x-3">
                             <i class="fas fa-file-medical text-blue-600 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-blue-600 font-medium">Medical Records</span>
+                            <span class="text-blue-600 font-medium">{{ __('appointments.medical_records') }}</span>
                         </div>
                         <i class="fas fa-arrow-right text-blue-400 group-hover:text-blue-600"></i>
                     </a>
@@ -259,7 +259,7 @@
                        class="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-2xl hover:from-emerald-100 hover:to-emerald-200 transition-all duration-200 group">
                         <div class="flex items-center space-x-3">
                             <i class="fas fa-prescription-bottle text-emerald-600 group-hover:scale-110 transition-transform"></i>
-                            <span class="text-emerald-600 font-medium">Prescriptions</span>
+                            <span class="text-emerald-600 font-medium">{{ __('appointments.prescriptions') }}</span>
                         </div>
                         <i class="fas fa-arrow-right text-emerald-400 group-hover:text-emerald-600"></i>
                     </a>

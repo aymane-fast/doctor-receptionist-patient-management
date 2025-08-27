@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Appointments')
+@section('title', __('appointments.title'))
 
 @section('content')
 <div class="space-y-8">
@@ -13,14 +13,14 @@
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">
-                        <span class="text-gradient">Appointments</span>
+                        <span class="text-gradient">{{ __('appointments.title') }}</span>
                     </h1>
-                    <p class="text-gray-600 mt-2 text-lg">Manage patient appointments and scheduling</p>
+                    <p class="text-gray-600 mt-2 text-lg">{{ __('appointments.manage_appointments_scheduling') }}</p>
                 </div>
             </div>
             <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow">
                 <i class="fas fa-plus"></i>
-                <span>Schedule Appointment</span>
+                <span>{{ __('appointments.schedule_appointment') }}</span>
             </a>
         </div>
     </div>
@@ -32,15 +32,15 @@
                 <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
                     <i class="fas fa-filter text-white"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900">Filter Appointments</h3>
+                <h3 class="text-xl font-bold text-gray-900">{{ __('appointments.filter_appointments') }}</h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                 <div class="space-y-2">
-                    <label for="search" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Search</label>
-                    <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Name, Patient ID, Phone, ID card" class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                    <label for="search" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.search') }}</label>
+                    <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="{{ __('appointments.search_placeholder') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
                 </div>
                 <div class="space-y-2">
-                    <label for="date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Date</label>
+                    <label for="date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.date') }}</label>
                     <input type="date" 
                            id="date" 
                            name="date" 
@@ -49,15 +49,15 @@
                 </div>
 
                 <div class="space-y-2">
-                    <label for="status" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Status</label>
+                    <label for="status" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.status') }}</label>
                     <select id="status" 
                             name="status" 
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
-                        <option value="">All Statuses</option>
-                        <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        <option value="">{{ __('appointments.all_statuses') }}</option>
+                        <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>{{ __('appointments.scheduled') }}</option>
+                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
+                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('appointments.cancelled') }}</option>
                     </select>
                 </div>
 
@@ -161,7 +161,7 @@
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="scheduled">
                                                 <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors">
-                                                    <i class="fas fa-clock text-yellow-600 mr-2"></i>Scheduled
+                                                    <i class="fas fa-clock text-yellow-600 mr-2"></i>{{ __('appointments.scheduled') }}
                                                 </button>
                                             </form>
                                             @endif
@@ -172,7 +172,7 @@
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="in_progress">
                                                 <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors">
-                                                    <i class="fas fa-play text-blue-600 mr-2"></i>In Progress
+                                                    <i class="fas fa-play text-blue-600 mr-2"></i>{{ __('appointments.in_progress') }}
                                                 </button>
                                             </form>
                                             @endif
@@ -183,7 +183,7 @@
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="completed">
                                                 <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors">
-                                                    <i class="fas fa-check text-green-600 mr-2"></i>Completed
+                                                    <i class="fas fa-check text-green-600 mr-2"></i>{{ __('appointments.completed') }}
                                                 </button>
                                             </form>
                                             @endif
@@ -194,8 +194,8 @@
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="cancelled">
                                                 <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors" 
-                                                        onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                                                    <i class="fas fa-times text-red-600 mr-2"></i>Cancelled
+                                                        onclick="return confirm('{{ __('appointments.confirm_cancel') }}')">
+                                                    <i class="fas fa-times text-red-600 mr-2"></i>{{ __('appointments.cancelled') }}
                                                 </button>
                                             </form>
                                             @endif
@@ -240,10 +240,10 @@
                 <div class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-float">
                     <i class="fas fa-calendar-times text-gray-400 text-3xl"></i>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-3">No appointments found</h3>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">{{ __('appointments.no_appointments_found') }}</h3>
                 <p class="text-gray-500 mb-8 text-lg max-w-md mx-auto">
                     @if(request()->query())
-                        No appointments match your filter criteria. Try adjusting your search parameters.
+                        {{ __('appointments.no_match_filter_criteria') }}
                     @else
                         Get started by scheduling your first appointment with a patient.
                     @endif

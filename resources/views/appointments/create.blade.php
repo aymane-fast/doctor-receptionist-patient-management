@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Schedule New Appointment')
+@section('title', __('appointments.schedule_appointment'))
 
 @section('content')
 <div class="space-y-6">
@@ -11,11 +11,11 @@
             <div class="flex items-center">
                 <i class="fas fa-clock text-orange-600 mr-3 text-lg"></i>
                 <div>
-                    <h4 class="font-semibold text-orange-800">Outside Working Hours</h4>
+                    <h4 class="font-semibold text-orange-800">{{ __('appointments.outside_working_hours') }}</h4>
                     <p class="text-orange-700 text-sm">
-                        The clinic is currently closed. Appointments can only be scheduled during working hours.
+                        {{ __('appointments.clinic_closed_message') }}
                         @if($nextWorking)
-                            <br><strong>Next available:</strong> {{ $nextWorking->format('l, M j \a\t g:i A') }}
+                            <br><strong>{{ __('appointments.next_available') }}:</strong> {{ $nextWorking->format('l, M j \a\t g:i A') }}
                         @endif
                     </p>
                 </div>
@@ -32,14 +32,14 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">
-                        <span class="text-gradient">Schedule New Appointment</span>
+                        <span class="text-gradient">{{ __('appointments.schedule_new_appointment') }}</span>
                     </h1>
-                    <p class="text-gray-600 mt-1">Create a new appointment for patient care</p>
+                    <p class="text-gray-600 mt-1">{{ __('appointments.create_appointment_description') }}</p>
                 </div>
             </div>
             <a href="{{ route('appointments.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
                 <i class="fas fa-arrow-left text-sm"></i>
-                <span>Back to Appointments</span>
+                <span>{{ __('appointments.back_to_appointments') }}</span>
             </a>
         </div>
     </div>
@@ -55,24 +55,24 @@
                     <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                         <i class="fas fa-users text-white text-sm"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900">Patient & Doctor Selection</h3>
+                    <h3 class="text-lg font-bold text-gray-900">{{ __('appointments.patient_information') }}</h3>
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-4">
                     <!-- Patient Selection -->
                     <div>
                         <label for="patient_id" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Patient <span class="text-red-500">*</span>
+                            {{ __('patients.patient') }} <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
                             <!-- Search Input -->
-                            <input type="text" id="patient_search" placeholder="Search patients by name or phone..." 
+                            <input type="text" id="patient_search" placeholder="{{ __('patients.search_patients_name_phone') }}..." 
                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 mb-2">
                             
                             <!-- Patient Select -->
                             <select id="patient_id" name="patient_id" required 
                                     class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror">
-                                <option value="">Select a patient</option>
+                                <option value="">{{ __('appointments.select_patient') }}</option>
                                 @foreach($patients as $patient)
                                     <option value="{{ $patient->id }}" 
                                             data-search="{{ strtolower($patient->first_name . ' ' . $patient->last_name . ' ' . $patient->phone) }}"
@@ -94,7 +94,7 @@
                     <div>
                         @if(auth()->user()->isReceptionist())
                         <label for="doctor_id" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Doctor <span class="text-red-500">*</span>
+                            {{ __('common.doctor') }} <span class="text-red-500">*</span>
                         </label>
                         <select id="doctor_id" name="doctor_id" required 
                                 class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('doctor_id') border-red-500 @enderror">
@@ -176,10 +176,10 @@
                         </label>
                         <select id="status" name="status" 
                                 class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('status') border-red-500 @enderror">
-                            <option value="scheduled" {{ old('status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                            <option value="in_progress" {{ old('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                            <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                            <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                            <option value="scheduled" {{ old('status') == 'scheduled' ? 'selected' : '' }}>{{ __('appointments.scheduled') }}</option>
+                            <option value="in_progress" {{ old('status') == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
+                            <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
+                            <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>{{ __('appointments.cancelled') }}</option>
                         </select>
                         @error('status')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
