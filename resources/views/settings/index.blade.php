@@ -58,6 +58,71 @@
         </div>
     </div>
 
+    <!-- Clinic Information -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
+                <i class="fas fa-clinic-medical text-purple-600 mr-2"></i>
+                Informations de la Clinique
+            </h3>
+            <p class="text-gray-600 text-sm">Configurez les informations de votre clinique pour les prescriptions et documents officiels.</p>
+            <p class="text-red-600 text-sm mt-1">
+                <i class="fas fa-info-circle mr-1"></i>
+                Les champs marqués d'un <span class="text-red-500">*</span> sont obligatoires.
+            </p>
+        </div>
+
+        <form action="{{ route('settings.clinic-info') }}" method="POST" class="space-y-4">
+            @csrf
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Nom de la Clinique <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="clinic_name" value="{{ \App\Models\Setting::get('clinic_name', '') }}" 
+                           required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Téléphone <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="clinic_phone" value="{{ \App\Models\Setting::get('clinic_phone', '') }}" 
+                           required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Adresse Complète <span class="text-red-500">*</span>
+                </label>
+                <textarea name="clinic_address" rows="3" 
+                          required
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">{{ \App\Models\Setting::get('clinic_address', '') }}</textarea>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" name="clinic_email" value="{{ \App\Models\Setting::get('clinic_email', '') }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Site Web</label>
+                    <input type="url" name="clinic_website" value="{{ \App\Models\Setting::get('clinic_website', '') }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                </div>
+            </div>
+            
+            <div class="flex justify-end">
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                    Sauvegarder les Informations
+                </button>
+            </div>
+        </form>
+    </div>
+
     <!-- Working Hours Settings -->
     <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="mb-6">
@@ -202,17 +267,7 @@
             </p>
         </div>
 
-        <!-- Emergency Override -->
-        <div class="bg-white rounded-xl shadow-sm p-6">
-            <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
-                <i class="fas fa-exclamation-triangle text-orange-600 mr-2"></i>
-                {{ __('common.emergency_mode') }}
-            </h4>
-            <p class="text-sm text-gray-600 mb-3">{{ __('common.emergency_mode_description') }}</p>
-            <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                Enable Emergency Mode
-            </button>
-        </div>
+
     </div>
 </div>
 

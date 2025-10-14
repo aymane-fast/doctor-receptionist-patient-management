@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
     // Settings (accessible by both roles)
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings/working-hours', [SettingsController::class, 'updateWorkingHours'])->name('settings.working-hours');
+    Route::post('/settings/clinic-info', [SettingsController::class, 'updateClinicInfo'])->name('settings.clinic-info');
     Route::get('/api/settings/working-status', [SettingsController::class, 'workingStatus'])->name('api.settings.working-status');
     
     // Patient management (accessible by both roles)

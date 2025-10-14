@@ -146,4 +146,16 @@ return [
     'no_records_found' => 'No records found',
     'no_appointments_found' => 'No appointments found',
     'no_prescriptions_found' => 'No prescriptions found',
+    
+    // Missing translations
+    'patient' => 'Patient',
+    'select_patient' => 'Select a patient',
+    'search_patients_name_phone' => 'Search by name, phone...',
+    
+    // Gender translations for dynamic lookup
+    'genders' => [
+        'male' => 'Male',
+        'female' => 'Female',
+        'other' => 'Other',
+    ],
 ];

@@ -77,13 +77,12 @@
 
                     <div class="space-y-2">
                         <label for="birth_date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            {{ __('patients.date_of_birth') }} <span class="text-red-500">{{ __('patients.required') }}</span>
+                            {{ __('patients.date_of_birth') }}
                         </label>
                         <input type="date" 
                                id="birth_date" 
                                name="birth_date" 
                                value="{{ old('birth_date') }}"
-                               required 
                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('birth_date') border-red-500 @enderror">
                         @error('birth_date')
                         <p class="mt-2 text-sm text-red-600 flex items-center space-x-2">
@@ -95,11 +94,10 @@
 
                     <div class="space-y-2">
                         <label for="gender" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            {{ __('patients.gender') }} <span class="text-red-500">{{ __('patients.required') }}</span>
+                            {{ __('patients.gender') }}
                         </label>
                         <select id="gender" 
                                 name="gender" 
-                                required 
                                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('gender') border-red-500 @enderror">
                             <option value="">{{ __('patients.select_gender') }}</option>
                             <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>{{ __('patients.male') }}</option>
@@ -145,13 +143,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-2">
                         <label for="phone" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            {{ __('patients.phone_number') }} <span class="text-red-500">{{ __('patients.required') }}</span>
+                            {{ __('patients.phone_number') }}
                         </label>
                         <input type="tel" 
                                id="phone" 
                                name="phone" 
                                value="{{ old('phone') }}"
-                               required 
                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('phone') border-red-500 @enderror">
                         @error('phone')
                         <p class="mt-2 text-sm text-red-600 flex items-center space-x-2">
@@ -180,12 +177,11 @@
 
                     <div class="space-y-2 md:col-span-2">
                         <label for="address" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            {{ __('patients.address') }} <span class="text-red-500">{{ __('patients.required') }}</span>
+                            {{ __('patients.address') }}
                         </label>
                         <textarea id="address" 
                                   name="address" 
                                   rows="4" 
-                                  required 
                                   placeholder="{{ __('patients.address_placeholder') }}"
                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('address') border-red-500 @enderror">{{ old('address') }}</textarea>
                         @error('address')
@@ -306,7 +302,7 @@
                                     <p class="text-orange-700 text-sm">
                                         {{ __('patients.walkin_not_available') }}
                                         @if($nextWorking)
-                                            {{ __('patients.next_available') }}: {{ $nextWorking->format('l, M j \a\t g:i A') }}
+                                            {{ __('patients.next_available') }}: {{ $nextWorking->locale(app()->getLocale())->isoFormat('dddd, D MMM [à] HH:mm') }}
                                         @endif
                                     </p>
                                 </div>

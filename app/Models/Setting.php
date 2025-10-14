@@ -10,7 +10,13 @@ class Setting extends Model
     protected $fillable = [
         'key',
         'value',
-        'type'
+        'type',
+        'clinic_name',
+        'clinic_address', 
+        'clinic_phone',
+        'clinic_email',
+        'clinic_website',
+        'clinic_logo'
     ];
 
     /**
@@ -163,5 +169,34 @@ class Setting extends Model
     public static function isLanguageSupported($language)
     {
         return array_key_exists($language, self::getAvailableLanguages());
+    }
+
+    /**
+     * Get clinic information
+     */
+    public static function getClinicInfo()
+    {
+        return [
+            'name' => self::get('clinic_name', 'Medical Clinic'),
+            'address' => self::get('clinic_address', ''),
+            'phone' => self::get('clinic_phone', ''),
+            'email' => self::get('clinic_email', ''),
+            'website' => self::get('clinic_website', ''),
+            'logo' => self::get('clinic_logo', '')
+        ];
+    }
+
+    /**
+     * Set clinic information
+     */
+    public static function setClinicInfo($data)
+    {
+        foreach ($data as $key => $value) {
+            if (in_array($key, ['name', 'address', 'phone', 'email', 'website', 'logo'])) {
+                // Convert null/empty values to empty string for database
+                $value = $value ?? '';
+                self::set("clinic_{$key}", $value);
+            }
+        }
     }
 }

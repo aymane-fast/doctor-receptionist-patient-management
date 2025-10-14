@@ -153,7 +153,7 @@
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-900">{{ $appointment->appointment_date->format('M d, Y') }}</p>
-                                        <p class="text-sm text-gray-600">{{ $appointment->appointment_time }} - {{ ucfirst($appointment->status) }}</p>
+                                        <p class="text-sm text-gray-600">{{ $appointment->appointment_time }} - {{ __('appointments.' . $appointment->status) }}</p>
                                     </div>
                                 </div>
                                 <span class="text-xs bg-gray-100 px-2 py-1 rounded">Dr. {{ $appointment->doctor->name }}</span>

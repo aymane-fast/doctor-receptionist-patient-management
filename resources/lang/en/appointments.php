@@ -100,4 +100,5 @@ return [
     'appointment_timeline' => 'Appointment Timeline',
     'back_to_list' => 'Back to Appointments',
     'edit' => 'Edit',
+    'book_now' => 'Book Now',
 ];

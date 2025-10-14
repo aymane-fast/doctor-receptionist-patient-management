@@ -100,4 +100,5 @@ return [
     'prescriptions' => 'Prescriptions',
     'back_to_list' => 'Retour aux Rendez-vous',
     'edit' => 'Modifier',
+    'book_now' => 'Réserver Maintenant',
 ];

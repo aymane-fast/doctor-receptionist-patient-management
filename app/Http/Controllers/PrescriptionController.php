@@ -80,8 +80,15 @@ class PrescriptionController extends Controller
             'instructions' => null,
         ]);
 
+        // Create prescription items
         foreach ($validated['items'] as $item) {
-            $prescription->items()->create($item);
+            $prescription->items()->create([
+                'medication_name' => $item['medication_name'],
+                'dosage' => $item['dosage'], 
+                'frequency' => $item['frequency'],
+                'duration_days' => $item['duration_days'] ?? null,
+                'instructions' => $item['instructions'] ?? null,
+            ]);
         }
 
         return redirect()->route('prescriptions.show', $prescription)

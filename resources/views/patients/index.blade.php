@@ -221,18 +221,18 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.phone_number') }} {{ __('patients.required') }}</label>
-                    <input type="tel" name="phone" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.phone_number') }}</label>
+                    <input type="tel" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.birth_date') }} {{ __('patients.required') }}</label>
-                        <input type="date" name="birth_date" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.birth_date') }}</label>
+                        <input type="date" name="birth_date" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.gender') }} {{ __('patients.required') }}</label>
-                        <select name="gender" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.gender') }}</label>
+                        <select name="gender" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
                             <option value="">{{ __('patients.select') }}</option>
                             <option value="male">{{ __('patients.male') }}</option>
                             <option value="female">{{ __('patients.female') }}</option>
@@ -241,8 +241,8 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.address') }} {{ __('patients.required') }}</label>
-                    <textarea name="address" required rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500 resize-none"></textarea>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.address') }}</label>
+                    <textarea name="address" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500 resize-none"></textarea>
                 </div>
                 
                 <div>

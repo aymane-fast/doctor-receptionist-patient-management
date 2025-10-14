@@ -45,7 +45,7 @@
                             <label for="patient_id" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
                                 {{ __('prescriptions.patient_name') }} <span class="text-red-500">*</span>
                             </label>
-                            <select id="patient_id" name="patient_id" required 
+                            <select id="patient_id" name="patient_id" required
                                     class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror">
                                 <option value="">{{ __('prescriptions.select_patient') }}</option>
                                 @foreach($patients as $patient)

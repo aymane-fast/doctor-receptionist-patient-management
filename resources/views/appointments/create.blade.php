@@ -253,6 +253,11 @@
                        class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-2 rounded-xl font-medium transition-all duration-200 text-center">
                         Cancel
                     </a>
+                    <button type="button" onclick="bookNow()" 
+                            class="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 deep-shadow flex items-center justify-center space-x-2">
+                        <i class="fas fa-clock"></i>
+                        <span>{{ __('appointments.book_now') }}</span>
+                    </button>
                     <button type="submit" 
                             class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 deep-shadow flex items-center justify-center space-x-2">
                         <i class="fas fa-save"></i>
@@ -314,6 +319,52 @@ document.addEventListener('DOMContentLoaded', function() {
             searchInput.placeholder = 'Search patients by name or phone...';
         }
     });
+    
+    // Book Now functionality
+    window.bookNow = function() {
+        // Set today's date
+        const today = new Date();
+        const dateInput = document.querySelector('input[name="appointment_date"]');
+        if (dateInput) {
+            dateInput.value = today.toISOString().split('T')[0];
+        }
+        
+        // Set status to in_progress for immediate appointments
+        const statusSelect = document.querySelector('select[name="status"]');
+        if (statusSelect) {
+            statusSelect.value = 'scheduled';
+        }
+        
+        // Set reason if empty
+        const reasonInput = document.querySelector('textarea[name="reason"]');
+        if (reasonInput && !reasonInput.value.trim()) {
+            reasonInput.value = 'Walk-in / Immediate consultation';
+        }
+        
+        // Find next available time slot and set it
+        setNextAvailableTime();
+        
+        // Submit the form
+        document.querySelector('form').submit();
+    };
+    
+    function setNextAvailableTime() {
+        const timeInput = document.querySelector('input[name="appointment_time"]');
+        if (timeInput) {
+            const now = new Date();
+            const currentMinutes = now.getMinutes();
+            const roundedMinutes = Math.ceil(currentMinutes / 15) * 15; // Round to next 15-minute interval
+            
+            now.setMinutes(roundedMinutes);
+            now.setSeconds(0);
+            
+            // Add 15 minutes buffer for immediate booking
+            now.setMinutes(now.getMinutes() + 15);
+            
+            const timeString = now.toTimeString().slice(0, 5); // HH:MM format
+            timeInput.value = timeString;
+        }
+    }
 });
 </script>
 @endsection

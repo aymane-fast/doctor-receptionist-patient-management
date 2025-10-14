@@ -62,6 +62,33 @@ class SettingsController extends Controller
     }
 
     /**
+     * Update clinic information
+     */
+    public function updateClinicInfo(Request $request)
+    {
+        $request->validate([
+            'clinic_name' => 'required|string|max:255',
+            'clinic_address' => 'required|string',
+            'clinic_phone' => 'required|string|max:255',
+            'clinic_email' => 'nullable|email|max:255',
+            'clinic_website' => 'nullable|url|max:255',
+        ]);
+
+        $clinicData = [
+            'name' => $request->clinic_name,
+            'address' => $request->clinic_address,
+            'phone' => $request->clinic_phone,
+            'email' => $request->clinic_email,
+            'website' => $request->clinic_website,
+        ];
+
+        Setting::setClinicInfo($clinicData);
+
+        return redirect()->route('settings.index')
+            ->with('success', 'Clinic information updated successfully!');
+    }
+
+    /**
      * Get current working status (API endpoint)
      */
     public function workingStatus()

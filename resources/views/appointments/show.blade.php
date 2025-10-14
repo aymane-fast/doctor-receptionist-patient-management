@@ -103,7 +103,7 @@
                         <div class="space-y-2">
                             <label class="block text-sm font-bold text-gray-500 uppercase tracking-wider">{{ __('appointments.date') }}</label>
                             <p class="text-xl font-bold text-gray-900 bg-gray-50 p-4 rounded-2xl">
-                                {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('l, F j, Y') }}
+                                {{ \Carbon\Carbon::parse($appointment->appointment_date)->locale(app()->getLocale())->isoFormat('dddd, D MMMM YYYY') }}
                             </p>
                         </div>
 

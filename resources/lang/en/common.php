@@ -5,6 +5,7 @@ return [
     'appointments' => 'Appointments',
     'patients' => 'Patients',
     'doctors' => 'Doctors',
+    'doctor' => 'Doctor',
     'medical_records' => 'Medical Records',
     'prescriptions' => 'Prescriptions',
     'settings' => 'Settings',
@@ -77,6 +78,13 @@ return [
     'end_time' => 'End Time',
     'save_working_hours' => 'Save Working Hours',
     'today_schedule' => "Today's Schedule",
-    'emergency_mode' => 'Emergency Mode',
-    'emergency_mode_description' => 'Temporarily allow appointments outside working hours',
+    
+    // Navigation
+    'back_to' => 'Back to :item',
+    'profile_setting' => 'Profile Settings',
+    
+    // Status
+    'open' => 'Open',
+    'closed' => 'Closed',
+    'not_specified' => 'Not specified',
 ];

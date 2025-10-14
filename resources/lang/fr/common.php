@@ -5,6 +5,7 @@ return [
     'appointments' => 'Rendez-vous',
     'patients' => 'Patients',
     'doctors' => 'Médecins',
+    'doctor' => 'Médecin',
     'medical_records' => 'Dossiers médicaux',
     'prescriptions' => 'Ordonnances',
     'settings' => 'Paramètres',
@@ -77,6 +78,13 @@ return [
     'end_time' => 'Heure de Fin',
     'save_working_hours' => 'Sauvegarder les Heures de Travail',
     'today_schedule' => "Programme d'Aujourd'hui",
-    'emergency_mode' => 'Mode Urgence',
-    'emergency_mode_description' => 'Permettre temporairement les rendez-vous en dehors des heures de travail',
+    
+    // Navigation
+    'back_to' => 'Retour aux :item',
+    'profile_setting' => 'Paramètres du Profil',
+    
+    // Status
+    'open' => 'Ouvert',
+    'closed' => 'Fermé',
+    'not_specified' => 'Non spécifié',
 ];

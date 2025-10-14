@@ -197,12 +197,16 @@
                                         @elseif($appointment->status == 'in_progress') bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 border border-blue-200
                                         @elseif($appointment->status == 'completed') bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 border border-emerald-200
                                         @else bg-gradient-to-r from-red-100 to-red-50 text-red-800 border border-red-200 @endif">
-                                        {{ ucfirst($appointment->status) }}
+                                        {{ __('appointments.' . $appointment->status) }}
                                     </span>
-                                    <form action="{{ route('appointments.set-current', $appointment) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg font-medium transition-colors">{{ __('dashboard.set_current') }}</button>
-                                    </form>
+                                    @if($appointment->is_current)
+                                        <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-medium">{{ __('dashboard.current_patient') }}</span>
+                                    @else
+                                        <form action="{{ route('appointments.set-current', $appointment) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg font-medium transition-colors">{{ __('dashboard.set_current') }}</button>
+                                        </form>
+                                    @endif
                                     <a href="{{ route('appointments.show', $appointment) }}" class="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors">
                                         <i class="fas fa-eye text-blue-600 text-sm"></i>
                                     </a>
@@ -340,7 +344,7 @@
                                         @elseif($appointment->status == 'in_progress') bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 border border-blue-200
                                         @elseif($appointment->status == 'completed') bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 border border-emerald-200
                                         @else bg-gradient-to-r from-red-100 to-red-50 text-red-800 border border-red-200 @endif">
-                                        {{ ucfirst($appointment->status) }}
+                                        {{ __('appointments.' . $appointment->status) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">

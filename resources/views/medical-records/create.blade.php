@@ -29,6 +29,9 @@
         <div class="glass-effect rounded-2xl modern-shadow overflow-hidden">
             <form action="{{ route('medical-records.store') }}" method="POST" class="space-y-6">
                 @csrf
+                @if($appointment)
+                    <input type="hidden" name="appointment_id" value="{{ $appointment->id }}">
+                @endif
                 
                 <!-- Patient and Basic Info -->
                 <div class="p-6 pb-0">
@@ -50,7 +53,7 @@
                                 <option value="">{{ __('patients.select_patient') }}</option>
                                 @foreach($patients as $patient)
                                     <option value="{{ $patient->id }}" 
-                                            {{ old('patient_id', request('patient_id')) == $patient->id ? 'selected' : '' }}>
+                                            {{ old('patient_id', $appointment ? $appointment->patient_id : request('patient_id')) == $patient->id ? 'selected' : '' }}>
                                         {{ $patient->first_name }} {{ $patient->last_name }}
                                     </option>
                                 @endforeach

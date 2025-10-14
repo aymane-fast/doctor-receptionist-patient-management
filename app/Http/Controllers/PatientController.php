@@ -47,14 +47,15 @@ class PatientController extends Controller
      */
     public function store(Request $request)
     {
+        // More flexible validation - only name fields are required
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'birth_date' => 'required|date|before:today',
-            'gender' => 'required|in:male,female',
-            'phone' => 'required|string|max:255',
+            'birth_date' => 'nullable|date|before:today',
+            'gender' => 'nullable|in:male,female',
+            'phone' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
-            'address' => 'required|string',
+            'address' => 'nullable|string',
             'id_card_number' => 'nullable|string|max:255',
             'allergies' => 'nullable|string',
             'chronic_conditions' => 'nullable|string',
@@ -76,7 +77,7 @@ class PatientController extends Controller
                 $nextWorking = Setting::getNextWorkingTime();
                 $errorMessage = 'Cannot book appointment outside working hours. ';
                 if ($nextWorking) {
-                    $errorMessage .= 'Next available time is ' . $nextWorking->format('l, M j \a\t g:i A') . '.';
+                    $errorMessage .= 'Next available time is ' . $nextWorking->locale(app()->getLocale())->isoFormat('dddd, D MMM [à] HH:mm') . '.';
                 }
                 return back()->withErrors(['book_today' => $errorMessage])->withInput();
             }
@@ -86,10 +87,12 @@ class PatientController extends Controller
                 return back()->withErrors(['book_today' => $appointmentResult['message']])->withInput();
             }
             
-            return redirect()->route('patients.show', $patient)
+            // For walk-in patients, redirect to dashboard after successful booking
+            return redirect()->route('dashboard')
                             ->with('success', 'Patient created successfully and appointment booked for today!');
         }
 
+        // For regular patient creation, redirect to the patient's profile
         return redirect()->route('patients.show', $patient)
                         ->with('success', 'Patient created successfully!');
     }
@@ -99,8 +102,16 @@ class PatientController extends Controller
      */
     private function createTodayAppointment($patient, $request)
     {
-        // Get the authenticated user (should be a doctor for this feature)
-        $doctor = auth()->user();
+        // Get the authenticated user - if not a doctor, get the first available doctor
+        $user = auth()->user();
+        $doctor = $user->role === 'doctor' ? $user : \App\Models\User::where('role', 'doctor')->first();
+        
+        if (!$doctor) {
+            return [
+                'success' => false,
+                'message' => 'No doctor available for appointment booking.'
+            ];
+        }
         
         // Get today's date and time
         $today = Carbon::now()->format('Y-m-d');
