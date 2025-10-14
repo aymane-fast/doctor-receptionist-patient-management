@@ -160,13 +160,16 @@
         <!-- Left Column: Patient Info -->
         <div class="lg:col-span-1 space-y-6">
             <!-- Personal Information -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                        <i class="fas fa-user-circle text-blue-600"></i>
-                    </div>
-                    {{ __('patients.personal_info') }}
-                </h3>
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-blue-200">
+                    <h3 class="text-lg font-bold text-blue-800 flex items-center">
+                        <div class="w-8 h-8 bg-blue-200 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-user-circle text-blue-700"></i>
+                        </div>
+                        {{ __('patients.personal_info') }}
+                    </h3>
+                </div>
+                <div class="p-6">
                 <div class="space-y-4">
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('patients.phone') }}</span>
@@ -189,16 +192,20 @@
                         <p class="font-semibold text-gray-900 bg-gray-50 p-3 rounded-lg">{{ $patient->address }}</p>
                     </div>
                 </div>
+                </div>
             </div>
 
             <!-- Medical Information -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-                        <i class="fas fa-heartbeat text-red-600"></i>
-                    </div>
-                    {{ __('patients.medical_info') }}
-                </h3>
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-red-50 to-red-100 px-6 py-4 border-b border-red-200">
+                    <h3 class="text-lg font-bold text-red-800 flex items-center">
+                        <div class="w-8 h-8 bg-red-200 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-heartbeat text-red-700"></i>
+                        </div>
+                        {{ __('patients.medical_info') }}
+                    </h3>
+                </div>
+                <div class="p-6">
                 <div class="space-y-4">
                     <div>
                         <span class="text-gray-600 font-medium block mb-2">{{ __('patients.allergies') }}</span>
@@ -221,16 +228,20 @@
                         @endif
                     </div>
                 </div>
+                </div>
             </div>
 
             <!-- Emergency Contact -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
-                        <i class="fas fa-phone-alt text-orange-600"></i>
-                    </div>
-                    {{ __('patients.emergency_contact') }}
-                </h3>
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-orange-50 to-orange-100 px-6 py-4 border-b border-orange-200">
+                    <h3 class="text-lg font-bold text-orange-800 flex items-center">
+                        <div class="w-8 h-8 bg-orange-200 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-phone-alt text-orange-700"></i>
+                        </div>
+                        {{ __('patients.emergency_contact') }}
+                    </h3>
+                </div>
+                <div class="p-6">
                 <div class="space-y-4">
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('patients.name') }}</span>
@@ -241,26 +252,30 @@
                         <span class="font-semibold text-gray-900">{{ $patient->emergency_contact_phone ?: 'Not provided' }}</span>
                     </div>
                 </div>
+                </div>
             </div>
         </div>
 
         <!-- Right Column: Appointments & Records -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Recent Appointments -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center">
-                        <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-calendar text-emerald-600"></i>
-                        </div>
-                        {{ __('patients.recent_appointments') }}
-                    </h3>
-                    <a href="{{ route('appointments.create', ['patient_id' => $patient->id]) }}" 
-                       class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
-                        <i class="fas fa-plus text-sm"></i>
-                        <span>{{ __('patients.new_appointment') }}</span>
-                    </a>
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-emerald-50 to-emerald-100 px-6 py-4 border-b border-emerald-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-emerald-800 flex items-center">
+                            <div class="w-8 h-8 bg-emerald-200 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-calendar text-emerald-700"></i>
+                            </div>
+                            {{ __('patients.recent_appointments') }}
+                        </h3>
+                        <a href="{{ route('appointments.create', ['patient_id' => $patient->id]) }}" 
+                           class="bg-emerald-200 hover:bg-emerald-300 text-emerald-800 px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                            <i class="fas fa-plus text-sm"></i>
+                            <span>{{ __('patients.new_appointment') }}</span>
+                        </a>
+                    </div>
                 </div>
+                <div class="p-6">
                 @if($patient->appointments->count() > 0)
                     <div class="space-y-3 max-h-96 overflow-y-auto">
                         @foreach($patient->appointments->sortByDesc('appointment_date')->take(8) as $appointment)
@@ -295,24 +310,28 @@
                         <p class="text-gray-400 text-sm mt-1">Book the first appointment to get started</p>
                     </div>
                 @endif
+                </div>
             </div>
 
             <!-- Medical Records -->
             @if(auth()->user()->isDoctor())
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center">
-                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-file-medical text-purple-600"></i>
-                        </div>
-                        {{ __('patients.medical_records') }}
-                    </h3>
-                    <a href="{{ route('medical-records.create', ['patient_id' => $patient->id]) }}" 
-                       class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
-                        <i class="fas fa-plus text-sm"></i>
-                        <span>{{ __('patients.new_record') }}</span>
-                    </a>
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-4 border-b border-purple-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-purple-800 flex items-center">
+                            <div class="w-8 h-8 bg-purple-200 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-file-medical text-purple-700"></i>
+                            </div>
+                            {{ __('patients.medical_records') }}
+                        </h3>
+                        <a href="{{ route('medical-records.create', ['patient_id' => $patient->id]) }}" 
+                           class="bg-purple-200 hover:bg-purple-300 text-purple-800 px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                            <i class="fas fa-plus text-sm"></i>
+                            <span>{{ __('patients.new_record') }}</span>
+                        </a>
+                    </div>
                 </div>
+                <div class="p-6">
                 @if($patient->medicalRecords->count() > 0)
                     <div class="space-y-3 max-h-96 overflow-y-auto">
                         @foreach($patient->medicalRecords->sortByDesc('created_at')->take(8) as $record)
@@ -360,6 +379,7 @@
                         <p class="text-gray-400 text-sm mt-1">Create the first medical record for this patient</p>
                     </div>
                 @endif
+                </div>
             </div>
             @endif
         </div>
