@@ -34,9 +34,7 @@ class MedicalRecordController extends Controller
         }
 
         $medicalRecords = $query->latest('visit_date')->paginate(15);
-        $patients = Patient::whereHas('appointments', function($q) {
-            $q->where('doctor_id', Auth::id());
-        })->get();
+        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
 
         return view('medical-records.index', compact('medicalRecords', 'patients'));
     }
@@ -55,9 +53,7 @@ class MedicalRecordController extends Controller
             $appointment = Appointment::with('patient')->findOrFail($request->appointment_id);
         }
 
-        $patients = Patient::whereHas('appointments', function($q) {
-            $q->where('doctor_id', Auth::id());
-        })->get();
+        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
 
         return view('medical-records.create', compact('patients', 'appointment'));
     }
@@ -125,9 +121,7 @@ class MedicalRecordController extends Controller
             abort(403, 'Unauthorized access to this medical record.');
         }
 
-        $patients = Patient::whereHas('appointments', function($q) {
-            $q->where('doctor_id', Auth::id());
-        })->get();
+        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
 
         return view('medical-records.edit', compact('medicalRecord', 'patients'));
     }

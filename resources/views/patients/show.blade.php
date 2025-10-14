@@ -63,12 +63,17 @@
                     <i class="fas fa-calendar-plus"></i>
                     <span>{{ __('patients.book') }}</span>
                 </a>
+                <a href="{{ route('prescriptions.create', ['patient_id' => $patient->id]) }}" 
+                   class="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                    <i class="fas fa-prescription-bottle"></i>
+                    <span>{{ __('patients.new_prescription') }}</span>
+                </a>
                 <a href="{{ route('patients.edit', $patient) }}" 
                    class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl"
                    onclick="return confirmEdit('{{ $patient->full_name }}')">
                     <i class="fas fa-edit"></i>
                     <span>{{ __('patients.edit') }}</span>
-                </a>
+</a>
                 <a href="{{ route('patients.index') }}" 
                    class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
                     <i class="fas fa-arrow-left"></i>

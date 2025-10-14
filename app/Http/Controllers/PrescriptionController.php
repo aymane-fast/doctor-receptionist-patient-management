@@ -24,9 +24,7 @@ class PrescriptionController extends Controller
         }
 
         $prescriptions = $query->latest('prescribed_date')->paginate(15);
-        $patients = Patient::whereHas('appointments', function ($q) {
-            $q->where('doctor_id', Auth::id());
-        })->get();
+        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
 
         return view('prescriptions.index', compact('prescriptions', 'patients'));
     }
@@ -37,9 +35,7 @@ class PrescriptionController extends Controller
             abort(403);
         }
 
-        $patients = Patient::whereHas('appointments', function ($q) {
-            $q->where('doctor_id', Auth::id());
-        })->get();
+        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
 
         $medicalRecords = MedicalRecord::with('patient')
             ->where('doctor_id', Auth::id())
@@ -121,9 +117,7 @@ class PrescriptionController extends Controller
             abort(403);
         }
 
-        $patients = Patient::whereHas('appointments', function ($q) {
-            $q->where('doctor_id', Auth::id());
-        })->get();
+        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
 
         $medicalRecords = MedicalRecord::with('patient')
             ->where('doctor_id', Auth::id())

@@ -140,6 +140,7 @@ return [
     'edit' => 'Edit',
     'back' => 'Back',
     'new_record' => 'New Record',
+    'new_prescription' => 'New Prescription',
     'medical_records' => 'Medical Records',
     'prescriptions' => 'Prescriptions',
     'appointments' => 'Appointments',

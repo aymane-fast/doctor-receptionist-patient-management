@@ -140,6 +140,7 @@ return [
     'edit' => 'Modifier',
     'back' => 'Retour',
     'new_record' => 'Nouveau dossier',
+    'new_prescription' => 'Nouvelle ordonnance',
     'medical_records' => 'Dossiers médicaux',
     'prescriptions' => 'Ordonnances',
     'appointments' => 'Rendez-vous',
