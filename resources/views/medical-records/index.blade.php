@@ -27,34 +27,59 @@
         </div>
     </div>
 
-    <!-- Modern Filters -->
+    <!-- Modern Search and Filters -->
     <div class="glass-effect rounded-3xl p-6 modern-shadow">
-        <form method="GET" action="{{ route('medical-records.index') }}" class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-            <div class="flex-1 w-full">
-                <label for="patient_filter" class="sr-only">Filter by Patient</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <i class="fas fa-user text-gray-400"></i>
+        <form method="GET" action="{{ route('medical-records.index') }}" class="space-y-4">
+            <!-- Search Bar -->
+            <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                <div class="flex-1 w-full">
+                    <label for="search" class="sr-only">Search Patients</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" 
+                               id="search" 
+                               name="search" 
+                               value="{{ request('search') }}"
+                               placeholder="Search by patient name, phone, or ID..."
+                               class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200">
                     </div>
-                    <select name="patient_id" onchange="this.form.submit()" 
-                            class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200">
-                        <option value="">All Patients - Show Complete Medical History</option>
-                        @foreach($patients as $patient)
-                            <option value="{{ $patient->id }}" {{ request('patient_id') == $patient->id ? 'selected' : '' }}>
-                                {{ $patient->first_name }} {{ $patient->last_name }} ({{ $patient->patient_id }})
-                            </option>
-                        @endforeach
-                    </select>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </button>
+                    @if(request('search') || request('patient_id'))
+                    <a href="{{ route('medical-records.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                        <i class="fas fa-times"></i>
+                        <span>Clear</span>
+                    </a>
+                    @endif
                 </div>
             </div>
-            @if(request('patient_id'))
-            <div class="flex space-x-3">
-                <a href="{{ route('medical-records.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
-                    <i class="fas fa-times"></i>
-                    <span>Clear Filter</span>
-                </a>
+            
+            <!-- Patient Filter -->
+            <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                <div class="flex-1 w-full">
+                    <label for="patient_filter" class="sr-only">Filter by Patient</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <select name="patient_id" onchange="this.form.submit()" 
+                                class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200">
+                            <option value="">All Patients - Show Complete Medical History</option>
+                            @foreach($patients as $patient)
+                                <option value="{{ $patient->id }}" {{ request('patient_id') == $patient->id ? 'selected' : '' }}>
+                                    {{ $patient->first_name }} {{ $patient->last_name }} ({{ $patient->patient_id }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
             </div>
-            @endif
         </form>
     </div>
 
@@ -228,21 +253,25 @@
                         <i class="fas fa-file-medical text-gray-400 text-4xl"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-3">
-                        @if(request('patient_id'))
+                        @if(request('search'))
+                            No Search Results
+                        @elseif(request('patient_id'))
                             No Medical Records Found
                         @else
                             No Medical Records Yet
                         @endif
                     </h3>
                     <p class="text-gray-500 text-lg mb-8 max-w-md mx-auto">
-                        @if(request('patient_id'))
+                        @if(request('search'))
+                            No medical records match your search for "{{ request('search') }}". Try adjusting your search terms.
+                        @elseif(request('patient_id'))
                             No medical records have been created for this patient yet.
                         @else
                             Start building comprehensive medical histories for your patients.
                         @endif
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-                        @if(request('patient_id'))
+                        @if(request('search') || request('patient_id'))
                         <a href="{{ route('medical-records.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
                             <i class="fas fa-arrow-left"></i>
                             <span>View All Records</span>
@@ -250,7 +279,7 @@
                         @endif
                         <a href="{{ route('medical-records.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow">
                             <i class="fas fa-plus"></i>
-                            <span>{{ request('patient_id') ? 'Create Medical Record' : 'Create First Record' }}</span>
+                            <span>{{ (request('search') || request('patient_id')) ? 'Create Medical Record' : 'Create First Record' }}</span>
                         </a>
                     </div>
                 </div>

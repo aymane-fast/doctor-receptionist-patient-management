@@ -24,12 +24,23 @@ class MedicalRecordController extends Controller
                              ->where('doctor_id', Auth::id());
 
         // Search by patient
-        if ($request->has('patient_id')) {
+        if ($request->has('patient_id') && $request->patient_id) {
             $query->where('patient_id', $request->patient_id);
         }
 
+        // Search by patient name, phone, or patient ID
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->whereHas('patient', function($q) use ($searchTerm) {
+                $q->where('first_name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('patient_id', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
         // Filter by date
-        if ($request->has('date')) {
+        if ($request->has('date') && $request->date) {
             $query->whereDate('visit_date', $request->date);
         }
 

@@ -52,31 +52,56 @@
         </div>
     </div>
 
-    <!-- Enhanced Filter Controls -->
+    <!-- Enhanced Search and Filter Controls -->
     <div class="bg-white/70 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
-        <form method="GET" action="{{ route('prescriptions.index') }}" class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
-            <div class="flex-1 w-full">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <i class="fas fa-user-injured text-teal-500"></i>
+        <form method="GET" action="{{ route('prescriptions.index') }}" class="space-y-4">
+            <!-- Search Bar -->
+            <div class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
+                <div class="flex-1 w-full">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-teal-500"></i>
+                        </div>
+                        <input type="text" 
+                               name="search" 
+                               value="{{ request('search') }}"
+                               placeholder="Search by patient name, phone, or ID..."
+                               class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 placeholder-gray-500 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900">
                     </div>
-                    <select name="patient_id" onchange="this.form.submit()" 
-                            class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900">
-                        <option value="">All Patients - Complete Prescription History</option>
-                        @foreach($patients as $patient)
-                            <option value="{{ $patient->id }}" {{ request('patient_id') == $patient->id ? 'selected' : '' }}>
-                                {{ $patient->first_name }} {{ $patient->last_name }} • {{ $patient->patient_id }}
-                            </option>
-                        @endforeach
-                    </select>
+                </div>
+                <div class="flex space-x-4">
+                    <button type="submit" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </button>
+                    @if(request('search') || request('patient_id'))
+                    <a href="{{ route('prescriptions.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg">
+                        <i class="fas fa-times"></i>
+                        <span>Clear</span>
+                    </a>
+                    @endif
                 </div>
             </div>
-            @if(request('patient_id'))
-            <a href="{{ route('prescriptions.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg">
-                <i class="fas fa-times"></i>
-                <span>Clear Filter</span>
-            </a>
-            @endif
+            
+            <!-- Patient Filter Dropdown -->
+            <div class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
+                <div class="flex-1 w-full">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-user-injured text-teal-500"></i>
+                        </div>
+                        <select name="patient_id" onchange="this.form.submit()" 
+                                class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900">
+                            <option value="">All Patients - Complete Prescription History</option>
+                            @foreach($patients as $patient)
+                                <option value="{{ $patient->id }}" {{ request('patient_id') == $patient->id ? 'selected' : '' }}>
+                                    {{ $patient->first_name }} {{ $patient->last_name }} • {{ $patient->patient_id }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
 
@@ -251,21 +276,25 @@
                     </div>
                 </div>
                 <h3 class="text-3xl font-bold text-gray-800 mb-4">
-                    @if(request('patient_id'))
+                    @if(request('search'))
+                        No Search Results
+                    @elseif(request('patient_id'))
                         No Prescriptions Found
                     @else
                         Digital Pharmacy Ready
                     @endif
                 </h3>
                 <p class="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-                    @if(request('patient_id'))
+                    @if(request('search'))
+                        No prescriptions match your search for "{{ request('search') }}". Try adjusting your search terms or browse all prescriptions.
+                    @elseif(request('patient_id'))
                         This patient doesn't have any prescriptions in the system yet. Create their first prescription to start building their medication history.
                     @else
                         Your digital pharmacy management system is ready to handle prescriptions. Start by creating comprehensive medication records for your patients.
                     @endif
                 </p>
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                    @if(request('patient_id'))
+                    @if(request('search') || request('patient_id'))
                     <a href="{{ route('prescriptions.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 flex items-center space-x-3 shadow-xl">
                         <i class="fas fa-arrow-left"></i>
                         <span>View All Prescriptions</span>
@@ -275,7 +304,7 @@
                         <div class="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                         <div class="relative flex items-center space-x-3">
                             <i class="fas fa-plus"></i>
-                            <span>{{ request('patient_id') ? 'Create Prescription' : 'Create First Prescription' }}</span>
+                            <span>{{ (request('search') || request('patient_id')) ? 'Create Prescription' : 'Create First Prescription' }}</span>
                         </div>
                     </a>
                 </div>

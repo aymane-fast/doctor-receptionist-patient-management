@@ -23,6 +23,17 @@ class PrescriptionController extends Controller
             $query->where('patient_id', $request->patient_id);
         }
 
+        // Search by patient name, phone, or patient ID
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->whereHas('patient', function($q) use ($searchTerm) {
+                $q->where('first_name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('patient_id', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
         $prescriptions = $query->latest('prescribed_date')->paginate(15);
         $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
 
