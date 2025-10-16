@@ -93,8 +93,8 @@
         <header class="fixed top-0 left-0 right-0 z-50 bg-header-gray header-shadow">
             <!-- Top Navigation Bar -->
             <nav class="bg-header-gray border-b border-gray-200 font-professional">
-                <div class="max-w-7xl mx-auto px-4">
-                    <div class="flex justify-between items-center py-3">
+                <div class="max-w-full mx-auto px-8">
+                    <div class="flex justify-between items-center py-4">
                         <!-- Left Section: Logo and Navigation -->
                         <div class="flex items-center space-x-6">
                             <!-- Logo -->
@@ -295,7 +295,7 @@
             </div>
         </header>
         <!-- Main Content with Header Offset -->
-        <main class="pt-24 max-w-7xl mx-auto py-8 px-4">
+        <main class="pt-32 max-w-7xl mx-auto py-8 px-4">
             <!-- Working Hours Status Alert -->
             @auth
             @if(!\App\Models\Setting::isWithinWorkingHours())

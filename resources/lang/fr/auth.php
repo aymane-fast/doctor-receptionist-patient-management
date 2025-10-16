@@ -39,4 +39,11 @@ return [
     'create_user' => 'Créer Utilisateur',
     'sign_in_here' => 'Connectez-vous ici',
     'medical_management_system' => 'Système de Gestion Médicale',
+    
+    // Missing login page keys
+    'login' => 'Connexion',
+    'sign_in_to_account' => 'Connectez-vous à votre compte',
+    'need_account' => 'Besoin d\'un compte ?',
+    'register_here' => 'Inscrivez-vous ici',
+    'logout' => 'Déconnexion',
 ];

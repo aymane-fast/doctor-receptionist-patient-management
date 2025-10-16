@@ -46,7 +46,7 @@
 
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-lock mr-1"></i> {{ __('auth.password') }}
+                    <i class="fas fa-lock mr-1"></i> {{ __('auth.password_label') }}
                 </label>
                 <input type="password" 
                        id="password" 

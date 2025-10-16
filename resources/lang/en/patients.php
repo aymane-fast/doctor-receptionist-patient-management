@@ -43,6 +43,7 @@ return [
     'patient_updated' => 'Patient updated successfully',
     'patient_deleted' => 'Patient deleted successfully',
     'search_patients' => 'Search Patients',
+    'search' => 'Search',
     'no_patients_found' => 'No patients found',
     'patient_profile' => 'Patient Profile',
     'medical_history' => 'Medical History',

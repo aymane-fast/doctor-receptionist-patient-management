@@ -43,6 +43,7 @@ return [
     'patient_updated' => 'Patient mis à jour avec succès',
     'patient_deleted' => 'Patient supprimé avec succès',
     'search_patients' => 'Rechercher des patients',
+    'search' => 'Rechercher',
     'no_patients_found' => 'Aucun patient trouvé',
     'patient_profile' => 'Profil du patient',
     'medical_history' => 'Antécédents médicaux',

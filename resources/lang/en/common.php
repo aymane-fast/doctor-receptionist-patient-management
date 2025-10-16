@@ -82,6 +82,7 @@ return [
     // Navigation
     'back_to' => 'Back to :item',
     'profile_setting' => 'Profile Settings',
+    'profile_settings' => 'Profile Settings',
     
     // Status
     'open' => 'Open',

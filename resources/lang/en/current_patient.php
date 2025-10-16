@@ -20,6 +20,7 @@ return [
     'quick_actions' => 'Quick Actions',
     'new_medical_record' => 'New Medical Record',
     'write_prescription' => 'Write Prescription',
+    'schedule_follow_up' => 'Schedule Follow-up',
     'complete_visit_next_patient' => 'Complete Visit & Next Patient',
     
     // Recent appointments
@@ -40,4 +41,17 @@ return [
     // Prescriptions
     'recent_prescriptions' => 'Recent Prescriptions',
     'no_prescriptions' => 'No prescriptions yet',
+
+    // Follow-up modal
+    'time_amount' => 'Amount',
+    'time_unit' => 'Unit',
+    'days' => 'Days',
+    'weeks' => 'Weeks',
+    'months' => 'Months',
+    'reason_optional' => 'Reason (Optional)',
+    'follow_up_reason_placeholder' => 'Follow-up check, test results review, medication adjustment...',
+    'auto_scheduling' => 'Auto-scheduling',
+    'auto_scheduling_description' => 'Appointment will be scheduled at the next available time slot based on working hours.',
+    'cancel' => 'Cancel',
+    'schedule_appointment' => 'Schedule Appointment',
 ];

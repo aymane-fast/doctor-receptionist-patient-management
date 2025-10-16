@@ -111,6 +111,13 @@
                         <i class="fas fa-prescription-bottle-alt"></i>
                         <span>{{ __('current_patient.write_prescription') }}</span>
                     </a>
+
+                    <!-- Quick Follow-up Button -->
+                    <button onclick="openFollowUpModal()" 
+                            class="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>{{ __('current_patient.schedule_follow_up') }}</span>
+                    </button>
                     
                     <form action="{{ route('appointments.mark-current-done') }}" method="POST">
                         @csrf
@@ -281,6 +288,119 @@
     </div>
     @endif
 </div>
+
+<!-- Follow-up Appointment Modal -->
+@if($currentAppointment)
+<div id="followUpModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4 modern-shadow">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">{{ __('current_patient.schedule_follow_up') }}</h3>
+            <button onclick="closeFollowUpModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <form action="{{ route('appointments.create-follow-up', $patient->id) }}" method="POST" class="space-y-4">
+            @csrf
+            <input type="hidden" name="current_appointment_id" value="{{ $currentAppointment->id }}">
+            
+            <div class="bg-blue-50 rounded-xl p-4 border border-blue-200 mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-user text-blue-600"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-blue-900">{{ $patient->full_name }}</div>
+                        <div class="text-sm text-blue-600">{{ $patient->patient_id }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="follow_up_number" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ __('current_patient.time_amount') }}
+                    </label>
+                    <input type="number" 
+                           id="follow_up_number" 
+                           name="follow_up_number" 
+                           min="1" 
+                           max="365" 
+                           value="7"
+                           required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                </div>
+                <div>
+                    <label for="follow_up_unit" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ __('current_patient.time_unit') }}
+                    </label>
+                    <select id="follow_up_unit" 
+                            name="follow_up_unit" 
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="days">{{ __('current_patient.days') }}</option>
+                        <option value="weeks">{{ __('current_patient.weeks') }}</option>
+                        <option value="months">{{ __('current_patient.months') }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label for="follow_up_reason" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ __('current_patient.reason_optional') }}
+                </label>
+                <textarea id="follow_up_reason" 
+                          name="follow_up_reason" 
+                          rows="3"
+                          placeholder="{{ __('current_patient.follow_up_reason_placeholder') }}"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"></textarea>
+            </div>
+
+            <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
+                <div class="flex items-start space-x-2">
+                    <i class="fas fa-info-circle text-amber-600 mt-0.5"></i>
+                    <div class="text-sm text-amber-800">
+                        <div class="font-medium">{{ __('current_patient.auto_scheduling') }}</div>
+                        <div>{{ __('current_patient.auto_scheduling_description') }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-3">
+                <button type="button" 
+                        onclick="closeFollowUpModal()"
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-xl font-medium transition-colors">
+                    {{ __('current_patient.cancel') }}
+                </button>
+                <button type="submit" 
+                        class="flex-1 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200">
+                    {{ __('current_patient.schedule_appointment') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
+<script>
+function openFollowUpModal() {
+    document.getElementById('followUpModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeFollowUpModal() {
+    document.getElementById('followUpModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.getElementById('followUpModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeFollowUpModal();
+    }
+});
+</script>
+
 @endsection
 
 

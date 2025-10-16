@@ -325,4 +325,86 @@ class AppointmentController extends Controller
 
         return back()->with('success', $current ? 'Marked current as done.' : 'No current appointment.') ;
     }
+
+    /**
+     * Create a follow-up appointment for a patient
+     */
+    public function createFollowUp(Request $request, Patient $patient)
+    {
+        $validated = $request->validate([
+            'current_appointment_id' => 'required|exists:appointments,id',
+            'follow_up_number' => 'required|integer|min:1|max:365',
+            'follow_up_unit' => 'required|in:days,weeks,months',
+            'follow_up_reason' => 'nullable|string|max:500',
+        ]);
+
+        // Calculate the follow-up date
+        $currentAppointment = Appointment::findOrFail($validated['current_appointment_id']);
+        $followUpDate = Carbon::now();
+        $followUpAmount = (int) $validated['follow_up_number']; // Cast to integer
+        
+        switch ($validated['follow_up_unit']) {
+            case 'days':
+                $followUpDate->addDays($followUpAmount);
+                break;
+            case 'weeks':
+                $followUpDate->addWeeks($followUpAmount);
+                break;
+            case 'months':
+                $followUpDate->addMonths($followUpAmount);
+                break;
+        }
+
+        // Find the next available appointment slot on that date
+        $workingHours = Setting::getWorkingHours($followUpDate->format('l'));
+        
+        if (!$workingHours['is_working'] || $workingHours['start_time'] === null) {
+            // If no working hours for that day, try the next working day (up to 7 days ahead)
+            for ($i = 1; $i <= 7; $i++) {
+                $testDate = $followUpDate->copy()->addDays($i);
+                $testWorkingHours = Setting::getWorkingHours($testDate->format('l'));
+                if ($testWorkingHours['is_working'] && $testWorkingHours['start_time'] !== null) {
+                    $followUpDate = $testDate;
+                    $workingHours = $testWorkingHours;
+                    break;
+                }
+            }
+        }
+
+        // Start from working hours start time
+        $appointmentTime = Carbon::parse($followUpDate->format('Y-m-d') . ' ' . $workingHours['start_time']);
+        
+        // Find next available slot (assuming 30-minute slots)
+        while ($appointmentTime->format('H:i') <= $workingHours['end_time']) {
+            $existingAppointment = Appointment::where('doctor_id', Auth::id())
+                ->where('appointment_date', $appointmentTime->format('Y-m-d'))
+                ->where('appointment_time', $appointmentTime->format('H:i:s'))
+                ->where('status', '!=', 'cancelled')
+                ->first();
+
+            if (!$existingAppointment) {
+                break; // Found available slot
+            }
+            
+            $appointmentTime->addMinutes(30);
+        }
+
+        // Create the follow-up appointment
+        $followUpAppointment = Appointment::create([
+            'patient_id' => $patient->id,
+            'doctor_id' => Auth::id(),
+            'appointment_date' => $appointmentTime->format('Y-m-d'),
+            'appointment_time' => $appointmentTime->format('H:i:s'),
+            'status' => 'scheduled',
+            'reason' => $validated['follow_up_reason'] ?: 'Follow-up appointment',
+            'notes' => 'Follow-up from appointment on ' . Carbon::parse($currentAppointment->appointment_date)->format('M j, Y'),
+        ]);
+
+        $timeAmount = $validated['follow_up_number'];
+        $timeUnit = $validated['follow_up_unit'];
+        $appointmentDateTime = $appointmentTime->format('M j, Y \a\t g:i A');
+
+        return redirect()->route('doctor.current')->with('success', 
+            "Follow-up appointment scheduled for {$timeAmount} {$timeUnit} from now on {$appointmentDateTime}");
+    }
 }

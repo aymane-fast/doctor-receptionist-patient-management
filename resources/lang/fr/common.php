@@ -82,6 +82,7 @@ return [
     // Navigation
     'back_to' => 'Retour aux :item',
     'profile_setting' => 'Paramètres du Profil',
+    'profile_settings' => 'Paramètres du Profil',
     
     // Status
     'open' => 'Ouvert',

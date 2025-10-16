@@ -39,4 +39,11 @@ return [
     'create_user' => 'Create User',
     'sign_in_here' => 'Sign in here',
     'medical_management_system' => 'Medical Management System',
+    
+    // Missing login page keys
+    'login' => 'Login',
+    'sign_in_to_account' => 'Sign in to your account',
+    'need_account' => 'Need an account?',
+    'register_here' => 'Register here',
+    'logout' => 'Logout',
 ];

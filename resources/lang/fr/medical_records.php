@@ -96,4 +96,17 @@ return [
     'record_information' => 'Informations du Dossier',
     'record_id' => 'ID du Dossier',
     'view_related_appointment' => 'Voir le Rendez-vous Associé',
+    
+    // Search and filter translations
+    'search_patients' => 'Rechercher par nom, téléphone ou ID du patient...',
+    'search' => 'Rechercher',
+    'clear' => 'Effacer',
+    'clear_filter' => 'Effacer le Filtre',
+    'all_patients_history' => 'Tous les Patients - Afficher l\'Historique Médical Complet',
+    'no_search_results' => 'Aucun Résultat de Recherche',
+    'no_search_results_desc' => 'Aucun dossier médical ne correspond à votre recherche. Essayez d\'ajuster vos termes de recherche.',
+    'view_all_records' => 'Voir Tous les Dossiers',
+    'complete_medical_history' => 'Historique médical complet et dossiers des patients',
+    'records_found' => 'dossiers trouvés',
+    'create_medical_record' => 'Créer un Dossier Médical',
 ];

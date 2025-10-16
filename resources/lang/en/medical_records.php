@@ -96,4 +96,17 @@ return [
     'record_information' => 'Record Information',
     'record_id' => 'Record ID',
     'view_related_appointment' => 'View Related Appointment',
+    
+    // Search and filter translations
+    'search_patients' => 'Search by patient name, phone, or ID...',
+    'search' => 'Search',
+    'clear' => 'Clear',
+    'clear_filter' => 'Clear Filter',
+    'all_patients_history' => 'All Patients - Show Complete Medical History',
+    'no_search_results' => 'No Search Results',
+    'no_search_results_desc' => 'No medical records match your search. Try adjusting your search terms.',
+    'view_all_records' => 'View All Records',
+    'complete_medical_history' => 'Complete medical history & patient records',
+    'records_found' => 'records found',
+    'create_medical_record' => 'Create Medical Record',
 ];

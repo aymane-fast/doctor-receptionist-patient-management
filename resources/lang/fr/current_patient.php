@@ -20,6 +20,7 @@ return [
     'quick_actions' => 'Actions rapides',
     'new_medical_record' => 'Nouveau dossier médical',
     'write_prescription' => 'Rédiger une ordonnance',
+    'schedule_follow_up' => 'Programmer un suivi',
     'complete_visit_next_patient' => 'Terminer la visite et patient suivant',
     
     // Recent appointments
@@ -40,4 +41,17 @@ return [
     // Prescriptions
     'recent_prescriptions' => 'Ordonnances récentes',
     'no_prescriptions' => 'Aucune ordonnance encore',
+
+    // Follow-up modal
+    'time_amount' => 'Quantité',
+    'time_unit' => 'Unité',
+    'days' => 'Jours',
+    'weeks' => 'Semaines',
+    'months' => 'Mois',
+    'reason_optional' => 'Raison (Optionnel)',
+    'follow_up_reason_placeholder' => 'Contrôle de suivi, examen des résultats, ajustement de médicaments...',
+    'auto_scheduling' => 'Programmation automatique',
+    'auto_scheduling_description' => 'Le rendez-vous sera programmé au prochain créneau disponible selon les heures de travail.',
+    'cancel' => 'Annuler',
+    'schedule_appointment' => 'Programmer le rendez-vous',
 ];

@@ -22,19 +22,19 @@
                         <h1 class="text-4xl font-bold bg-gradient-to-r from-teal-700 via-cyan-700 to-blue-700 bg-clip-text text-transparent">
                             {{ __('prescriptions.title') }}
                         </h1>
-                        <p class="text-gray-600 text-lg mt-2">Digital pharmacy management & prescription tracking</p>
+                        <p class="text-gray-600 text-lg mt-2">{{ __('prescriptions.subtitle') }}</p>
                         <div class="flex items-center mt-3 space-x-4 text-sm text-gray-500">
                             <span class="flex items-center space-x-1">
                                 <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span>{{ $prescriptions->where('status', 'active')->count() }} Active</span>
+                                <span>{{ $prescriptions->where('status', 'active')->count() }} {{ __('prescriptions.active') }}</span>
                             </span>
                             <span class="flex items-center space-x-1">
                                 <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                <span>{{ $prescriptions->where('status', 'completed')->count() }} Completed</span>
+                                <span>{{ $prescriptions->where('status', 'completed')->count() }} {{ __('prescriptions.completed') }}</span>
                             </span>
                             <span class="flex items-center space-x-1">
                                 <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
-                                <span>{{ $prescriptions->count() }} Total Records</span>
+                                <span>{{ $prescriptions->count() }} {{ __('prescriptions.total_records') }}</span>
                             </span>
                         </div>
                     </div>
@@ -44,7 +44,7 @@
                         <div class="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                         <div class="relative flex items-center space-x-3">
                             <i class="fas fa-plus"></i>
-                            <span>New Prescription</span>
+                            <span>{{ __('prescriptions.new_prescription') }}</span>
                         </div>
                     </a>
                 </div>
@@ -65,19 +65,19 @@
                         <input type="text" 
                                name="search" 
                                value="{{ request('search') }}"
-                               placeholder="Search by patient name, phone, or ID..."
+                               placeholder="{{ __('prescriptions.search_patients') }}"
                                class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 placeholder-gray-500 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900">
                     </div>
                 </div>
                 <div class="flex space-x-4">
                     <button type="submit" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg">
                         <i class="fas fa-search"></i>
-                        <span>Search</span>
+                        <span>{{ __('prescriptions.search') }}</span>
                     </button>
                     @if(request('search') || request('patient_id'))
                     <a href="{{ route('prescriptions.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg">
                         <i class="fas fa-times"></i>
-                        <span>Clear</span>
+                        <span>{{ __('prescriptions.clear') }}</span>
                     </a>
                     @endif
                 </div>
@@ -92,7 +92,7 @@
                         </div>
                         <select name="patient_id" onchange="this.form.submit()" 
                                 class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900">
-                            <option value="">All Patients - Complete Prescription History</option>
+                            <option value="">{{ __('prescriptions.all_patients_history') }}</option>
                             @foreach($patients as $patient)
                                 <option value="{{ $patient->id }}" {{ request('patient_id') == $patient->id ? 'selected' : '' }}>
                                     {{ $patient->first_name }} {{ $patient->last_name }} • {{ $patient->patient_id }}
@@ -113,11 +113,11 @@
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center space-x-3">
                         <i class="fas fa-pills text-teal-600"></i>
-                        <span>Active Prescriptions Registry</span>
+                        <span>{{ __('prescriptions.active_prescriptions_registry') }}</span>
                     </h2>
                     <div class="text-sm text-gray-600 flex items-center space-x-2">
                         <i class="fas fa-database text-gray-400"></i>
-                        <span>{{ $prescriptions->count() }} records found</span>
+                        <span>{{ $prescriptions->count() }} {{ __('prescriptions.records_found') }}</span>
                     </div>
                 </div>
             </div>
@@ -127,11 +127,11 @@
                 <table class="w-full">
                     <thead class="bg-gray-50/80 border-b border-gray-200/70">
                         <tr>
-                            <th class="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Patient & Doctor</th>
-                            <th class="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Medication Details</th>
-                            <th class="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Treatment Schedule</th>
-                            <th class="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Status & Dates</th>
-                            <th class="text-center py-4 px-6 font-semibold text-gray-700 text-sm">Actions</th>
+                            <th class="text-left py-4 px-6 font-semibold text-gray-700 text-sm">{{ __('prescriptions.patient_doctor') }}</th>
+                            <th class="text-left py-4 px-6 font-semibold text-gray-700 text-sm">{{ __('prescriptions.medication_details') }}</th>
+                            <th class="text-left py-4 px-6 font-semibold text-gray-700 text-sm">{{ __('prescriptions.treatment_schedule') }}</th>
+                            <th class="text-left py-4 px-6 font-semibold text-gray-700 text-sm">{{ __('prescriptions.status_dates') }}</th>
+                            <th class="text-center py-4 px-6 font-semibold text-gray-700 text-sm">{{ __('prescriptions.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
@@ -167,12 +167,12 @@
                                         <p class="font-semibold text-gray-900">{{ $firstMed->medication_name }}</p>
                                         <p class="text-sm text-gray-500 mt-1">{{ $firstMed->dosage }}</p>
                                         @if($prescription->items->count() > 1)
-                                            <p class="text-xs text-gray-400 mt-2">+{{ $prescription->items->count() - 1 }} more</p>
+                                            <p class="text-xs text-gray-400 mt-2">+{{ $prescription->items->count() - 1 }} {{ __('prescriptions.more') }}</p>
                                         @endif
                                     </div>
                                 @else
                                     <div>
-                                        <p class="font-semibold text-gray-900">{{ $prescription->medication_name ?: 'Medication' }}</p>
+                                        <p class="font-semibold text-gray-900">{{ $prescription->medication_name ?: __('prescriptions.medication') }}</p>
                                         @if($prescription->dosage)
                                             <p class="text-sm text-gray-500 mt-1">{{ $prescription->dosage }}</p>
                                         @endif
@@ -185,12 +185,12 @@
                                 @if($prescription->items && $prescription->items->count() > 0)
                                     @php $firstMed = $prescription->items->first() @endphp
                                     @if($firstMed->duration_days)
-                                        <p class="font-semibold text-gray-900">{{ $firstMed->duration_days }} days</p>
+                                        <p class="font-semibold text-gray-900">{{ $firstMed->duration_days }} {{ __('prescriptions.days') }}</p>
                                     @endif
                                     <p class="text-sm text-gray-500 mt-1">{{ $firstMed->frequency }}</p>
                                 @else
                                     @if($prescription->duration_days)
-                                        <p class="font-semibold text-gray-900">{{ $prescription->duration_days }} days</p>
+                                        <p class="font-semibold text-gray-900">{{ $prescription->duration_days }} {{ __('prescriptions.days') }}</p>
                                     @endif
                                     @if($prescription->frequency)
                                         <p class="text-sm text-gray-500 mt-1">{{ $prescription->frequency }}</p>
@@ -213,7 +213,7 @@
                                 
                                 <!-- Prescribed Date -->
                                 <p class="font-medium text-gray-900 mt-3">{{ \Carbon\Carbon::parse($prescription->prescribed_date)->format('M j, Y') }}</p>
-                                <p class="text-xs text-gray-500 mt-1">Prescribed</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ __('prescriptions.prescribed') }}</p>
                                 
                                 <!-- End Date if available -->
                                 @if($prescription->items && $prescription->items->first() && $prescription->items->first()->duration_days)
@@ -221,7 +221,7 @@
                                         $endDate = \Carbon\Carbon::parse($prescription->prescribed_date)->addDays($prescription->items->first()->duration_days);
                                     @endphp
                                     <p class="text-sm text-gray-600 mt-2">{{ $endDate->format('M j, Y') }}</p>
-                                    <p class="text-xs text-gray-400">Est. end</p>
+                                    <p class="text-xs text-gray-400">{{ __('prescriptions.est_end') }}</p>
                                 @endif
                             </td>
 
@@ -239,7 +239,7 @@
                                     @if($prescription->medicalRecord)
                                     <a href="{{ route('medical-records.show', $prescription->medicalRecord) }}" 
                                        class="w-9 h-9 bg-purple-100 hover:bg-purple-200 rounded-xl flex items-center justify-center transition-all duration-200 group/btn" 
-                                       title="View Medical Record">
+                                       title="{{ __('prescriptions.view_medical_record') }}">
                                         <i class="fas fa-file-medical text-purple-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                     </a>
                                     @endif
@@ -256,7 +256,7 @@
             <div class="bg-gray-50/50 border-t border-gray-200/70 px-6 py-4">
                 <div class="flex items-center justify-between">
                     <div class="text-sm text-gray-600">
-                        Showing {{ $prescriptions->firstItem() }} to {{ $prescriptions->lastItem() }} of {{ $prescriptions->total() }} prescriptions
+                        {{ __('prescriptions.showing_results', ['first' => $prescriptions->firstItem(), 'last' => $prescriptions->lastItem(), 'total' => $prescriptions->total()]) }}
                     </div>
                     <div>
                         {{ $prescriptions->appends(request()->query())->links() }}
@@ -277,34 +277,34 @@
                 </div>
                 <h3 class="text-3xl font-bold text-gray-800 mb-4">
                     @if(request('search'))
-                        No Search Results
+                        {{ __('prescriptions.no_search_results') }}
                     @elseif(request('patient_id'))
-                        No Prescriptions Found
+                        {{ __('prescriptions.no_prescriptions_found') }}
                     @else
-                        Digital Pharmacy Ready
+                        {{ __('prescriptions.digital_pharmacy_ready') }}
                     @endif
                 </h3>
                 <p class="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
                     @if(request('search'))
-                        No prescriptions match your search for "{{ request('search') }}". Try adjusting your search terms or browse all prescriptions.
+                        {{ __('prescriptions.no_search_results_desc', ['search' => request('search')]) }}
                     @elseif(request('patient_id'))
-                        This patient doesn't have any prescriptions in the system yet. Create their first prescription to start building their medication history.
+                        {{ __('prescriptions.no_patient_prescriptions_desc') }}
                     @else
-                        Your digital pharmacy management system is ready to handle prescriptions. Start by creating comprehensive medication records for your patients.
+                        {{ __('prescriptions.digital_pharmacy_ready_desc') }}
                     @endif
                 </p>
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
                     @if(request('search') || request('patient_id'))
                     <a href="{{ route('prescriptions.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 flex items-center space-x-3 shadow-xl">
                         <i class="fas fa-arrow-left"></i>
-                        <span>View All Prescriptions</span>
+                        <span>{{ __('prescriptions.view_all_prescriptions') }}</span>
                     </a>
                     @endif
                     <a href="{{ route('prescriptions.create') }}" class="group relative overflow-hidden bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
                         <div class="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                         <div class="relative flex items-center space-x-3">
                             <i class="fas fa-plus"></i>
-                            <span>{{ (request('search') || request('patient_id')) ? 'Create Prescription' : 'Create First Prescription' }}</span>
+                            <span>{{ (request('search') || request('patient_id')) ? __('prescriptions.create_prescription') : __('prescriptions.create_first_prescription') }}</span>
                         </div>
                     </a>
                 </div>
