@@ -206,7 +206,7 @@
                             <label class="font-bold text-gray-900">{{ __('medical_records.chief_complaint') }}</label>
                         </div>
                         <div class="bg-gray-50 rounded-lg p-4">
-                            <p class="text-gray-900 whitespace-pre-wrap leading-relaxed">{{ $medicalRecord->chief_complaint }}</p>
+                            <p class="text-gray-900 whitespace-pre-wrap leading-relaxed">{{ $medicalRecord->symptoms }}</p>
                         </div>
                     </div>
 

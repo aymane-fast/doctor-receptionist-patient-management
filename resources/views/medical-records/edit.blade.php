@@ -184,15 +184,15 @@
                 <div class="border-b border-gray-200 pb-6 mb-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('medical_records.clinical_information') }}</h2>
                     
-                    <!-- Chief Complaint -->
+                    <!-- Symptoms -->
                     <div class="mb-6">
-                        <label for="chief_complaint" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="symptoms" class="block text-sm font-medium text-gray-700 mb-2">
                             {{ __('medical_records.chief_complaint') }} <span class="text-red-500">*</span>
                         </label>
-                        <textarea id="chief_complaint" name="chief_complaint" rows="3" required
+                        <textarea id="symptoms" name="symptoms" rows="3" required
                                   placeholder="{{ __('medical_records.primary_reason_visit') }}"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('chief_complaint', $medicalRecord->chief_complaint) }}</textarea>
-                        @error('chief_complaint')
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('symptoms', $medicalRecord->symptoms) }}</textarea>
+                        @error('symptoms')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>

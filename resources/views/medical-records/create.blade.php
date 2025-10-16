@@ -122,15 +122,15 @@
                     </div>
                     
                     <div class="grid md:grid-cols-2 gap-4 mb-4">
-                        <!-- Chief Complaint -->
+                        <!-- Symptoms -->
                         <div>
-                            <label for="chief_complaint" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                            <label for="symptoms" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
                                 {{ __('medical_records.chief_complaint') }} <span class="text-red-500">*</span>
                             </label>
-                            <textarea id="chief_complaint" name="chief_complaint" rows="3" required
+                            <textarea id="symptoms" name="symptoms" rows="3" required
                                       placeholder="{{ __('medical_records.primary_reason_visit') }}"
-                                      class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('chief_complaint') border-red-500 @enderror">{{ old('chief_complaint') }}</textarea>
-                            @error('chief_complaint')
+                                      class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('symptoms') border-red-500 @enderror">{{ old('symptoms') }}</textarea>
+                            @error('symptoms')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
                                 <i class="fas fa-exclamation-circle text-xs"></i>
                                 <span>{{ $message }}</span>
