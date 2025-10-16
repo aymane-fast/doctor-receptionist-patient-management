@@ -148,19 +148,35 @@
                             <!-- Today's Stats -->
                             <div class="hidden lg:flex items-center space-x-4">
                                 <!-- Today's Appointments -->
+                                @php
+                                    $todayQuery = \App\Models\Appointment::whereDate('appointment_date', today());
+                                    
+                                    // If user is a doctor, only show their appointments
+                                    if(auth()->user()->isDoctor()) {
+                                        $todayQuery->where('doctor_id', auth()->id());
+                                    }
+                                    
+                                    $todayCount = $todayQuery->count();
+                                @endphp
                                 <div class="flex items-center space-x-2 bg-white rounded-lg px-3 py-2 shadow-sm">
                                     <i class="fas fa-calendar-day text-blue-600"></i>
                                     <span class="text-sm font-medium text-gray-700">Today</span>
                                     <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">
-                                        {{ \App\Models\Appointment::whereDate('appointment_date', today())->count() }}
+                                        {{ $todayCount }}
                                     </span>
                                 </div>
 
                                 <!-- Pending Appointments -->
                                 @php
-                                    $pendingCount = \App\Models\Appointment::where('status', 'scheduled')
-                                        ->whereDate('appointment_date', today())
-                                        ->count();
+                                    $pendingQuery = \App\Models\Appointment::where('status', 'scheduled')
+                                        ->whereDate('appointment_date', today());
+                                    
+                                    // If user is a doctor, only show their appointments
+                                    if(auth()->user()->isDoctor()) {
+                                        $pendingQuery->where('doctor_id', auth()->id());
+                                    }
+                                    
+                                    $pendingCount = $pendingQuery->count();
                                 @endphp
                                 @if($pendingCount > 0)
                                 <div class="flex items-center space-x-2 bg-orange-50 rounded-lg px-3 py-2 shadow-sm">
