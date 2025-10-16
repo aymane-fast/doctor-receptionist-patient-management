@@ -19,14 +19,6 @@
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3">
-                @if(auth()->user()->isDoctor())
-                <!-- Walk-in Patient Button -->
-                <button onclick="openWalkInModal()" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
-                    <i class="fas fa-running"></i>
-                    <span>{{ __('patients.walkin_patient') }}</span>
-                </button>
-                @endif
-                
                 <!-- Regular Add Patient Button -->
                 <a href="{{ route('patients.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 deep-shadow hover:shadow-xl flex items-center space-x-3">
                     <i class="fas fa-plus"></i>
@@ -185,125 +177,10 @@
     </div>
 </div>
 
-<!-- Walk-in Patient Modal -->
-<div id="walkInModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full transform scale-95 opacity-0 transition-all duration-300" id="walkInContent">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-running text-white text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-900">{{ __('patients.walkin_patient') }}</h3>
-                        <p class="text-sm text-gray-600">{{ __('patients.walkin_quick_registration') }}</p>
-                    </div>
-                </div>
-                <button onclick="closeWalkInModal()" class="text-gray-400 hover:text-gray-600 p-2">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <form action="{{ route('patients.store') }}" method="POST" class="space-y-4">
-                @csrf
-                <input type="hidden" name="book_today" value="1">
-                <input type="hidden" name="appointment_priority" value="normal">
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.first_name') }} {{ __('patients.required') }}</label>
-                        <input type="text" name="first_name" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.last_name') }} {{ __('patients.required') }}</label>
-                        <input type="text" name="last_name" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.phone_number') }}</label>
-                    <input type="tel" name="phone" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.birth_date') }}</label>
-                        <input type="date" name="birth_date" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.gender') }}</label>
-                        <select name="gender" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
-                            <option value="">{{ __('patients.select') }}</option>
-                            <option value="male">{{ __('patients.male') }}</option>
-                            <option value="female">{{ __('patients.female') }}</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.address') }}</label>
-                    <textarea name="address" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500 resize-none"></textarea>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-semibold text-red-700 mb-2">
-                        <i class="fas fa-exclamation-triangle text-red-600 mr-1"></i>
-                        {{ __('patients.allergies_important') }}
-                    </label>
-                    <input type="text" name="allergies" placeholder="{{ __('patients.allergies_walkin_placeholder') }}" class="w-full px-3 py-2 border border-red-300 rounded-xl focus:outline-none focus:border-red-500 bg-red-50">
-                    <p class="text-xs text-red-600 mt-1">{{ __('patients.allergies_safety_note') }}</p>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.reason_for_visit') }}</label>
-                    <input type="text" name="appointment_reason" placeholder="{{ __('patients.reason_placeholder') }}" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-emerald-500">
-                </div>
-                
-                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                    <div class="flex items-center space-x-2">
-                        <i class="fas fa-clock text-emerald-600"></i>
-                        <span class="text-sm font-medium text-emerald-700">{{ __('patients.auto_booking_today') }}</span>
-                    </div>
-                </div>
-                
-                <div class="flex items-center space-x-3 pt-4">
-                    <button type="button" onclick="closeWalkInModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-3 rounded-xl font-medium transition-colors">
-                        {{ __('patients.cancel') }}
-                    </button>
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200">
-                        {{ __('patients.register_and_book') }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
 
 @push('scripts')
 <script>
-function openWalkInModal() {
-    const modal = document.getElementById('walkInModal');
-    const content = document.getElementById('walkInContent');
-    
-    modal.classList.remove('hidden');
-    setTimeout(() => {
-        content.classList.remove('scale-95', 'opacity-0');
-        content.classList.add('scale-100', 'opacity-100');
-    }, 10);
-}
-
-function closeWalkInModal() {
-    const modal = document.getElementById('walkInModal');
-    const content = document.getElementById('walkInContent');
-    
-    content.classList.remove('scale-100', 'opacity-100');
-    content.classList.add('scale-95', 'opacity-0');
-    
-    setTimeout(() => {
-        modal.classList.add('hidden');
-    }, 300);
-}
-
 // Confirmation dialog for editing patient
 function confirmEdit(patientName) {
     return confirm(`{{ __('patients.confirm_edit_prefix') }} "${patientName}"?\n\n{{ __('patients.edit_warning') }}`);
@@ -319,13 +196,6 @@ function confirmAppointment(patientName, hasAllergies, allergies) {
     
     return confirm(message);
 }
-
-// Close modal when clicking outside
-document.getElementById('walkInModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeWalkInModal();
-    }
-});
 </script>
 @endpush
 @endsection
