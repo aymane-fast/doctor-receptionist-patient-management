@@ -5,10 +5,8 @@
 @section('content')
 <div class="space-y-8">
     <!-- Pharmacy-Style Header -->
-    <div class="relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-blue-500/5"></div>
-        <div class="relative bg-white/90 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
-            <div class="flex items-center justify-between">
+    <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-lg">
+        <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-6">
                     <div class="relative">
                         <div class="w-20 h-20 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-3xl flex items-center justify-center shadow-xl">
@@ -26,7 +24,7 @@
                         <div class="flex items-center mt-3 space-x-4 text-sm text-gray-500">
                             <span class="flex items-center space-x-1">
                                 <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span>{{ $prescriptions->where('status', 'active')->count() }} {{ __('prescriptions.active') }}</span>
+                                <span>{{ $prescriptions->filter(function($p) { return empty($p->status) || $p->status === 'active'; })->count() }} {{ __('prescriptions.active') }}</span>
                             </span>
                             <span class="flex items-center space-x-1">
                                 <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -49,7 +47,6 @@
                     </a>
                 </div>
             </div>
-        </div>
     </div>
 
     <!-- Enhanced Search and Filter Controls -->
