@@ -224,6 +224,81 @@
         </form>
     </div>
 
+    <!-- Data Export Section -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
+                <i class="fas fa-download text-emerald-600 mr-2"></i>
+                Data Export
+            </h3>
+            <p class="text-gray-600 text-sm">Export all your clinic data to a comprehensive Excel file with multiple organized sheets.</p>
+        </div>
+
+        <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-6 border border-emerald-200">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h4 class="font-semibold text-emerald-900 mb-2 flex items-center">
+                        <i class="fas fa-file-csv text-emerald-600 mr-2"></i>
+                        Complete Clinic Data Export
+                    </h4>
+                    <p class="text-emerald-700 text-sm mb-4">
+                        This will generate a comprehensive CSV file containing all your clinic data organized in sections:
+                    </p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        <div class="flex items-center text-xs text-emerald-700">
+                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
+                            Overview & Statistics
+                        </div>
+                        <div class="flex items-center text-xs text-emerald-700">
+                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
+                            All Patients Data
+                        </div>
+                        <div class="flex items-center text-xs text-emerald-700">
+                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
+                            Appointments History
+                        </div>
+                        <div class="flex items-center text-xs text-emerald-700">
+                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
+                            Medical Records
+                        </div>
+                        <div class="flex items-center text-xs text-emerald-700">
+                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
+                            Prescriptions Details
+                        </div>
+                        <div class="flex items-center text-xs text-emerald-700">
+                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
+                            Lab Orders
+                        </div>
+                        <div class="flex items-center text-xs text-emerald-700">
+                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
+                            Analytics & Demographics
+                        </div>
+                        <div class="flex items-center text-xs text-emerald-700">
+                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
+                            Excel Compatible
+                        </div>
+                    </div>
+                    <div class="text-xs text-emerald-600 bg-emerald-100 rounded-md px-3 py-2 inline-flex items-center">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Single CSV file with all clinic data, perfectly formatted for Excel, Google Sheets, and data analysis
+                    </div>
+                </div>
+                <div class="ml-6">
+                    <form action="{{ route('settings.export-data') }}" method="POST" id="exportForm">
+                        @csrf
+                        <button 
+                            type="submit" 
+                            id="exportBtn"
+                            class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2 transform hover:scale-105">
+                            <i class="fas fa-download text-lg"></i>
+                            <span>Export All Data</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Today's Schedule -->
@@ -267,7 +342,27 @@
             </p>
         </div>
 
-
+        <!-- Export Status -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
+                <i class="fas fa-database text-purple-600 mr-2"></i>
+                Data Status
+            </h4>
+            <div class="space-y-2 text-sm text-gray-600">
+                <div class="flex justify-between">
+                    <span>Patients:</span>
+                    <span class="font-medium">{{ \App\Models\Patient::count() }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Appointments:</span>
+                    <span class="font-medium">{{ \App\Models\Appointment::count() }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Records:</span>
+                    <span class="font-medium">{{ \App\Models\MedicalRecord::count() }}</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -309,11 +404,105 @@ function setDefaultHours() {
     });
 }
 
-// Initialize toggle states on page load
+// Enhanced export functionality with loading animation
 document.addEventListener('DOMContentLoaded', function() {
     ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
         toggleDayHours(day);
     });
+    
+    // Export form handling
+    const exportForm = document.getElementById('exportForm');
+    const exportBtn = document.getElementById('exportBtn');
+    
+    if (exportForm && exportBtn) {
+        exportForm.addEventListener('submit', function() {
+            // Update button to show loading state
+            exportBtn.innerHTML = `
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Generating Excel...</span>
+            `;
+            
+            exportBtn.disabled = true;
+            exportBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            
+            // Show progress notification
+            showNotification('Preparing your comprehensive data export...', 'info');
+            
+            // Reset button after 30 seconds (in case of timeout)
+            setTimeout(() => {
+                resetExportBtn();
+            }, 30000);
+        });
+    }
+    
+    function resetExportBtn() {
+        if (exportBtn) {
+            exportBtn.innerHTML = `
+                <i class="fas fa-download text-lg"></i>
+                <span>Export All Data</span>
+            `;
+            exportBtn.disabled = false;
+            exportBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+    }
+    
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border-l-4 p-4 transition-all duration-300 transform translate-x-full ${
+            type === 'info' ? 'border-blue-500' : 
+            type === 'success' ? 'border-green-500' : 
+            type === 'error' ? 'border-red-500' : 'border-gray-500'
+        }`;
+        
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas ${
+                        type === 'info' ? 'fa-info-circle text-blue-500' :
+                        type === 'success' ? 'fa-check-circle text-green-500' :
+                        type === 'error' ? 'fa-exclamation-circle text-red-500' : 'fa-bell text-gray-500'
+                    }"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">${message}</p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Slide in
+        setTimeout(() => {
+            notification.classList.remove('translate-x-full');
+        }, 100);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    }
+    
+    // Reset export button if page loads with success message (after successful export)
+    @if(session('success'))
+        setTimeout(resetExportBtn, 1000);
+        showNotification('{{ session('success') }}', 'success');
+    @endif
+    
+    // Show error message if export failed
+    @if(session('error'))
+        setTimeout(resetExportBtn, 1000);
+        showNotification('{{ session('error') }}', 'error');
+    @endif
 });
 </script>
 @endpush
