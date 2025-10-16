@@ -63,11 +63,11 @@
 
                 @if(auth()->user()->isReceptionist())
                 <div class="space-y-2">
-                    <label for="doctor_id" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Doctor</label>
+                    <label for="doctor_id" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.doctor') }}</label>
                     <select id="doctor_id" 
                             name="doctor_id" 
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
-                        <option value="">All Doctors</option>
+                        <option value="">{{ __('appointments.all_doctors') }}</option>
                         @foreach($doctors as $doctor)
                         <option value="{{ $doctor->id }}" {{ request('doctor_id') == $doctor->id ? 'selected' : '' }}>
                             Dr. {{ $doctor->name }}
@@ -80,12 +80,12 @@
                 <div class="flex flex-col justify-end space-y-3">
                     <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
                         <i class="fas fa-filter"></i>
-                        <span>Filter</span>
+                        <span>{{ __('appointments.filter') }}</span>
                     </button>
                     @if(request()->query())
                     <a href="{{ route('appointments.index') }}" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
                         <i class="fas fa-times"></i>
-                        <span>Clear</span>
+                        <span>{{ __('appointments.clear') }}</span>
                     </a>
                     @endif
                 </div>
@@ -100,12 +100,12 @@
                 <table class="min-w-full">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                         <tr>
-                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Patient</th>
-                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Doctor</th>
-                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Date & Time</th>
-                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
-                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Reason</th>
-                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
+                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">{{ __('appointments.patient') }}</th>
+                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">{{ __('appointments.doctor') }}</th>
+                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">{{ __('appointments.date_time') }}</th>
+                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">{{ __('appointments.status') }}</th>
+                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">{{ __('appointments.reason') }}</th>
+                            <th class="px-8 py-6 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">{{ __('appointments.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -146,7 +146,7 @@
                                         @elseif($appointment->status == 'in_progress') bg-blue-100 text-blue-800
                                         @elseif($appointment->status == 'completed') bg-green-100 text-green-800
                                         @else bg-red-100 text-red-800 @endif">
-                                        {{ ucfirst($appointment->status) }}
+                                        {{ __('appointments.' . $appointment->status) }}
                                     </span>
                                     
                                     <!-- Quick Status Update -->
@@ -205,7 +205,7 @@
                             </td>
                             <td class="px-8 py-6 text-sm text-gray-900">
                                 <div class="max-w-xs">
-                                    {{ $appointment->reason ? Str::limit($appointment->reason, 50) : '-' }}
+                                    {{ $appointment->reason ? Str::limit(translate_appointment_reason($appointment->reason), 50) : '-' }}
                                 </div>
                             </td>
                             <td class="px-8 py-6">
@@ -245,12 +245,12 @@
                     @if(request()->query())
                         {{ __('appointments.no_match_filter_criteria') }}
                     @else
-                        Get started by scheduling your first appointment with a patient.
+                        {{ __('appointments.get_started_first_appointment') }}
                     @endif
                 </p>
                 <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-2xl font-medium transition-all duration-200 inline-flex items-center space-x-2 deep-shadow">
                     <i class="fas fa-plus"></i>
-                    <span>Schedule Appointment</span>
+                    <span>{{ __('appointments.schedule_appointment') }}</span>
                 </a>
             </div>
         @endif

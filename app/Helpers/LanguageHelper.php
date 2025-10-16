@@ -69,3 +69,31 @@ if (!function_exists('t')) {
         return __($key, $replace, $locale);
     }
 }
+
+if (!function_exists('translate_appointment_reason')) {
+    /**
+     * Translate common appointment reasons
+     */
+    function translate_appointment_reason($reason)
+    {
+        if (empty($reason)) {
+            return '-';
+        }
+        
+        // Common appointment reason translations
+        $reasonTranslations = [
+            'Follow-up appointment' => __('appointments.follow_up_appointment'),
+            'Walk-in consultation' => __('appointments.walk_in_consultation'),
+            'Emergency consultation' => __('appointments.emergency_consultation'),
+            'Routine check-up' => __('appointments.routine_checkup'),
+            'General consultation' => __('appointments.general_consultation'),
+            'Urgent consultation' => __('appointments.urgent_consultation'),
+            'Annual checkup' => __('appointments.annual_checkup'),
+            'Vaccination' => __('appointments.vaccination'),
+            'Lab results review' => __('appointments.lab_results_review'),
+            'Medication review' => __('appointments.medication_review'),
+        ];
+        
+        return $reasonTranslations[$reason] ?? $reason;
+    }
+}

@@ -101,4 +101,26 @@ return [
     'back_to_list' => 'Back to Appointments',
     'edit' => 'Edit',
     'book_now' => 'Book Now',
+    
+    // Additional missing translations
+    'patient' => 'Patient',
+    'doctor' => 'Doctor',
+    'date_time' => 'Date & Time',
+    'actions' => 'Actions',
+    'clear' => 'Clear',
+    'no_match_filter_criteria' => 'No appointments match your filter criteria. Try adjusting your search or filters.',
+    'get_started_first_appointment' => 'Get started by scheduling your first appointment with a patient.',
+    'confirm_cancel' => 'Are you sure you want to cancel this appointment?',
+    
+    // Common appointment reasons
+    'follow_up_appointment' => 'Follow-up appointment',
+    'walk_in_consultation' => 'Walk-in consultation', 
+    'emergency_consultation' => 'Emergency consultation',
+    'routine_checkup' => 'Routine check-up',
+    'general_consultation' => 'General consultation',
+    'urgent_consultation' => 'Urgent consultation',
+    'annual_checkup' => 'Annual checkup',
+    'vaccination' => 'Vaccination',
+    'lab_results_review' => 'Lab results review',
+    'medication_review' => 'Medication review',
 ];

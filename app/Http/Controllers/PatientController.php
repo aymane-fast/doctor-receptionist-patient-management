@@ -162,7 +162,7 @@ class PatientController extends Controller
             'doctor_id' => $doctor->id,
             'appointment_date' => $today,
             'appointment_time' => $nextTime->format('H:i:s'),
-            'reason' => $request->appointment_reason ?: 'Walk-in consultation',
+            'reason' => $request->appointment_reason ?: __('appointments.walk_in_consultation'),
             'status' => $request->appointment_priority === 'emergency' ? 'urgent' : 'scheduled',
             'notes' => 'Auto-scheduled walk-in patient',
         ]);

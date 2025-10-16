@@ -396,7 +396,7 @@ class AppointmentController extends Controller
             'appointment_date' => $appointmentTime->format('Y-m-d'),
             'appointment_time' => $appointmentTime->format('H:i:s'),
             'status' => 'scheduled',
-            'reason' => $validated['follow_up_reason'] ?: 'Follow-up appointment',
+            'reason' => $validated['follow_up_reason'] ?: __('appointments.follow_up_appointment'),
             'notes' => 'Follow-up from appointment on ' . Carbon::parse($currentAppointment->appointment_date)->format('M j, Y'),
         ]);
 

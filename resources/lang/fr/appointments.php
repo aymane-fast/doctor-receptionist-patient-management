@@ -101,4 +101,26 @@ return [
     'back_to_list' => 'Retour aux Rendez-vous',
     'edit' => 'Modifier',
     'book_now' => 'Réserver Maintenant',
+    
+    // Additional missing translations
+    'patient' => 'Patient',
+    'doctor' => 'Médecin',
+    'date_time' => 'Date et Heure',
+    'actions' => 'Actions',
+    'clear' => 'Effacer',
+    'no_match_filter_criteria' => 'Aucun rendez-vous ne correspond à vos critères de filtre. Essayez d\'ajuster votre recherche ou vos filtres.',
+    'get_started_first_appointment' => 'Commencez par programmer votre premier rendez-vous avec un patient.',
+    'confirm_cancel' => 'Êtes-vous sûr de vouloir annuler ce rendez-vous ?',
+    
+    // Common appointment reasons
+    'follow_up_appointment' => 'Rendez-vous de suivi',
+    'walk_in_consultation' => 'Consultation sans rendez-vous',
+    'emergency_consultation' => 'Consultation d\'urgence',
+    'routine_checkup' => 'Contrôle de routine',
+    'general_consultation' => 'Consultation générale',
+    'urgent_consultation' => 'Consultation urgente',
+    'annual_checkup' => 'Bilan annuel',
+    'vaccination' => 'Vaccination',
+    'lab_results_review' => 'Examen des résultats de laboratoire',
+    'medication_review' => 'Révision des médicaments',
 ];
