@@ -19,15 +19,15 @@ class AppointmentController extends Controller
     {
         $query = Appointment::with(['patient', 'doctor']);
 
-        // Text search across patient name, patient number, phone, id card
+        // Search by patient information
         if ($request->filled('search')) {
             $search = trim($request->string('search'));
             $query->whereHas('patient', function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
                   ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('patient_id', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('id_card_number', 'like', "%{$search}%");
+                  ->orWhere('id_card_number', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
             });
         }
 

@@ -31,7 +31,7 @@ class DashboardController extends Controller
     private function doctorDashboard()
     {
         // Today's appointments with filtering
-        $todayAppointmentsQuery = Appointment::with('patient')
+        $todayAppointmentsQuery = Appointment::with(['patient', 'doctor'])
             ->where('doctor_id', Auth::id())
             ->today();
 
@@ -41,9 +41,9 @@ class DashboardController extends Controller
             $todayAppointmentsQuery->whereHas('patient', function($query) use ($searchTerm) {
                 $query->where('first_name', 'like', '%' . $searchTerm . '%')
                       ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('patient_id', 'like', '%' . $searchTerm . '%')
                       ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('cin', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('id_card_number', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('email', 'like', '%' . $searchTerm . '%')
                       ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
             });
         }
@@ -105,9 +105,9 @@ class DashboardController extends Controller
             $recentRecordsQuery->whereHas('patient', function($query) use ($searchTerm) {
                 $query->where('first_name', 'like', '%' . $searchTerm . '%')
                       ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('patient_id', 'like', '%' . $searchTerm . '%')
                       ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('cin', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('id_card_number', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('email', 'like', '%' . $searchTerm . '%')
                       ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
             });
         }
@@ -158,9 +158,9 @@ class DashboardController extends Controller
             $todayAppointmentsQuery->whereHas('patient', function($query) use ($searchTerm) {
                 $query->where('first_name', 'like', '%' . $searchTerm . '%')
                       ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('patient_id', 'like', '%' . $searchTerm . '%')
                       ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('cin', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('id_card_number', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('email', 'like', '%' . $searchTerm . '%')
                       ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
             });
         }
@@ -199,9 +199,9 @@ class DashboardController extends Controller
             $recentPatientsQuery->where(function($query) use ($searchTerm) {
                 $query->where('first_name', 'like', '%' . $searchTerm . '%')
                       ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('patient_id', 'like', '%' . $searchTerm . '%')
                       ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('cin', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('id_card_number', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('email', 'like', '%' . $searchTerm . '%')
                       ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
             });
         }

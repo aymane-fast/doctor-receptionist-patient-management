@@ -30,14 +30,15 @@ class MedicalRecordController extends Controller
             $query = MedicalRecord::with(['patient', 'doctor', 'appointment'])
                                  ->where('doctor_id', Auth::id());
 
-            // Search by patient name, phone, or patient ID
+            // Search by patient information
             if ($request->filled('search')) {
                 $searchTerm = $request->search;
                 $query->whereHas('patient', function($q) use ($searchTerm) {
                     $q->where('first_name', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('patient_id', 'LIKE', "%{$searchTerm}%");
+                      ->orWhere('id_card_number', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('email', 'LIKE', "%{$searchTerm}%");
                 });
             }
 
