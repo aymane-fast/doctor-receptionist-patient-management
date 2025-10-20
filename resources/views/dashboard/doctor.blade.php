@@ -184,7 +184,7 @@
                 @if($todayAppointments->count() > 0)
                     <div class="space-y-2">
                         @foreach($todayAppointments as $index => $appointment)
-                        <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover">
+                        <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover border border-gray-200 {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
@@ -274,7 +274,7 @@
                 @if($recentRecords->count() > 0)
                     <div class="space-y-2">
                         @foreach($recentRecords as $index => $record)
-                        <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover">
+                        <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover border border-gray-200 {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">

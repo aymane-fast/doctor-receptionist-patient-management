@@ -132,7 +132,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         @foreach($prescriptions as $prescription)
-                        <tr class="group hover:bg-gradient-to-r hover:from-teal-50/30 hover:to-transparent transition-all duration-300 border-b border-gray-100">
+                        <tr class="group hover:bg-gradient-to-r hover:from-teal-50/50 hover:to-transparent transition-all duration-300 border-b border-gray-100 {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                             <!-- Patient & Doctor Column -->
                             <td class="py-6 px-6">
                                 <div class="flex items-center space-x-4">

@@ -148,7 +148,7 @@
                     @if($recentAppointments->count())
                         <div class="space-y-3">
                             @foreach($recentAppointments as $ap)
-                            <div class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                            <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-4">
                                         <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
@@ -205,7 +205,7 @@
                     @if($recentRecords->count())
                         <div class="space-y-3">
                             @foreach($recentRecords as $rec)
-                            <div class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                            <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-4">
                                         <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">
@@ -254,7 +254,7 @@
                     @if($recentRx->count())
                         <div class="space-y-3">
                             @foreach($recentRx as $rx)
-                            <div class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                            <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-4">
                                         <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">

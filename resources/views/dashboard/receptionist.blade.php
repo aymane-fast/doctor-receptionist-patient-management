@@ -198,7 +198,7 @@
                                 @if($todayAppointments->count() > 0)
                     <div class="space-y-2">
                         @foreach($todayAppointments as $index => $appointment)
-                        <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover">
+                        <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover border border-gray-200 {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
@@ -287,7 +287,7 @@
                 @if($recentPatients->count() > 0)
                     <div class="space-y-2">
                         @foreach($recentPatients as $index => $patient)
-                        <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover">
+                        <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover border border-gray-200 {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">
@@ -373,7 +373,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @foreach($upcomingAppointments as $appointment)
-                            <tr class="hover:bg-gray-50 transition-colors">
+                            <tr class="hover:bg-blue-50 transition-colors {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">

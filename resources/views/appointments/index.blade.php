@@ -34,62 +34,65 @@
                 </div>
                 <h3 class="text-xl font-bold text-gray-900">{{ __('appointments.filter_appointments') }}</h3>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                <div class="space-y-2">
-                    <label for="search" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.search') }}</label>
-                    <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="{{ __('appointments.search_placeholder') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
-                </div>
-                <div class="space-y-2">
-                    <label for="date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.date') }}</label>
-                    <input type="date" 
-                           id="date" 
-                           name="date" 
-                           value="{{ request('date') }}"
-                           class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+            <div class="space-y-6">
+                <!-- Filter Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="space-y-2">
+                        <label for="search" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.search') }}</label>
+                        <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="{{ __('appointments.search_placeholder') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                    </div>
+                    <div class="space-y-2">
+                        <label for="date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.date') }}</label>
+                        <input type="date" 
+                               id="date" 
+                               name="date" 
+                               value="{{ request('date') }}"
+                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="status" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.status') }}</label>
+                        <select id="status" 
+                                name="status" 
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                            <option value="">{{ __('appointments.all_statuses') }}</option>
+                            <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>{{ __('appointments.scheduled') }}</option>
+                            <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
+                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('appointments.cancelled') }}</option>
+                        </select>
+                    </div>
+
+                    @if(auth()->user()->isReceptionist())
+                    <div class="space-y-2">
+                        <label for="doctor_id" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.doctor') }}</label>
+                        <select id="doctor_id" 
+                                name="doctor_id" 
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                            <option value="">{{ __('appointments.all_doctors') }}</option>
+                            @foreach($doctors as $doctor)
+                            <option value="{{ $doctor->id }}" {{ request('doctor_id') == $doctor->id ? 'selected' : '' }}>
+                                {{ __('appointments.doctor_prefix') }} {{ $doctor->name }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                 </div>
 
-                <div class="space-y-2">
-                    <label for="status" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.status') }}</label>
-                    <select id="status" 
-                            name="status" 
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
-                        <option value="">{{ __('appointments.all_statuses') }}</option>
-                        <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>{{ __('appointments.scheduled') }}</option>
-                        <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
-                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
-                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('appointments.cancelled') }}</option>
-                    </select>
-                </div>
-
-                @if(auth()->user()->isReceptionist())
-                <div class="space-y-2">
-                    <label for="doctor_id" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.doctor') }}</label>
-                    <select id="doctor_id" 
-                            name="doctor_id" 
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
-                        <option value="">{{ __('appointments.all_doctors') }}</option>
-                        @foreach($doctors as $doctor)
-                        <option value="{{ $doctor->id }}" {{ request('doctor_id') == $doctor->id ? 'selected' : '' }}>
-                            {{ __('appointments.doctor_prefix') }} {{ $doctor->name }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-                @endif
-
-                <div class="flex flex-col justify-end space-y-3">
-                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
-                        <i class="fas fa-search"></i>
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100">
+                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg">
+                        <i class="fas fa-search text-sm"></i>
                         <span>{{ __('appointments.search') }}</span>
                     </button>
-                    <button type="submit" name="show_today" value="1" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
-                        <i class="fas fa-calendar-day"></i>
+                    <button type="submit" name="show_today" value="1" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg">
+                        <i class="fas fa-calendar-day text-sm"></i>
                         <span>{{ __('appointments.today') }}</span>
                     </button>
                     @if(request()->query())
-                    <a href="{{ route('appointments.index') }}" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
-                        <i class="fas fa-times"></i>
-                        <span>{{ __('appointments.clear') }}</span>
+                    <a href="{{ route('appointments.index') }}" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg" title="{{ __('appointments.clear') }}">
+                        <i class="fas fa-times text-sm"></i>
                     </a>
                     @endif
                 </div>
@@ -135,7 +138,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($appointments as $appointment)
-                        <tr class="hover:bg-gray-50/50 transition-all duration-200">
+                        <tr class="hover:bg-blue-50/60 transition-all duration-200 {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                             <td class="px-8 py-6">
                                 <div class="flex items-center">
                                     <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mr-4">
