@@ -15,160 +15,115 @@ class AppointmentSeeder extends Seeder
      */
     public function run(): void
     {
-        $patients = Patient::all();
-        $doctors = User::where('role', 'doctor')->get();
+        $patients = \App\Models\Patient::all();
+        $doctor = \App\Models\User::where('role', 'doctor')->first();
         
-        if ($patients->isEmpty() || $doctors->isEmpty()) {
+        if ($patients->isEmpty() || !$doctor) {
             $this->command->warn('No patients or doctors found. Please run PatientSeeder and UserSeeder first.');
             return;
         }
 
-        $appointments = [
-            // Past appointments (last week)
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::now()->subDays(7)->format('Y-m-d'),
-                'appointment_time' => '09:00:00',
-                'status' => 'completed',
-                'reason' => 'Routine check-up',
-                'notes' => 'Annual health examination',
-                'is_current' => false,
-            ],
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::now()->subDays(5)->format('Y-m-d'),
-                'appointment_time' => '10:30:00',
-                'status' => 'completed',
-                'reason' => 'Follow-up appointment',
-                'notes' => 'Blood pressure monitoring',
-                'is_current' => false,
-            ],
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::now()->subDays(3)->format('Y-m-d'),
-                'appointment_time' => '14:00:00',
-                'status' => 'completed',
-                'reason' => 'Walk-in consultation',
-                'notes' => 'Flu symptoms',
-                'is_current' => false,
-            ],
-
-            // Today's appointments
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::today()->format('Y-m-d'),
-                'appointment_time' => '09:00:00',
-                'status' => 'scheduled',
-                'reason' => 'General consultation',
-                'notes' => 'Patient reports headaches',
-                'is_current' => true,
-            ],
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::today()->format('Y-m-d'),
-                'appointment_time' => '11:00:00',
-                'status' => 'in_progress',
-                'reason' => 'Emergency consultation',
-                'notes' => 'Chest pain evaluation',
-                'is_current' => true,
-            ],
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::today()->format('Y-m-d'),
-                'appointment_time' => '15:30:00',
-                'status' => 'scheduled',
-                'reason' => 'Routine checkup',
-                'notes' => 'Diabetes management',
-                'is_current' => true,
-            ],
-
-            // Tomorrow's appointments
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::tomorrow()->format('Y-m-d'),
-                'appointment_time' => '08:30:00',
-                'status' => 'scheduled',
-                'reason' => 'Follow-up appointment',
-                'notes' => 'Post-surgery check',
-                'is_current' => false,
-            ],
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::tomorrow()->format('Y-m-d'),
-                'appointment_time' => '13:00:00',
-                'status' => 'scheduled',
-                'reason' => 'General consultation',
-                'notes' => 'Skin condition examination',
-                'is_current' => false,
-            ],
-
-            // Next week appointments
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::now()->addDays(3)->format('Y-m-d'),
-                'appointment_time' => '10:00:00',
-                'status' => 'scheduled',
-                'reason' => 'Vaccination',
-                'notes' => 'Annual flu shot',
-                'is_current' => false,
-            ],
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::now()->addDays(5)->format('Y-m-d'),
-                'appointment_time' => '14:30:00',
-                'status' => 'scheduled',
-                'reason' => 'Lab results review',
-                'notes' => 'Blood work discussion',
-                'is_current' => false,
-            ],
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::now()->addDays(7)->format('Y-m-d'),
-                'appointment_time' => '09:30:00',
-                'status' => 'scheduled',
-                'reason' => 'Routine check-up',
-                'notes' => 'Monthly health monitoring',
-                'is_current' => false,
-            ],
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::now()->addDays(10)->format('Y-m-d'),
-                'appointment_time' => '16:00:00',
-                'status' => 'scheduled',
-                'reason' => 'Medication review',
-                'notes' => 'Prescription adjustments',
-                'is_current' => false,
-            ],
-
-            // Cancelled appointment
-            [
-                'patient_id' => $patients->random()->id,
-                'doctor_id' => $doctors->random()->id,
-                'appointment_date' => Carbon::now()->addDays(2)->format('Y-m-d'),
-                'appointment_time' => '11:30:00',
-                'status' => 'cancelled',
-                'reason' => 'General consultation',
-                'notes' => 'Patient cancelled due to scheduling conflict',
-                'is_current' => false,
-            ],
+        $appointmentReasons = [
+            'Routine check-up', 'Annual physical exam', 'Follow-up appointment', 'Blood pressure monitoring',
+            'Diabetes management', 'Vaccination', 'Lab results review', 'Medication review',
+            'Chest pain evaluation', 'Headache consultation', 'Skin condition examination', 'Joint pain assessment',
+            'Respiratory issues', 'Digestive problems', 'Mental health consultation', 'Injury assessment',
+            'Preventive care', 'Vision problems', 'Hearing issues', 'Allergy consultation',
+            'Cold and flu symptoms', 'Back pain evaluation', 'Weight management', 'Sleep disorder consultation'
         ];
 
-        foreach ($appointments as $appointmentData) {
-            Appointment::create($appointmentData);
+        $appointmentNotes = [
+            'Patient reports feeling well overall',
+            'Needs blood work follow-up in 3 months',
+            'Continue current medications',
+            'Referred to specialist for further evaluation',
+            'Patient education provided on lifestyle changes',
+            'Prescription adjusted based on recent symptoms',
+            'Vital signs within normal limits',
+            'Patient shows improvement since last visit',
+            'Discussed treatment options with patient',
+            'Scheduled for additional testing next week'
+        ];
+
+        $timeSlots = [
+            '08:00:00', '08:30:00', '09:00:00', '09:30:00', '10:00:00', '10:30:00',
+            '11:00:00', '11:30:00', '13:00:00', '13:30:00', '14:00:00', '14:30:00',
+            '15:00:00', '15:30:00', '16:00:00', '16:30:00', '17:00:00'
+        ];
+
+        $currentDate = Carbon::now();
+        $startDate = $currentDate->copy()->subWeeks(2);
+        $endDate = $currentDate->copy()->addWeeks(2);
+        
+        $appointmentCount = 0;
+        $currentAppointmentSet = false;
+
+        // Generate appointments for each day (skip Sundays)
+        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+            if ($date->dayOfWeek === Carbon::SUNDAY) {
+                continue;
+            }
+
+            $dailyAppointments = rand(4, 8);
+            if ($date->dayOfWeek === Carbon::SATURDAY) {
+                $dailyAppointments = rand(2, 4);
+            }
+
+            $shuffledTimeSlots = $timeSlots;
+            shuffle($shuffledTimeSlots);
+            $usedTimeSlots = array_slice($shuffledTimeSlots, 0, $dailyAppointments);
+            sort($usedTimeSlots);
+
+            foreach ($usedTimeSlots as $timeSlot) {
+                $selectedPatient = $patients->random();
+                
+                if ($date->isPast()) {
+                    $status = rand(1, 10) <= 9 ? 'completed' : 'cancelled';
+                    $isCurrent = false;
+                } elseif ($date->isToday()) {
+                    $statusOptions = ['scheduled', 'in_progress', 'completed'];
+                    $status = $statusOptions[array_rand($statusOptions)];
+                    
+                    if (!$currentAppointmentSet && $status === 'in_progress') {
+                        $isCurrent = true;
+                        $currentAppointmentSet = true;
+                    } else {
+                        $isCurrent = false;
+                    }
+                } else {
+                    $status = rand(1, 10) <= 9 ? 'scheduled' : 'cancelled';
+                    $isCurrent = false;
+                }
+
+                \App\Models\Appointment::create([
+                    'patient_id' => $selectedPatient->id,
+                    'doctor_id' => $doctor->id,
+                    'appointment_date' => $date->format('Y-m-d'),
+                    'appointment_time' => $timeSlot,
+                    'status' => $status,
+                    'reason' => $appointmentReasons[array_rand($appointmentReasons)],
+                    'notes' => $appointmentNotes[array_rand($appointmentNotes)],
+                    'is_current' => $isCurrent,
+                ]);
+
+                $appointmentCount++;
+            }
         }
 
-        $this->command->info('Appointments seeded successfully with various dates and statuses!');
+        // Ensure at least one current appointment for today
+        if (!$currentAppointmentSet) {
+            $todayAppointment = \App\Models\Appointment::where('appointment_date', $currentDate->format('Y-m-d'))
+                ->where('status', 'scheduled')
+                ->first();
+            
+            if ($todayAppointment) {
+                $todayAppointment->update([
+                    'status' => 'in_progress',
+                    'is_current' => true
+                ]);
+            }
+        }
+
+        $this->command->info("$appointmentCount appointments seeded successfully spanning 4 weeks!");
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Patient;
 
 class PatientSeeder extends Seeder
 {
@@ -12,83 +12,66 @@ class PatientSeeder extends Seeder
      */
     public function run(): void
     {
-        $patients = [
-            [
-                'first_name' => 'Alice',
-                'last_name' => 'Nguyen',
-                'birth_date' => '1988-04-12',
-                'gender' => 'female',
-                'phone' => '+1555000001',
-                'email' => 'alice.nguyen@example.com',
-                'address' => '101 Main St, Springfield',
-                'id_card_number' => 'G001',
-                'allergies' => 'Peanuts',
-                'chronic_conditions' => 'Asthma',
-                'emergency_contact_name' => 'Tom Nguyen',
-                'emergency_contact_phone' => '+1555010001',
-            ],
-            [
-                'first_name' => 'Brian',
-                'last_name' => 'O’Connor',
-                'birth_date' => '1979-11-23',
-                'gender' => 'male',
-                'phone' => '+1555000002',
-                'email' => 'brian.oconnor@example.com',
-                'address' => '202 Oak Ave, Riverdale',
-                'id_card_number' => 'G002',
-                'allergies' => null,
-                'chronic_conditions' => 'Hypertension',
-                'emergency_contact_name' => 'Mia O’Connor',
-                'emergency_contact_phone' => '+1555010002',
-            ],
-            [
-                'first_name' => 'Carla',
-                'last_name' => 'Fernandez',
-                'birth_date' => '1993-06-05',
-                'gender' => 'female',
-                'phone' => '+1555000003',
-                'email' => 'carla.fernandez@example.com',
-                'address' => '303 Pine Rd, Lakeside',
-                'id_card_number' => 'G003',
-                'allergies' => 'Penicillin',
-                'chronic_conditions' => null,
-                'emergency_contact_name' => 'Diego Fernandez',
-                'emergency_contact_phone' => '+1555010003',
-            ],
-            [
-                'first_name' => 'David',
-                'last_name' => 'Kim',
-                'birth_date' => '2001-02-18',
-                'gender' => 'male',
-                'phone' => '+1555000004',
-                'email' => null,
-                'address' => '404 Cedar Ln, Brookfield',
-                'id_card_number' => 'G004',
-                'allergies' => null,
-                'chronic_conditions' => null,
-                'emergency_contact_name' => 'Jin Kim',
-                'emergency_contact_phone' => '+1555010004',
-            ],
-            [
-                'first_name' => 'Eman',
-                'last_name' => 'Hassan',
-                'birth_date' => '1985-09-30',
-                'gender' => 'male',
-                'phone' => '+1555000005',
-                'email' => 'eman.hassan@example.com',
-                'address' => '505 Maple St, Fairview',
-                'id_card_number' => 'G005',
-                'allergies' => 'Shellfish',
-                'chronic_conditions' => 'Diabetes Type II',
-                'emergency_contact_name' => 'Omar Hassan',
-                'emergency_contact_phone' => '+1555010005',
-            ],
+        $firstNames = [
+            'James', 'Robert', 'John', 'Michael', 'David', 'William', 'Richard', 'Joseph', 'Thomas', 'Christopher',
+            'Charles', 'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua',
+            'Kenneth', 'Kevin', 'Brian', 'George', 'Timothy', 'Ronald', 'Jason', 'Edward', 'Jeffrey', 'Ryan',
+            'Mary', 'Patricia', 'Jennifer', 'Linda', 'Elizabeth', 'Barbara', 'Susan', 'Jessica', 'Sarah', 'Karen',
+            'Nancy', 'Lisa', 'Betty', 'Helen', 'Sandra', 'Donna', 'Carol', 'Ruth', 'Sharon', 'Michelle',
+            'Laura', 'Kimberly', 'Deborah', 'Dorothy', 'Maria', 'Ashley', 'Emma', 'Olivia', 'Sophia', 'Ava'
         ];
 
-        foreach ($patients as $data) {
-            Patient::create($data);
+        $lastNames = [
+            'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+            'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+            'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson',
+            'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores'
+        ];
+
+        $addresses = [
+            '123 Main St, Springfield', '456 Oak Ave, Riverside', '789 Pine Rd, Lakeside', '321 Elm St, Brookfield',
+            '654 Maple Ave, Fairview', '987 Cedar Ln, Hillside', '147 Birch Dr, Woodland', '258 Spruce Way, Valley View',
+            '369 Willow St, Meadowbrook', '741 Aspen Ct, Forest Hill', '852 Poplar Ave, Garden City', '963 Sycamore Rd, Greenwood'
+        ];
+
+        $allergies = [null, 'Peanuts', 'Shellfish', 'Dairy', 'Eggs', 'Penicillin', 'Latex', 'Dust mites'];
+        $chronicConditions = [null, 'Hypertension', 'Diabetes Type II', 'Asthma', 'COPD', 'Heart disease', 'Arthritis'];
+        $genders = ['male', 'female'];
+
+        // Generate 150 patients
+        for ($i = 1; $i <= 150; $i++) {
+            $gender = $genders[array_rand($genders)];
+            $firstName = $firstNames[array_rand($firstNames)];
+            $lastName = $lastNames[array_rand($lastNames)];
+            
+            $birthDate = now()->subYears(rand(18, 85))->subDays(rand(0, 365));
+            $phone = '+1555' . str_pad($i, 6, '0', STR_PAD_LEFT);
+            $email = rand(1, 10) <= 7 ? strtolower($firstName . '.' . $lastName . $i . '@example.com') : null;
+            $idCardNumber = 'ID' . str_pad($i, 6, '0', STR_PAD_LEFT);
+            
+            $selectedAllergies = rand(1, 10) <= 3 ? $allergies[array_rand($allergies)] : null;
+            $selectedChronicConditions = rand(1, 10) <= 3 ? $chronicConditions[array_rand($chronicConditions)] : null;
+            
+            $emergencyFirstName = $firstNames[array_rand($firstNames)];
+            $emergencyLastName = rand(1, 2) === 1 ? $lastName : $lastNames[array_rand($lastNames)];
+            $emergencyPhone = '+1555' . str_pad(($i + 50000), 6, '0', STR_PAD_LEFT);
+
+            \App\Models\Patient::create([
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'birth_date' => $birthDate->format('Y-m-d'),
+                'gender' => $gender,
+                'phone' => $phone,
+                'email' => $email,
+                'address' => $addresses[array_rand($addresses)],
+                'id_card_number' => $idCardNumber,
+                'allergies' => $selectedAllergies,
+                'chronic_conditions' => $selectedChronicConditions,
+                'emergency_contact_name' => $emergencyFirstName . ' ' . $emergencyLastName,
+                'emergency_contact_phone' => $emergencyPhone,
+            ]);
         }
+
+        $this->command->info('150 patients seeded successfully!');
     }
 }
-
-
