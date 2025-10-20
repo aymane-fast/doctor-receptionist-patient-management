@@ -30,10 +30,10 @@
     <!-- Modern Search and Filters -->
     <div class="glass-effect rounded-3xl p-6 modern-shadow">
         <form method="GET" action="{{ route('medical-records.index') }}" class="space-y-4">
-            <!-- Search Bar -->
+            <!-- Search Bar and Date Filter -->
             <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
                 <div class="flex-1 w-full">
-                    <label for="search" class="sr-only">Search Patients</label>
+                    <label for="search" class="sr-only">{{ __('medical_records.search_patients') }}</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
@@ -46,12 +46,26 @@
                                class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200">
                     </div>
                 </div>
+                <!-- Date Filter -->
+                <div class="w-full md:w-auto">
+                    <label for="date" class="sr-only">{{ __('medical_records.filter_by_date') }}</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-calendar text-gray-400"></i>
+                        </div>
+                        <input type="date" 
+                               id="date" 
+                               name="date" 
+                               value="{{ request('date') }}"
+                               class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200">
+                    </div>
+                </div>
                 <div class="flex space-x-3">
                     <button type="submit" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
                         <i class="fas fa-search"></i>
                         <span>{{ __('medical_records.search') }}</span>
                     </button>
-                    @if(request('search') || request('patient_id'))
+                    @if(request('search') || request('date'))
                     <a href="{{ route('medical-records.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
                         <i class="fas fa-times"></i>
                         <span>{{ __('medical_records.clear') }}</span>
@@ -59,31 +73,11 @@
                     @endif
                 </div>
             </div>
-            
-            <!-- Patient Filter -->
-            <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-                <div class="flex-1 w-full">
-                    <label for="patient_filter" class="sr-only">Filter by Patient</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fas fa-user text-gray-400"></i>
-                        </div>
-                        <select name="patient_id" onchange="this.form.submit()" 
-                                class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200">
-                            <option value="">{{ __('medical_records.all_patients_history') }}</option>
-                            @foreach($patients as $patient)
-                                <option value="{{ $patient->id }}" {{ request('patient_id') == $patient->id ? 'selected' : '' }}>
-                                    {{ $patient->first_name }} {{ $patient->last_name }} ({{ $patient->patient_id }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            </div>
         </form>
     </div>
 
     <!-- Modern Medical Records Grid -->
+    @if($hasSearchQuery)
     <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
         <div class="p-6">
             @if($medicalRecords->count() > 0)
@@ -253,38 +247,54 @@
                         <i class="fas fa-file-medical text-gray-400 text-4xl"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-3">
-                        @if(request('search'))
-                            {{ __('medical_records.no_search_results') }}
-                        @elseif(request('patient_id'))
-                            {{ __('medical_records.no_records_found') }}
-                        @else
-                            {{ __('medical_records.no_records_yet') }}
-                        @endif
+                        {{ __('medical_records.no_search_results') }}
                     </h3>
                     <p class="text-gray-500 text-lg mb-8 max-w-md mx-auto">
                         @if(request('search'))
                             {{ __('medical_records.no_search_results_desc', ['search' => request('search')]) }}
-                        @elseif(request('patient_id'))
-                            {{ __('medical_records.no_records_for_patient') }}
+                        @elseif(request('date'))
+                            {{ __('medical_records.no_records_for_date') }}
                         @else
-                            {{ __('medical_records.complete_medical_history') }}
+                            {{ __('medical_records.no_records_found_desc') }}
                         @endif
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-                        @if(request('search') || request('patient_id'))
                         <a href="{{ route('medical-records.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
                             <i class="fas fa-arrow-left"></i>
-                            <span>{{ __('medical_records.view_all_records') }}</span>
+                            <span>{{ __('medical_records.clear_search') }}</span>
                         </a>
-                        @endif
                         <a href="{{ route('medical-records.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow">
                             <i class="fas fa-plus"></i>
-                                                        <span>{{ (request('search') || request('patient_id')) ? __('medical_records.create_medical_record') : __('medical_records.create_first_record') }}</span>
+                            <span>{{ __('medical_records.create_medical_record') }}</span>
                         </a>
                     </div>
                 </div>
             @endif
         </div>
     </div>
+    @else
+    <!-- Initial State - No Search Performed -->
+    <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
+        <div class="p-6">
+            <div class="text-center py-16">
+                <div class="w-24 h-24 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-float">
+                    <i class="fas fa-search text-emerald-600 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">
+                    {{ __('medical_records.search_records_title') }}
+                </h3>
+                <p class="text-gray-500 text-lg mb-8 max-w-md mx-auto">
+                    {{ __('medical_records.search_records_desc') }}
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <a href="{{ route('medical-records.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow">
+                        <i class="fas fa-plus"></i>
+                        <span>{{ __('medical_records.create_medical_record') }}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 @endsection

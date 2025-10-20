@@ -109,4 +109,12 @@ return [
     'complete_medical_history' => 'Historique médical complet et dossiers des patients',
     'records_found' => 'dossiers trouvés',
     'create_medical_record' => 'Créer un Dossier Médical',
+    
+    // New translations for simplified index
+    'filter_by_date' => 'Filtrer par Date',
+    'search_records_title' => 'Rechercher des Dossiers Médicaux',
+    'search_records_desc' => 'Utilisez la barre de recherche ci-dessus pour trouver des dossiers médicaux par nom de patient, ID, ou filtrer par date.',
+    'no_records_for_date' => 'Aucun dossier médical trouvé pour la date sélectionnée.',
+    'no_records_found_desc' => 'Aucun dossier médical trouvé correspondant à vos critères de recherche.',
+    'clear_search' => 'Effacer la Recherche',
 ];

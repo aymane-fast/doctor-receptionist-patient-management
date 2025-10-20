@@ -20,34 +20,36 @@ class MedicalRecordController extends Controller
             abort(403, 'Unauthorized access to medical records.');
         }
 
-        $query = MedicalRecord::with(['patient', 'doctor', 'appointment'])
-                             ->where('doctor_id', Auth::id());
+        $medicalRecords = collect(); // Empty collection by default
+        $hasSearchQuery = false;
 
-        // Search by patient
-        if ($request->has('patient_id') && $request->patient_id) {
-            $query->where('patient_id', $request->patient_id);
+        // Only query records if there's a search term or date filter
+        if ($request->filled('search') || $request->filled('date')) {
+            $hasSearchQuery = true;
+            
+            $query = MedicalRecord::with(['patient', 'doctor', 'appointment'])
+                                 ->where('doctor_id', Auth::id());
+
+            // Search by patient name, phone, or patient ID
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->whereHas('patient', function($q) use ($searchTerm) {
+                    $q->where('first_name', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('patient_id', 'LIKE', "%{$searchTerm}%");
+                });
+            }
+
+            // Filter by date
+            if ($request->has('date') && $request->date) {
+                $query->whereDate('visit_date', $request->date);
+            }
+
+            $medicalRecords = $query->latest('visit_date')->paginate(15);
         }
 
-        // Search by patient name, phone, or patient ID
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->whereHas('patient', function($q) use ($searchTerm) {
-                $q->where('first_name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('patient_id', 'LIKE', "%{$searchTerm}%");
-            });
-        }
-
-        // Filter by date
-        if ($request->has('date') && $request->date) {
-            $query->whereDate('visit_date', $request->date);
-        }
-
-        $medicalRecords = $query->latest('visit_date')->paginate(15);
-        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
-
-        return view('medical-records.index', compact('medicalRecords', 'patients'));
+        return view('medical-records.index', compact('medicalRecords', 'hasSearchQuery'));
     }
 
     /**

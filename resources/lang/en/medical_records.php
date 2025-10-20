@@ -109,4 +109,12 @@ return [
     'complete_medical_history' => 'Complete medical history & patient records',
     'records_found' => 'records found',
     'create_medical_record' => 'Create Medical Record',
+    
+    // New translations for simplified index
+    'filter_by_date' => 'Filter by Date',
+    'search_records_title' => 'Search Medical Records',
+    'search_records_desc' => 'Use the search bar above to find medical records by patient name, ID, or filter by date.',
+    'no_records_for_date' => 'No medical records found for the selected date.',
+    'no_records_found_desc' => 'No medical records found matching your search criteria.',
+    'clear_search' => 'Clear Search',
 ];
