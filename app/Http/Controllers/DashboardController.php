@@ -30,11 +30,31 @@ class DashboardController extends Controller
      */
     private function doctorDashboard()
     {
-        $todayAppointments = Appointment::with('patient')
+        // Today's appointments with filtering
+        $todayAppointmentsQuery = Appointment::with('patient')
             ->where('doctor_id', Auth::id())
-            ->today()
+            ->today();
+
+        // Apply appointment filters
+        if (request('patient_search')) {
+            $searchTerm = request('patient_search');
+            $todayAppointmentsQuery->whereHas('patient', function($query) use ($searchTerm) {
+                $query->where('first_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('patient_id', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('phone', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('cin', 'like', '%' . $searchTerm . '%')
+                      ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
+            });
+        }
+
+        if (request('status_filter')) {
+            $todayAppointmentsQuery->where('status', request('status_filter'));
+        }
+
+        $todayAppointments = $todayAppointmentsQuery
             ->orderBy('appointment_time')
-            ->paginate(10, ['*'], 'doc_today_page');
+            ->paginate(4, ['*'], 'doc_today_page');
 
         $currentAppointment = Appointment::with('patient')
             ->where('doctor_id', Auth::id())
@@ -75,9 +95,33 @@ class DashboardController extends Controller
             ->orderBy('appointment_time')
             ->get();
 
-        $recentRecords = MedicalRecord::with('patient')
-            ->where('doctor_id', Auth::id())
-            ->latest()
+        // Medical records with filtering
+        $recentRecordsQuery = MedicalRecord::with('patient')
+            ->where('doctor_id', Auth::id());
+
+        // Apply medical records filters
+        if (request('record_patient_search')) {
+            $searchTerm = request('record_patient_search');
+            $recentRecordsQuery->whereHas('patient', function($query) use ($searchTerm) {
+                $query->where('first_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('patient_id', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('phone', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('cin', 'like', '%' . $searchTerm . '%')
+                      ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
+            });
+        }
+
+        if (request('record_date_from')) {
+            $recentRecordsQuery->whereDate('visit_date', '>=', request('record_date_from'));
+        }
+
+        if (request('record_date_to')) {
+            $recentRecordsQuery->whereDate('visit_date', '<=', request('record_date_to'));
+        }
+
+        $recentRecords = $recentRecordsQuery
+            ->latest('visit_date')
             ->paginate(5, ['*'], 'doc_records_page');
 
         $stats = [
@@ -104,10 +148,34 @@ class DashboardController extends Controller
      */
     private function receptionistDashboard()
     {
-        $todayAppointments = Appointment::with(['patient', 'doctor'])
-            ->today()
+        // Today's appointments with filtering
+        $todayAppointmentsQuery = Appointment::with(['patient', 'doctor'])
+            ->today();
+
+        // Apply appointment filters
+        if (request('patient_search')) {
+            $searchTerm = request('patient_search');
+            $todayAppointmentsQuery->whereHas('patient', function($query) use ($searchTerm) {
+                $query->where('first_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('patient_id', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('phone', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('cin', 'like', '%' . $searchTerm . '%')
+                      ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
+            });
+        }
+
+        if (request('doctor_filter')) {
+            $todayAppointmentsQuery->where('doctor_id', request('doctor_filter'));
+        }
+
+        if (request('status_filter')) {
+            $todayAppointmentsQuery->where('status', request('status_filter'));
+        }
+
+        $todayAppointments = $todayAppointmentsQuery
             ->orderBy('appointment_time')
-            ->paginate(10, ['*'], 'today_page');
+            ->paginate(4, ['*'], 'today_page');
 
         $currentByDoctor = Appointment::with(['patient', 'doctor'])
             ->today()
@@ -122,7 +190,41 @@ class DashboardController extends Controller
             ->orderBy('appointment_time')
             ->get();
 
-        $recentPatients = Patient::latest()->paginate(5, ['*'], 'recent_patients_page');
+        // Recent patients with filtering
+        $recentPatientsQuery = Patient::query();
+
+        // Apply patient filters
+        if (request('patient_name_search')) {
+            $searchTerm = request('patient_name_search');
+            $recentPatientsQuery->where(function($query) use ($searchTerm) {
+                $query->where('first_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('patient_id', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('phone', 'like', '%' . $searchTerm . '%')
+                      ->orWhere('cin', 'like', '%' . $searchTerm . '%')
+                      ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
+            });
+        }
+
+        if (request('age_from')) {
+            $recentPatientsQuery->whereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= ?', [request('age_from')]);
+        }
+
+        if (request('age_to')) {
+            $recentPatientsQuery->whereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) <= ?', [request('age_to')]);
+        }
+
+        if (request('reg_date_from')) {
+            $recentPatientsQuery->whereDate('created_at', '>=', request('reg_date_from'));
+        }
+
+        if (request('reg_date_to')) {
+            $recentPatientsQuery->whereDate('created_at', '<=', request('reg_date_to'));
+        }
+
+        $recentPatients = $recentPatientsQuery
+            ->latest()
+            ->paginate(5, ['*'], 'recent_patients_page');
 
         $stats = [
             'total_patients' => Patient::count(),

@@ -4,6 +4,49 @@
 
 @section('content')
 <div class="space-y-8">
+    <!-- Modern Quick Actions - Moved to Top -->
+    <div class="glass-effect rounded-3xl p-8 modern-shadow">
+        <div class="flex items-center space-x-3 mb-6">
+            <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
+                <i class="fas fa-bolt text-white"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-900">{{ __('dashboard.quick_actions') }}</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <a href="{{ route('patients.create') }}" class="group bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 border-2 border-gray-100 hover:border-blue-200 rounded-2xl p-6 transition-all duration-300 card-hover">
+                <div class="w-12 h-12 bg-blue-100 group-hover:bg-blue-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
+                    <i class="fas fa-user-plus text-blue-600 text-xl"></i>
+                </div>
+                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.register_patient') }}</span>
+                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.add_new_patient') }}</span>
+            </a>
+            
+            <a href="{{ route('appointments.create') }}" class="group bg-white hover:bg-gradient-to-br hover:from-emerald-50 hover:to-emerald-100 border-2 border-gray-100 hover:border-emerald-200 rounded-2xl p-6 transition-all duration-300 card-hover">
+                <div class="w-12 h-12 bg-emerald-100 group-hover:bg-emerald-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
+                    <i class="fas fa-calendar-plus text-emerald-600 text-xl"></i>
+                </div>
+                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.book_appointment_action') }}</span>
+                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.schedule_visit') }}</span>
+            </a>
+            
+            <a href="{{ route('patients.index') }}" class="group bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-purple-100 border-2 border-gray-100 hover:border-purple-200 rounded-2xl p-6 transition-all duration-300 card-hover">
+                <div class="w-12 h-12 bg-purple-100 group-hover:bg-purple-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
+                    <i class="fas fa-search text-purple-600 text-xl"></i>
+                </div>
+                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.search_patients') }}</span>
+                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.find_patient_records') }}</span>
+            </a>
+            
+            <a href="{{ route('appointments.index') }}" class="group bg-white hover:bg-gradient-to-br hover:from-orange-50 hover:to-orange-100 border-2 border-gray-100 hover:border-orange-200 rounded-2xl p-6 transition-all duration-300 card-hover">
+                <div class="w-12 h-12 bg-orange-100 group-hover:bg-orange-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
+                    <i class="fas fa-calendar-alt text-orange-600 text-xl"></i>
+                </div>
+                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.all_appointments') }}</span>
+                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.view_schedule') }}</span>
+            </a>
+        </div>
+    </div>
+
     <!-- Current Patients Section -->
     @if(isset($currentByDoctor) && $currentByDoctor->count())
     <div class="glass-effect rounded-3xl p-8 modern-shadow">
@@ -52,28 +95,6 @@
         </div>
     </div>
     @endif
-
-    <!-- Welcome Header -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-user-tie text-indigo-600 text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">
-                        {{ __('dashboard.welcome_back') }}, <span class="text-gradient">{{ auth()->user()->name }}</span>
-                    </h1>
-                    <p class="text-gray-600 mt-2 text-lg">{{ __('dashboard.reception_dashboard') }} - {{ __('dashboard.manage_patients_appointments') }}</p>
-                </div>
-            </div>
-            <div class="text-right bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4">
-                <div class="text-sm text-gray-500 mb-1">{{ now()->format('l') }}</div>
-                <div class="text-xl font-semibold text-gray-900">{{ now()->format('F j, Y') }}</div>
-                <div class="text-lg font-medium text-indigo-600">{{ now()->format('g:i A') }}</div>
-            </div>
-        </div>
-    </div>
 
     <!-- Modern Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -161,64 +182,73 @@
                             <p class="text-sm text-gray-500">{{ $stats['today_appointments'] }} {{ __('dashboard.scheduled_today') }}</p>
                         </div>
                     </div>
-                    <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
-                        <i class="fas fa-plus"></i>
-                        <span>{{ __('dashboard.book_appointment_btn') }}</span>
-                    </a>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="openReceptionAppointmentFilters()" class="filter-btn">
+                            <i class="fas fa-filter"></i>
+                            <span>Filter</span>
+                        </button>
+                        <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>{{ __('dashboard.book_appointment_btn') }}</span>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="p-6 max-h-96 overflow-y-auto">
-                @if($todayAppointments->count() > 0)
-                    <div class="space-y-4">
-                        @foreach($todayAppointments as $appointment)
-                        <div class="bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover">
+            <div class="p-6">
+                                @if($todayAppointments->count() > 0)
+                    <div class="space-y-2">
+                        @foreach($todayAppointments as $index => $appointment)
+                        <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                                        <i class="fas fa-user text-gray-600"></i>
+                                    <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-clock text-blue-600"></i>
                                     </div>
                                     <div>
                                         <h3 class="font-semibold text-gray-900">{{ $appointment->patient->full_name }}</h3>
                                         <p class="text-sm text-gray-500 flex items-center space-x-3">
                                             <span class="flex items-center space-x-1">
                                                 <i class="fas fa-clock w-3"></i>
-                                                <span>{{ $appointment->appointment_time->format('g:i A') }}</span>
+                                                <span>{{ $appointment->appointment_time->format('H:i') }}</span>
                                             </span>
                                             <span class="flex items-center space-x-1">
-                                                <i class="fas fa-user-md w-3"></i>
-                                                <span>Dr. {{ $appointment->doctor->name }}</span>
+                                                <i class="fas fa-stethoscope w-3"></i>
+                                                <span>{{ $appointment->doctor->full_name }}</span>
                                             </span>
                                         </p>
                                     </div>
                                 </div>
-                                <div class="flex items-center space-x-3">
-                                    <span class="px-3 py-1 text-xs font-medium rounded-full
-                                        @if($appointment->status == 'scheduled') bg-gradient-to-r from-amber-100 to-amber-50 text-amber-800 border border-amber-200
-                                        @elseif($appointment->status == 'in_progress') bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 border border-blue-200
-                                        @elseif($appointment->status == 'completed') bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-800 border border-emerald-200
-                                        @else bg-gradient-to-r from-red-100 to-red-50 text-red-800 border border-red-200 @endif">
-                                        {{ __('appointments.' . $appointment->status) }}
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs px-2 py-1 rounded-full {{ $appointment->status === 'confirmed' ? 'bg-green-100 text-green-600' : ($appointment->status === 'cancelled' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600') }}">
+                                        {{ ucfirst($appointment->status) }}
                                     </span>
-                                    @if($appointment->is_current)
-                                        <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-medium">{{ __('dashboard.current_patient') }}</span>
-                                    @else
-                                        <form action="{{ route('appointments.set-current', $appointment) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-lg font-medium transition-colors">{{ __('dashboard.set_current') }}</button>
-                                        </form>
-                                    @endif
                                     <a href="{{ route('appointments.show', $appointment) }}" class="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors">
                                         <i class="fas fa-eye text-blue-600 text-sm"></i>
                                     </a>
                                 </div>
                             </div>
-                            @if($appointment->reason)
-                            <p class="text-sm text-gray-600 mt-3 pl-16">{{ Str::limit($appointment->reason, 80) }}</p>
-                            @endif
                         </div>
                         @endforeach
                     </div>
-                    <div class="mt-6">{{ $todayAppointments->links() }}</div>
+                    
+                    <!-- Enhanced Pagination Section -->
+                    @if($todayAppointments->hasPages())
+                    <div class="border-t border-gray-100 pt-6 mt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="pagination-info flex items-center space-x-2 text-sm text-gray-600">
+                                <i class="fas fa-info-circle text-blue-500"></i>
+                                <span>Showing {{ $todayAppointments->firstItem() ?? 0 }} to {{ $todayAppointments->lastItem() ?? 0 }} of {{ $todayAppointments->total() }} appointments</span>
+                            </div>
+                            <div class="pagination-page-indicator flex items-center space-x-2 text-xs">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>Page {{ $todayAppointments->currentPage() }} of {{ $todayAppointments->lastPage() }}</span>
+                            </div>
+                        </div>
+                        <div class="pagination-wrapper">
+                            {{ $todayAppointments->appends(request()->except(['doc_recent_page']))->links() }}
+                        </div>
+                    </div>
+                    @endif
                 @else
                     <div class="text-center py-12">
                         <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -241,17 +271,23 @@
                         </div>
                         <h2 class="text-xl font-bold text-gray-900">{{ __('dashboard.recent_patients') }}</h2>
                     </div>
-                    <a href="{{ route('patients.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
-                        <i class="fas fa-plus"></i>
-                        <span>{{ __('dashboard.add_patient') }}</span>
-                    </a>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="openReceptionPatientFilters()" class="filter-btn">
+                            <i class="fas fa-filter"></i>
+                            <span>Filter</span>
+                        </button>
+                        <a href="{{ route('patients.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>{{ __('dashboard.add_patient') }}</span>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="p-6 max-h-96 overflow-y-auto">
+            <div class="p-6">
                 @if($recentPatients->count() > 0)
-                    <div class="space-y-4">
-                        @foreach($recentPatients as $patient)
-                        <div class="bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover">
+                    <div class="space-y-2">
+                        @foreach($recentPatients as $index => $patient)
+                        <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">
@@ -280,7 +316,25 @@
                         </div>
                         @endforeach
                     </div>
-                    <div class="mt-6">{{ $recentPatients->links() }}</div>
+                    
+                    <!-- Enhanced Pagination Section -->
+                    @if($recentPatients->hasPages())
+                    <div class="border-t border-gray-100 pt-6 mt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="pagination-info flex items-center space-x-2 text-sm text-gray-600">
+                                <i class="fas fa-info-circle text-emerald-500"></i>
+                                <span>Showing {{ $recentPatients->firstItem() ?? 0 }} to {{ $recentPatients->lastItem() ?? 0 }} of {{ $recentPatients->total() }} patients</span>
+                            </div>
+                            <div class="pagination-page-indicator flex items-center space-x-2 text-xs">
+                                <i class="fas fa-users"></i>
+                                <span>Page {{ $recentPatients->currentPage() }} of {{ $recentPatients->lastPage() }}</span>
+                            </div>
+                        </div>
+                        <div class="pagination-wrapper">
+                            {{ $recentPatients->appends(request()->except(['rec_today_page']))->links() }}
+                        </div>
+                    </div>
+                    @endif
                 @else
                     <div class="text-center py-12">
                         <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -374,47 +428,126 @@
         </div>
     </div>
 
-    <!-- Modern Quick Actions -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow">
-        <div class="flex items-center space-x-3 mb-6">
-            <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
-                <i class="fas fa-bolt text-white"></i>
+</div>
+
+<!-- Filter Modals -->
+<div id="receptionAppointmentFiltersModal" class="fixed inset-0 modal-overlay z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Filter Appointments</h3>
+                    <button onclick="closeReceptionAppointmentFilters()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form method="GET" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Search Patient</label>
+                        <input type="text" name="patient_search" class="modal-input focus:ring-blue-500" placeholder="Search by name, phone, CIN, or patient ID..." value="{{ request('patient_search') }}">
+                        <p class="text-xs text-gray-500 mt-1">Search across: name, phone number, CIN, patient ID</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Doctor</label>
+                        <select name="doctor_filter" class="modal-input focus:ring-blue-500">
+                            <option value="">All Doctors</option>
+                            @foreach(\App\Models\User::where('role', 'doctor')->get() as $doctor)
+                            <option value="{{ $doctor->id }}" {{ request('doctor_filter') == $doctor->id ? 'selected' : '' }}>Dr. {{ $doctor->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <select name="status_filter" class="modal-input focus:ring-blue-500">
+                            <option value="">All Statuses</option>
+                            <option value="scheduled" {{ request('status_filter') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                            <option value="in_progress" {{ request('status_filter') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                            <option value="completed" {{ request('status_filter') == 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="cancelled" {{ request('status_filter') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-3 pt-4">
+                        <button type="submit" class="flex-1 btn-primary">
+                            <i class="fas fa-search mr-2"></i>Apply Filters
+                        </button>
+                        <a href="{{ route('dashboard') }}" class="flex-1 btn-secondary text-center">
+                            <i class="fas fa-times mr-2"></i>Clear
+                        </a>
+                    </div>
+                </form>
             </div>
-            <h2 class="text-xl font-bold text-gray-900">{{ __('dashboard.quick_actions') }}</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <a href="{{ route('patients.create') }}" class="group bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 border-2 border-gray-100 hover:border-blue-200 rounded-2xl p-6 transition-all duration-300 card-hover">
-                <div class="w-12 h-12 bg-blue-100 group-hover:bg-blue-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
-                    <i class="fas fa-user-plus text-blue-600 text-xl"></i>
-                </div>
-                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.register_patient') }}</span>
-                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.add_new_patient') }}</span>
-            </a>
-            
-            <a href="{{ route('appointments.create') }}" class="group bg-white hover:bg-gradient-to-br hover:from-emerald-50 hover:to-emerald-100 border-2 border-gray-100 hover:border-emerald-200 rounded-2xl p-6 transition-all duration-300 card-hover">
-                <div class="w-12 h-12 bg-emerald-100 group-hover:bg-emerald-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
-                    <i class="fas fa-calendar-plus text-emerald-600 text-xl"></i>
-                </div>
-                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.book_appointment_action') }}</span>
-                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.schedule_visit') }}</span>
-            </a>
-            
-            <a href="{{ route('patients.index') }}" class="group bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-purple-100 border-2 border-gray-100 hover:border-purple-200 rounded-2xl p-6 transition-all duration-300 card-hover">
-                <div class="w-12 h-12 bg-purple-100 group-hover:bg-purple-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
-                    <i class="fas fa-search text-purple-600 text-xl"></i>
-                </div>
-                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.search_patients') }}</span>
-                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.find_patient_records') }}</span>
-            </a>
-            
-            <a href="{{ route('appointments.index') }}" class="group bg-white hover:bg-gradient-to-br hover:from-orange-50 hover:to-orange-100 border-2 border-gray-100 hover:border-orange-200 rounded-2xl p-6 transition-all duration-300 card-hover">
-                <div class="w-12 h-12 bg-orange-100 group-hover:bg-orange-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
-                    <i class="fas fa-calendar-alt text-orange-600 text-xl"></i>
-                </div>
-                <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.all_appointments') }}</span>
-                <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.view_schedule') }}</span>
-            </a>
         </div>
     </div>
 </div>
+
+<div id="receptionPatientFiltersModal" class="fixed inset-0 modal-overlay z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Filter Patients</h3>
+                    <button onclick="closeReceptionPatientFilters()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form method="GET" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Search Patient</label>
+                        <input type="text" name="patient_name_search" class="modal-input focus:ring-emerald-500" placeholder="Search by name, phone, CIN, or patient ID..." value="{{ request('patient_name_search') }}">
+                        <p class="text-xs text-gray-500 mt-1">Search across: name, phone number, CIN, patient ID</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Age Range</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="number" name="age_from" class="modal-input focus:ring-emerald-500" placeholder="From" value="{{ request('age_from') }}">
+                            <input type="number" name="age_to" class="modal-input focus:ring-emerald-500" placeholder="To" value="{{ request('age_to') }}">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Registration Date</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="date" name="reg_date_from" class="modal-input focus:ring-emerald-500" value="{{ request('reg_date_from') }}">
+                            <input type="date" name="reg_date_to" class="modal-input focus:ring-emerald-500" value="{{ request('reg_date_to') }}">
+                        </div>
+                    </div>
+                    <div class="flex space-x-3 pt-4">
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl">
+                            <i class="fas fa-search mr-2"></i>Apply Filters
+                        </button>
+                        <a href="{{ route('dashboard') }}" class="flex-1 btn-secondary text-center">
+                            <i class="fas fa-times mr-2"></i>Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openReceptionAppointmentFilters() {
+    document.getElementById('receptionAppointmentFiltersModal').classList.remove('hidden');
+}
+
+function closeReceptionAppointmentFilters() {
+    document.getElementById('receptionAppointmentFiltersModal').classList.add('hidden');
+}
+
+function openReceptionPatientFilters() {
+    document.getElementById('receptionPatientFiltersModal').classList.remove('hidden');
+}
+
+function closeReceptionPatientFilters() {
+    document.getElementById('receptionPatientFiltersModal').classList.add('hidden');
+}
+
+// Close modals when clicking outside
+document.getElementById('receptionAppointmentFiltersModal').addEventListener('click', function(e) {
+    if (e.target === this) closeReceptionAppointmentFilters();
+});
+
+document.getElementById('receptionPatientFiltersModal').addEventListener('click', function(e) {
+    if (e.target === this) closeReceptionPatientFilters();
+});
+</script>
 @endsection
