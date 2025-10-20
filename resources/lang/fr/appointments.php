@@ -60,6 +60,10 @@ return [
     'no_appointments_found' => 'Aucun rendez-vous trouvé correspondant à vos critères.',
     'create_first_appointment' => 'Créez votre premier rendez-vous pour commencer.',
     'id_card_number' => 'Numéro de carte d\'identité',
+    'today' => 'Aujourd\'hui',
+    'show_today' => 'Afficher les Rendez-vous d\'Aujourd\'hui',
+    'search_to_begin' => 'Rechercher pour Trouver des Rendez-vous',
+    'search_instructions' => 'Utilisez le formulaire de recherche ci-dessus pour trouver des rendez-vous, ou cliquez ci-dessous pour voir les rendez-vous d\'aujourd\'hui.',
     'appointment_with' => 'Rendez-vous avec',
     'view_details' => 'Voir les Détails',
     'start_consultation' => 'Commencer la Consultation',
@@ -123,4 +127,5 @@ return [
     'vaccination' => 'Vaccination',
     'lab_results_review' => 'Examen des résultats de laboratoire',
     'medication_review' => 'Révision des médicaments',
+    'doctor_prefix' => 'Dr.',
 ];

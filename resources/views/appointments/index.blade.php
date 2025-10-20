@@ -70,7 +70,7 @@
                         <option value="">{{ __('appointments.all_doctors') }}</option>
                         @foreach($doctors as $doctor)
                         <option value="{{ $doctor->id }}" {{ request('doctor_id') == $doctor->id ? 'selected' : '' }}>
-                            Dr. {{ $doctor->name }}
+                            {{ __('appointments.doctor_prefix') }} {{ $doctor->name }}
                         </option>
                         @endforeach
                     </select>
@@ -79,8 +79,12 @@
 
                 <div class="flex flex-col justify-end space-y-3">
                     <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
-                        <i class="fas fa-filter"></i>
-                        <span>{{ __('appointments.filter') }}</span>
+                        <i class="fas fa-search"></i>
+                        <span>{{ __('appointments.search') }}</span>
+                    </button>
+                    <button type="submit" name="show_today" value="1" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>{{ __('appointments.today') }}</span>
                     </button>
                     @if(request()->query())
                     <a href="{{ route('appointments.index') }}" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
@@ -95,7 +99,28 @@
 
     <!-- Modern Appointments List -->
     <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
-        @if($appointments->count() > 0)
+        @if(!$hasSearchQuery)
+            <!-- Initial state - no search performed -->
+            <div class="text-center py-16 px-8">
+                <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-float">
+                    <i class="fas fa-search text-blue-500 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">{{ __('appointments.search_to_begin') }}</h3>
+                <p class="text-gray-500 mb-6 text-lg max-w-md mx-auto">{{ __('appointments.search_instructions') }}</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <form method="GET" action="{{ route('appointments.index') }}" class="inline">
+                        <button type="submit" name="show_today" value="1" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                            <i class="fas fa-calendar-day"></i>
+                            <span>{{ __('appointments.show_today') }}</span>
+                        </button>
+                    </form>
+                    <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 inline-flex items-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>{{ __('appointments.schedule_appointment') }}</span>
+                    </a>
+                </div>
+            </div>
+        @elseif($appointments->count() > 0)
             <div class="overflow-x-auto">
                 <table class="min-w-full">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
@@ -127,7 +152,7 @@
                                     <div class="w-10 h-10 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">
                                         <i class="fas fa-user-md text-emerald-600 text-sm"></i>
                                     </div>
-                                    <span class="text-base font-medium text-gray-900">Dr. {{ $appointment->doctor->name }}</span>
+                                    <span class="text-base font-medium text-gray-900">{{ __('appointments.doctor_prefix') }} {{ $appointment->doctor->name }}</span>
                                 </div>
                             </td>
                             <td class="px-8 py-6">
@@ -232,9 +257,11 @@
             </div>
 
             <!-- Modern Pagination -->
+            @if(method_exists($appointments, 'appends'))
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-t border-gray-100">
                 {{ $appointments->appends(request()->query())->links() }}
             </div>
+            @endif
         @else
             <div class="text-center py-16 px-8">
                 <div class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-float">

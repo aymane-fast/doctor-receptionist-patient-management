@@ -17,49 +17,61 @@ class AppointmentController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Appointment::with(['patient', 'doctor']);
+        // Check if there's a search query or show_today request
+        $hasSearchQuery = $request->filled('search') || $request->filled('date') || $request->filled('status') || $request->filled('doctor_id') || $request->has('show_today');
+        
+        if (!$hasSearchQuery) {
+            // No search performed, return empty collection
+            $appointments = collect();
+        } else {
+            $query = Appointment::with(['patient', 'doctor']);
 
-        // Search by patient information
-        if ($request->filled('search')) {
-            $search = trim($request->string('search'));
-            $query->whereHas('patient', function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('id_card_number', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
+            // Handle "Today" button
+            if ($request->has('show_today')) {
+                $query->whereDate('appointment_date', Carbon::today());
+            }
+
+            // Search by patient information
+            if ($request->filled('search')) {
+                $search = trim($request->string('search'));
+                $query->whereHas('patient', function ($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
+                      ->orWhere('phone', 'like', "%{$search}%")
+                      ->orWhere('id_card_number', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            // Filter by date
+            if ($request->filled('date')) {
+                $query->whereDate('appointment_date', $request->date);
+            }
+
+            // Filter by status
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            // Filter by doctor for receptionists
+            if ($request->filled('doctor_id') && Auth::user()->isReceptionist()) {
+                $query->where('doctor_id', $request->doctor_id);
+            }
+
+            // If user is doctor, only show their appointments
+            if (Auth::user()->isDoctor()) {
+                $query->where('doctor_id', Auth::id());
+            }
+
+            $appointments = $query->orderBy('appointment_date', 'desc')
+                                 ->orderBy('appointment_time', 'desc')
+                                 ->paginate(15)
+                                 ->appends($request->query());
         }
-
-        // Filter by date
-        if ($request->filled('date')) {
-            $query->whereDate('appointment_date', $request->date);
-        }
-
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by doctor for receptionists
-        if ($request->filled('doctor_id') && Auth::user()->isReceptionist()) {
-            $query->where('doctor_id', $request->doctor_id);
-        }
-
-        // If user is doctor, only show their appointments
-        if (Auth::user()->isDoctor()) {
-            $query->where('doctor_id', Auth::id());
-        }
-
-        $appointments = $query->orderBy('appointment_date', 'desc')
-                             ->orderBy('appointment_time', 'desc')
-                             ->paginate(15)
-                             ->appends($request->query());
 
         $doctors = User::where('role', 'doctor')->get();
-        $patients = Patient::all();
 
-        return view('appointments.index', compact('appointments', 'doctors', 'patients'));
+        return view('appointments.index', compact('appointments', 'doctors', 'hasSearchQuery'));
     }
 
     /**

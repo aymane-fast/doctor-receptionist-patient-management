@@ -60,6 +60,10 @@ return [
     'no_appointments_found' => 'No appointments found matching your criteria.',
     'create_first_appointment' => 'Create your first appointment to get started.',
     'id_card_number' => 'ID Card Number',
+    'today' => 'Today',
+    'show_today' => 'Show Today\'s Appointments',
+    'search_to_begin' => 'Search to Find Appointments',
+    'search_instructions' => 'Use the search form above to find appointments, or click below to view today\'s appointments.',
     'appointment_with' => 'Appointment with',
     'view_details' => 'View Details',
     'start_consultation' => 'Start Consultation',
@@ -123,4 +127,5 @@ return [
     'vaccination' => 'Vaccination',
     'lab_results_review' => 'Lab results review',
     'medication_review' => 'Medication review',
+    'doctor_prefix' => 'Dr.',
 ];
