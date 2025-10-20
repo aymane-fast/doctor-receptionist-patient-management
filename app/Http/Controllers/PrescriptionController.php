@@ -16,28 +16,36 @@ class PrescriptionController extends Controller
             abort(403);
         }
 
-        $query = Prescription::with(['patient', 'doctor', 'medicalRecord'])
-            ->where('doctor_id', Auth::id());
+        $prescriptions = collect(); // Empty collection by default
+        $hasSearchQuery = false;
 
-        if ($request->filled('patient_id')) {
-            $query->where('patient_id', $request->patient_id);
+        // Only query prescriptions if there's a search term or date filter
+        if ($request->filled('search') || $request->filled('date')) {
+            $hasSearchQuery = true;
+            
+            $query = Prescription::with(['patient', 'doctor', 'medicalRecord'])
+                ->where('doctor_id', Auth::id());
+
+            // Search by patient name, phone, or patient ID
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->whereHas('patient', function($q) use ($searchTerm) {
+                    $q->where('first_name', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('patient_id', 'LIKE', "%{$searchTerm}%");
+                });
+            }
+
+            // Filter by prescribed date
+            if ($request->has('date') && $request->date) {
+                $query->whereDate('prescribed_date', $request->date);
+            }
+
+            $prescriptions = $query->latest('prescribed_date')->paginate(15);
         }
 
-        // Search by patient name, phone, or patient ID
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->whereHas('patient', function($q) use ($searchTerm) {
-                $q->where('first_name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('patient_id', 'LIKE', "%{$searchTerm}%");
-            });
-        }
-
-        $prescriptions = $query->latest('prescribed_date')->paginate(15);
-        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
-
-        return view('prescriptions.index', compact('prescriptions', 'patients'));
+        return view('prescriptions.index', compact('prescriptions', 'hasSearchQuery'));
     }
 
     public function create(Request $request)

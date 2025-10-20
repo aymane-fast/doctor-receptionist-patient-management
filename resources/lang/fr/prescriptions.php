@@ -167,4 +167,12 @@ return [
     'showing_results' => 'Affichage de :first à :last sur :total ordonnances',
     'digital_pharmacy_ready_desc' => 'Votre système de gestion de pharmacie numérique est prêt à gérer les ordonnances. Commencez par créer des dossiers de médicaments complets pour vos patients.',
     'no_patient_prescriptions_desc' => 'Ce patient n\'a pas encore d\'ordonnances dans le système. Créez sa première ordonnance pour commencer à construire son historique de médicaments.',
+    
+    // New translations for simplified index
+    'filter_by_date' => 'Filtrer par Date',
+    'search_prescriptions_title' => 'Rechercher des Ordonnances',
+    'search_prescriptions_desc' => 'Utilisez la barre de recherche ci-dessus pour trouver des ordonnances par nom de patient, ID, ou filtrer par date de prescription.',
+    'no_prescriptions_for_date' => 'Aucune ordonnance trouvée pour la date sélectionnée.',
+    'no_prescriptions_found_desc' => 'Aucune ordonnance trouvée correspondant à vos critères de recherche.',
+    'clear_search' => 'Effacer la Recherche',
 ];

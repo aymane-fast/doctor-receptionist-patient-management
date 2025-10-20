@@ -167,4 +167,12 @@ return [
     'showing_results' => 'Showing :first to :last of :total prescriptions',
     'digital_pharmacy_ready_desc' => 'Your digital pharmacy management system is ready to handle prescriptions. Start by creating comprehensive medication records for your patients.',
     'no_patient_prescriptions_desc' => 'This patient doesn\'t have any prescriptions in the system yet. Create their first prescription to start building their medication history.',
+    
+    // New translations for simplified index
+    'filter_by_date' => 'Filter by Date',
+    'search_prescriptions_title' => 'Search Prescriptions',
+    'search_prescriptions_desc' => 'Use the search bar above to find prescriptions by patient name, ID, or filter by prescription date.',
+    'no_prescriptions_for_date' => 'No prescriptions found for the selected date.',
+    'no_prescriptions_found_desc' => 'No prescriptions found matching your search criteria.',
+    'clear_search' => 'Clear Search',
 ];

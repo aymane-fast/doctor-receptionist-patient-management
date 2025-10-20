@@ -21,6 +21,7 @@
                             {{ __('prescriptions.title') }}
                         </h1>
                         <p class="text-gray-600 text-lg mt-2">{{ __('prescriptions.subtitle') }}</p>
+                        @if($hasSearchQuery && $prescriptions->count() > 0)
                         <div class="flex items-center mt-3 space-x-4 text-sm text-gray-500">
                             <span class="flex items-center space-x-1">
                                 <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -35,6 +36,7 @@
                                 <span>{{ $prescriptions->count() }} {{ __('prescriptions.total_records') }}</span>
                             </span>
                         </div>
+                        @endif
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -52,18 +54,34 @@
     <!-- Enhanced Search and Filter Controls -->
     <div class="bg-white/70 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
         <form method="GET" action="{{ route('prescriptions.index') }}" class="space-y-4">
-            <!-- Search Bar -->
+            <!-- Search Bar and Date Filter -->
             <div class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
                 <div class="flex-1 w-full">
+                    <label for="search" class="sr-only">{{ __('prescriptions.search_patients') }}</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="fas fa-search text-teal-500"></i>
                         </div>
                         <input type="text" 
+                               id="search"
                                name="search" 
                                value="{{ request('search') }}"
                                placeholder="{{ __('prescriptions.search_patients') }}"
                                class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 placeholder-gray-500 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900">
+                    </div>
+                </div>
+                <!-- Date Filter -->
+                <div class="w-full lg:w-auto">
+                    <label for="date" class="sr-only">{{ __('prescriptions.filter_by_date') }}</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-calendar text-teal-500"></i>
+                        </div>
+                        <input type="date" 
+                               id="date" 
+                               name="date" 
+                               value="{{ request('date') }}"
+                               class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900">
                     </div>
                 </div>
                 <div class="flex space-x-4">
@@ -71,7 +89,7 @@
                         <i class="fas fa-search"></i>
                         <span>{{ __('prescriptions.search') }}</span>
                     </button>
-                    @if(request('search') || request('patient_id'))
+                    @if(request('search') || request('date'))
                     <a href="{{ route('prescriptions.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg">
                         <i class="fas fa-times"></i>
                         <span>{{ __('prescriptions.clear') }}</span>
@@ -79,30 +97,11 @@
                     @endif
                 </div>
             </div>
-            
-            <!-- Patient Filter Dropdown -->
-            <div class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
-                <div class="flex-1 w-full">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fas fa-user-injured text-teal-500"></i>
-                        </div>
-                        <select name="patient_id" onchange="this.form.submit()" 
-                                class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900">
-                            <option value="">{{ __('prescriptions.all_patients_history') }}</option>
-                            @foreach($patients as $patient)
-                                <option value="{{ $patient->id }}" {{ request('patient_id') == $patient->id ? 'selected' : '' }}>
-                                    {{ $patient->first_name }} {{ $patient->last_name }} • {{ $patient->patient_id }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            </div>
         </form>
     </div>
 
     <!-- Professional Prescription Table -->
+    @if($hasSearchQuery)
     <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden">
         @if($prescriptions->count() > 0)
             <!-- Table Header -->
@@ -273,40 +272,62 @@
                     </div>
                 </div>
                 <h3 class="text-3xl font-bold text-gray-800 mb-4">
-                    @if(request('search'))
-                        {{ __('prescriptions.no_search_results') }}
-                    @elseif(request('patient_id'))
-                        {{ __('prescriptions.no_prescriptions_found') }}
-                    @else
-                        {{ __('prescriptions.digital_pharmacy_ready') }}
-                    @endif
+                    {{ __('prescriptions.no_search_results') }}
                 </h3>
                 <p class="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
                     @if(request('search'))
                         {{ __('prescriptions.no_search_results_desc', ['search' => request('search')]) }}
-                    @elseif(request('patient_id'))
-                        {{ __('prescriptions.no_patient_prescriptions_desc') }}
+                    @elseif(request('date'))
+                        {{ __('prescriptions.no_prescriptions_for_date') }}
                     @else
-                        {{ __('prescriptions.digital_pharmacy_ready_desc') }}
+                        {{ __('prescriptions.no_prescriptions_found_desc') }}
                     @endif
                 </p>
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                    @if(request('search') || request('patient_id'))
                     <a href="{{ route('prescriptions.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 flex items-center space-x-3 shadow-xl">
                         <i class="fas fa-arrow-left"></i>
-                        <span>{{ __('prescriptions.view_all_prescriptions') }}</span>
+                        <span>{{ __('prescriptions.clear_search') }}</span>
                     </a>
-                    @endif
                     <a href="{{ route('prescriptions.create') }}" class="group relative overflow-hidden bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
                         <div class="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
                         <div class="relative flex items-center space-x-3">
                             <i class="fas fa-plus"></i>
-                            <span>{{ (request('search') || request('patient_id')) ? __('prescriptions.create_prescription') : __('prescriptions.create_first_prescription') }}</span>
+                            <span>{{ __('prescriptions.create_prescription') }}</span>
                         </div>
                     </a>
                 </div>
             </div>
         @endif
     </div>
+    @else
+    <!-- Initial State - No Search Performed -->
+    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden">
+        <div class="text-center py-20">
+            <div class="relative inline-block mb-8">
+                <div class="w-32 h-32 bg-gradient-to-br from-teal-100 via-cyan-100 to-blue-100 rounded-full flex items-center justify-center shadow-2xl animate-float">
+                    <i class="fas fa-search text-teal-500 text-5xl"></i>
+                </div>
+                <div class="absolute -top-2 -right-2 w-12 h-12 bg-gradient-to-br from-orange-400 to-red-400 rounded-full flex items-center justify-center shadow-xl">
+                    <i class="fas fa-prescription-bottle text-white text-xl"></i>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-800 mb-4">
+                {{ __('prescriptions.search_prescriptions_title') }}
+            </h3>
+            <p class="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+                {{ __('prescriptions.search_prescriptions_desc') }}
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <a href="{{ route('prescriptions.create') }}" class="group relative overflow-hidden bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
+                    <div class="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                    <div class="relative flex items-center space-x-3">
+                        <i class="fas fa-plus"></i>
+                        <span>{{ __('prescriptions.create_prescription') }}</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 @endsection
