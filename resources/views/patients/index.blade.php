@@ -30,37 +30,55 @@
 
     <!-- Modern Search and Filters -->
     <div class="glass-effect rounded-3xl p-6 modern-shadow">
-        <form method="GET" action="{{ route('patients.index') }}" class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-            <div class="flex-1 w-full">
-                <label for="search" class="sr-only">{{ __('patients.search_patients') }}</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400"></i>
+        <form method="GET" action="{{ route('patients.index') }}" class="space-y-4">
+            <!-- Search Bar and Date Filter -->
+            <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                <div class="flex-1 w-full">
+                    <label for="search" class="sr-only">{{ __('patients.search_patients') }}</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" 
+                               id="search" 
+                               name="search" 
+                               value="{{ request('search') }}"
+                               placeholder="{{ __('patients.search_placeholder') }}"
+                               class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
                     </div>
-                    <input type="text" 
-                           id="search" 
-                           name="search" 
-                           value="{{ request('search') }}"
-                           placeholder="{{ __('patients.search_placeholder') }}"
-                           class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
                 </div>
-            </div>
-            <div class="flex space-x-3">
-                <button type="submit" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
-                    <i class="fas fa-search"></i>
-                    <span>{{ __('patients.search') }}</span>
-                </button>
-                @if(request('search'))
-                <a href="{{ route('patients.index') }}" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
-                    <i class="fas fa-times"></i>
-                    <span>{{ __('patients.clear') }}</span>
-                </a>
-                @endif
+                <!-- Date Filter -->
+                <div class="w-full md:w-auto">
+                    <label for="date" class="sr-only">{{ __('patients.filter_by_date') }}</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-calendar text-gray-400"></i>
+                        </div>
+                        <input type="date" 
+                               id="date" 
+                               name="date" 
+                               value="{{ request('date') }}"
+                               class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                        <i class="fas fa-search"></i>
+                        <span>{{ __('patients.search') }}</span>
+                    </button>
+                    @if(request('search') || request('date'))
+                    <a href="{{ route('patients.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                        <i class="fas fa-times"></i>
+                        <span>{{ __('patients.clear') }}</span>
+                    </a>
+                    @endif
+                </div>
             </div>
         </form>
     </div>
 
     <!-- Modern Patients Grid -->
+    @if($hasSearchQuery)
     <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
         <div class="p-6">
             @if($patients->count() > 0)
@@ -146,35 +164,55 @@
                         <i class="fas fa-users text-gray-400 text-4xl"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-3">
-                        @if(request('search'))
-                            {{ __('patients.no_patients_found') }}
-                        @else
-                            {{ __('patients.no_patients_registered') }}
-                        @endif
+                        {{ __('patients.no_search_results') }}
                     </h3>
                     <p class="text-gray-500 text-lg mb-8 max-w-md mx-auto">
                         @if(request('search'))
-                            {{ __('patients.no_match_search') }}
+                            {{ __('patients.no_search_results_desc', ['search' => request('search')]) }}
+                        @elseif(request('date'))
+                            {{ __('patients.no_patients_for_date') }}
                         @else
-                            {{ __('patients.start_building_database') }}
+                            {{ __('patients.no_patients_found_desc') }}
                         @endif
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-                        @if(request('search'))
                         <a href="{{ route('patients.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
                             <i class="fas fa-arrow-left"></i>
-                            <span>{{ __('patients.view_all_patients') }}</span>
+                            <span>{{ __('patients.clear_search') }}</span>
                         </a>
-                        @endif
                         <a href="{{ route('patients.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow">
                             <i class="fas fa-plus"></i>
-                            <span>{{ request('search') ? __('patients.add_new_patient') : __('patients.add_first_patient') }}</span>
+                            <span>{{ __('patients.add_new_patient') }}</span>
                         </a>
                     </div>
                 </div>
             @endif
         </div>
     </div>
+    @else
+    <!-- Initial State - No Search Performed -->
+    <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
+        <div class="p-6">
+            <div class="text-center py-16">
+                <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-float">
+                    <i class="fas fa-search text-blue-600 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">
+                    {{ __('patients.search_patients_title') }}
+                </h3>
+                <p class="text-gray-500 text-lg mb-8 max-w-md mx-auto">
+                    {{ __('patients.search_patients_desc') }}
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <a href="{{ route('patients.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow">
+                        <i class="fas fa-plus"></i>
+                        <span>{{ __('patients.add_new_patient') }}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
 

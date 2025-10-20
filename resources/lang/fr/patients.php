@@ -160,4 +160,20 @@ return [
         'female' => 'Féminin',
         'other' => 'Autre',
     ],
+    
+    // New translations for simplified index
+    'filter_by_date' => 'Filtrer par Date',
+    'search_patients_title' => 'Rechercher des Patients',
+    'search_patients_desc' => 'Utilisez la barre de recherche ci-dessus pour trouver des patients par nom, ID, téléphone, email, ou filtrer par date d\'inscription.',
+    'no_patients_for_date' => 'Aucun patient trouvé pour la date sélectionnée.',
+    'no_patients_found_desc' => 'Aucun patient trouvé correspondant à vos critères de recherche.',
+    'no_search_results' => 'Aucun Résultat de Recherche',
+    'no_search_results_desc' => 'Aucun patient ne correspond à votre recherche pour ":search". Essayez d\'ajuster vos termes de recherche.',
+    'clear_search' => 'Effacer la Recherche',
+    'book_appointment' => 'Réserver un Rendez-vous',
+    'confirm_edit_prefix' => 'Modifier le dossier du patient pour',
+    'edit_warning' => 'Cette action vous permettra de modifier des informations médicales sensibles.',
+    'book_appointment_for' => 'Réserver un rendez-vous pour',
+    'patient_has_allergies' => 'Ce patient a des allergies',
+    'notify_medical_staff' => 'Veuillez vous assurer que le personnel médical soit informé.',
 ];

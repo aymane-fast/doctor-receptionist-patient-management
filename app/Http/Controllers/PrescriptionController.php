@@ -33,7 +33,9 @@ class PrescriptionController extends Controller
                     $q->where('first_name', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('patient_id', 'LIKE', "%{$searchTerm}%");
+                      ->orWhere('patient_id', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('id_card_number', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('email', 'LIKE', "%{$searchTerm}%");
                 });
             }
 

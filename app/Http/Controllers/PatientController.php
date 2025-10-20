@@ -16,22 +16,37 @@ class PatientController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Patient::query();
+        $patients = collect(); // Empty collection by default
+        $hasSearchQuery = false;
 
-        // Search functionality
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('patient_id', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
-            });
+        // Only query patients if there's a search term or date filter
+        if ($request->filled('search') || $request->filled('date')) {
+            $hasSearchQuery = true;
+            
+            $query = Patient::query();
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
+                      ->orWhere('patient_id', 'like', "%{$search}%")
+                      ->orWhere('phone', 'like', "%{$search}%")
+                      ->orWhere('id_card_number', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            // Filter by creation date
+            if ($request->has('date') && $request->date) {
+                $query->whereDate('created_at', $request->date);
+            }
+
+            $patients = $query->latest()->paginate(15);
         }
 
-        $patients = $query->latest()->paginate(15);
-
-        return view('patients.index', compact('patients'));
+        return view('patients.index', compact('patients', 'hasSearchQuery'));
     }
 
     /**
