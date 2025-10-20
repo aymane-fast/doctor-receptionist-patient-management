@@ -56,7 +56,7 @@
                     <div>
                         <div class="text-sm text-gray-500 mb-1">{{ __('current_patient.current_patient') }}</div>
                         <div class="text-xl font-bold text-gray-900">{{ $patient->full_name }}</div>
-                        <div class="text-emerald-600 font-medium">{{ $patient->patient_id }}</div>
+                        <div class="text-emerald-600 font-medium">{{ $patient->id_card_number }}</div>
                     </div>
                 </div>
                 
@@ -311,7 +311,7 @@
                     </div>
                     <div>
                         <div class="font-semibold text-blue-900">{{ $patient->full_name }}</div>
-                        <div class="text-sm text-blue-600">{{ $patient->patient_id }}</div>
+                        <div class="text-sm text-blue-600">{{ $patient->id_card_number }}</div>
                     </div>
                 </div>
             </div>

@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
-            $table->string('patient_id')->unique(); // Auto-generated patient ID
             $table->string('first_name');
             $table->string('last_name');
             $table->date('birth_date');
@@ -21,7 +20,7 @@ return new class extends Migration
             $table->string('phone');
             $table->string('email')->nullable();
             $table->text('address');
-            $table->string('id_card_number')->nullable();
+            $table->string('id_card_number')->unique(); // Unique national ID card number
             $table->text('allergies')->nullable();
             $table->text('chronic_conditions')->nullable();
             $table->string('emergency_contact_name')->nullable();

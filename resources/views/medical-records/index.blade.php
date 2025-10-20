@@ -94,7 +94,7 @@
                                     <h3 class="text-lg font-bold text-gray-900">{{ $record->patient->first_name }} {{ $record->patient->last_name }}</h3>
                                     <p class="text-sm text-gray-500 flex items-center space-x-2">
                                         <i class="fas fa-id-card w-3"></i>
-                                        <span>{{ $record->patient->patient_id }}</span>
+                                        <span>{{ $record->patient->id_card_number }}</span>
                                         <span class="text-gray-400">•</span>
                                         <span>{{ $record->patient->age }} years</span>
                                     </p>

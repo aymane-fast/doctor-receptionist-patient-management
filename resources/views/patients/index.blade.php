@@ -94,7 +94,7 @@
                                     <h3 class="text-lg font-bold text-gray-900">{{ $patient->full_name }}</h3>
                                     <p class="text-sm text-gray-500 flex items-center space-x-2">
                                         <i class="fas fa-id-card w-3"></i>
-                                        <span>{{ $patient->patient_id }}</span>
+                                        <span>{{ $patient->id_card_number }}</span>
                                     </p>
                                 </div>
                             </div>

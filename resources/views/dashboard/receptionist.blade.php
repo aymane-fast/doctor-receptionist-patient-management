@@ -296,7 +296,7 @@
                                     <div>
                                         <h3 class="font-semibold text-gray-900">{{ $patient->full_name }}</h3>
                                         <p class="text-sm text-gray-500 flex items-center space-x-3">
-                                            <span>{{ $patient->patient_id }}</span>
+                                            <span>{{ $patient->id_card_number }}</span>
                                             <span>•</span>
                                             <span>{{ __('dashboard.age') }}: {{ $patient->age }}</span>
                                         </p>
@@ -381,7 +381,7 @@
                                         </div>
                                         <div>
                                             <div class="text-sm font-semibold text-gray-900">{{ $appointment->patient->full_name }}</div>
-                                            <div class="text-xs text-gray-500">{{ $appointment->patient->patient_id }}</div>
+                                            <div class="text-xs text-gray-500">{{ $appointment->patient->id_card_number }}</div>
                                         </div>
                                     </div>
                                 </td>

@@ -118,7 +118,7 @@
                                     </div>
                                     <div>
                                         <div class="text-base font-semibold text-gray-900">{{ $appointment->patient->full_name }}</div>
-                                        <div class="text-sm text-gray-500">{{ $appointment->patient->patient_id }}</div>
+                                        <div class="text-sm text-gray-500">{{ $appointment->patient->id_card_number }}</div>
                                     </div>
                                 </div>
                             </td>

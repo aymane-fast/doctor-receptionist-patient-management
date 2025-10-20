@@ -146,7 +146,7 @@
                                     </div>
                                     <div>
                                         <h3 class="font-bold text-gray-900 text-base">{{ $prescription->patient->first_name }} {{ $prescription->patient->last_name }}</h3>
-                                        <p class="text-sm text-gray-600 mt-1">{{ $prescription->patient->patient_id }}</p>
+                                        <p class="text-sm text-gray-600 mt-1">{{ $prescription->patient->id_card_number }}</p>
                                         <p class="text-xs text-gray-500 mt-1 flex items-center space-x-2">
                                             <i class="fas fa-user-md text-teal-500"></i>
                                             <span>Dr. {{ $prescription->doctor->name }}</span>

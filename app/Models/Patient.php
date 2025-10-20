@@ -11,7 +11,6 @@ class Patient extends Model
     use HasFactory;
 
     protected $fillable = [
-        'patient_id',
         'first_name',
         'last_name',
         'birth_date',
@@ -29,18 +28,6 @@ class Patient extends Model
     protected $casts = [
         'birth_date' => 'datetime',
     ];
-
-    /**
-     * Generate unique patient ID
-     */
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($patient) {
-            $patient->patient_id = 'PAT-' . str_pad(Patient::count() + 1, 6, '0', STR_PAD_LEFT);
-        });
-    }
 
     /**
      * Get full name

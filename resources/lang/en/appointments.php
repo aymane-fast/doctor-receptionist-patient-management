@@ -59,7 +59,7 @@ return [
     'clear_filters' => 'Clear Filters',
     'no_appointments_found' => 'No appointments found matching your criteria.',
     'create_first_appointment' => 'Create your first appointment to get started.',
-    'patient_id' => 'Patient ID',
+    'id_card_number' => 'ID Card Number',
     'appointment_with' => 'Appointment with',
     'view_details' => 'View Details',
     'start_consultation' => 'Start Consultation',

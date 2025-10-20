@@ -59,7 +59,7 @@ return [
     'clear_filters' => 'Effacer les Filtres',
     'no_appointments_found' => 'Aucun rendez-vous trouvé correspondant à vos critères.',
     'create_first_appointment' => 'Créez votre premier rendez-vous pour commencer.',
-    'patient_id' => 'ID Patient',
+    'id_card_number' => 'Numéro de carte d\'identité',
     'appointment_with' => 'Rendez-vous avec',
     'view_details' => 'Voir les Détails',
     'start_consultation' => 'Commencer la Consultation',

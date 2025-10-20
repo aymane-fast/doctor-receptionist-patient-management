@@ -38,7 +38,7 @@
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $patient->full_name }}</h1>
                     <div class="flex items-center space-x-4 mb-2">
-                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">ID: {{ $patient->patient_id }}</span>
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">ID: {{ $patient->id_card_number }}</span>
                         <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold">{{ $patient->age }} years old</span>
                         <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">{{ ucfirst($patient->gender) }}</span>
                     </div>
