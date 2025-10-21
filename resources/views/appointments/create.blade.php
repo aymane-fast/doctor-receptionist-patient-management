@@ -59,28 +59,42 @@
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-4">
-                    <!-- Patient Selection -->
+                    <!-- Patient Selection with Autocomplete -->
                     <div>
-                        <label for="patient_id" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="patient_search" class="block text-sm font-semibold text-gray-700 mb-2">
                             {{ __('patients.patient') }} <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
-                            <!-- Search Input -->
-                            <input type="text" id="patient_search" placeholder="{{ __('patients.search_patients_name_phone') }}..." 
-                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 mb-2">
+                            <!-- Patient Search Input with Autocomplete -->
+                            <input type="text" 
+                                   id="patient_search" 
+                                   placeholder="Search patients by name, phone, or email..." 
+                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror"
+                                   autocomplete="off"
+                                   value="{{ $selectedPatient ? $selectedPatient->first_name . ' ' . $selectedPatient->last_name . ' - ' . $selectedPatient->phone : '' }}">
                             
-                            <!-- Patient Select -->
-                            <select id="patient_id" name="patient_id" required 
-                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror">
-                                <option value="">{{ __('appointments.select_patient') }}</option>
-                                @foreach($patients as $patient)
-                                    <option value="{{ $patient->id }}" 
-                                            data-search="{{ strtolower($patient->first_name . ' ' . $patient->last_name . ' ' . $patient->phone) }}"
-                                            {{ old('patient_id', request('patient_id')) == $patient->id ? 'selected' : '' }}>
-                                        {{ $patient->first_name }} {{ $patient->last_name }} - {{ $patient->phone }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <!-- Hidden input for patient_id -->
+                            <input type="hidden" 
+                                   id="patient_id" 
+                                   name="patient_id" 
+                                   value="{{ $selectedPatient ? $selectedPatient->id : old('patient_id') }}" 
+                                   required>
+                            
+                            <!-- Autocomplete dropdown -->
+                            <div id="patient_results" 
+                                 class="absolute z-50 w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-auto hidden">
+                                <!-- Results will be populated by JavaScript -->
+                            </div>
+                            
+                            <!-- Create new patient link -->
+                            <div class="mt-2">
+                                <a href="{{ route('patients.create') }}" 
+                                   target="_blank"
+                                   class="text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center space-x-1">
+                                    <i class="fas fa-plus text-xs"></i>
+                                    <span>Create New Patient</span>
+                                </a>
+                            </div>
                         </div>
                         @error('patient_id')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
@@ -135,7 +149,7 @@
                     <h3 class="text-lg font-bold text-gray-900">Appointment Details</h3>
                 </div>
                 
-                <div class="grid md:grid-cols-4 gap-4 mb-4">
+                <div class="grid md:grid-cols-3 gap-4 mb-4">
                     <!-- Appointment Date -->
                     <div>
                         <label for="appointment_date" class="block text-sm font-semibold text-gray-700 mb-2">
@@ -176,32 +190,12 @@
                         </label>
                         <select id="status" name="status" 
                                 class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('status') border-red-500 @enderror">
-                            <option value="scheduled" {{ old('status') == 'scheduled' ? 'selected' : '' }}>{{ __('appointments.scheduled') }}</option>
+                            <option value="scheduled" {{ old('status', 'scheduled') == 'scheduled' ? 'selected' : '' }}>{{ __('appointments.scheduled') }}</option>
                             <option value="in_progress" {{ old('status') == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
                             <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
                             <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>{{ __('appointments.cancelled') }}</option>
                         </select>
                         @error('status')
-                        <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
-                            <i class="fas fa-exclamation-circle text-xs"></i>
-                            <span>{{ $message }}</span>
-                        </p>
-                        @enderror
-                    </div>
-
-                    <!-- Appointment Type -->
-                    <div>
-                        <label for="appointment_type" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Type
-                        </label>
-                        <select id="appointment_type" name="appointment_type" 
-                                class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('appointment_type') border-red-500 @enderror">
-                            <option value="consultation" {{ old('appointment_type') == 'consultation' ? 'selected' : '' }}>Consultation</option>
-                            <option value="follow-up" {{ old('appointment_type') == 'follow-up' ? 'selected' : '' }}>Follow-up</option>
-                            <option value="emergency" {{ old('appointment_type') == 'emergency' ? 'selected' : '' }}>Emergency</option>
-                            <option value="routine-checkup" {{ old('appointment_type') == 'routine-checkup' ? 'selected' : '' }}>Routine Checkup</option>
-                        </select>
-                        @error('appointment_type')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
                             <i class="fas fa-exclamation-circle text-xs"></i>
                             <span>{{ $message }}</span>
@@ -214,13 +208,13 @@
                 <div class="grid md:grid-cols-2 gap-4">
                     <!-- Purpose -->
                     <div>
-                        <label for="purpose" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="reason" class="block text-sm font-semibold text-gray-700 mb-2">
                             Purpose/Reason for Visit
                         </label>
-                        <textarea id="purpose" name="purpose" rows="3" 
+                        <textarea id="reason" name="reason" rows="3" 
                                   placeholder="Brief description of the reason for this appointment..."
-                                  class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('purpose') border-red-500 @enderror">{{ old('purpose') }}</textarea>
-                        @error('purpose')
+                                  class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('reason') border-red-500 @enderror">{{ old('reason') }}</textarea>
+                        @error('reason')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
                             <i class="fas fa-exclamation-circle text-xs"></i>
                             <span>{{ $message }}</span>
@@ -272,56 +266,106 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('patient_search');
-    const patientSelect = document.getElementById('patient_id');
-    const allOptions = Array.from(patientSelect.options).slice(1); // Exclude first empty option
-    
+    const patientIdInput = document.getElementById('patient_id');
+    const resultsContainer = document.getElementById('patient_results');
+    let searchTimeout;
+    let selectedPatientId = patientIdInput.value;
+
+    // Patient Search Autocomplete
     searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase().trim();
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
         
-        // Clear current options (keep the first empty option)
-        patientSelect.innerHTML = '<option value="">Select a patient</option>';
+        if (query.length < 2) {
+            hideResults();
+            patientIdInput.value = '';
+            return;
+        }
         
-        if (searchTerm === '') {
-            // Show all patients if search is empty
-            allOptions.forEach(option => {
-                patientSelect.appendChild(option.cloneNode(true));
+        searchTimeout = setTimeout(() => {
+            searchPatients(query);
+        }, 300); // Debounce for 300ms
+    });
+
+    // Hide results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+            hideResults();
+        }
+    });
+
+    // Clear search if patient was deselected
+    searchInput.addEventListener('focus', function() {
+        if (this.value && !patientIdInput.value) {
+            this.value = '';
+        }
+    });
+
+    function searchPatients(query) {
+        fetch(`{{ route('api.patients.search') }}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(patients => {
+                displayResults(patients);
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                hideResults();
             });
+    }
+
+    function displayResults(patients) {
+        if (patients.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="p-3 text-gray-500 text-center">
+                    <i class="fas fa-search mr-2"></i>
+                    No patients found
+                </div>
+            `;
         } else {
-            // Filter and show matching patients
-            const matchingOptions = allOptions.filter(option => {
-                const searchData = option.getAttribute('data-search') || '';
-                return searchData.includes(searchTerm);
-            });
-            
-            if (matchingOptions.length > 0) {
-                matchingOptions.forEach(option => {
-                    patientSelect.appendChild(option.cloneNode(true));
+            resultsContainer.innerHTML = patients.map(patient => `
+                <div class="patient-result p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
+                     data-id="${patient.id}" 
+                     data-display="${patient.display}">
+                    <div class="font-medium text-gray-900">${patient.name}</div>
+                    <div class="text-sm text-gray-600">${patient.phone} • ${patient.email}</div>
+                </div>
+            `).join('');
+
+            // Add click handlers to results
+            document.querySelectorAll('.patient-result').forEach(result => {
+                result.addEventListener('click', function() {
+                    selectPatient(this.dataset.id, this.dataset.display);
                 });
-            } else {
-                // Show "No patients found" option
-                const noResultOption = document.createElement('option');
-                noResultOption.value = '';
-                noResultOption.textContent = 'No patients found';
-                noResultOption.disabled = true;
-                patientSelect.appendChild(noResultOption);
-            }
+            });
         }
-    });
-    
-    // Clear search when a patient is selected
-    patientSelect.addEventListener('change', function() {
-        if (this.value) {
-            searchInput.value = '';
-            // Show the selected patient's name in search input
-            const selectedOption = this.options[this.selectedIndex];
-            searchInput.placeholder = 'Selected: ' + selectedOption.textContent;
-        } else {
-            searchInput.placeholder = 'Search patients by name or phone...';
-        }
-    });
-    
+        
+        showResults();
+    }
+
+    function selectPatient(id, display) {
+        patientIdInput.value = id;
+        searchInput.value = display;
+        selectedPatientId = id;
+        hideResults();
+    }
+
+    function showResults() {
+        resultsContainer.classList.remove('hidden');
+    }
+
+    function hideResults() {
+        resultsContainer.classList.add('hidden');
+    }
+
     // Book Now functionality
     window.bookNow = function() {
+        // Validate that a patient is selected
+        if (!patientIdInput.value) {
+            alert('Please select a patient first.');
+            searchInput.focus();
+            return;
+        }
+
         // Set today's date
         const today = new Date();
         const dateInput = document.querySelector('input[name="appointment_date"]');
@@ -329,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
             dateInput.value = today.toISOString().split('T')[0];
         }
         
-        // Set status to in_progress for immediate appointments
+        // Set status to scheduled for immediate appointments
         const statusSelect = document.querySelector('select[name="status"]');
         if (statusSelect) {
             statusSelect.value = 'scheduled';
@@ -352,8 +396,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const timeInput = document.querySelector('input[name="appointment_time"]');
         if (timeInput) {
             const now = new Date();
+            
+            // Round to next 15-minute interval
             const currentMinutes = now.getMinutes();
-            const roundedMinutes = Math.ceil(currentMinutes / 15) * 15; // Round to next 15-minute interval
+            const roundedMinutes = Math.ceil(currentMinutes / 15) * 15;
             
             now.setMinutes(roundedMinutes);
             now.setSeconds(0);
@@ -361,10 +407,37 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add 15 minutes buffer for immediate booking
             now.setMinutes(now.getMinutes() + 15);
             
+            // Ensure it's within working hours (9 AM - 5 PM for now)
+            const hours = now.getHours();
+            if (hours < 9) {
+                now.setHours(9, 0, 0, 0);
+            } else if (hours >= 17) {
+                // If after 5 PM, set to 9 AM next day
+                now.setDate(now.getDate() + 1);
+                now.setHours(9, 0, 0, 0);
+                
+                // Update date field too
+                const dateInput = document.querySelector('input[name="appointment_date"]');
+                if (dateInput) {
+                    dateInput.value = now.toISOString().split('T')[0];
+                }
+            }
+            
             const timeString = now.toTimeString().slice(0, 5); // HH:MM format
             timeInput.value = timeString;
         }
     }
+
+    // Form validation before submit
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!patientIdInput.value) {
+            e.preventDefault();
+            alert('Please select a patient.');
+            searchInput.focus();
+            return false;
+        }
+    });
 });
 </script>
 @endsection

@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
     
     // Appointment management (accessible by both roles)
     Route::resource('appointments', AppointmentController::class);
+    Route::get('/api/patients/search', [AppointmentController::class, 'searchPatients'])->name('api.patients.search');
     Route::patch('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
     Route::post('/appointments/{appointment}/set-current', [AppointmentController::class, 'setCurrent'])->name('appointments.set-current');
     Route::post('/appointments/current/mark-done', [AppointmentController::class, 'markCurrentDone'])->name('appointments.mark-current-done');

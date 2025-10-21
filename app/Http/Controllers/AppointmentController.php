@@ -77,12 +77,52 @@ class AppointmentController extends Controller
     /**
      * Show the form for creating a new appointment
      */
-    public function create()
+    public function create(Request $request)
     {
-        $patients = Patient::all();
+        $patients = collect(); // Start with empty collection
+        $selectedPatient = null;
+        
+        // If patient_id is provided in URL, get that patient
+        if ($request->has('patient_id')) {
+            $selectedPatient = Patient::find($request->patient_id);
+        }
+        
         $doctors = User::where('role', 'doctor')->get();
         
-        return view('appointments.create', compact('patients', 'doctors'));
+        return view('appointments.create', compact('patients', 'doctors', 'selectedPatient'));
+    }
+
+    /**
+     * API endpoint for patient search autocomplete
+     */
+    public function searchPatients(Request $request)
+    {
+        $query = $request->get('q', '');
+        
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+        
+        $patients = Patient::where(function($q) use ($query) {
+            $q->where('first_name', 'like', "%{$query}%")
+              ->orWhere('last_name', 'like', "%{$query}%")
+              ->orWhere('phone', 'like', "%{$query}%")
+              ->orWhere('email', 'like', "%{$query}%")
+              ->orWhere('id_card_number', 'like', "%{$query}%");
+        })
+        ->limit(10)
+        ->get()
+        ->map(function($patient) {
+            return [
+                'id' => $patient->id,
+                'name' => $patient->first_name . ' ' . $patient->last_name,
+                'phone' => $patient->phone,
+                'email' => $patient->email,
+                'display' => $patient->first_name . ' ' . $patient->last_name . ' - ' . $patient->phone
+            ];
+        });
+        
+        return response()->json($patients);
     }
 
     /**
