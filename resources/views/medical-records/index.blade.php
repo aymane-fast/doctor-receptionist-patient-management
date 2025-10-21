@@ -28,22 +28,31 @@
     </div>
 
     <!-- Modern Search and Filters -->
-    <div class="glass-effect rounded-3xl p-6 modern-shadow">
+    <div class="glass-effect rounded-3xl p-6 modern-shadow relative z-[10001]">
         <form method="GET" action="{{ route('medical-records.index') }}" class="space-y-4">
             <!-- Search Bar and Date Filter -->
             <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-                <div class="flex-1 w-full">
-                    <label for="search" class="sr-only">{{ __('medical_records.search_patients') }}</label>
+                <div class="flex-1 w-full relative z-[10000]">
+                    <label for="patient_search" class="sr-only">{{ __('medical_records.search_patients') }}</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
                         <input type="text" 
-                               id="search" 
-                               name="search" 
-                               value="{{ request('search') }}"
+                               id="patient_search" 
                                placeholder="{{ __('medical_records.search_patients') }}"
-                               class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200">
+                               class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200"
+                               autocomplete="off"
+                               value="{{ request('search') }}">
+                        
+                        <!-- Hidden input for search -->
+                        <input type="hidden" id="search" name="search" value="{{ request('search') }}">
+                        
+                        <!-- Autocomplete dropdown -->
+                        <div id="patient_results" 
+                             class="absolute z-[99999] w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-auto hidden">
+                            <!-- Results will be populated by JavaScript -->
+                        </div>
                     </div>
                 </div>
                 <!-- Date Filter -->
@@ -78,7 +87,7 @@
 
     <!-- Modern Medical Records Grid -->
     @if($hasSearchQuery)
-    <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
+    <div class="glass-effect rounded-3xl modern-shadow overflow-hidden relative z-0">
         <div class="p-6">
             @if($medicalRecords->count() > 0)
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -274,7 +283,7 @@
     </div>
     @else
     <!-- Initial State - No Search Performed -->
-    <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
+    <div class="glass-effect rounded-3xl modern-shadow overflow-hidden relative z-0">
         <div class="p-6">
             <div class="text-center py-16">
                 <div class="w-24 h-24 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-float">
@@ -297,4 +306,93 @@
     </div>
     @endif
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('patient_search');
+    const searchHidden = document.getElementById('search');
+    const resultsContainer = document.getElementById('patient_results');
+    let searchTimeout;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            // Update hidden field
+            searchHidden.value = query;
+            
+            if (query.length < 2) {
+                hideResults();
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                searchPatients(query);
+            }, 300);
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+                hideResults();
+            }
+        });
+
+        function searchPatients(query) {
+            fetch(`{{ route('api.medical-records.patients.search') }}?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(patients => {
+                    displayResults(patients);
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    hideResults();
+                });
+        }
+
+        function displayResults(patients) {
+            if (patients.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="p-3 text-gray-500 text-center">
+                        <i class="fas fa-search mr-2"></i>
+                        No patients found
+                    </div>
+                `;
+            } else {
+                resultsContainer.innerHTML = patients.map(patient => `
+                    <div class="patient-result p-3 hover:bg-emerald-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
+                         data-search="${patient.display}">
+                        <div class="font-medium text-gray-900">${patient.name}</div>
+                        <div class="text-sm text-gray-600">${patient.phone} • ${patient.email}</div>
+                    </div>
+                `).join('');
+
+                // Add click handlers to results
+                document.querySelectorAll('.patient-result').forEach(result => {
+                    result.addEventListener('click', function() {
+                        selectPatient(this.dataset.search);
+                    });
+                });
+            }
+            
+            showResults();
+        }
+
+        function selectPatient(display) {
+            searchInput.value = display;
+            searchHidden.value = display;
+            hideResults();
+        }
+
+        function showResults() {
+            resultsContainer.classList.remove('hidden');
+        }
+
+        function hideResults() {
+            resultsContainer.classList.add('hidden');
+        }
+    }
+});
+</script>
 @endsection

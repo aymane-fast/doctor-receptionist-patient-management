@@ -26,7 +26,7 @@
     </div>
 
     <!-- Modern Filters -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow">
+    <div class="glass-effect rounded-3xl p-8 modern-shadow relative z-[10001]">
         <form method="GET" action="{{ route('appointments.index') }}" class="space-y-6">
             <div class="flex items-center space-x-3 mb-6">
                 <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
@@ -37,9 +37,25 @@
             <div class="space-y-6">
                 <!-- Filter Fields -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="space-y-2">
-                        <label for="search" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.search') }}</label>
-                        <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="{{ __('appointments.search_placeholder') }}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                    <div class="space-y-2 relative z-[10000]">
+                        <label for="patient_search" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.search') }}</label>
+                        <div class="relative">
+                            <input type="text" 
+                                   id="patient_search" 
+                                   placeholder="{{ __('appointments.search_placeholder') }}" 
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200"
+                                   autocomplete="off"
+                                   value="{{ request('search') }}">
+                            
+                            <!-- Hidden input for search -->
+                            <input type="hidden" id="search" name="search" value="{{ request('search') }}">
+                            
+                            <!-- Autocomplete dropdown -->
+                            <div id="patient_results" 
+                                 class="absolute z-[99999] w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-auto hidden">
+                                <!-- Results will be populated by JavaScript -->
+                            </div>
+                        </div>
                     </div>
                     <div class="space-y-2">
                         <label for="date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.date') }}</label>
@@ -101,7 +117,7 @@
     </div>
 
     <!-- Modern Appointments List -->
-    <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
+    <div class="glass-effect rounded-3xl modern-shadow overflow-hidden relative z-0">
         @if(!$hasSearchQuery)
             <!-- Initial state - no search performed -->
             <div class="text-center py-16 px-8">
@@ -325,6 +341,92 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
         });
     });
+
+    // Patient Search Autocomplete for Index
+    const searchInput = document.getElementById('patient_search');
+    const searchHidden = document.getElementById('search');
+    const resultsContainer = document.getElementById('patient_results');
+    let searchTimeout;
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            // Update hidden field
+            searchHidden.value = query;
+            
+            if (query.length < 2) {
+                hideResults();
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                searchPatients(query);
+            }, 300);
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+                hideResults();
+            }
+        });
+
+        function searchPatients(query) {
+            fetch(`{{ route('api.patients.search') }}?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(patients => {
+                    displayResults(patients);
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    hideResults();
+                });
+        }
+
+        function displayResults(patients) {
+            if (patients.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="p-3 text-gray-500 text-center">
+                        <i class="fas fa-search mr-2"></i>
+                        No patients found
+                    </div>
+                `;
+            } else {
+                resultsContainer.innerHTML = patients.map(patient => `
+                    <div class="patient-result p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
+                         data-search="${patient.display}">
+                        <div class="font-medium text-gray-900">${patient.name}</div>
+                        <div class="text-sm text-gray-600">${patient.phone} • ${patient.email}</div>
+                    </div>
+                `).join('');
+
+                // Add click handlers to results
+                document.querySelectorAll('.patient-result').forEach(result => {
+                    result.addEventListener('click', function() {
+                        selectPatient(this.dataset.search);
+                    });
+                });
+            }
+            
+            showResults();
+        }
+
+        function selectPatient(display) {
+            searchInput.value = display;
+            searchHidden.value = display;
+            hideResults();
+        }
+
+        function showResults() {
+            resultsContainer.classList.remove('hidden');
+        }
+
+        function hideResults() {
+            resultsContainer.classList.add('hidden');
+        }
+    }
 });
 </script>
 @endpush

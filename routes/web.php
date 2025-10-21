@@ -53,12 +53,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/appointments/{appointment}/set-current', [AppointmentController::class, 'setCurrent'])->name('appointments.set-current');
     Route::post('/appointments/current/mark-done', [AppointmentController::class, 'markCurrentDone'])->name('appointments.mark-current-done');
     Route::post('/appointments/{patient}/follow-up', [AppointmentController::class, 'createFollowUp'])->name('appointments.create-follow-up');
+    
+    // Patient search APIs (accessible by both roles for autocomplete)
+    Route::get('/api/medical-records/patients/search', [MedicalRecordController::class, 'searchPatients'])->name('api.medical-records.patients.search');
+    Route::get('/api/prescriptions/patients/search', [PrescriptionController::class, 'searchPatients'])->name('api.prescriptions.patients.search');
 });
 
 // Doctor-only routes
 Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/doctor/current', [DoctorController::class, 'current'])->name('doctor.current');
     Route::resource('medical-records', MedicalRecordController::class);
+    Route::get('/api/medical-records/patients/search', [MedicalRecordController::class, 'searchPatients'])->name('api.medical-records.patients.search');
     Route::resource('prescriptions', PrescriptionController::class);
+    Route::get('/api/prescriptions/patients/search', [PrescriptionController::class, 'searchPatients'])->name('api.prescriptions.patients.search');
     Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');
 });

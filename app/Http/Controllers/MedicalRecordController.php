@@ -63,13 +63,49 @@ class MedicalRecordController extends Controller
         }
 
         $appointment = null;
+        $selectedPatient = null;
+        
         if ($request->has('appointment_id')) {
             $appointment = Appointment::with('patient')->findOrFail($request->appointment_id);
+            $selectedPatient = $appointment->patient;
+        } elseif ($request->has('patient_id')) {
+            $selectedPatient = Patient::find($request->patient_id);
         }
 
-        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
+        return view('medical-records.create', compact('selectedPatient', 'appointment'));
+    }
 
-        return view('medical-records.create', compact('patients', 'appointment'));
+    /**
+     * API endpoint for patient search autocomplete
+     */
+    public function searchPatients(Request $request)
+    {
+        $query = $request->get('q', '');
+        
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+        
+        $patients = Patient::where(function($q) use ($query) {
+            $q->where('first_name', 'like', "%{$query}%")
+              ->orWhere('last_name', 'like', "%{$query}%")
+              ->orWhere('phone', 'like', "%{$query}%")
+              ->orWhere('email', 'like', "%{$query}%")
+              ->orWhere('id_card_number', 'like', "%{$query}%");
+        })
+        ->limit(10)
+        ->get()
+        ->map(function($patient) {
+            return [
+                'id' => $patient->id,
+                'name' => $patient->first_name . ' ' . $patient->last_name,
+                'phone' => $patient->phone,
+                'email' => $patient->email,
+                'display' => $patient->first_name . ' ' . $patient->last_name . ' - ' . $patient->phone
+            ];
+        });
+        
+        return response()->json($patients);
     }
 
     /**

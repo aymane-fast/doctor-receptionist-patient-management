@@ -52,22 +52,31 @@
     </div>
 
     <!-- Enhanced Search and Filter Controls -->
-    <div class="bg-white/70 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
+    <div class="bg-white/70 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg relative z-[10001]">
         <form method="GET" action="{{ route('prescriptions.index') }}" class="space-y-4">
             <!-- Search Bar and Date Filter -->
             <div class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
-                <div class="flex-1 w-full">
-                    <label for="search" class="sr-only">{{ __('prescriptions.search_patients') }}</label>
+                <div class="flex-1 w-full relative z-[10000]">
+                    <label for="patient_search" class="sr-only">{{ __('prescriptions.search_patients') }}</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i class="fas fa-search text-teal-500"></i>
                         </div>
                         <input type="text" 
-                               id="search"
-                               name="search" 
-                               value="{{ request('search') }}"
+                               id="patient_search"
                                placeholder="{{ __('prescriptions.search_patients') }}"
-                               class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 placeholder-gray-500 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900">
+                               class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 placeholder-gray-500 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900"
+                               autocomplete="off"
+                               value="{{ request('search') }}">
+                        
+                        <!-- Hidden input for search -->
+                        <input type="hidden" id="search" name="search" value="{{ request('search') }}">
+                        
+                        <!-- Autocomplete dropdown -->
+                        <div id="patient_results" 
+                             class="absolute z-[99999] w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-auto hidden">
+                            <!-- Results will be populated by JavaScript -->
+                        </div>
                     </div>
                 </div>
                 <!-- Date Filter -->
@@ -102,7 +111,7 @@
 
     <!-- Professional Prescription Table -->
     @if($hasSearchQuery)
-    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden">
+    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden relative z-0">
         @if($prescriptions->count() > 0)
             <!-- Table Header -->
             <div class="bg-gradient-to-r from-teal-50 via-cyan-50 to-blue-50 border-b border-gray-200/70 px-6 py-4">
@@ -301,7 +310,7 @@
     </div>
     @else
     <!-- Initial State - No Search Performed -->
-    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden">
+    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden relative z-0">
         <div class="text-center py-20">
             <div class="relative inline-block mb-8">
                 <div class="w-32 h-32 bg-gradient-to-br from-teal-100 via-cyan-100 to-blue-100 rounded-full flex items-center justify-center shadow-2xl animate-float">
@@ -331,3 +340,113 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const patientSearchInput = document.getElementById('patient_search');
+        const searchInput = document.getElementById('search');
+        const resultsDiv = document.getElementById('patient_results');
+        let searchTimeout;
+
+        if (!patientSearchInput) return;
+
+        patientSearchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            clearTimeout(searchTimeout);
+            
+            if (query.length < 2) {
+                resultsDiv.classList.add('hidden');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/prescriptions/patients/search?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        resultsDiv.innerHTML = '';
+                        
+                        if (data.length === 0) {
+                            resultsDiv.innerHTML = `
+                                <div class="p-4 text-gray-500 text-center">
+                                    <i class="fas fa-search-minus mb-2"></i>
+                                    <p>{{ __('prescriptions.no_patients_found') }}</p>
+                                </div>
+                            `;
+                        } else {
+                            data.forEach(patient => {
+                                const patientDiv = document.createElement('div');
+                                patientDiv.className = 'patient-result p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0';
+                                patientDiv.innerHTML = `
+                                    <div class="flex items-center space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-user text-teal-600 text-sm"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate">${patient.name}</p>
+                                            <p class="text-sm text-gray-500 truncate">
+                                                ${patient.phone ? `📞 ${patient.phone}` : ''}
+                                                ${patient.phone && patient.email ? ' • ' : ''}
+                                                ${patient.email ? `📧 ${patient.email}` : ''}
+                                            </p>
+                                            ${patient.id_card ? `<p class="text-xs text-gray-400">ID: ${patient.id_card}</p>` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                                
+                                patientDiv.addEventListener('click', function() {
+                                    patientSearchInput.value = patient.name;
+                                    searchInput.value = patient.name;
+                                    resultsDiv.classList.add('hidden');
+                                    
+                                    // Trigger search by submitting the form
+                                    const form = patientSearchInput.closest('form');
+                                    if (form) {
+                                        form.submit();
+                                    } else {
+                                        // If no form found, trigger page reload with search parameter
+                                        const url = new URL(window.location);
+                                        url.searchParams.set('search', patient.name);
+                                        window.location.href = url.toString();
+                                    }
+                                });
+                                
+                                resultsDiv.appendChild(patientDiv);
+                            });
+                        }
+                        
+                        resultsDiv.classList.remove('hidden');
+                    })
+                    .catch(error => {
+                        console.error('Error searching patients:', error);
+                        resultsDiv.innerHTML = `
+                            <div class="p-4 text-red-500 text-center">
+                                <i class="fas fa-exclamation-triangle mb-2"></i>
+                                <p>{{ __('prescriptions.search_error') }}</p>
+                            </div>
+                        `;
+                        resultsDiv.classList.remove('hidden');
+                    });
+            }, 300);
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!patientSearchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.classList.add('hidden');
+            }
+        });
+
+        // Handle form submission to ensure search value is set
+        const form = patientSearchInput.closest('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                searchInput.value = patientSearchInput.value;
+            });
+        }
+    });
+</script>
+@endpush

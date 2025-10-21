@@ -40,21 +40,43 @@
                     </div>
                     
                     <div class="grid md:grid-cols-2 gap-4">
-                        <!-- Patient Selection -->
+                        <!-- Patient Selection with Autocomplete -->
                         <div>
-                            <label for="patient_id" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                            <label for="patient_search" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
                                 {{ __('prescriptions.patient_name') }} <span class="text-red-500">*</span>
                             </label>
-                            <select id="patient_id" name="patient_id" required
-                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror">
-                                <option value="">{{ __('prescriptions.select_patient') }}</option>
-                                @foreach($patients as $patient)
-                                    <option value="{{ $patient->id }}" 
-                                            {{ old('patient_id', request('patient_id')) == $patient->id ? 'selected' : '' }}>
-                                        {{ $patient->first_name }} {{ $patient->last_name }} - {{ $patient->phone }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="relative">
+                                <!-- Patient Search Input with Autocomplete -->
+                                <input type="text" 
+                                       id="patient_search" 
+                                       placeholder="Search patients by name, phone, or email..." 
+                                       class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror"
+                                       autocomplete="off"
+                                       value="{{ $selectedPatient ? $selectedPatient->first_name . ' ' . $selectedPatient->last_name . ' - ' . $selectedPatient->phone : '' }}">
+                                
+                                <!-- Hidden input for patient_id -->
+                                <input type="hidden" 
+                                       id="patient_id" 
+                                       name="patient_id" 
+                                       value="{{ $selectedPatient ? $selectedPatient->id : old('patient_id') }}" 
+                                       required>
+                                
+                                <!-- Autocomplete dropdown -->
+                                <div id="patient_results" 
+                                     class="absolute z-50 w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-auto hidden">
+                                    <!-- Results will be populated by JavaScript -->
+                                </div>
+                                
+                                <!-- Create new patient link -->
+                                <div class="mt-2">
+                                    <a href="{{ route('patients.create') }}" 
+                                       target="_blank"
+                                       class="text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center space-x-1">
+                                        <i class="fas fa-plus text-xs"></i>
+                                        <span>Create New Patient</span>
+                                    </a>
+                                </div>
+                            </div>
                             @error('patient_id')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
                                 <i class="fas fa-exclamation-circle text-xs"></i>
@@ -167,6 +189,105 @@
     </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('patient_search');
+    const patientIdInput = document.getElementById('patient_id');
+    const resultsContainer = document.getElementById('patient_results');
+    let searchTimeout;
+
+    // Patient Search Autocomplete
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            hideResults();
+            if (!patientIdInput.value) {
+                // Only clear if no patient was previously selected
+                patientIdInput.value = '';
+            }
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            searchPatients(query);
+        }, 300); // Debounce for 300ms
+    });
+
+    // Hide results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+            hideResults();
+        }
+    });
+
+    function searchPatients(query) {
+        fetch(`{{ route('api.prescriptions.patients.search') }}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(patients => {
+                displayResults(patients);
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                hideResults();
+            });
+    }
+
+    function displayResults(patients) {
+        if (patients.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="p-3 text-gray-500 text-center">
+                    <i class="fas fa-search mr-2"></i>
+                    No patients found
+                </div>
+            `;
+        } else {
+            resultsContainer.innerHTML = patients.map(patient => `
+                <div class="patient-result p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
+                     data-id="${patient.id}" 
+                     data-display="${patient.display}">
+                    <div class="font-medium text-gray-900">${patient.name}</div>
+                    <div class="text-sm text-gray-600">${patient.phone} • ${patient.email}</div>
+                </div>
+            `).join('');
+
+            // Add click handlers to results
+            document.querySelectorAll('.patient-result').forEach(result => {
+                result.addEventListener('click', function() {
+                    selectPatient(this.dataset.id, this.dataset.display);
+                });
+            });
+        }
+        
+        showResults();
+    }
+
+    function selectPatient(id, display) {
+        patientIdInput.value = id;
+        searchInput.value = display;
+        hideResults();
+    }
+
+    function showResults() {
+        resultsContainer.classList.remove('hidden');
+    }
+
+    function hideResults() {
+        resultsContainer.classList.add('hidden');
+    }
+
+    // Form validation before submit
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!patientIdInput.value) {
+            e.preventDefault();
+            alert('Please select a patient.');
+            searchInput.focus();
+            return false;
+        }
+    });
+
+// Original medication items functionality
 let itemIndex = 1;
 document.getElementById('add-item').addEventListener('click', () => {
   const wrapper = document.createElement('div');
@@ -210,6 +331,7 @@ document.getElementById('add-item').addEventListener('click', () => {
   `;
   document.getElementById('items').appendChild(wrapper);
   itemIndex++;
+});
 });
 </script>
 </div>
