@@ -80,7 +80,7 @@ class MedicalRecordController extends Controller
      */
     public function searchPatients(Request $request)
     {
-        $query = $request->get('q', '');
+        $query = $request->get('query', '');
         
         if (strlen($query) < 2) {
             return response()->json([]);

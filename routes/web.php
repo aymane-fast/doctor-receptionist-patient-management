@@ -57,14 +57,14 @@ Route::middleware('auth')->group(function () {
     // Patient search APIs (accessible by both roles for autocomplete)
     Route::get('/api/medical-records/patients/search', [MedicalRecordController::class, 'searchPatients'])->name('api.medical-records.patients.search');
     Route::get('/api/prescriptions/patients/search', [PrescriptionController::class, 'searchPatients'])->name('api.prescriptions.patients.search');
+    
+    // Prescription management (accessible by both roles)
+    Route::resource('prescriptions', PrescriptionController::class);
+    Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');
 });
 
 // Doctor-only routes
 Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/doctor/current', [DoctorController::class, 'current'])->name('doctor.current');
     Route::resource('medical-records', MedicalRecordController::class);
-    Route::get('/api/medical-records/patients/search', [MedicalRecordController::class, 'searchPatients'])->name('api.medical-records.patients.search');
-    Route::resource('prescriptions', PrescriptionController::class);
-    Route::get('/api/prescriptions/patients/search', [PrescriptionController::class, 'searchPatients'])->name('api.prescriptions.patients.search');
-    Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');
 });
