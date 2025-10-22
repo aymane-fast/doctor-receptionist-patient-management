@@ -5,20 +5,20 @@
 @section('content')
 <div class="space-y-8">
     <!-- Pharmacy-Style Header -->
-    <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-lg">
-        <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-6">
+    <div class="glass-effect rounded-3xl p-8 modern-shadow">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                <div class="flex items-center space-x-4">
                     <div class="relative">
-                        <div class="w-20 h-20 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-3xl flex items-center justify-center shadow-xl">
-                            <i class="fas fa-prescription-bottle text-white text-3xl"></i>
+                        <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-xl">
+                            <i class="fas fa-prescription-bottle text-white text-2xl"></i>
                         </div>
-                        <div class="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                             <i class="fas fa-plus text-white text-xs"></i>
                         </div>
                     </div>
                     <div>
-                        <h1 class="text-4xl font-bold bg-gradient-to-r from-teal-700 via-cyan-700 to-blue-700 bg-clip-text text-transparent">
-                            {{ __('prescriptions.title') }}
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            <span class="text-gradient">{{ __('prescriptions.title') }}</span>
                         </h1>
                         <p class="text-gray-600 text-lg mt-2">{{ __('prescriptions.subtitle') }}</p>
                         @if($hasSearchQuery && $prescriptions->count() > 0)
@@ -40,20 +40,17 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('prescriptions.create') }}" class="group relative overflow-hidden bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-                        <div class="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
-                        <div class="relative flex items-center space-x-3">
-                            <i class="fas fa-plus"></i>
-                            <span>{{ __('prescriptions.new_prescription') }}</span>
-                        </div>
+                    <a href="{{ route('prescriptions.create') }}" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg">
+                        <i class="fas fa-plus"></i>
+                        <span>{{ __('prescriptions.new_prescription') }}</span>
                     </a>
                 </div>
             </div>
     </div>
 
     <!-- Enhanced Search and Filter Controls -->
-    <div class="bg-white/70 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg relative z-[10001]">
-        <form method="GET" action="{{ route('prescriptions.index') }}" class="space-y-4">
+    <div class="glass-effect rounded-3xl p-8 modern-shadow relative z-[10001]">
+        <form method="GET" action="{{ route('prescriptions.index') }}" class="space-y-6">
             <!-- Search Bar and Date Filter -->
             <div class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
                 <div class="flex-1 w-full relative z-[10000]">

@@ -6,7 +6,7 @@
 <div class="space-y-8">
     <!-- Modern Header -->
     <div class="glass-effect rounded-3xl p-8 modern-shadow">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div class="flex items-center space-x-4">
                 <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center animate-float">
                     <i class="fas fa-file-medical text-emerald-600 text-2xl"></i>
@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <a href="{{ route('medical-records.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 deep-shadow hover:shadow-xl flex items-center space-x-3">
+                <a href="{{ route('medical-records.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 shadow-lg flex items-center space-x-2">
                     <i class="fas fa-plus"></i>
                     <span>{{ __('medical_records.new_record') }}</span>
                 </a>
@@ -28,8 +28,8 @@
     </div>
 
     <!-- Modern Search and Filters -->
-    <div class="glass-effect rounded-3xl p-6 modern-shadow relative z-[10001]">
-        <form method="GET" action="{{ route('medical-records.index') }}" class="space-y-4">
+    <div class="glass-effect rounded-3xl p-8 modern-shadow relative z-[10001]">
+        <form method="GET" action="{{ route('medical-records.index') }}" class="space-y-6">
             <!-- Search Bar and Date Filter -->
             <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
                 <div class="flex-1 w-full relative z-[10000]">
@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         function searchPatients(query) {
-            fetch(`{{ route('api.medical-records.patients.search') }}?q=${encodeURIComponent(query)}`)
+            fetch(`{{ route('api.medical-records.patients.search') }}?query=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(patients => {
                     displayResults(patients);
