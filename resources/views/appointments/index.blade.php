@@ -278,7 +278,7 @@
             <!-- Modern Pagination -->
             @if(method_exists($appointments, 'appends'))
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-t border-gray-100">
-                {{ $appointments->appends(request()->query())->links() }}
+                {{ $appointments->appends(request()->query())->links('pagination.smart') }}
             </div>
             @endif
         @else

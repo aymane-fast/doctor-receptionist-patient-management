@@ -232,7 +232,7 @@
                             </div>
                         </div>
                         <div class="pagination-wrapper">
-                            {{ $todayAppointments->appends(request()->except(['doc_records_page']))->links() }}
+                            {{ $todayAppointments->appends(request()->except(['doc_records_page']))->links('pagination.smart') }}
                         </div>
                     </div>
                     @endif
@@ -313,7 +313,7 @@
                             </div>
                         </div>
                         <div class="pagination-wrapper">
-                            {{ $recentRecords->appends(request()->except(['doc_today_page']))->links() }}
+                            {{ $recentRecords->appends(request()->except(['doc_today_page']))->links('pagination.smart') }}
                         </div>
                     </div>
                     @endif

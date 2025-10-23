@@ -245,7 +245,7 @@
                             </div>
                         </div>
                         <div class="pagination-wrapper">
-                            {{ $todayAppointments->appends(request()->except(['doc_recent_page']))->links() }}
+                            {{ $todayAppointments->appends(request()->except(['doc_recent_page']))->links('pagination.smart') }}
                         </div>
                     </div>
                     @endif
@@ -331,7 +331,7 @@
                             </div>
                         </div>
                         <div class="pagination-wrapper">
-                            {{ $recentPatients->appends(request()->except(['rec_today_page']))->links() }}
+                            {{ $recentPatients->appends(request()->except(['rec_today_page']))->links('pagination.smart') }}
                         </div>
                     </div>
                     @endif

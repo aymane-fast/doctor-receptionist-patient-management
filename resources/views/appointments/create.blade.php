@@ -388,8 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Find next available time slot and set it
         setNextAvailableTime();
         
-        // Submit the form
-        document.querySelector('form').submit();
+
     };
     
     function setNextAvailableTime() {

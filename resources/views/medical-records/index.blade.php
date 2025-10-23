@@ -248,7 +248,7 @@
 
                 <!-- Modern Pagination -->
                 <div class="mt-8 flex justify-center">
-                    {{ $medicalRecords->appends(request()->query())->links() }}
+                    {{ $medicalRecords->appends(request()->query())->links('pagination.smart') }}
                 </div>
             @else
                 <div class="text-center py-16">

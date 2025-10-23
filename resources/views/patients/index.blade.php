@@ -156,7 +156,7 @@
 
                 <!-- Modern Pagination -->
                 <div class="mt-8 flex justify-center">
-                    {{ $patients->appends(request()->query())->links() }}
+                    {{ $patients->appends(request()->query())->links('pagination.smart') }}
                 </div>
             @else
                 <div class="text-center py-16">

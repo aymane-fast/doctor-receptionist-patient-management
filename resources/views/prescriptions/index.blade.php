@@ -261,7 +261,7 @@
                         {{ __('prescriptions.showing_results', ['first' => $prescriptions->firstItem(), 'last' => $prescriptions->lastItem(), 'total' => $prescriptions->total()]) }}
                     </div>
                     <div>
-                        {{ $prescriptions->appends(request()->query())->links() }}
+                        {{ $prescriptions->appends(request()->query())->links('pagination.smart') }}
                     </div>
                 </div>
             </div>
