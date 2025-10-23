@@ -54,7 +54,7 @@ class DashboardController extends Controller
 
         $todayAppointments = $todayAppointmentsQuery
             ->orderBy('appointment_time')
-            ->paginate(4, ['*'], 'doc_today_page');
+            ->paginate(5, ['*'], 'doc_today_page');
 
         $currentAppointment = Appointment::with('patient')
             ->where('doctor_id', Auth::id())
@@ -175,7 +175,7 @@ class DashboardController extends Controller
 
         $todayAppointments = $todayAppointmentsQuery
             ->orderBy('appointment_time')
-            ->paginate(4, ['*'], 'today_page');
+            ->paginate(6, ['*'], 'today_page');
 
         $currentByDoctor = Appointment::with(['patient', 'doctor'])
             ->today()
