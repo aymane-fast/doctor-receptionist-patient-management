@@ -316,20 +316,22 @@ class AppointmentController extends Controller
             abort(403);
         }
 
-        // Clear any existing current for this doctor for today
+        // Mark any existing current appointment as completed and clear current status
         Appointment::where('doctor_id', $appointment->doctor_id)
             ->whereDate('appointment_date', $appointment->appointment_date)
             ->where('is_current', true)
-            ->update(['is_current' => false]);
+            ->update([
+                'is_current' => false,
+                'status' => 'completed'
+            ]);
 
-        // Mark this appointment as current and in progress if scheduled
-        $appointment->is_current = true;
-        if ($appointment->status === 'scheduled') {
-            $appointment->status = 'in_progress';
-        }
-        $appointment->save();
+        // Set this appointment as current and in progress
+        $appointment->update([
+            'is_current' => true,
+            'status' => 'in_progress'
+        ]);
 
-        return back()->with('success', 'Current patient set.');
+        return back()->with('success', 'Current patient set. Previous patient marked as completed.');
     }
 
     /**
@@ -475,4 +477,85 @@ class AppointmentController extends Controller
             'next_working_time' => Setting::getNextWorkingTime()?->format('Y-m-d H:i:s')
         ]);
     }
+
+    /**
+     * Cancel an appointment
+     */
+    public function cancel(Appointment $appointment)
+    {
+        // Only receptionists or the owning doctor can cancel
+        if (!(Auth::user()->isReceptionist() || (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id()))) {
+            return back()->with('error', 'Unauthorized action.');
+        }
+
+        $appointment->update([
+            'status' => 'cancelled',
+            'notes' => ($appointment->notes ? $appointment->notes . "\n" : '') . 'Cancelled on ' . now()->format('Y-m-d H:i')
+        ]);
+
+        return back()->with('success', 'Appointment cancelled successfully!');
+    }
+
+    /**
+     * Reschedule appointment to end of day
+     */
+    public function rescheduleToEndOfDay(Appointment $appointment)
+    {
+        // Only receptionists or the owning doctor can reschedule
+        if (!(Auth::user()->isReceptionist() || (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id()))) {
+            return back()->with('error', 'Unauthorized action.');
+        }
+
+        // Find the last appointment time for today for this doctor
+        $today = now()->format('Y-m-d');
+        $lastAppointment = Appointment::where('doctor_id', $appointment->doctor_id)
+            ->where('appointment_date', $today)
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('appointment_time', 'desc')
+            ->first();
+
+        // Calculate new time (30 minutes after the last appointment, or 30 minutes from now if no appointments)
+        if ($lastAppointment) {
+            try {
+                // Get the raw time value from database (should be HH:MM:SS format)
+                $rawTime = $lastAppointment->getRawOriginal('appointment_time');
+                
+                // If it's already a full datetime string, parse it directly
+                if (strlen($rawTime) > 8) {
+                    $lastDateTime = \Carbon\Carbon::parse($rawTime);
+                } else {
+                    // It's a time string (HH:MM:SS), combine with today's date
+                    $lastDateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $today . ' ' . $rawTime);
+                }
+                
+                $newTime = $lastDateTime->addMinutes(30);
+                
+            } catch (\Exception $e) {
+                // Fallback: use current time + 30 minutes
+                \Log::error('Error parsing appointment time: ' . $e->getMessage() . ' | Raw time: ' . ($rawTime ?? 'null'));
+                $newTime = now()->addMinutes(30);
+            }
+        } else {
+            $newTime = now()->addMinutes(30);
+            // Ensure it's at least on the next 30-minute mark
+            $minutes = $newTime->minute;
+            if ($minutes % 30 !== 0) {
+                $newTime->minute = ($minutes < 30) ? 30 : 0;
+                if ($minutes >= 30) {
+                    $newTime->addHour();
+                }
+                $newTime->second = 0;
+            }
+        }
+
+        // Update appointment
+        $appointment->update([
+            'appointment_time' => $newTime->format('H:i:s'),
+            'status' => 'scheduled',
+            'notes' => ($appointment->notes ? $appointment->notes . "\n" : '') . 'Rescheduled to end of day on ' . now()->format('Y-m-d H:i')
+        ]);
+
+        return back()->with('success', 'Appointment rescheduled to ' . $newTime->format('g:i A') . ' successfully!');
+    }
+
 }

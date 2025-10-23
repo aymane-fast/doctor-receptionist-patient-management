@@ -52,6 +52,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/working-hours', [AppointmentController::class, 'getWorkingHours'])->name('api.working-hours');
     Route::patch('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
     Route::post('/appointments/{appointment}/set-current', [AppointmentController::class, 'setCurrent'])->name('appointments.set-current');
+    Route::post('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('/appointments/{appointment}/reschedule-end-day', [AppointmentController::class, 'rescheduleToEndOfDay'])->name('appointments.reschedule-end-day');
     Route::post('/appointments/current/mark-done', [AppointmentController::class, 'markCurrentDone'])->name('appointments.mark-current-done');
     Route::post('/appointments/{patient}/follow-up', [AppointmentController::class, 'createFollowUp'])->name('appointments.create-follow-up');
     

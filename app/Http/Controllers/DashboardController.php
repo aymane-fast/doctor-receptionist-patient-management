@@ -140,7 +140,19 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
-        return view('dashboard.doctor', compact('todayAppointments', 'currentAppointment', 'upcomingAppointments', 'recentRecords', 'stats'));
+        // Get next appointment for this doctor
+        $nextAppointment = null;
+        if ($currentAppointment) {
+            $nextAppointment = Appointment::with('patient')
+                ->where('doctor_id', Auth::id())
+                ->today()
+                ->where('status', 'scheduled')
+                ->whereTime('appointment_time', '>', $currentAppointment->appointment_time)
+                ->orderBy('appointment_time')
+                ->first();
+        }
+
+        return view('dashboard.doctor', compact('todayAppointments', 'currentAppointment', 'nextAppointment', 'upcomingAppointments', 'recentRecords', 'stats'));
     }
 
     /**

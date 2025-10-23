@@ -54,6 +54,7 @@ class AppointmentSeeder extends Seeder
 
         $currentDate = Carbon::now();
         $appointmentCount = 0;
+        $usedPatientDates = []; // Track which patients have appointments on which dates
 
         // Generate appointments for 4 days starting from today
         for ($dayOffset = 0; $dayOffset < 4; $dayOffset++) {
@@ -64,10 +65,23 @@ class AppointmentSeeder extends Seeder
                 continue;
             }
 
+            $dateString = $date->format('Y-m-d');
+            $usedPatientDates[$dateString] = [];
+
             // Determine number of appointments per day
-            $dailyAppointments = rand(6, 12);
+            $dailyAppointments = rand(8, 14);
             if ($date->dayOfWeek === Carbon::SATURDAY) {
-                $dailyAppointments = rand(3, 6); // Fewer appointments on Saturday
+                $dailyAppointments = rand(4, 8); // Fewer appointments on Saturday
+            }
+            
+            // Get available patients for this date (exclude those who already have appointments)
+            $availablePatients = $patients->reject(function($patient) use ($dateString, $usedPatientDates) {
+                return in_array($patient->id, $usedPatientDates[$dateString] ?? []);
+            });
+
+            // If we don't have enough patients, use all patients but prioritize those without appointments
+            if ($availablePatients->count() < $dailyAppointments) {
+                $availablePatients = $patients;
             }
 
             // Randomly select and shuffle time slots
@@ -76,14 +90,36 @@ class AppointmentSeeder extends Seeder
             $usedTimeSlots = array_slice($shuffledTimeSlots, 0, min($dailyAppointments, count($timeSlots)));
             sort($usedTimeSlots); // Sort to maintain chronological order
 
+            $slotIndex = 0;
             foreach ($usedTimeSlots as $timeSlot) {
-                $selectedPatient = $patients->random();
-                $selectedDoctor = $doctors->random();
+                // Select a patient who doesn't have an appointment on this date yet
+                $selectedPatient = null;
+                $attempts = 0;
+                
+                do {
+                    $candidatePatient = $availablePatients->random();
+                    if (!in_array($candidatePatient->id, $usedPatientDates[$dateString])) {
+                        $selectedPatient = $candidatePatient;
+                    }
+                    $attempts++;
+                } while ($selectedPatient === null && $attempts < 20);
+
+                // If we couldn't find a unique patient after 20 attempts, just use any patient
+                if ($selectedPatient === null) {
+                    $selectedPatient = $availablePatients->random();
+                }
+
+                // Mark this patient as used for this date
+                $usedPatientDates[$dateString][] = $selectedPatient->id;
+
+                // Distribute appointments across doctors more evenly
+                $selectedDoctor = $doctors->get($slotIndex % $doctors->count());
+                $slotIndex++;
                 
                 \App\Models\Appointment::create([
                     'patient_id' => $selectedPatient->id,
                     'doctor_id' => $selectedDoctor->id,
-                    'appointment_date' => $date->format('Y-m-d'),
+                    'appointment_date' => $dateString,
                     'appointment_time' => $timeSlot,
                     'status' => 'scheduled', // Only scheduled appointments as requested
                     'reason' => $appointmentReasons[array_rand($appointmentReasons)],
@@ -93,8 +129,11 @@ class AppointmentSeeder extends Seeder
 
                 $appointmentCount++;
             }
+
+            $this->command->info("Day " . ($dayOffset + 1) . " ({$dateString}): " . count($usedTimeSlots) . " appointments created with " . count(array_unique($usedPatientDates[$dateString])) . " unique patients");
         }
 
-        $this->command->info("$appointmentCount scheduled appointments seeded successfully for 4 days starting from today!");
+        $this->command->info("✅ $appointmentCount scheduled appointments seeded successfully for 4 days!");
+        $this->command->info("📊 Each patient has maximum 1 appointment per day for realistic testing");
     }
 }

@@ -85,6 +85,36 @@
     </div>
     @endif
 
+    <!-- Next Up Patient - Enhanced -->
+    @if(isset($nextAppointment) && $nextAppointment)
+    <div class="glass-effect rounded-2xl p-6 modern-shadow border-l-4 border-purple-500">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-clock text-white text-lg"></i>
+                </div>
+                <div>
+                    <div class="text-sm text-purple-600 mb-1 font-medium">{{ __('dashboard.next_up') }}</div>
+                    <div class="text-xl font-bold text-gray-900 mb-1">{{ $nextAppointment->patient->full_name }}</div>
+                    <div class="flex items-center space-x-3 text-gray-600">
+                        <span><i class="fas fa-clock mr-1"></i>{{ $nextAppointment->appointment_time->format('g:i A') }}</span>
+                        <span><i class="fas fa-stethoscope mr-1"></i>{{ Str::limit($nextAppointment->reason ?? 'General consultation', 30) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="setAsCurrent({{ $nextAppointment->id }})" class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium px-4 py-2 rounded-xl transition-all duration-200 flex items-center space-x-2" title="Set as Current Patient">
+                    <i class="fas fa-play text-sm"></i>
+                    <span>Set as Current</span>
+                </button>
+                <button onclick="rescheduleAppointment({{ $nextAppointment->id }})" class="bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium px-3 py-2 rounded-xl transition-all duration-200" title="Reschedule">
+                    <i class="fas fa-clock text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Modern Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Total Patients -->
@@ -206,9 +236,22 @@
                                         @else bg-gradient-to-r from-red-100 to-red-50 text-red-800 border border-red-200 @endif">
                                         {{ __('appointments.' . $appointment->status) }}
                                     </span>
-                                    <a href="{{ route('appointments.show', $appointment) }}" class="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors">
-                                        <i class="fas fa-eye text-blue-600 text-sm"></i>
-                                    </a>
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{{ route('appointments.show', $appointment) }}" class="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors" title="View Details">
+                                            <i class="fas fa-eye text-blue-600 text-sm"></i>
+                                        </a>
+                                        @if($appointment->status === 'scheduled')
+                                            <button onclick="setAsCurrent({{ $appointment->id }})" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="Set as Current Patient">
+                                                <i class="fas fa-play text-green-600 text-sm"></i>
+                                            </button>
+                                            <button onclick="rescheduleAppointment({{ $appointment->id }})" class="w-8 h-8 bg-purple-100 hover:bg-purple-200 rounded-lg flex items-center justify-center transition-colors" title="Reschedule to End of Day">
+                                                <i class="fas fa-clock text-purple-600 text-sm"></i>
+                                            </button>
+                                            <button onclick="cancelAppointment({{ $appointment->id }})" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors" title="Cancel Appointment">
+                                                <i class="fas fa-times text-red-600 text-sm"></i>
+                                            </button>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                             @if($appointment->reason)
@@ -435,5 +478,57 @@ document.getElementById('appointmentFiltersModal').addEventListener('click', fun
 document.getElementById('recordsFiltersModal').addEventListener('click', function(e) {
     if (e.target === this) closeRecordsFilters();
 });
+
+// Quick action functions
+function setAsCurrent(appointmentId) {
+    if (confirm('Set this appointment as the current patient?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/appointments/${appointmentId}/set-current`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function cancelAppointment(appointmentId) {
+    if (confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/appointments/${appointmentId}/cancel`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function rescheduleAppointment(appointmentId) {
+    if (confirm('Are you sure you want to reschedule this appointment to the end of the day? The patient will be notified.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/appointments/${appointmentId}/reschedule-end-day`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
 </script>
 @endsection
