@@ -393,38 +393,101 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function setNextAvailableTime() {
         const timeInput = document.querySelector('input[name="appointment_time"]');
-        if (timeInput) {
-            const now = new Date();
-            
-            // Round to next 15-minute interval
-            const currentMinutes = now.getMinutes();
-            const roundedMinutes = Math.ceil(currentMinutes / 15) * 15;
-            
-            now.setMinutes(roundedMinutes);
-            now.setSeconds(0);
-            
-            // Add 15 minutes buffer for immediate booking
-            now.setMinutes(now.getMinutes() + 15);
-            
-            // Ensure it's within working hours (9 AM - 5 PM for now)
-            const hours = now.getHours();
-            if (hours < 9) {
-                now.setHours(9, 0, 0, 0);
-            } else if (hours >= 17) {
-                // If after 5 PM, set to 9 AM next day
-                now.setDate(now.getDate() + 1);
-                now.setHours(9, 0, 0, 0);
+        const dateInput = document.querySelector('input[name="appointment_date"]');
+        
+        if (!timeInput || !dateInput) return;
+
+        // Fetch working hours dynamically
+        fetch('{{ route('api.working-hours') }}')
+            .then(response => response.json())
+            .then(workingHours => {
+                const now = new Date();
+                let appointmentDate = new Date(now);
                 
-                // Update date field too
-                const dateInput = document.querySelector('input[name="appointment_date"]');
-                if (dateInput) {
-                    dateInput.value = now.toISOString().split('T')[0];
+                // Find the next available time slot
+                const nextSlot = findNextAvailableSlot(now, workingHours);
+                
+                if (nextSlot) {
+                    // Update both date and time
+                    dateInput.value = nextSlot.toISOString().split('T')[0];
+                    timeInput.value = nextSlot.toTimeString().slice(0, 5); // HH:MM format
+                } else {
+                    // Fallback to next working day at start time
+                    setFallbackTime(workingHours, dateInput, timeInput);
                 }
-            }
+            })
+            .catch(error => {
+                console.error('Error fetching working hours:', error);
+                // Fallback to basic time setting
+                setBasicFallbackTime(timeInput, dateInput);
+            });
+    }
+
+    function findNextAvailableSlot(currentTime, workingHours) {
+        const today = currentTime.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        
+        // Try today first if we're within working hours
+        let testDate = new Date(currentTime);
+        
+        // Add 30 minutes buffer for booking
+        testDate.setMinutes(testDate.getMinutes() + 30);
+        
+        // Round to next 15-minute interval
+        const minutes = testDate.getMinutes();
+        const roundedMinutes = Math.ceil(minutes / 15) * 15;
+        testDate.setMinutes(roundedMinutes);
+        testDate.setSeconds(0);
+        
+        // Check if this time is within today's working hours
+        const todayName = dayNames[today];
+        const todayHours = workingHours.all_days[todayName];
+        
+        if (todayHours && todayHours.is_working) {
+            const currentTimeString = testDate.toTimeString().slice(0, 5); // HH:MM
             
-            const timeString = now.toTimeString().slice(0, 5); // HH:MM format
-            timeInput.value = timeString;
+            if (currentTimeString >= todayHours.start_time && currentTimeString <= todayHours.end_time) {
+                return testDate;
+            }
         }
+        
+        // If not available today, find next working day
+        for (let daysAhead = 1; daysAhead <= 7; daysAhead++) {
+            const nextDate = new Date(currentTime);
+            nextDate.setDate(nextDate.getDate() + daysAhead);
+            
+            const dayName = dayNames[nextDate.getDay()];
+            const dayHours = workingHours.all_days[dayName];
+            
+            if (dayHours && dayHours.is_working) {
+                // Set to start of working hours
+                const [hours, minutes] = dayHours.start_time.split(':');
+                nextDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                return nextDate;
+            }
+        }
+        
+        return null; // No working day found in next week
+    }
+
+    function setFallbackTime(workingHours, dateInput, timeInput) {
+        if (workingHours.next_working_time) {
+            const nextWorking = new Date(workingHours.next_working_time);
+            dateInput.value = nextWorking.toISOString().split('T')[0];
+            timeInput.value = nextWorking.toTimeString().slice(0, 5);
+        } else {
+            setBasicFallbackTime(timeInput, dateInput);
+        }
+    }
+
+    function setBasicFallbackTime(timeInput, dateInput) {
+        // Emergency fallback - set to tomorrow 9 AM
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(9, 0, 0, 0);
+        
+        dateInput.value = tomorrow.toISOString().split('T')[0];
+        timeInput.value = '09:00';
     }
 
     // Form validation before submit

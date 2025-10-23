@@ -459,4 +459,20 @@ class AppointmentController extends Controller
         return redirect()->route('doctor.current')->with('success', 
             "Follow-up appointment scheduled for {$timeAmount} {$timeUnit} from now on {$appointmentDateTime}");
     }
+
+    /**
+     * Get working hours for the frontend
+     */
+    public function getWorkingHours()
+    {
+        $workingHours = Setting::getAllWorkingHours();
+        $currentWorkingHours = Setting::getWorkingHours();
+        
+        return response()->json([
+            'all_days' => $workingHours,
+            'today' => $currentWorkingHours,
+            'is_within_hours' => Setting::isWithinWorkingHours(),
+            'next_working_time' => Setting::getNextWorkingTime()?->format('Y-m-d H:i:s')
+        ]);
+    }
 }
