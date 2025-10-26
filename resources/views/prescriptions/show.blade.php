@@ -8,9 +8,9 @@
     <div class="flex items-center justify-between mb-6 print:hidden">
         <h1 class="text-3xl font-bold text-gray-900">{{ __('prescriptions.prescription_details') }}</h1>
         <div class="flex space-x-3">
-            <a href="{{ route('prescriptions.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i>{{ __('prescriptions.back_to_prescriptions') }}
-            </a>
+            <button onclick="history.back()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>{{ __('common.back') }}
+            </button>
             <a href="{{ route('prescriptions.edit', $prescription) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
                 <i class="fas fa-edit mr-2"></i>{{ __('common.edit') }}
             </a>

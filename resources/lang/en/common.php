@@ -90,4 +90,5 @@ return [
     'open' => 'Open',
     'closed' => 'Closed',
     'not_specified' => 'Not specified',
+    'medical_management' => 'Medical Management',
 ];

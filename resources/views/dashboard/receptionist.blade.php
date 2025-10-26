@@ -57,7 +57,7 @@
                 </div>
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900">{{ __('dashboard.active_patients_today') }}</h2>
-                    <p class="text-sm text-gray-600 mt-1">Currently in consultation</p>
+                    <p class="text-sm text-gray-600 mt-1">{{ __('dashboard.currently_in_consultation') }}</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
@@ -123,7 +123,7 @@
                                         class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 mx-auto shadow-sm hover:shadow-md" 
                                         title="Set as Current">
                                     <i class="fas fa-play"></i>
-                                    <span>Start Session</span>
+                                    <span>{{ __('dashboard.start_session') }}</span>
                                 </button>
                             </div>
                         </div>
@@ -133,7 +133,7 @@
                                 <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <i class="fas fa-clock text-gray-400"></i>
                                 </div>
-                                <div class="text-sm text-gray-500">No next patient scheduled</div>
+                                <div class="text-sm text-gray-500">{{ __('dashboard.no_next_patient_scheduled') }}</div>
                             </div>
                         </div>
                         @endif
@@ -158,7 +158,7 @@
                                 <a href="{{ route('appointments.show', $curr) }}" 
                                    class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2">
                                     <i class="fas fa-eye"></i>
-                                    <span>View Patient Details</span>
+                                    <span>{{ __('dashboard.view_patient_details') }}</span>
                                 </a>
                                 
                                 <div class="grid grid-cols-2 gap-3">
@@ -167,7 +167,7 @@
                                             class="bg-amber-100 hover:bg-amber-200 text-amber-700 font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2" 
                                             title="Reschedule">
                                         <i class="fas fa-calendar-alt"></i>
-                                        <span>Reschedule</span>
+                                        <span>{{ __('dashboard.reschedule') }}</span>
                                     </a>
                                     
                                     <!-- Cancel -->
@@ -175,7 +175,7 @@
                                             class="bg-red-100 hover:bg-red-200 text-red-700 font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2" 
                                             title="Cancel">
                                         <i class="fas fa-times"></i>
-                                        <span>Cancel</span>
+                                        <span>{{ __('dashboard.cancel') }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -277,7 +277,7 @@
                     <div class="flex items-center space-x-3">
                         <button onclick="openReceptionAppointmentFilters()" class="filter-btn">
                             <i class="fas fa-filter"></i>
-                            <span>Filter</span>
+                            <span>{{ __('dashboard.filter') }}</span>
                         </button>
                         <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
                             <i class="fas fa-plus"></i>
@@ -379,7 +379,7 @@
                     <div class="flex items-center space-x-3">
                         <button onclick="openReceptionPatientFilters()" class="filter-btn">
                             <i class="fas fa-filter"></i>
-                            <span>Filter</span>
+                            <span>{{ __('dashboard.filter') }}</span>
                         </button>
                         <a href="{{ route('patients.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
                             <i class="fas fa-plus"></i>
@@ -541,7 +541,7 @@
         <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Filter Appointments</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('dashboard.filter_appointments') }}</h3>
                     <button onclick="closeReceptionAppointmentFilters()" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times text-xl"></i>
                     </button>

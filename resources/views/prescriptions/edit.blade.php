@@ -9,9 +9,9 @@
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-3xl font-bold text-gray-900">{{ __('prescriptions.edit_prescription') }}</h1>
             <div class="flex space-x-3">
-                <a href="{{ route('prescriptions.show', $prescription) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
-                    <i class="fas fa-arrow-left mr-2"></i>{{ __('prescriptions.back_to_details') }}
-                </a>
+                <button onclick="history.back()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>{{ __('common.back') }}
+                </button>
             </div>
         </div>
 

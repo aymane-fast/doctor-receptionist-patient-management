@@ -17,11 +17,11 @@
                 </div>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('appointments.index') }}" 
+                <button onclick="history.back()" 
                    class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
                     <i class="fas fa-arrow-left"></i>
-                    <span>{{ __('appointments.back_to_list') }}</span>
-                </a>
+                    <span>{{ __('common.back') }}</span>
+                </button>
                 <a href="{{ route('appointments.edit', $appointment) }}" 
                    class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
                     <i class="fas fa-edit"></i>

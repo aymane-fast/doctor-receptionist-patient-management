@@ -102,7 +102,7 @@
                                 <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                                     <i class="fas fa-heartbeat text-white text-xl"></i>
                                 </div>
-                                <h1 class="text-xl font-bold text-gray-900">Medical Management</h1>
+                                <h1 class="text-xl font-bold text-gray-900">{{ __('common.medical_management') ?? 'Medical Management' }}</h1>
                             </div>
                             
                             <!-- Navigation Links -->
@@ -123,7 +123,7 @@
                                 @if(auth()->user()->isDoctor())
                                 <a href="{{ route('doctor.current') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('doctor.current') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
                                     <i class="fas fa-user-clock text-lg mb-1"></i>
-                                    <span class="text-xs font-medium">Current</span>
+                                    <span class="text-xs font-medium">{{ __('dashboard.current_patient') }}</span>
                                 </a>
                                 <a href="{{ route('medical-records.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('medical-records.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
                                     <i class="fas fa-file-medical text-lg mb-1"></i>

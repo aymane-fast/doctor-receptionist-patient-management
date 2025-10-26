@@ -18,10 +18,10 @@
                     <p class="text-gray-600 mt-2 text-lg">{{ __('patients.create_comprehensive_profile') }}</p>
                 </div>
             </div>
-            <a href="{{ route('patients.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+            <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
                 <i class="fas fa-arrow-left"></i>
-                <span>{{ __('patients.back_to_patients') }}</span>
-            </a>
+                <span>{{ __('common.back') }}</span>
+            </button>
         </div>
     </div>
 
