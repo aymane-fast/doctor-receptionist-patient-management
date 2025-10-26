@@ -59,7 +59,7 @@ class DashboardController extends Controller
         $currentAppointment = Appointment::with('patient')
             ->where('doctor_id', Auth::id())
             ->today()
-            ->where('is_current', true)
+            ->where('status', 'in_progress')
             ->first();
 
         // Auto-assign first scheduled appointment as current if none is set
@@ -191,7 +191,7 @@ class DashboardController extends Controller
 
         $currentByDoctor = Appointment::with(['patient', 'doctor'])
             ->today()
-            ->where('is_current', true)
+            ->where('status', 'in_progress')
             ->get()
             ->keyBy('doctor_id');
 

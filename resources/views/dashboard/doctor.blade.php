@@ -107,9 +107,9 @@
                     <i class="fas fa-play text-sm"></i>
                     <span>Set as Current</span>
                 </button>
-                <button onclick="rescheduleAppointment({{ $nextAppointment->id }})" class="bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium px-3 py-2 rounded-xl transition-all duration-200" title="Reschedule">
+                <a href="{{ route('appointments.reschedule', $nextAppointment) }}" class="bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium px-3 py-2 rounded-xl transition-all duration-200" title="Reschedule">
                     <i class="fas fa-clock text-sm"></i>
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -244,9 +244,9 @@
                                             <button onclick="setAsCurrent({{ $appointment->id }})" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="Set as Current Patient">
                                                 <i class="fas fa-play text-green-600 text-sm"></i>
                                             </button>
-                                            <button onclick="rescheduleAppointment({{ $appointment->id }})" class="w-8 h-8 bg-purple-100 hover:bg-purple-200 rounded-lg flex items-center justify-center transition-colors" title="Reschedule to End of Day">
+                                            <a href="{{ route('appointments.reschedule', $appointment) }}" class="w-8 h-8 bg-purple-100 hover:bg-purple-200 rounded-lg flex items-center justify-center transition-colors" title="Reschedule Appointment">
                                                 <i class="fas fa-clock text-purple-600 text-sm"></i>
-                                            </button>
+                                            </a>
                                             <button onclick="cancelAppointment({{ $appointment->id }})" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors" title="Cancel Appointment">
                                                 <i class="fas fa-times text-red-600 text-sm"></i>
                                             </button>
@@ -515,20 +515,8 @@ function cancelAppointment(appointmentId) {
 }
 
 function rescheduleAppointment(appointmentId) {
-    if (confirm('Are you sure you want to reschedule this appointment to the end of the day? The patient will be notified.')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/appointments/${appointmentId}/reschedule-end-day`;
-        
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = '{{ csrf_token() }}';
-        
-        form.appendChild(csrfToken);
-        document.body.appendChild(form);
-        form.submit();
-    }
+    // Simple redirect to reschedule (edit) page
+    window.location.href = `/appointments/${appointmentId}/reschedule`;
 }
 </script>
 @endsection

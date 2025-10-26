@@ -17,29 +17,12 @@ class DoctorController extends Controller
             abort(403);
         }
 
-        // Ensure there's a current appointment, otherwise auto-assign first scheduled today
+        // Get current appointment (in progress status)
         $current = Appointment::with(['patient'])
             ->where('doctor_id', Auth::id())
             ->today()
-            ->where('is_current', true)
+            ->where('status', 'in_progress')
             ->first();
-
-        if (!$current) {
-            $first = Appointment::with('patient')
-                ->where('doctor_id', Auth::id())
-                ->today()
-                ->where('status', 'scheduled')
-                ->orderBy('appointment_time')
-                ->first();
-            if ($first) {
-                Appointment::where('doctor_id', Auth::id())
-                    ->today()
-                    ->where('is_current', true)
-                    ->update(['is_current' => false]);
-                $first->update(['is_current' => true, 'status' => 'in_progress']);
-                $current = $first;
-            }
-        }
 
         $patient = $current ? $current->patient()->with(['appointments.doctor', 'medicalRecords.doctor', 'prescriptions.doctor'])->first() : null;
 

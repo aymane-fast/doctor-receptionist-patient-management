@@ -316,26 +316,20 @@ class AppointmentController extends Controller
             abort(403);
         }
 
-        // Mark any existing current appointment as completed and clear current status
+        // Clear any existing current status for this doctor today (don't auto-complete)
         Appointment::where('doctor_id', $appointment->doctor_id)
-            ->whereDate('appointment_date', $appointment->appointment_date)
-            ->where('is_current', true)
-            ->update([
-                'is_current' => false,
-                'status' => 'completed'
-            ]);
+            ->whereDate('appointment_date', today())
+            ->where('status', 'in_progress')
+            ->update(['status' => 'scheduled']);
 
-        // Set this appointment as current and in progress
-        $appointment->update([
-            'is_current' => true,
-            'status' => 'in_progress'
-        ]);
+        // Set this appointment as current/in progress
+        $appointment->update(['status' => 'in_progress']);
 
-        return back()->with('success', 'Current patient set. Previous patient marked as completed.');
+        return back()->with('success', 'Patient session started successfully.');
     }
 
     /**
-     * Mark the current patient as done and move to next
+     * Mark the current patient as done
      */
     public function markCurrentDone(Request $request)
     {
@@ -350,34 +344,18 @@ class AppointmentController extends Controller
             abort(403);
         }
 
-        // Find current appointment for today
+        // Find current appointment for today (in_progress status)
         $current = Appointment::where('doctor_id', $doctorId)
             ->whereDate('appointment_date', today())
-            ->where('is_current', true)
+            ->where('status', 'in_progress')
             ->first();
 
         if ($current) {
-            $current->update([
-                'is_current' => false,
-                'status' => 'completed',
-            ]);
+            $current->update(['status' => 'completed']);
+            return back()->with('success', 'Patient consultation completed successfully.');
         }
 
-        // Auto-assign the next scheduled appointment today as current
-        $next = Appointment::where('doctor_id', $doctorId)
-            ->whereDate('appointment_date', today())
-            ->where('status', 'scheduled')
-            ->orderBy('appointment_time')
-            ->first();
-
-        if ($next) {
-            $next->update([
-                'is_current' => true,
-                'status' => 'in_progress',
-            ]);
-        }
-
-        return back()->with('success', $current ? 'Marked current as done.' : 'No current appointment.') ;
+        return back()->with('error', 'No active consultation found.');
     }
 
     /**
@@ -497,65 +475,18 @@ class AppointmentController extends Controller
     }
 
     /**
-     * Reschedule appointment to end of day
+     * Simple reschedule - redirect to edit page
      */
-    public function rescheduleToEndOfDay(Appointment $appointment)
+    public function reschedule(Appointment $appointment)
     {
         // Only receptionists or the owning doctor can reschedule
         if (!(Auth::user()->isReceptionist() || (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id()))) {
             return back()->with('error', 'Unauthorized action.');
         }
 
-        // Find the last appointment time for today for this doctor
-        $today = now()->format('Y-m-d');
-        $lastAppointment = Appointment::where('doctor_id', $appointment->doctor_id)
-            ->where('appointment_date', $today)
-            ->where('status', '!=', 'cancelled')
-            ->orderBy('appointment_time', 'desc')
-            ->first();
-
-        // Calculate new time (30 minutes after the last appointment, or 30 minutes from now if no appointments)
-        if ($lastAppointment) {
-            try {
-                // Get the raw time value from database (should be HH:MM:SS format)
-                $rawTime = $lastAppointment->getRawOriginal('appointment_time');
-                
-                // If it's already a full datetime string, parse it directly
-                if (strlen($rawTime) > 8) {
-                    $lastDateTime = \Carbon\Carbon::parse($rawTime);
-                } else {
-                    // It's a time string (HH:MM:SS), combine with today's date
-                    $lastDateTime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $today . ' ' . $rawTime);
-                }
-                
-                $newTime = $lastDateTime->addMinutes(30);
-                
-            } catch (\Exception $e) {
-                // Fallback: use current time + 30 minutes
-                \Log::error('Error parsing appointment time: ' . $e->getMessage() . ' | Raw time: ' . ($rawTime ?? 'null'));
-                $newTime = now()->addMinutes(30);
-            }
-        } else {
-            $newTime = now()->addMinutes(30);
-            // Ensure it's at least on the next 30-minute mark
-            $minutes = $newTime->minute;
-            if ($minutes % 30 !== 0) {
-                $newTime->minute = ($minutes < 30) ? 30 : 0;
-                if ($minutes >= 30) {
-                    $newTime->addHour();
-                }
-                $newTime->second = 0;
-            }
-        }
-
-        // Update appointment
-        $appointment->update([
-            'appointment_time' => $newTime->format('H:i:s'),
-            'status' => 'scheduled',
-            'notes' => ($appointment->notes ? $appointment->notes . "\n" : '') . 'Rescheduled to end of day on ' . now()->format('Y-m-d H:i')
-        ]);
-
-        return back()->with('success', 'Appointment rescheduled to ' . $newTime->format('g:i A') . ' successfully!');
+        // Redirect to edit page for manual rescheduling
+        return redirect()->route('appointments.edit', $appointment)
+            ->with('info', 'Please select a new date and time for this appointment.');
     }
 
 }
