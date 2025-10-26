@@ -124,7 +124,6 @@ class AppointmentSeeder extends Seeder
                     'status' => 'scheduled', // Only scheduled appointments as requested
                     'reason' => $appointmentReasons[array_rand($appointmentReasons)],
                     'notes' => $appointmentNotes[array_rand($appointmentNotes)],
-                    'is_current' => false, // No current appointments in seeder
                 ]);
 
                 $appointmentCount++;

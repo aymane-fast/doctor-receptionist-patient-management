@@ -8,10 +8,13 @@ use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
 use App\Models\Setting;
+use App\Services\PatientSearchService;
+use App\Http\Requests\Traits\ValidatesAppointments;
 use Carbon\Carbon;
 
 class AppointmentController extends Controller
 {
+    use ValidatesAppointments;
     /**
      * Display a listing of appointments
      */
@@ -98,92 +101,25 @@ class AppointmentController extends Controller
     public function searchPatients(Request $request)
     {
         $query = $request->get('q', '');
-        
-        if (strlen($query) < 2) {
-            return response()->json([]);
-        }
-        
-        $patients = Patient::where(function($q) use ($query) {
-            $q->where('first_name', 'like', "%{$query}%")
-              ->orWhere('last_name', 'like', "%{$query}%")
-              ->orWhere('phone', 'like', "%{$query}%")
-              ->orWhere('email', 'like', "%{$query}%")
-              ->orWhere('id_card_number', 'like', "%{$query}%");
-        })
-        ->limit(10)
-        ->get()
-        ->map(function($patient) {
-            return [
-                'id' => $patient->id,
-                'name' => $patient->first_name . ' ' . $patient->last_name,
-                'phone' => $patient->phone,
-                'email' => $patient->email,
-                'display' => $patient->first_name . ' ' . $patient->last_name . ' - ' . $patient->phone
-            ];
-        });
-        
-        return response()->json($patients);
-    }
-
-    /**
+        return response()->json(PatientSearchService::search($query));
+    }    /**
      * Store a newly created appointment
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'doctor_id' => 'required|exists:users,id',
-            'appointment_date' => 'required|date|after_or_equal:today',
-            'appointment_time' => 'required|date_format:H:i',
-            'status' => 'nullable|in:scheduled,in_progress,completed,cancelled',
-            'reason' => 'nullable|string',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validate($this->getAppointmentValidationRules());
 
-        if (empty($validated['status'])) {
-            $validated['status'] = 'scheduled';
-        }
+        // All new appointments start as scheduled
+        $validated['status'] = 'scheduled';
 
-        // Validate appointment is during working hours
-        $appointmentDateTime = Carbon::parse($validated['appointment_date'] . ' ' . $validated['appointment_time']);
-        
-        if (!Setting::isTimeWithinWorkingHours($appointmentDateTime)) {
-            $workingHours = Setting::getWorkingHours($appointmentDateTime->format('l'));
-            $errorMessage = 'Appointment time is outside working hours. ';
-            
-            if ($workingHours && $workingHours['is_working']) {
-                $errorMessage .= 'Working hours for ' . $appointmentDateTime->format('l') . ' are ' . 
-                               $workingHours['start_time'] . ' - ' . $workingHours['end_time'] . '.';
-            } else {
-                $errorMessage .= 'We are closed on ' . $appointmentDateTime->format('l') . '.';
-            }
-            
-            return back()->withErrors(['appointment_time' => $errorMessage]);
-        }
-
-        // Check if appointment is too close to end of working hours (less than 30 minutes)
-        $dayName = strtolower($appointmentDateTime->format('l'));
-        $workingHours = Setting::getWorkingHours($dayName);
-        if ($workingHours && $workingHours['is_working']) {
-            $endTime = Carbon::parse($validated['appointment_date'] . ' ' . $workingHours['end_time']);
-            $appointmentEndTime = $appointmentDateTime->copy()->addMinutes(30); // Assume 30-minute appointments
-            
-            if ($appointmentEndTime->gt($endTime)) {
-                return back()->withErrors(['appointment_time' => 
-                    'Appointment would extend past working hours. Last appointment should be scheduled at least 30 minutes before closing time (' . 
-                    $workingHours['end_time'] . ').'
-                ]);
-            }
+        // Validate working hours
+        $workingHoursError = $this->validateWorkingHours($validated['appointment_date'], $validated['appointment_time']);
+        if ($workingHoursError) {
+            return back()->withErrors(['appointment_time' => $workingHoursError]);
         }
 
         // Check for conflicts
-        $existingAppointment = Appointment::where('doctor_id', $validated['doctor_id'])
-                                        ->whereDate('appointment_date', $validated['appointment_date'])
-                                        ->whereTime('appointment_time', $validated['appointment_time'])
-                                        ->where('status', '!=', 'cancelled')
-                                        ->first();
-
-        if ($existingAppointment) {
+        if ($this->hasAppointmentConflict($validated['doctor_id'], $validated['appointment_date'], $validated['appointment_time'])) {
             return back()->withErrors(['appointment_time' => 'Doctor already has an appointment at this time.']);
         }
 

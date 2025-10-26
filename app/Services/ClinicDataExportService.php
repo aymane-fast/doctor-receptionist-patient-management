@@ -249,7 +249,7 @@ class ClinicDataExportService
                 $statusDisplay,
                 $appointment->reason ?? 'General consultation',
                 $appointment->notes ?? 'No additional notes',
-                $appointment->is_current ? '⭐ Current' : '📋 Past/Future',
+                $appointment->status === 'in_progress' ? '⭐ Current' : '📋 Past/Future',
                 $appointment->created_at->format('M j, Y g:i A')
             ];
             
@@ -602,7 +602,7 @@ class ClinicDataExportService
         $insights = [
             ['👥 Patient Retention Rate', Patient::whereHas('appointments', function($q) { $q->where('status', 'completed'); })->count() . '/' . $totalPatients . ' patients', 'Patients with completed visits'],
             ['📅 Average Monthly Appointments', round(Appointment::count() / max(1, Carbon::now()->diffInMonths(Appointment::oldest()->first()?->created_at ?? Carbon::now())), 1), 'Based on clinic operation period'],
-            ['⭐ Current Active Cases', Appointment::where('is_current', true)->count(), 'Ongoing patient sessions'],
+            ['⭐ Current Active Cases', Appointment::where('status', 'in_progress')->count(), 'Ongoing patient sessions'],
             ['💊 Prescription Compliance', Prescription::whereNotNull('instructions')->count() . '/' . Prescription::count(), 'Detailed prescription records'],
             ['🔬 Lab Order Completion', Order::where('status', 'completed')->count() . '/' . Order::count(), 'Successfully completed tests'],
             ['📋 Records with Vitals', MedicalRecord::whereNotNull(['weight', 'height'])->count() . '/' . MedicalRecord::count(), 'Complete vital sign records'],

@@ -62,8 +62,7 @@ class DashboardController extends Controller
             ->where('status', 'in_progress')
             ->first();
 
-        // Auto-assign first scheduled appointment as current if none is set
-        if (!$currentAppointment) {
+            // Auto-assign first scheduled appointment as current if none exists
             $firstScheduled = Appointment::with('patient')
                 ->where('doctor_id', Auth::id())
                 ->today()
@@ -72,22 +71,15 @@ class DashboardController extends Controller
                 ->first();
 
             if ($firstScheduled) {
-                // Clear any strays just in case
+                // Clear any existing in_progress appointments for this doctor today
                 Appointment::where('doctor_id', Auth::id())
                     ->today()
-                    ->where('is_current', true)
-                    ->update(['is_current' => false]);
+                    ->where('status', 'in_progress')
+                    ->update(['status' => 'scheduled']);
 
-                $firstScheduled->update([
-                    'is_current' => true,
-                    'status' => 'in_progress',
-                ]);
-
+                $firstScheduled->update(['status' => 'in_progress']);
                 $currentAppointment = $firstScheduled;
-            }
-        }
-
-        $upcomingAppointments = Appointment::with('patient')
+            }        $upcomingAppointments = Appointment::with('patient')
             ->where('doctor_id', Auth::id())
             ->upcoming()
             ->limit(5)

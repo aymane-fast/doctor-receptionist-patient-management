@@ -183,25 +183,8 @@
                         @enderror
                     </div>
 
-                    <!-- Status -->
-                    <div>
-                        <label for="status" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Status
-                        </label>
-                        <select id="status" name="status" 
-                                class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('status') border-red-500 @enderror">
-                            <option value="scheduled" {{ old('status', 'scheduled') == 'scheduled' ? 'selected' : '' }}>{{ __('appointments.scheduled') }}</option>
-                            <option value="in_progress" {{ old('status') == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
-                            <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
-                            <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>{{ __('appointments.cancelled') }}</option>
-                        </select>
-                        @error('status')
-                        <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
-                            <i class="fas fa-exclamation-circle text-xs"></i>
-                            <span>{{ $message }}</span>
-                        </p>
-                        @enderror
-                    </div>
+                    <!-- Status (Hidden - New appointments are always scheduled) -->
+                    <input type="hidden" name="status" value="scheduled">
                 </div>
 
                 <!-- Purpose & Notes in 2 columns -->
