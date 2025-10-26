@@ -78,6 +78,8 @@ return [
     'end_time' => 'End Time',
     'save_working_hours' => 'Save Working Hours',
     'today_schedule' => "Today's Schedule",
+    'today' => 'Today',
+    'waiting' => 'Waiting',
     
     // Navigation
     'back_to' => 'Back to :item',

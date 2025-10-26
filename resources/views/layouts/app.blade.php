@@ -158,13 +158,14 @@
                                     
                                     $todayCount = $todayQuery->count();
                                 @endphp
-                                <div class="flex items-center space-x-2 bg-white rounded-lg px-3 py-2 shadow-sm">
+                                <a href="{{ route('appointments.index', ['show_today' => '1']) }}" 
+                                   class="flex items-center space-x-2 bg-white rounded-lg px-3 py-2 shadow-sm hover:bg-blue-50 transition-colors duration-200">
                                     <i class="fas fa-calendar-day text-blue-600"></i>
-                                    <span class="text-sm font-medium text-gray-700">Today</span>
+                                    <span class="text-sm font-medium text-gray-700">{{ __('common.today') }}</span>
                                     <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">
                                         {{ $todayCount }}
                                     </span>
-                                </div>
+                                </a>
 
                                 <!-- Pending Appointments -->
                                 @php
@@ -179,11 +180,12 @@
                                     $pendingCount = $pendingQuery->count();
                                 @endphp
                                 @if($pendingCount > 0)
-                                <div class="flex items-center space-x-2 bg-orange-50 rounded-lg px-3 py-2 shadow-sm">
+                                <a href="{{ route('appointments.index', ['show_today' => '1', 'status' => 'scheduled']) }}" 
+                                   class="flex items-center space-x-2 bg-orange-50 rounded-lg px-3 py-2 shadow-sm hover:bg-orange-100 transition-colors duration-200">
                                     <i class="fas fa-clock text-orange-600"></i>
-                                    <span class="text-sm font-medium text-gray-700">Waiting</span>
+                                    <span class="text-sm font-medium text-gray-700">{{ __('common.waiting') }}</span>
                                     <span class="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded-full">{{ $pendingCount }}</span>
-                                </div>
+                                </a>
                                 @endif
                             </div>
 
@@ -203,12 +205,7 @@
                                     <i class="fas fa-calendar-plus text-lg"></i>
                                 </a>
 
-                                <!-- Settings -->
-                                <a href="{{ route('settings.index') }}" 
-                                   class="p-2 text-gray-600 hover:text-purple-600 transition-colors" 
-                                   title="{{ __('common.settings') }}">
-                                    <i class="fas fa-cog text-lg"></i>
-                                </a>
+
                             </div>
 
                             <!-- User Profile with Dynamic Status -->
@@ -256,7 +253,6 @@
                                         <i class="fas fa-chevron-down text-sm"></i>
                                     </button>
                                     <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border hidden">
-                                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ __('common.profile_settings') }}</a>
                                         <form method="POST" action="{{ route('logout') }}" class="block">
                                             @csrf
                                             <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50">

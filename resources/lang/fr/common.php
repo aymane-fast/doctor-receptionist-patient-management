@@ -78,6 +78,8 @@ return [
     'end_time' => 'Heure de Fin',
     'save_working_hours' => 'Sauvegarder les Heures de Travail',
     'today_schedule' => "Programme d'Aujourd'hui",
+    'today' => "Aujourd'hui",
+    'waiting' => 'En attente',
     
     // Navigation
     'back_to' => 'Retour aux :item',
