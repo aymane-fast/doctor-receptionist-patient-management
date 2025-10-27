@@ -74,6 +74,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Appointments (alias for doctorAppointments for easier querying)
+     */
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'doctor_id');
+    }
+
+    /**
      * Medical records as doctor
      */
     public function medicalRecords()

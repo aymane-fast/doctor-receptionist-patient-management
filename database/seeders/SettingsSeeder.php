@@ -15,6 +15,8 @@ class SettingsSeeder extends Seeder
         $settings = [
             // Language settings
             ['key' => 'app_language', 'value' => 'en', 'type' => 'string'],
+            // Consultation pricing
+            ['key' => 'consultation_price', 'value' => '75.00', 'type' => 'decimal'],
         ];
 
         foreach ($settings as $setting) {

@@ -10,6 +10,7 @@ use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\StatisticsController;
 
 // Public routes
 Route::get('/', function () {
@@ -64,6 +65,11 @@ Route::middleware('auth')->group(function () {
     // Prescription management (accessible by both roles)
     Route::resource('prescriptions', PrescriptionController::class);
     Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');
+    
+    // Statistics (accessible by both roles)
+    Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+    Route::get('/api/statistics', [StatisticsController::class, 'api'])->name('api.statistics');
+    Route::get('/api/statistics/trend', [StatisticsController::class, 'getTrendData'])->name('api.statistics.trend');
 });
 
 // Doctor-only routes

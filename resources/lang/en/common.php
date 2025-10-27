@@ -91,4 +91,5 @@ return [
     'closed' => 'Closed',
     'not_specified' => 'Not specified',
     'medical_management' => 'Medical Management',
+    'statistics' => 'Statistics',
 ];
