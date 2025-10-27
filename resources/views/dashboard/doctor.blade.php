@@ -115,7 +115,7 @@
     </div>
     @endif
 
-    <!-- Modern Statistics Cards -->
+    {{-- Modern Statistics Cards - Commented out since we have dedicated statistics page
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Total Patients -->
         <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 card-hover modern-shadow">
@@ -185,6 +185,7 @@
             </div>
         </div>
     </div>
+    --}}
 
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
