@@ -240,11 +240,7 @@
                             class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-2 rounded-xl font-medium transition-all duration-200 text-center">
                         Cancel
                     </button>
-                    <button type="button" onclick="bookNow()" 
-                            class="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 deep-shadow flex items-center justify-center space-x-2">
-                        <i class="fas fa-clock"></i>
-                        <span>{{ __('appointments.book_now') }}</span>
-                    </button>
+
                     <button type="submit" 
                             class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 deep-shadow flex items-center justify-center space-x-2">
                         <i class="fas fa-save"></i>

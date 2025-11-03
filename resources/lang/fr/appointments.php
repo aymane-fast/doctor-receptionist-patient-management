@@ -106,6 +106,14 @@ return [
     'edit' => 'Modifier',
     'book_now' => 'Réserver Maintenant',
     
+    // Smart scheduling messages
+    'only_one_slot_today' => 'Un seul créneau disponible aujourd\'hui à :time',
+    'next_slot_today' => 'Prochain créneau disponible aujourd\'hui est :time (:count créneaux disponibles)',
+    'earliest_slot_date' => 'Premier créneau disponible le :date est :time',
+    'no_slots_today_tomorrow' => 'Aucun créneau disponible aujourd\'hui. Prochain disponible : demain à :time',
+    'no_slots_date_next' => 'Aucun créneau disponible à cette date. Prochain disponible : :date à :time',
+    'no_slots_week' => 'Aucun créneau disponible trouvé dans la semaine prochaine',
+    
     // Additional missing translations
     'patient' => 'Patient',
     'doctor' => 'Médecin',

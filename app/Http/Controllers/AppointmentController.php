@@ -232,8 +232,11 @@ class AppointmentController extends Controller
                     $nextDayStart = \Carbon\Carbon::createFromFormat('H:i', $nextDayHours['start_time']);
                     $suggestedTime = $nextDayStart->format('g:i A');
                     $message = $isToday 
-                        ? "No available slots today. Next available: tomorrow at {$suggestedTime}"
-                        : "No available slots on this date. Next available: " . $nextWorkingDay->format('M j, Y') . " at {$suggestedTime}";
+                        ? __('appointments.no_slots_today_tomorrow', ['time' => $suggestedTime])
+                        : __('appointments.no_slots_date_next', [
+                            'date' => $nextWorkingDay->format('M j, Y'), 
+                            'time' => $suggestedTime
+                        ]);
                     
                     return response()->json([
                         'available' => false,
@@ -253,7 +256,7 @@ class AppointmentController extends Controller
             
             return response()->json([
                 'available' => false,
-                'message' => 'No available slots found in the next week',
+                'message' => __('appointments.no_slots_week'),
                 'working_hours' => [
                     'start' => $workingHours['start_time'],
                     'end' => $workingHours['end_time']
@@ -267,10 +270,13 @@ class AppointmentController extends Controller
         $message = '';
         if ($isToday) {
             $message = count($availableSlots) === 1 
-                ? "Only one slot available today at {$nextSlot['display']}"
-                : "Next available slot today is {$nextSlot['display']} (" . count($availableSlots) . " slots available)";
+                ? __('appointments.only_one_slot_today', ['time' => $nextSlot['display']])
+                : __('appointments.next_slot_today', ['time' => $nextSlot['display'], 'count' => count($availableSlots)]);
         } else {
-            $message = "Earliest available slot on " . $requestedDate->format('M j, Y') . " is {$nextSlot['display']}";
+            $message = __('appointments.earliest_slot_date', [
+                'date' => $requestedDate->format('M j, Y'), 
+                'time' => $nextSlot['display']
+            ]);
         }
         
         return response()->json([

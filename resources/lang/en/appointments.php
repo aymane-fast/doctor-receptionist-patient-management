@@ -106,6 +106,14 @@ return [
     'edit' => 'Edit',
     'book_now' => 'Book Now',
     
+    // Smart scheduling messages
+    'only_one_slot_today' => 'Only one slot available today at :time',
+    'next_slot_today' => 'Next available slot today is :time (:count slots available)',
+    'earliest_slot_date' => 'Earliest available slot on :date is :time',
+    'no_slots_today_tomorrow' => 'No available slots today. Next available: tomorrow at :time',
+    'no_slots_date_next' => 'No available slots on this date. Next available: :date at :time',
+    'no_slots_week' => 'No available slots found in the next week',
+    
     // Additional missing translations
     'patient' => 'Patient',
     'doctor' => 'Doctor',
