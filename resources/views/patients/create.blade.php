@@ -435,8 +435,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Set the next available slot
                 appointmentTimeInput.value = data.next_slot.time;
                 
-                // Update info text
-                slotInfo.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-1"></i>Next available: ${data.next_slot.display} (${data.all_slots.length} slots available)`;
+                // Update info text with UX message
+                slotInfo.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-1"></i>${data.message}`;
                 
                 // Show available slots as clickable buttons
                 if (data.all_slots && data.all_slots.length > 1) {
@@ -472,18 +472,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 // No slots available
-                slotInfo.innerHTML = `<i class="fas fa-exclamation-triangle text-orange-500 mr-1"></i>${data.message || 'No available slots for this date'}`;
+                slotInfo.innerHTML = `<i class="fas fa-exclamation-triangle text-orange-500 mr-1"></i>${data.message}`;
                 slotsPreview.classList.add('hidden');
                 
-                // Set to working hours start time if available
-                if (data.working_hours) {
+                // Set to suggested time or working hours start time
+                if (data.next_available_time) {
+                    appointmentTimeInput.value = data.next_available_time;
+                    if (data.next_available_date) {
+                        appointmentDateInput.value = data.next_available_date;
+                    }
+                } else if (data.working_hours) {
                     appointmentTimeInput.value = data.working_hours.start;
                 }
                 
                 // Update main info
                 const mainInfo = document.querySelector('.text-green-700 strong');
                 if (mainInfo) {
-                    mainInfo.textContent = 'No available slots - appointment will be scheduled during working hours';
+                    mainInfo.textContent = data.message;
                 }
             }
         } catch (error) {

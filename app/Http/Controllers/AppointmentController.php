@@ -172,10 +172,10 @@ class AppointmentController extends Controller
             ], 500);
         }
         
-        // If it's today, start from current time + 15 minutes buffer
+        // If it's today, start from current time + 30 minutes buffer
         if ($isToday) {
             $now = now();
-            $minTime = $now->copy()->addMinutes(15)->roundMinute(15); // Round to nearest 15 minutes
+            $minTime = $now->copy()->addMinutes(30)->roundMinute(30); // Round to nearest 30 minutes
             if ($minTime->format('H:i') > $startTime->format('H:i')) {
                 $startTime = $minTime;
             }
@@ -190,15 +190,25 @@ class AppointmentController extends Controller
             })
             ->toArray();
         
-        // Generate available slots (15-minute intervals)
+        // Generate available slots (30-minute intervals)
         $availableSlots = [];
         $currentSlot = $startTime->copy();
         
         while ($currentSlot->format('H:i') < $endTime->format('H:i')) {
             $timeSlot = $currentSlot->format('H:i');
             
-            // Check if this slot is available
-            if (!in_array($timeSlot, $existingAppointments)) {
+            // Check if this slot is available (no appointments within 30 minutes)
+            $hasConflict = false;
+            foreach ($existingAppointments as $existingTime) {
+                $existingSlot = \Carbon\Carbon::createFromFormat('H:i', $existingTime);
+                $timeDiff = abs($currentSlot->diffInMinutes($existingSlot));
+                if ($timeDiff < 30) {
+                    $hasConflict = true;
+                    break;
+                }
+            }
+            
+            if (!$hasConflict) {
                 $availableSlots[] = [
                     'time' => $timeSlot,
                     'formatted' => $currentSlot->format('H:i'),
@@ -206,14 +216,44 @@ class AppointmentController extends Controller
                 ];
             }
             
-            $currentSlot->addMinutes(15);
+            $currentSlot->addMinutes(30);
         }
         
         // Return the first available slot or indicate no availability
         if (empty($availableSlots)) {
+            // Try to find next working day with available slots
+            $nextWorkingDay = $requestedDate->copy()->addDay();
+            $attempts = 0;
+            while ($attempts < 7) { // Check up to 7 days ahead
+                $nextDayName = strtolower($nextWorkingDay->format('l'));
+                $nextDayHours = \App\Models\Setting::getWorkingHours($nextDayName);
+                
+                if ($nextDayHours && $nextDayHours['is_working']) {
+                    $nextDayStart = \Carbon\Carbon::createFromFormat('H:i', $nextDayHours['start_time']);
+                    $suggestedTime = $nextDayStart->format('g:i A');
+                    $message = $isToday 
+                        ? "No available slots today. Next available: tomorrow at {$suggestedTime}"
+                        : "No available slots on this date. Next available: " . $nextWorkingDay->format('M j, Y') . " at {$suggestedTime}";
+                    
+                    return response()->json([
+                        'available' => false,
+                        'message' => $message,
+                        'next_available_date' => $nextWorkingDay->toDateString(),
+                        'next_available_time' => $nextDayStart->format('H:i'),
+                        'working_hours' => [
+                            'start' => $workingHours['start_time'],
+                            'end' => $workingHours['end_time']
+                        ]
+                    ]);
+                }
+                
+                $nextWorkingDay->addDay();
+                $attempts++;
+            }
+            
             return response()->json([
                 'available' => false,
-                'message' => 'No available slots for this date',
+                'message' => 'No available slots found in the next week',
                 'working_hours' => [
                     'start' => $workingHours['start_time'],
                     'end' => $workingHours['end_time']
@@ -221,10 +261,23 @@ class AppointmentController extends Controller
             ]);
         }
         
+        $nextSlot = $availableSlots[0];
+        
+        // Generate UX message explaining the choice
+        $message = '';
+        if ($isToday) {
+            $message = count($availableSlots) === 1 
+                ? "Only one slot available today at {$nextSlot['display']}"
+                : "Next available slot today is {$nextSlot['display']} (" . count($availableSlots) . " slots available)";
+        } else {
+            $message = "Earliest available slot on " . $requestedDate->format('M j, Y') . " is {$nextSlot['display']}";
+        }
+        
         return response()->json([
             'available' => true,
-            'next_slot' => $availableSlots[0],
-            'all_slots' => array_slice($availableSlots, 0, 10), // Return first 10 slots
+            'next_slot' => $nextSlot,
+            'all_slots' => array_slice($availableSlots, 0, 8), // Return first 8 slots
+            'message' => $message,
             'working_hours' => [
                 'start' => $workingHours['start_time'],
                 'end' => $workingHours['end_time']

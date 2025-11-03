@@ -181,6 +181,16 @@
                             <span>{{ $message }}</span>
                         </p>
                         @enderror
+                        
+                        <!-- Book Now Button -->
+                        <div class="mt-3">
+                            <button type="button" id="book_now_btn" 
+                                    class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
+                                <i class="fas fa-magic text-sm"></i>
+                                <span>{{ __('appointments.book_now') }}</span>
+                            </button>
+                            <p id="book_now_message" class="mt-2 text-sm text-gray-600 hidden"></p>
+                        </div>
                     </div>
 
                     <!-- Status (Hidden - New appointments are always scheduled) -->
@@ -471,6 +481,52 @@ document.addEventListener('DOMContentLoaded', function() {
         
         dateInput.value = tomorrow.toISOString().split('T')[0];
         timeInput.value = '09:00';
+    }
+
+    // Book Now functionality
+    const bookNowBtn = document.getElementById('book_now_btn');
+    const bookNowMessage = document.getElementById('book_now_message');
+    
+    if (bookNowBtn) {
+        bookNowBtn.addEventListener('click', async function() {
+            const dateInput = document.querySelector('input[name="appointment_date"]');
+            const timeInput = document.querySelector('input[name="appointment_time"]');
+            
+            if (!dateInput.value) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+            
+            const originalText = bookNowBtn.innerHTML;
+            bookNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Finding best time...';
+            bookNowBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`{{ route('api.appointments.next-available-slot') }}?date=${dateInput.value}`);
+                const data = await response.json();
+                
+                if (data.available) {
+                    timeInput.value = data.next_slot.time;
+                    bookNowMessage.innerHTML = `<i class="fas fa-info-circle text-blue-500 mr-1"></i>${data.message}`;
+                    bookNowMessage.classList.remove('hidden');
+                } else {
+                    if (data.next_available_date && data.next_available_time) {
+                        dateInput.value = data.next_available_date;
+                        timeInput.value = data.next_available_time;
+                    }
+                    bookNowMessage.innerHTML = `<i class="fas fa-exclamation-triangle text-orange-500 mr-1"></i>${data.message}`;
+                    bookNowMessage.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                bookNowMessage.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-1"></i>Error finding available slots. Please select manually.`;
+                bookNowMessage.classList.remove('hidden');
+            }
+            
+            setTimeout(() => {
+                bookNowBtn.innerHTML = originalText;
+                bookNowBtn.disabled = false;
+            }, 1000);
+        });
     }
 
     // Form validation before submit
