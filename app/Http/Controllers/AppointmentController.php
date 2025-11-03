@@ -37,12 +37,38 @@ class AppointmentController extends Controller
             // Search by patient information
             if ($request->filled('search')) {
                 $search = trim($request->string('search'));
-                $query->whereHas('patient', function ($q) use ($search) {
+                $terms = array_filter(explode(' ', $search));
+                
+                $query->whereHas('patient', function ($q) use ($search, $terms) {
+                    // Search individual fields
                     $q->where('first_name', 'like', "%{$search}%")
                       ->orWhere('last_name', 'like', "%{$search}%")
                       ->orWhere('phone', 'like', "%{$search}%")
                       ->orWhere('id_card_number', 'like', "%{$search}%")
                       ->orWhere('email', 'like', "%{$search}%");
+                    
+                    // Handle multiple terms for full name search
+                    if (count($terms) >= 2) {
+                        $q->orWhere(function ($subQuery) use ($terms) {
+                            foreach ($terms as $i => $firstTerm) {
+                                foreach ($terms as $j => $lastTerm) {
+                                    if ($i !== $j) {
+                                        $subQuery->orWhere(function ($combo) use ($firstTerm, $lastTerm) {
+                                            $combo->where('first_name', 'like', "%{$firstTerm}%")
+                                                  ->where('last_name', 'like', "%{$lastTerm}%");
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Search in concatenated full name
+                    foreach ($terms as $term) {
+                        if (strlen($term) >= 2) {
+                            $q->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$term}%"]);
+                        }
+                    }
                 });
             }
 

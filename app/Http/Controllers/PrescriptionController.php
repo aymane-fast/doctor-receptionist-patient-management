@@ -29,12 +29,38 @@ class PrescriptionController extends Controller
             // Search by patient information
             if ($request->filled('search')) {
                 $searchTerm = $request->search;
-                $query->whereHas('patient', function($q) use ($searchTerm) {
+                $terms = array_filter(explode(' ', trim($searchTerm)));
+                
+                $query->whereHas('patient', function($q) use ($searchTerm, $terms) {
+                    // Search individual fields
                     $q->where('first_name', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('id_card_number', 'LIKE', "%{$searchTerm}%")
                       ->orWhere('email', 'LIKE', "%{$searchTerm}%");
+                    
+                    // Handle multiple terms for full name search
+                    if (count($terms) >= 2) {
+                        $q->orWhere(function ($subQuery) use ($terms) {
+                            foreach ($terms as $i => $firstTerm) {
+                                foreach ($terms as $j => $lastTerm) {
+                                    if ($i !== $j) {
+                                        $subQuery->orWhere(function ($combo) use ($firstTerm, $lastTerm) {
+                                            $combo->where('first_name', 'LIKE', "%{$firstTerm}%")
+                                                  ->where('last_name', 'LIKE', "%{$lastTerm}%");
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Search in concatenated full name
+                    foreach ($terms as $term) {
+                        if (strlen($term) >= 2) {
+                            $q->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$term}%"]);
+                        }
+                    }
                 });
             }
 
