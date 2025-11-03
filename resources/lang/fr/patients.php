@@ -176,4 +176,11 @@ return [
     'book_appointment_for' => 'Réserver un rendez-vous pour',
     'patient_has_allergies' => 'Ce patient a des allergies',
     'notify_medical_staff' => 'Veuillez vous assurer que le personnel médical soit informé.',
+    
+    // Walk-in patient translations
+    'appointment_details' => 'Détails du Rendez-vous',
+    'appointment_time' => 'Heure du Rendez-vous',
+    'auto_slot_info' => 'Créneau disponible suivant suggéré automatiquement',
+    'walk_in_scheduling_info' => 'Ce rendez-vous sera automatiquement programmé pendant les heures de consultation.',
+    'appointment_time_past_error' => 'L\'heure du rendez-vous ne peut pas être dans le passé. Veuillez sélectionner une heure future.',
 ];

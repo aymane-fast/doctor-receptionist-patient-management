@@ -176,4 +176,11 @@ return [
     'book_appointment_for' => 'Book appointment for',
     'patient_has_allergies' => 'This patient has allergies',
     'notify_medical_staff' => 'Please ensure medical staff is notified.',
+    
+    // Walk-in patient translations
+    'appointment_details' => 'Appointment Details',
+    'appointment_time' => 'Appointment Time',
+    'auto_slot_info' => 'Automatically suggested next available slot',
+    'walk_in_scheduling_info' => 'This appointment will be automatically scheduled during clinic hours.',
+    'appointment_time_past_error' => 'Appointment time cannot be in the past. Please select a future time.',
 ];

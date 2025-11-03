@@ -62,6 +62,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/medical-records/patients/search', [MedicalRecordController::class, 'searchPatients'])->name('api.medical-records.patients.search');
     Route::get('/api/prescriptions/patients/search', [PrescriptionController::class, 'searchPatients'])->name('api.prescriptions.patients.search');
     
+    // Available slots API
+    Route::get('/api/appointments/next-available-slot', [AppointmentController::class, 'getNextAvailableSlot'])->name('api.appointments.next-available-slot');
+    
     // Prescription management (accessible by both roles)
     Route::resource('prescriptions', PrescriptionController::class);
     Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');

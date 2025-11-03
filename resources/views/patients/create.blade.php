@@ -25,9 +25,112 @@
         </div>
     </div>
 
+    <!-- Walk-in Patient Quick Booking -->
+    <div class="glass-effect rounded-3xl p-6 modern-shadow">
+        <div class="flex items-start space-x-4">
+            <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-clock text-white"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="text-xl font-bold text-gray-900 mb-2">{{ __('patients.walkin_patient') }}</h4>
+                <p class="text-gray-600 mb-4">{{ __('patients.walkin_description') }}</p>
+                
+                @if(!\App\Models\Setting::isWithinWorkingHours())
+                    @php $nextWorking = \App\Models\Setting::getNextWorkingTime(); @endphp
+                    <div class="bg-orange-100 border border-orange-300 rounded-xl p-4 mb-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-orange-600 mr-3"></i>
+                            <div>
+                                <h5 class="font-semibold text-orange-800">{{ __('patients.outside_working_hours') }}</h5>
+                                <p class="text-orange-700 text-sm">
+                                    {{ __('patients.walkin_not_available') }}
+                                    @if($nextWorking)
+                                        {{ __('patients.next_available') }}: {{ $nextWorking->locale(app()->getLocale())->isoFormat('dddd, D MMM [à] HH:mm') }}
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                
+                <div class="flex items-center space-x-3">
+                    <label class="flex items-center space-x-3 cursor-pointer {{ !\App\Models\Setting::isWithinWorkingHours() ? 'opacity-50 cursor-not-allowed' : '' }}">
+                        <input type="checkbox" 
+                               id="book_today" 
+                               name="book_today" 
+                               value="1" 
+                               {{ !\App\Models\Setting::isWithinWorkingHours() ? 'disabled' : '' }}
+                               class="w-5 h-5 text-green-600 bg-white border-2 border-gray-300 rounded focus:ring-green-500 focus:border-green-500">
+                        <span class="text-lg font-medium text-gray-700">{{ __('patients.book_appointment_today') }}</span>
+                    </label>
+                </div>
+                
+                <!-- Appointment Slot Details (shown when checkbox is checked) -->
+                <div id="appointment_details" class="hidden mt-6 p-4 bg-white rounded-xl border-2 border-green-200">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <i class="fas fa-calendar-check text-green-600"></i>
+                        <h5 class="font-semibold text-gray-900">{{ __('patients.appointment_details') }}</h5>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.appointment_time') }}</label>
+                            <div class="space-y-2">
+                                <input type="date" 
+                                       id="appointment_date" 
+                                       name="appointment_date" 
+                                       value="{{ date('Y-m-d') }}"
+                                       min="{{ date('Y-m-d') }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-green-500">
+                                
+                                <div class="flex space-x-2">
+                                    <input type="time" 
+                                           id="appointment_time" 
+                                           name="appointment_time" 
+                                           value="{{ date('H:i', strtotime('+1 hour')) }}"
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-green-500">
+                                    <button type="button" 
+                                            id="refresh_slots" 
+                                            class="px-3 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-xl transition-colors"
+                                            title="Refresh available slots">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Available slots preview -->
+                            <div id="available_slots_preview" class="mt-2 hidden">
+                                <p class="text-xs font-medium text-gray-600 mb-1">Available slots today:</p>
+                                <div id="slots_container" class="flex flex-wrap gap-1">
+                                    <!-- Slots will be populated by JavaScript -->
+                                </div>
+                            </div>
+                            
+                            <p class="text-xs text-gray-500 mt-1" id="slot_info">{{ __('patients.auto_slot_info') }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.reason_for_visit') }}</label>
+                            <input type="text" 
+                                   name="appointment_reason" 
+                                   placeholder="{{ __('patients.reason_placeholder') }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-green-500">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-green-50 rounded-lg">
+                        <p class="text-sm text-green-700">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>{{ __('patients.walk_in_scheduling_info') }}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modern Patient Form -->
     <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
-        <form method="POST" action="{{ route('patients.store') }}" class="space-y-8">
+        <form method="POST" action="{{ route('patients.store') }}" class="space-y-8" id="patient_form">
             @csrf
             
             <!-- Personal Information Section -->
@@ -290,73 +393,6 @@
 
             <!-- Submit Section -->
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-8 rounded-b-3xl">
-                <!-- Quick Booking Option -->
-                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 mb-6">
-                    @if(!\App\Models\Setting::isWithinWorkingHours())
-                        @php $nextWorking = \App\Models\Setting::getNextWorkingTime(); @endphp
-                        <div class="bg-orange-100 border border-orange-300 rounded-xl p-4 mb-4">
-                            <div class="flex items-center">
-                                <i class="fas fa-exclamation-triangle text-orange-600 mr-3"></i>
-                                <div>
-                                    <h5 class="font-semibold text-orange-800">{{ __('patients.outside_working_hours') }}</h5>
-                                    <p class="text-orange-700 text-sm">
-                                        {{ __('patients.walkin_not_available') }}
-                                        @if($nextWorking)
-                                            {{ __('patients.next_available') }}: {{ $nextWorking->locale(app()->getLocale())->isoFormat('dddd, D MMM [à] HH:mm') }}
-                                        @endif
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                    
-                    <div class="flex items-start space-x-4">
-                        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-clock text-white"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-lg font-bold text-gray-900 mb-2">{{ __('patients.walkin_patient') }}</h4>
-                            <p class="text-gray-600 text-sm mb-4">{{ __('patients.walkin_description') }}</p>
-                            
-                            <div class="flex items-center space-x-3">
-                                <label class="flex items-center space-x-3 cursor-pointer {{ !\App\Models\Setting::isWithinWorkingHours() ? 'opacity-50 cursor-not-allowed' : '' }}">
-                                    <input type="checkbox" 
-                                           id="book_today" 
-                                           name="book_today" 
-                                           value="1" 
-                                           {{ !\App\Models\Setting::isWithinWorkingHours() ? 'disabled' : '' }}
-                                           class="w-5 h-5 text-blue-600 bg-white border-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
-                                    <span class="text-sm font-medium text-gray-700">{{ __('patients.book_appointment_today') }}</span>
-                                </label>
-                            </div>
-                            
-                            <!-- Appointment Details (shown when checkbox is checked) -->
-                            <div id="appointment_details" class="hidden mt-4 p-4 bg-white rounded-xl border border-blue-200">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.reason_for_visit') }}</label>
-                                        <input type="text" name="appointment_reason" placeholder="{{ __('patients.reason_placeholder') }}" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('patients.priority') }}</label>
-                                        <select name="appointment_priority" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500">
-                                            <option value="normal">{{ __('patients.normal') }}</option>
-                                            <option value="urgent">{{ __('patients.urgent') }}</option>
-                                            <option value="emergency">{{ __('patients.emergency') }}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
-                                    <p class="text-sm text-blue-700">
-                                        <i class="fas fa-info-circle mr-2"></i>
-                                        <strong>{{ __('patients.auto_scheduling_info') }}</strong>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="flex flex-col sm:flex-row items-center justify-end space-y-4 sm:space-y-0 sm:space-x-4">
                     <button type="button" onclick="history.back()" class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-8 py-3 rounded-2xl font-medium transition-all duration-200 text-center">
                         {{ __('patients.cancel') }}
@@ -377,14 +413,171 @@ document.addEventListener('DOMContentLoaded', function() {
     const bookTodayCheckbox = document.getElementById('book_today');
     const appointmentDetails = document.getElementById('appointment_details');
     const submitText = document.getElementById('submit_text');
+    const patientForm = document.getElementById('patient_form');
+    const appointmentTimeInput = document.getElementById('appointment_time');
+    const appointmentDateInput = document.getElementById('appointment_date');
     
+    // Fetch next available slot from API
+    async function setNextAvailableSlot(date = null) {
+        const slotInfo = document.getElementById('slot_info');
+        const slotsPreview = document.getElementById('available_slots_preview');
+        const slotsContainer = document.getElementById('slots_container');
+        
+        // Show loading state
+        slotInfo.textContent = 'Loading available slots...';
+        
+        try {
+            const dateParam = date || appointmentDateInput.value;
+            const response = await fetch(`{{ route('api.appointments.next-available-slot') }}?date=${dateParam}`);
+            const data = await response.json();
+            
+            if (data.available && data.next_slot) {
+                // Set the next available slot
+                appointmentTimeInput.value = data.next_slot.time;
+                
+                // Update info text
+                slotInfo.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-1"></i>Next available: ${data.next_slot.display} (${data.all_slots.length} slots available)`;
+                
+                // Show available slots as clickable buttons
+                if (data.all_slots && data.all_slots.length > 1) {
+                    slotsContainer.innerHTML = '';
+                    data.all_slots.slice(0, 8).forEach(slot => {
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'px-2 py-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 rounded border transition-colors';
+                        button.textContent = slot.display;
+                        button.onclick = () => {
+                            appointmentTimeInput.value = slot.time;
+                            // Update active state
+                            slotsContainer.querySelectorAll('button').forEach(b => b.classList.remove('bg-green-500', 'text-white'));
+                            button.classList.add('bg-green-500', 'text-white');
+                        };
+                        
+                        // Mark first slot as active
+                        if (slot.time === data.next_slot.time) {
+                            button.classList.add('bg-green-500', 'text-white');
+                        }
+                        
+                        slotsContainer.appendChild(button);
+                    });
+                    slotsPreview.classList.remove('hidden');
+                } else {
+                    slotsPreview.classList.add('hidden');
+                }
+                
+                // Update the main info text
+                const mainInfo = document.querySelector('.text-green-700 strong');
+                if (mainInfo) {
+                    mainInfo.textContent = `Smart scheduling: ${data.next_slot.display} automatically selected based on availability`;
+                }
+            } else {
+                // No slots available
+                slotInfo.innerHTML = `<i class="fas fa-exclamation-triangle text-orange-500 mr-1"></i>${data.message || 'No available slots for this date'}`;
+                slotsPreview.classList.add('hidden');
+                
+                // Set to working hours start time if available
+                if (data.working_hours) {
+                    appointmentTimeInput.value = data.working_hours.start;
+                }
+                
+                // Update main info
+                const mainInfo = document.querySelector('.text-green-700 strong');
+                if (mainInfo) {
+                    mainInfo.textContent = 'No available slots - appointment will be scheduled during working hours';
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching available slots:', error);
+            slotInfo.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-1"></i>Error loading slots. Using default time.`;
+            slotsPreview.classList.add('hidden');
+            
+            // Fallback to simple time calculation
+            const now = new Date();
+            now.setHours(now.getHours() + 1);
+            const timeString = now.toTimeString().slice(0, 5);
+            appointmentTimeInput.value = timeString;
+        }
+    }
+    
+    // Function to refresh slots
+    function refreshSlots() {
+        const refreshBtn = document.getElementById('refresh_slots_btn');
+        if (!refreshBtn) return;
+        
+        const originalHtml = refreshBtn.innerHTML;
+        
+        // Show loading state
+        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Refreshing...';
+        refreshBtn.disabled = true;
+        
+        setNextAvailableSlot().then(() => {
+            // Reset button state
+            setTimeout(() => {
+                refreshBtn.innerHTML = originalHtml;
+                refreshBtn.disabled = false;
+            }, 500);
+        }).catch(() => {
+            // Reset button even on error
+            setTimeout(() => {
+                refreshBtn.innerHTML = originalHtml;
+                refreshBtn.disabled = false;
+            }, 500);
+        });
+    }
+    
+    // Set default time on page load
+    setNextAvailableSlot();
+    
+    // Handle walk-in checkbox toggle
     bookTodayCheckbox.addEventListener('change', function() {
         if (this.checked) {
             appointmentDetails.classList.remove('hidden');
             submitText.textContent = '{{ __('patients.create_patient_book_today') }}';
+            
+            // Add appointment form inputs to the main form
+            const appointmentInputs = appointmentDetails.querySelectorAll('input, select, textarea');
+            appointmentInputs.forEach(input => {
+                input.setAttribute('form', 'patient_form');
+            });
         } else {
             appointmentDetails.classList.add('hidden');
             submitText.textContent = '{{ __('patients.create_patient') }}';
+            
+            // Remove form attribute from appointment inputs
+            const appointmentInputs = appointmentDetails.querySelectorAll('input, select, textarea');
+            appointmentInputs.forEach(input => {
+                input.removeAttribute('form');
+            });
+        }
+    });
+    
+    // Update available slots when date changes
+    appointmentDateInput.addEventListener('change', function() {
+        if (bookTodayCheckbox.checked) {
+            setNextAvailableSlot(this.value);
+        }
+    });
+    
+    // Form submission handler
+    patientForm.addEventListener('submit', function(e) {
+        if (bookTodayCheckbox.checked) {
+            // Validate appointment time is not in the past
+            const appointmentDate = new Date(appointmentDateInput.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (appointmentDate.getTime() === today.getTime()) {
+                const now = new Date();
+                const selectedTime = appointmentTimeInput.value.split(':');
+                const appointmentTime = new Date();
+                appointmentTime.setHours(parseInt(selectedTime[0]), parseInt(selectedTime[1]), 0, 0);
+                
+                if (appointmentTime <= now) {
+                    e.preventDefault();
+                    alert('{{ __('patients.appointment_time_past_error') }}');
+                    return false;
+                }
+            }
         }
     });
 });

@@ -128,7 +128,111 @@ class AppointmentController extends Controller
     {
         $query = $request->get('q', '');
         return response()->json(PatientSearchService::search($query));
-    }    /**
+    }
+
+    /**
+     * API endpoint to get next available appointment slot
+     */
+    public function getNextAvailableSlot(Request $request)
+    {
+        $date = $request->get('date', now()->toDateString());
+        
+        try {
+            $requestedDate = \Carbon\Carbon::parse($date)->startOfDay();
+        } catch (\Exception $e) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Invalid date format provided'
+            ], 400);
+        }
+        
+        // Check if the requested date is today
+        $isToday = $requestedDate->isToday();
+        
+        // Get working hours for the requested day
+        $dayOfWeek = strtolower($requestedDate->format('l'));
+        $workingHours = \App\Models\Setting::getWorkingHours($dayOfWeek);
+        
+        if (!$workingHours || !$workingHours['is_working']) {
+            return response()->json([
+                'available' => false,
+                'message' => 'No working hours for this day'
+            ]);
+        }
+        
+        // Parse working hours
+        try {
+            $startTime = \Carbon\Carbon::createFromFormat('H:i', $workingHours['start_time']);
+            $endTime = \Carbon\Carbon::createFromFormat('H:i', $workingHours['end_time']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Invalid working hours format in settings',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+        
+        // If it's today, start from current time + 15 minutes buffer
+        if ($isToday) {
+            $now = now();
+            $minTime = $now->copy()->addMinutes(15)->roundMinute(15); // Round to nearest 15 minutes
+            if ($minTime->format('H:i') > $startTime->format('H:i')) {
+                $startTime = $minTime;
+            }
+        }
+        
+        // Get existing appointments for this date
+        $existingAppointments = \App\Models\Appointment::whereDate('appointment_date', $requestedDate)
+            ->where('status', '!=', 'cancelled')
+            ->get(['appointment_time'])
+            ->map(function ($appointment) {
+                return $appointment->appointment_time->format('H:i');
+            })
+            ->toArray();
+        
+        // Generate available slots (15-minute intervals)
+        $availableSlots = [];
+        $currentSlot = $startTime->copy();
+        
+        while ($currentSlot->format('H:i') < $endTime->format('H:i')) {
+            $timeSlot = $currentSlot->format('H:i');
+            
+            // Check if this slot is available
+            if (!in_array($timeSlot, $existingAppointments)) {
+                $availableSlots[] = [
+                    'time' => $timeSlot,
+                    'formatted' => $currentSlot->format('H:i'),
+                    'display' => $currentSlot->format('g:i A')
+                ];
+            }
+            
+            $currentSlot->addMinutes(15);
+        }
+        
+        // Return the first available slot or indicate no availability
+        if (empty($availableSlots)) {
+            return response()->json([
+                'available' => false,
+                'message' => 'No available slots for this date',
+                'working_hours' => [
+                    'start' => $workingHours['start_time'],
+                    'end' => $workingHours['end_time']
+                ]
+            ]);
+        }
+        
+        return response()->json([
+            'available' => true,
+            'next_slot' => $availableSlots[0],
+            'all_slots' => array_slice($availableSlots, 0, 10), // Return first 10 slots
+            'working_hours' => [
+                'start' => $workingHours['start_time'],
+                'end' => $workingHours['end_time']
+            ]
+        ]);
+    }
+
+    /**
      * Store a newly created appointment
      */
     public function store(Request $request)
