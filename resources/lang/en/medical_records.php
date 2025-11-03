@@ -117,4 +117,9 @@ return [
     'no_records_for_date' => 'No medical records found for the selected date.',
     'no_records_found_desc' => 'No medical records found matching your search criteria.',
     'clear_search' => 'Clear Search',
+    // Related links on the record show page
+    'related_records' => 'Related Records',
+    'patient_medical_history' => 'Patient Medical History',
+    'patient_prescriptions' => 'Patient\'s Prescriptions',
+    'patient_appointments' => 'Patient\'s Appointments',
 ];

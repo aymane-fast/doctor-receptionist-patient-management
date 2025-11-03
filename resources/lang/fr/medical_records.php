@@ -117,4 +117,9 @@ return [
     'no_records_for_date' => 'Aucun dossier médical trouvé pour la date sélectionnée.',
     'no_records_found_desc' => 'Aucun dossier médical trouvé correspondant à vos critères de recherche.',
     'clear_search' => 'Effacer la Recherche',
+    // Related links on the record show page
+    'related_records' => 'Enregistrements Liés',
+    'patient_medical_history' => 'Historique médical du patient',
+    'patient_prescriptions' => 'Prescriptions du patient',
+    'patient_appointments' => 'Rendez-vous du patient',
 ];

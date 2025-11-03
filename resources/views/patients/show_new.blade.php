@@ -46,11 +46,11 @@
                     <i class="fas fa-edit"></i>
                     <span>Edit</span>
                 </a>
-                <a href="{{ route('patients.index') }}" 
-                   class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                <button onclick="history.back()" 
+                        class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
                     <i class="fas fa-arrow-left"></i>
                     <span>{{ __('common.back') }}</span>
-                </a>
+                </button>
             </div>
         </div>
     </div>

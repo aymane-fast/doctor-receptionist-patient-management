@@ -226,10 +226,10 @@
             <!-- Submit Section -->
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-b-2xl">
                 <div class="flex flex-col sm:flex-row items-center justify-end space-y-3 sm:space-y-0 sm:space-x-3">
-                    <a href="{{ route('appointments.index') }}" 
-                       class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-2 rounded-xl font-medium transition-all duration-200 text-center">
+                    <button type="button" onclick="history.back()" 
+                            class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-2 rounded-xl font-medium transition-all duration-200 text-center">
                         Cancel
-                    </a>
+                    </button>
                     <button type="button" onclick="bookNow()" 
                             class="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 deep-shadow flex items-center justify-center space-x-2">
                         <i class="fas fa-clock"></i>

@@ -18,10 +18,10 @@
                     <p class="text-gray-600 mt-1">{{ __('medical_records.document_visit') }}</p>
                 </div>
             </div>
-            <a href="{{ route('medical-records.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+            <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
                 <i class="fas fa-arrow-left text-sm"></i>
-                <span>{{ __('common.back_to', ['item' => __('medical_records.title')]) }}</span>
-            </a>
+                <span>{{ __('common.back') }}</span>
+            </button>
         </div>
     </div>
 
@@ -251,10 +251,10 @@
                 <!-- Form Actions -->
                 <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-b-2xl">
                     <div class="flex flex-col sm:flex-row items-center justify-end space-y-3 sm:space-y-0 sm:space-x-3">
-                        <a href="{{ route('medical-records.index') }}" 
-                           class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-3 rounded-xl font-medium transition-all duration-200 text-center">
+                        <button type="button" onclick="history.back()" 
+                                class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-3 rounded-xl font-medium transition-all duration-200 text-center">
                             {{ __('common.cancel') }}
-                        </a>
+                        </button>
                         <button type="submit" 
                                 class="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
                             <i class="fas fa-save"></i>

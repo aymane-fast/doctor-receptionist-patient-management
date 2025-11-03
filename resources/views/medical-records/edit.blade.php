@@ -9,9 +9,9 @@
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-3xl font-bold text-gray-900">{{ __('medical_records.edit_record') }}</h1>
             <div class="flex space-x-3">
-                <a href="{{ route('medical-records.show', $medicalRecord) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
-                    <i class="fas fa-arrow-left mr-2"></i>{{ __('common.back_to_details') }}
-                </a>
+                <button onclick="history.back()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>{{ __('common.back') }}
+                </button>
             </div>
         </div>
 
@@ -278,10 +278,10 @@
                     </div>
                     
                     <div class="flex items-center space-x-3">
-                        <a href="{{ route('medical-records.show', $medicalRecord) }}" 
-                           class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg transition-colors">
+                        <button type="button" onclick="history.back()" 
+                                class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg transition-colors">
                             {{ __('common.cancel') }}
-                        </a>
+                        </button>
                         <button type="submit" 
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
                             <i class="fas fa-save mr-2"></i>{{ __('medical_records.update_record') }}

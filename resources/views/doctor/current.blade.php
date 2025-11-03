@@ -18,10 +18,10 @@
                     <p class="text-gray-600 mt-1">{{ __('current_patient.subtitle') }}</p>
                 </div>
             </div>
-            <a href="{{ route('dashboard') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+            <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
                 <i class="fas fa-arrow-left text-sm"></i>
-                <span>{{ __('current_patient.back_to_dashboard') }}</span>
-            </a>
+                <span>{{ __('common.back') }}</span>
+            </button>
         </div>
     </div>
 

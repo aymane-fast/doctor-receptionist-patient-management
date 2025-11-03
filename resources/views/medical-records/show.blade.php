@@ -17,11 +17,11 @@
                 </div>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('medical-records.index') }}" 
+                <button onclick="history.back()" 
                    class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
                     <i class="fas fa-arrow-left"></i>
-                    <span>{{ __('common.back_to', ['item' => __('medical_records.title')]) }}</span>
-                </a>
+                    <span>{{ __('common.back') }}</span>
+                </button>
                 <a href="{{ route('medical-records.edit', $medicalRecord) }}" 
                    class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
                     <i class="fas fa-edit"></i>
@@ -144,7 +144,7 @@
                             <i class="fas fa-thermometer-half text-white text-sm"></i>
                         </div>
                         <p class="text-xs font-medium text-gray-600 mb-1">{{ __('medical_records.temperature') }}</p>
-                        <p class="text-lg font-bold text-gray-900">{{ $medicalRecord->temperature }}°</p>
+                        <p class="text-lg font-bold text-gray-900">{{ $medicalRecord->temperature }}°C</p>
                     </div>
                     @endif
                     
@@ -355,24 +355,24 @@
                 <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-blue-200">
                     <h3 class="text-lg font-bold text-blue-800 flex items-center">
                         <div class="w-8 h-8 bg-blue-200 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-link text-blue-700"></i>
-                        </div>
-                        Related Records
+                                    <i class="fas fa-link text-blue-700"></i>
+                                </div>
+                                {{ __('medical_records.related_records') }}
                     </h3>
                 </div>
                 <div class="p-6">
                 <div class="space-y-3">
-                    <a href="{{ route('medical-records.index', ['patient_id' => $medicalRecord->patient_id]) }}" 
+                    <a href="{{ route('patients.show', $medicalRecord->patient) }}?tab=medical-records" 
                        class="flex items-center bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-3 rounded-lg transition-colors font-medium">
-                        <i class="fas fa-file-medical mr-3"></i>Patient's Medical History
+                        <i class="fas fa-file-medical mr-3"></i>{{ __('medical_records.patient_medical_history') }}
                     </a>
-                    <a href="{{ route('prescriptions.index', ['patient_id' => $medicalRecord->patient_id]) }}" 
+                    <a href="{{ route('patients.show', $medicalRecord->patient) }}?tab=prescriptions" 
                        class="flex items-center bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-3 rounded-lg transition-colors font-medium">
-                        <i class="fas fa-prescription-bottle mr-3"></i>Patient's Prescriptions
+                        <i class="fas fa-prescription-bottle mr-3"></i>{{ __('medical_records.patient_prescriptions') }}
                     </a>
-                    <a href="{{ route('appointments.index', ['patient_id' => $medicalRecord->patient_id]) }}" 
+                    <a href="{{ route('patients.show', $medicalRecord->patient) }}?tab=appointments" 
                        class="flex items-center bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-lg transition-colors font-medium">
-                        <i class="fas fa-calendar mr-3"></i>Patient's Appointments
+                        <i class="fas fa-calendar mr-3"></i>{{ __('medical_records.patient_appointments') }}
                     </a>
                 </div>
                 </div>
