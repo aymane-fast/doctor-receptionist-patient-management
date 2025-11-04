@@ -20,13 +20,22 @@ return new class extends Migration
             $table->timestamps();
         });
         
-        // Insert default language setting
+        // Insert default settings
         DB::table('settings')->insert([
-            'key' => 'app_language',
-            'value' => 'en',
-            'type' => 'string',
-            'created_at' => now(),
-            'updated_at' => now(),
+            [
+                'key' => 'app_language',
+                'value' => 'en',
+                'type' => 'string',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'key' => 'appointment_duration',
+                'value' => '30',
+                'type' => 'integer',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
     }
 

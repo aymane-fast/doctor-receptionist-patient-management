@@ -136,4 +136,11 @@ return [
     'lab_results_review' => 'Lab results review',
     'medication_review' => 'Medication review',
     'doctor_prefix' => 'Dr.',
+    
+    // Appointment settings
+    'appointment_settings' => 'Appointment Settings',
+    'appointment_settings_description' => 'Configure appointment duration and scheduling preferences',
+    'appointment_duration' => 'Appointment Duration',
+    'duration_help_text' => 'Time allocated for each appointment including buffer time between patients',
+    'appointment_duration_updated' => 'Appointment duration updated successfully',
 ];

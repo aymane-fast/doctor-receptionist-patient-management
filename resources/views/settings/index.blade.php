@@ -123,6 +123,52 @@
         </form>
     </div>
 
+    <!-- Appointment Settings -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
+                <i class="fas fa-calendar-check text-indigo-600 mr-2"></i>
+                {{ __('appointments.appointment_settings') }}
+            </h3>
+            <p class="text-gray-600 text-sm">{{ __('appointments.appointment_settings_description') }}</p>
+        </div>
+
+        <form action="{{ route('settings.appointment-duration') }}" method="POST" class="space-y-4">
+            @csrf
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-hourglass-half text-indigo-500 mr-1"></i>
+                        {{ __('appointments.appointment_duration') }}
+                    </label>
+                    <div class="relative">
+                        <select name="appointment_duration" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 appearance-none bg-white">
+                            @php $currentDuration = \App\Models\Setting::getAppointmentDuration(); @endphp
+                            <option value="15" {{ $currentDuration == 15 ? 'selected' : '' }}>15 {{ __('common.minutes') }}</option>
+                            <option value="20" {{ $currentDuration == 20 ? 'selected' : '' }}>20 {{ __('common.minutes') }}</option>
+                            <option value="30" {{ $currentDuration == 30 ? 'selected' : '' }}>30 {{ __('common.minutes') }}</option>
+                            <option value="45" {{ $currentDuration == 45 ? 'selected' : '' }}>45 {{ __('common.minutes') }}</option>
+                            <option value="60" {{ $currentDuration == 60 ? 'selected' : '' }}>60 {{ __('common.minutes') }}</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('appointments.duration_help_text') }}</p>
+                </div>
+                
+                <div class="flex items-end">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                        <i class="fas fa-save text-sm"></i>
+                        <span>{{ __('common.save_changes') }}</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <!-- Working Hours Settings -->
     <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="mb-6">

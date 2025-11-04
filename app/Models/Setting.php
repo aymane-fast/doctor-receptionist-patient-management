@@ -199,4 +199,20 @@ class Setting extends Model
             }
         }
     }
+
+    /**
+     * Get appointment duration in minutes
+     */
+    public static function getAppointmentDuration()
+    {
+        return (int) self::get('appointment_duration', 30);
+    }
+
+    /**
+     * Set appointment duration in minutes
+     */
+    public static function setAppointmentDuration($minutes)
+    {
+        self::set('appointment_duration', (int) $minutes);
+    }
 }

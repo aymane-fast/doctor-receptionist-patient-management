@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\MedicalRecord;
 use App\Models\Patient;
 use App\Models\Appointment;
+use App\Services\PatientSearchService;
 
 class MedicalRecordController extends Controller
 {
@@ -30,42 +31,20 @@ class MedicalRecordController extends Controller
             $query = MedicalRecord::with(['patient', 'doctor', 'appointment'])
                                  ->where('doctor_id', Auth::id());
 
-            // Search by patient information
+            // Search by patient information using PatientSearchService
             if ($request->filled('search')) {
                 $searchTerm = $request->search;
-                $terms = array_filter(explode(' ', trim($searchTerm)));
+                $searchResults = PatientSearchService::search($searchTerm);
+                $patientIds = $searchResults->pluck('id')->toArray();
                 
-                $query->whereHas('patient', function($q) use ($searchTerm, $terms) {
-                    // Search individual fields
-                    $q->where('first_name', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('id_card_number', 'LIKE', "%{$searchTerm}%")
-                      ->orWhere('email', 'LIKE', "%{$searchTerm}%");
-                    
-                    // Handle multiple terms for full name search
-                    if (count($terms) >= 2) {
-                        $q->orWhere(function ($subQuery) use ($terms) {
-                            foreach ($terms as $i => $firstTerm) {
-                                foreach ($terms as $j => $lastTerm) {
-                                    if ($i !== $j) {
-                                        $subQuery->orWhere(function ($combo) use ($firstTerm, $lastTerm) {
-                                            $combo->where('first_name', 'LIKE', "%{$firstTerm}%")
-                                                  ->where('last_name', 'LIKE', "%{$lastTerm}%");
-                                        });
-                                    }
-                                }
-                            }
-                        });
-                    }
-                    
-                    // Search in concatenated full name
-                    foreach ($terms as $term) {
-                        if (strlen($term) >= 2) {
-                            $q->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$term}%"]);
-                        }
-                    }
-                });
+                if (!empty($patientIds)) {
+                    // Order by the search relevance from PatientSearchService
+                    $query->whereIn('patient_id', $patientIds)
+                          ->orderByRaw('FIELD(patient_id, ' . implode(',', $patientIds) . ')');
+                } else {
+                    // No patients found, return empty results
+                    $query->whereRaw('1 = 0');
+                }
             }
 
             // Filter by date
@@ -107,31 +86,7 @@ class MedicalRecordController extends Controller
     public function searchPatients(Request $request)
     {
         $query = $request->get('query', '');
-        
-        if (strlen($query) < 2) {
-            return response()->json([]);
-        }
-        
-        $patients = Patient::where(function($q) use ($query) {
-            $q->where('first_name', 'like', "%{$query}%")
-              ->orWhere('last_name', 'like', "%{$query}%")
-              ->orWhere('phone', 'like', "%{$query}%")
-              ->orWhere('email', 'like', "%{$query}%")
-              ->orWhere('id_card_number', 'like', "%{$query}%");
-        })
-        ->limit(10)
-        ->get()
-        ->map(function($patient) {
-            return [
-                'id' => $patient->id,
-                'name' => $patient->first_name . ' ' . $patient->last_name,
-                'phone' => $patient->phone,
-                'email' => $patient->email,
-                'display' => $patient->first_name . ' ' . $patient->last_name . ' - ' . $patient->phone
-            ];
-        });
-        
-        return response()->json($patients);
+        return response()->json(PatientSearchService::search($query));
     }
 
     /**

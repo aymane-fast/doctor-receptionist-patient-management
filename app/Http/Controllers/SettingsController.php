@@ -124,4 +124,19 @@ class SettingsController extends Controller
                 ->with('error', 'Failed to export data: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Update appointment duration setting
+     */
+    public function updateAppointmentDuration(Request $request)
+    {
+        $request->validate([
+            'appointment_duration' => 'required|integer|in:15,20,30,45,60'
+        ]);
+
+        Setting::setAppointmentDuration($request->appointment_duration);
+
+        return redirect()->route('settings.index')
+            ->with('success', __('appointments.appointment_duration_updated'));
+    }
 }

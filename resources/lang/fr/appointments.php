@@ -136,4 +136,11 @@ return [
     'lab_results_review' => 'Examen des résultats de laboratoire',
     'medication_review' => 'Révision des médicaments',
     'doctor_prefix' => 'Dr.',
+    
+    // Appointment settings
+    'appointment_settings' => 'Paramètres des Rendez-vous',
+    'appointment_settings_description' => 'Configurer la durée des rendez-vous et les préférences de planification',
+    'appointment_duration' => 'Durée du Rendez-vous',
+    'duration_help_text' => 'Temps alloué pour chaque rendez-vous incluant le temps tampon entre les patients',
+    'appointment_duration_updated' => 'Durée du rendez-vous mise à jour avec succès',
 ];

@@ -172,10 +172,11 @@ class AppointmentController extends Controller
             ], 500);
         }
         
-        // If it's today, start from current time + 30 minutes buffer
+        // If it's today, start from current time + appointment duration buffer
         if ($isToday) {
+            $appointmentDuration = \App\Models\Setting::getAppointmentDuration();
             $now = now();
-            $minTime = $now->copy()->addMinutes(30)->roundMinute(30); // Round to nearest 30 minutes
+            $minTime = $now->copy()->addMinutes($appointmentDuration)->roundMinute($appointmentDuration); // Round to nearest appointment duration
             if ($minTime->format('H:i') > $startTime->format('H:i')) {
                 $startTime = $minTime;
             }
@@ -190,19 +191,20 @@ class AppointmentController extends Controller
             })
             ->toArray();
         
-        // Generate available slots (30-minute intervals)
+        // Generate available slots (configurable intervals)
+        $appointmentDuration = \App\Models\Setting::getAppointmentDuration();
         $availableSlots = [];
         $currentSlot = $startTime->copy();
         
         while ($currentSlot->format('H:i') < $endTime->format('H:i')) {
             $timeSlot = $currentSlot->format('H:i');
             
-            // Check if this slot is available (no appointments within 30 minutes)
+            // Check if this slot is available (no appointments within appointment duration)
             $hasConflict = false;
             foreach ($existingAppointments as $existingTime) {
                 $existingSlot = \Carbon\Carbon::createFromFormat('H:i', $existingTime);
                 $timeDiff = abs($currentSlot->diffInMinutes($existingSlot));
-                if ($timeDiff < 30) {
+                if ($timeDiff < $appointmentDuration) {
                     $hasConflict = true;
                     break;
                 }
@@ -216,7 +218,7 @@ class AppointmentController extends Controller
                 ];
             }
             
-            $currentSlot->addMinutes(30);
+            $currentSlot->addMinutes($appointmentDuration);
         }
         
         // Return the first available slot or indicate no availability
@@ -377,11 +379,11 @@ class AppointmentController extends Controller
             $workingHours = Setting::getWorkingHours($dayName);
             if ($workingHours && $workingHours['is_working']) {
                 $endTime = Carbon::parse($validated['appointment_date'] . ' ' . $workingHours['end_time']);
-                $appointmentEndTime = $appointmentDateTime->copy()->addMinutes(30);
+                $appointmentEndTime = $appointmentDateTime->copy()->addMinutes(\App\Models\Setting::getAppointmentDuration());
                 
                 if ($appointmentEndTime->gt($endTime)) {
                     return back()->withErrors(['appointment_time' => 
-                        'Appointment would extend past working hours. Last appointment should be scheduled at least 30 minutes before closing time (' . 
+                        'Appointment would extend past working hours. Last appointment should be scheduled at least ' . \App\Models\Setting::getAppointmentDuration() . ' minutes before closing time (' . 
                         $workingHours['end_time'] . ').'
                     ]);
                 }
@@ -531,7 +533,7 @@ class AppointmentController extends Controller
         // Start from working hours start time
         $appointmentTime = Carbon::parse($followUpDate->format('Y-m-d') . ' ' . $workingHours['start_time']);
         
-        // Find next available slot (assuming 30-minute slots)
+        // Find next available slot (using configured appointment duration)
         while ($appointmentTime->format('H:i') <= $workingHours['end_time']) {
             $existingAppointment = Appointment::where('doctor_id', Auth::id())
                 ->where('appointment_date', $appointmentTime->format('Y-m-d'))
@@ -543,7 +545,7 @@ class AppointmentController extends Controller
                 break; // Found available slot
             }
             
-            $appointmentTime->addMinutes(30);
+            $appointmentTime->addMinutes(\App\Models\Setting::getAppointmentDuration());
         }
 
         // Create the follow-up appointment
