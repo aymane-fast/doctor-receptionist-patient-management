@@ -23,6 +23,10 @@ class SettingsController extends Controller
      */
     public function updateWorkingHours(Request $request)
     {
+        if (!auth()->user()->isDoctor()) {
+            abort(403, 'Only doctors can modify working hours.');
+        }
+
         $request->validate([
             'monday_working' => 'boolean',
             'monday_start' => 'required_if:monday_working,1|date_format:H:i',
@@ -68,6 +72,10 @@ class SettingsController extends Controller
      */
     public function updateClinicInfo(Request $request)
     {
+        if (!auth()->user()->isDoctor()) {
+            abort(403, 'Only doctors can modify clinic information.');
+        }
+
         $request->validate([
             'clinic_name' => 'required|string|max:255',
             'clinic_address' => 'required|string',
@@ -107,6 +115,10 @@ class SettingsController extends Controller
      */
     public function exportClinicData()
     {
+        if (!auth()->user()->isDoctor()) {
+            abort(403, 'Only doctors can export clinic data.');
+        }
+
         try {
             $exportService = new ClinicDataExportService();
             $filePath = $exportService->exportAllData();

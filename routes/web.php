@@ -39,10 +39,7 @@ Route::middleware('auth')->group(function () {
     
     // Settings (accessible by both roles)
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
-    Route::post('/settings/working-hours', [SettingsController::class, 'updateWorkingHours'])->name('settings.working-hours');
-    Route::post('/settings/clinic-info', [SettingsController::class, 'updateClinicInfo'])->name('settings.clinic-info');
     Route::post('/settings/appointment-duration', [SettingsController::class, 'updateAppointmentDuration'])->name('settings.appointment-duration');
-    Route::post('/settings/export-data', [SettingsController::class, 'exportClinicData'])->name('settings.export-data');
     Route::get('/api/settings/working-status', [SettingsController::class, 'workingStatus'])->name('api.settings.working-status');
     
     // Patient management (accessible by both roles)
@@ -70,14 +67,20 @@ Route::middleware('auth')->group(function () {
     Route::resource('prescriptions', PrescriptionController::class);
     Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');
     
-    // Statistics (accessible by both roles)
-    Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
-    Route::get('/api/statistics', [StatisticsController::class, 'api'])->name('api.statistics');
-    Route::get('/api/statistics/trend', [StatisticsController::class, 'getTrendData'])->name('api.statistics.trend');
 });
 
 // Doctor-only routes
 Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/doctor/current', [DoctorController::class, 'current'])->name('doctor.current');
     Route::resource('medical-records', MedicalRecordController::class);
+    
+    // Statistics (accessible by doctors only)
+    Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+    Route::get('/api/statistics', [StatisticsController::class, 'api'])->name('api.statistics');
+    Route::get('/api/statistics/trend', [StatisticsController::class, 'getTrendData'])->name('api.statistics.trend');
+    
+    // Doctor-only settings
+    Route::post('/settings/working-hours', [SettingsController::class, 'updateWorkingHours'])->name('settings.working-hours');
+    Route::post('/settings/clinic-info', [SettingsController::class, 'updateClinicInfo'])->name('settings.clinic-info');
+    Route::post('/settings/export-data', [SettingsController::class, 'exportClinicData'])->name('settings.export-data');
 });

@@ -253,10 +253,12 @@
                                         <i class="fas fa-chevron-down text-sm"></i>
                                     </button>
                                     <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border hidden">
+                                        @if(auth()->user()->isDoctor())
                                         <a href="{{ route('statistics.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ request()->routeIs('statistics.*') ? 'bg-blue-50 text-blue-600' : '' }}">
                                             <i class="fas fa-chart-line mr-2"></i>{{ __('common.statistics') }}
                                         </a>
                                         <div class="border-t border-gray-100"></div>
+                                        @endif
                                         <form method="POST" action="{{ route('logout') }}" class="block">
                                             @csrf
                                             <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50">

@@ -58,6 +58,7 @@
         </div>
     </div>
 
+    @if(auth()->user()->isDoctor())
     <!-- Clinic Information -->
     <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="mb-6">
@@ -122,6 +123,7 @@
             </div>
         </form>
     </div>
+    @endif
 
     <!-- Appointment Settings -->
     <div class="bg-white rounded-xl shadow-sm p-6">
@@ -169,6 +171,7 @@
         </form>
     </div>
 
+    @if(auth()->user()->isDoctor())
     <!-- Working Hours Settings -->
     <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="mb-6">
@@ -269,7 +272,9 @@
             </div>
         </form>
     </div>
+    @endif
 
+    @if(auth()->user()->isDoctor())
     <!-- Data Export Section -->
     <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="mb-6">
@@ -344,6 +349,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
