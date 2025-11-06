@@ -255,4 +255,6 @@ class DashboardController extends Controller
 
         return view('dashboard.receptionist', compact('todayAppointments', 'currentByDoctor', 'nextByDoctor', 'upcomingAppointments', 'recentPatients', 'stats'));
     }
+
+
 }

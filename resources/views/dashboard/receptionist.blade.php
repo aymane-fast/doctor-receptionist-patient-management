@@ -73,114 +73,132 @@
             
             <!-- Main Content -->
             <div class="p-8">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Left Column: Doctor & Patient Info -->
-                    <div class="lg:col-span-1">
-                        <div class="flex items-center space-x-4 mb-6">
-                            <div class="relative">
-                                <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center">
-                                    <i class="fas fa-user-md text-blue-600 text-2xl"></i>
-                                </div>
-                                <div class="absolute -bottom-1 -right-1 w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-circle text-white text-sm animate-pulse"></i>
-                                </div>
+                <!-- Current Patient Info Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Left: Current Patient Info -->
+                    <div class="flex items-center space-x-6">
+                        <div class="relative">
+                            <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center shadow-lg">
+                                <i class="fas fa-user-md text-blue-600 text-3xl"></i>
                             </div>
-                            <div>
-                                <div class="text-xs font-medium text-blue-600 uppercase tracking-wide mb-1">
-                                    Dr. {{ $curr->doctor->name }}
+                            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-md">
+                                <i class="fas fa-circle text-white text-sm animate-pulse"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-xs font-medium text-blue-600 uppercase tracking-wide mb-2">
+                                <i class="fas fa-stethoscope mr-1"></i>
+                                Dr. {{ $curr->doctor->name }}
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-900 leading-tight mb-3">
+                                {{ $curr->patient->full_name }}
+                            </h3>
+                            <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-clock text-blue-500"></i>
+                                    <span class="font-medium">Started: {{ $curr->appointment_time->format('g:i A') }}</span>
                                 </div>
-                                <h3 class="text-2xl font-bold text-gray-900 leading-tight">
-                                    {{ $curr->patient->full_name }}
-                                </h3>
-                                <div class="flex items-center space-x-2 mt-3">
-                                    <i class="fas fa-clock text-gray-400"></i>
-                                    <span class="text-sm text-gray-600 font-medium">
-                                        Started at {{ $curr->appointment_time->format('g:i A') }}
-                                    </span>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-id-card text-blue-500"></i>
+                                    <span>{{ $curr->patient->id_card_number }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Middle Column: Next Patient Info -->
-                    <div class="lg:col-span-1">
-                        @if(isset($nextByDoctor[$docId]) && $nextByDoctor[$docId])
-                        <div class="bg-gradient-to-r from-indigo-50 to-blue-50 border border-blue-200 rounded-xl p-6 h-full flex flex-col justify-center">
-                            <div class="text-center">
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas fa-clock text-blue-600"></i>
-                                </div>
-                                <div class="text-xs font-medium text-blue-600 uppercase tracking-wide mb-2">
-                                    {{ __('dashboard.next_up') }}
-                                </div>
-                                <div class="text-lg font-semibold text-blue-900 mb-1">
-                                    {{ $nextByDoctor[$docId]->patient->full_name }}
-                                </div>
-                                <div class="text-sm text-blue-600 mb-4">
-                                    Scheduled for {{ $nextByDoctor[$docId]->appointment_time->format('g:i A') }}
-                                </div>
-                                <button onclick="setAsCurrent({{ $nextByDoctor[$docId]->id }})" 
-                                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 mx-auto shadow-sm hover:shadow-md" 
-                                        title="Set as Current">
-                                    <i class="fas fa-play"></i>
-                                    <span>{{ __('dashboard.start_session') }}</span>
-                                </button>
-                            </div>
-                        </div>
-                        @else
-                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 h-full flex flex-col justify-center">
-                            <div class="text-center">
-                                <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas fa-clock text-gray-400"></i>
-                                </div>
-                                <div class="text-sm text-gray-500">{{ __('dashboard.no_next_patient_scheduled') }}</div>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-
-                    <!-- Right Column: Action Buttons -->
-                    <div class="lg:col-span-1">
-                        <div class="space-y-4">
+                    <!-- Right: Current Patient Actions -->
+                    <div class="flex items-center justify-center">
+                        <div class="grid grid-cols-1 gap-4 w-full max-w-sm">
                             <!-- Primary Action: Mark Complete -->
-                            <form action="{{ route('appointments.mark-current-done') }}" method="POST">
+                            <form action="{{ route('appointments.mark-current-done') }}" method="POST" onsubmit="handleMarkComplete(this)">
                                 @csrf
                                 <input type="hidden" name="doctor_id" value="{{ $curr->doctor_id }}">
-                                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                                    <i class="fas fa-check-circle text-lg"></i>
+                                <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                                    <i class="fas fa-check-circle text-xl"></i>
                                     <span class="text-lg">{{ __('dashboard.mark_complete') }}</span>
                                 </button>
                             </form>
                             
                             <!-- Secondary Actions -->
-                            <div class="grid grid-cols-1 gap-3">
+                            <div class="grid grid-cols-3 gap-2">
                                 <!-- View Details -->
                                 <a href="{{ route('appointments.show', $curr) }}" 
-                                   class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2">
+                                   class="bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-3 px-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-1">
                                     <i class="fas fa-eye"></i>
-                                    <span>{{ __('dashboard.view_patient_details') }}</span>
+                                    <span class="text-sm">View</span>
                                 </a>
                                 
-                                <div class="grid grid-cols-2 gap-3">
-                                    <!-- Reschedule -->
-                                    <a href="{{ route('appointments.reschedule', $curr) }}" 
-                                            class="bg-amber-100 hover:bg-amber-200 text-amber-700 font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2" 
-                                            title="Reschedule">
-                                        <i class="fas fa-calendar-alt"></i>
-                                        <span>{{ __('dashboard.reschedule') }}</span>
-                                    </a>
-                                    
-                                    <!-- Cancel -->
-                                    <button onclick="cancelAppointment({{ $curr->id }})" 
-                                            class="bg-red-100 hover:bg-red-200 text-red-700 font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2" 
-                                            title="Cancel">
-                                        <i class="fas fa-times"></i>
-                                        <span>{{ __('dashboard.cancel') }}</span>
-                                    </button>
-                                </div>
+                                <!-- Reschedule -->
+                                <a href="{{ route('appointments.reschedule', $curr) }}" 
+                                   class="bg-amber-100 hover:bg-amber-200 text-amber-700 font-medium py-3 px-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-1">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span class="text-sm">Reschedule</span>
+                                </a>
+                                
+                                <!-- Cancel -->
+                                <button onclick="cancelAppointment({{ $curr->id }})" 
+                                        class="bg-red-100 hover:bg-red-200 text-red-700 font-medium py-3 px-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-1" 
+                                        title="Cancel">
+                                    <i class="fas fa-times"></i>
+                                    <span class="text-sm">Cancel</span>
+                                </button>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Next Patient Section (Separate) -->
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-arrow-right text-gray-400 mr-2"></i>
+                            Next Patient
+                        </h4>
+                    </div>
+                    
+                    @if(isset($nextByDoctor[$docId]) && $nextByDoctor[$docId])
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-16 h-16 bg-amber-100 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-user text-amber-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <div class="text-lg font-semibold text-amber-900 mb-1">
+                                        {{ $nextByDoctor[$docId]->patient->full_name }}
+                                    </div>
+                                    <div class="text-sm text-amber-700 flex items-center space-x-3">
+                                        <span><i class="fas fa-clock mr-1"></i>{{ $nextByDoctor[$docId]->appointment_time->format('g:i A') }}</span>
+                                        <span><i class="fas fa-id-card mr-1"></i>{{ $nextByDoctor[$docId]->patient->id_card_number }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="setAsCurrent({{ $nextByDoctor[$docId]->id }})" 
+                                        class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1" 
+                                        title="Start Session with Next Patient">
+                                    <i class="fas fa-play text-lg"></i>
+                                    <span>{{ __('dashboard.start_session') }}</span>
+                                </button>
+                                <button onclick="cancelAppointment({{ $nextByDoctor[$docId]->id }})" 
+                                        class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2" 
+                                        title="Cancel Next Patient">
+                                    <i class="fas fa-times"></i>
+                                    <span class="hidden sm:inline">Cancel</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
+                        <div class="text-center text-gray-500">
+                            <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-clock text-gray-400 text-xl"></i>
+                            </div>
+                            <p>{{ __('dashboard.no_next_patient_scheduled') }}</p>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -695,5 +713,65 @@ function rescheduleAppointment(appointmentId) {
     // Simple redirect to reschedule (edit) page
     window.location.href = `/appointments/${appointmentId}/reschedule`;
 }
+
+// Handle mark complete form submission
+function handleMarkComplete(form) {
+    const button = form.querySelector('button[type="submit"]');
+    button.innerHTML = '<i class="fas fa-spinner animate-spin text-xl mr-3"></i><span class="text-lg">Completing...</span>';
+    button.disabled = true;
+    
+    return true; // Allow form to submit normally
+}
+
+// Enhanced action functions with immediate sync trigger
+function setAsCurrent(appointmentId) {
+    if (confirm('Set this appointment as the current patient?')) {
+        // Show loading state
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Starting...';
+        button.disabled = true;
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/appointments/${appointmentId}/set-current`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        
+        form.submit();
+    }
+}
+
+function cancelAppointment(appointmentId) {
+    if (confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+        // Show loading state
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Cancelling...';
+        button.disabled = true;
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/appointments/${appointmentId}/cancel`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        
+        form.submit();
+    }
+}
+
+
 </script>
 @endsection

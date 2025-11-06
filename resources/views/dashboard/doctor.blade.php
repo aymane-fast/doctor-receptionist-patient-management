@@ -519,5 +519,60 @@ function rescheduleAppointment(appointmentId) {
     // Simple redirect to reschedule (edit) page
     window.location.href = `/appointments/${appointmentId}/reschedule`;
 }
+
+// Action functions
+function setAsCurrent(appointmentId) {
+    if (confirm('Set this appointment as the current patient?')) {
+        // Show loading state
+        const button = event.target.closest('button');
+        if (button) {
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Starting...';
+            button.disabled = true;
+        }
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/appointments/${appointmentId}/set-current`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        
+        form.submit();
+    }
+}
+
+function cancelAppointment(appointmentId) {
+    if (confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+        // Show loading state
+        const button = event.target.closest('button');
+        if (button) {
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Cancelling...';
+            button.disabled = true;
+        }
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/appointments/${appointmentId}/cancel`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        
+        form.submit();
+    }
+}
+
+
 </script>
 @endsection
