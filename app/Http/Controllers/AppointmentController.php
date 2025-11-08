@@ -631,8 +631,8 @@ class AppointmentController extends Controller
             // Check if this was the current patient
             $wasCurrentPatient = ($appointment->status === 'in_progress');
             
-            // Cancel the appointment with row locking
-            $appointment->lockForUpdate()->update([
+            // Cancel the appointment
+            $appointment->update([
                 'status' => 'cancelled',
                 'notes' => ($appointment->notes ? $appointment->notes . "\n" : '') . 'Cancelled on ' . now()->format('Y-m-d H:i')
             ]);
@@ -643,7 +643,6 @@ class AppointmentController extends Controller
                     ->whereDate('appointment_date', today())
                     ->where('status', 'scheduled')
                     ->orderBy('appointment_time')
-                    ->lockForUpdate()
                     ->first();
                 
                 if ($nextScheduled) {
