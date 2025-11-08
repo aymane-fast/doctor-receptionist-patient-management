@@ -265,7 +265,6 @@ class DashboardController extends Controller
                 ->whereDate('appointment_date', today())
                 ->where('status', 'scheduled')
                 ->orderBy('appointment_time')
-                ->lockForUpdate()
                 ->first();
 
             if (!$firstScheduled) {
