@@ -36,6 +36,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 Route::middleware('auth')->group(function () {
     // Dashboard (accessible by both roles)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/dashboard/initialize-first-patient', [DashboardController::class, 'initializeFirstPatient'])->name('dashboard.initialize-first-patient');
     
     // Settings (accessible by both roles)
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
@@ -55,6 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/appointments/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])->name('appointments.reschedule');
     Route::post('/appointments/current/mark-done', [AppointmentController::class, 'markCurrentDone'])->name('appointments.mark-current-done');
     Route::post('/appointments/{patient}/follow-up', [AppointmentController::class, 'createFollowUp'])->name('appointments.create-follow-up');
+    
     
     // Patient search APIs (accessible by both roles for autocomplete)
     Route::get('/api/medical-records/patients/search', [MedicalRecordController::class, 'searchPatients'])->name('api.medical-records.patients.search');

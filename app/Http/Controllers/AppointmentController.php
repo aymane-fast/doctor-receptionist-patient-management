@@ -443,14 +443,20 @@ class AppointmentController extends Controller
             abort(403);
         }
 
-        // Clear any existing current status for this doctor today (don't auto-complete)
-        Appointment::where('doctor_id', $appointment->doctor_id)
-            ->whereDate('appointment_date', today())
-            ->where('status', 'in_progress')
-            ->update(['status' => 'scheduled']);
+        // Use database transaction to ensure atomicity
+        \DB::transaction(function () use ($appointment) {
+            // First, clear ANY existing in_progress status for this doctor today
+            Appointment::where('doctor_id', $appointment->doctor_id)
+                ->whereDate('appointment_date', today())
+                ->where('status', 'in_progress')
+                ->update(['status' => 'scheduled']);
 
-        // Set this appointment as current/in progress
-        $appointment->update(['status' => 'in_progress']);
+            // Then set this appointment as current/in progress
+            $appointment->update(['status' => 'in_progress']);
+        });
+
+        // Clear dashboard cache
+        cache()->forget('dashboard_stats_' . today()->format('Y-m-d'));
 
         return back()->with('success', 'Patient session started successfully.');
     }
@@ -471,18 +477,45 @@ class AppointmentController extends Controller
             abort(403);
         }
 
-        // Find current appointment for today (in_progress status)
-        $current = Appointment::where('doctor_id', $doctorId)
-            ->whereDate('appointment_date', today())
-            ->where('status', 'in_progress')
-            ->first();
+        // Use database transaction to ensure atomicity
+        $result = \DB::transaction(function () use ($doctorId) {
+            // Find current appointment for today (in_progress status)
+            $current = Appointment::where('doctor_id', $doctorId)
+                ->whereDate('appointment_date', today())
+                ->where('status', 'in_progress')
+                ->first();
 
-        if ($current) {
+            if (!$current) {
+                return ['success' => false, 'message' => 'No active consultation found.'];
+            }
+
+            // Mark current as completed
             $current->update(['status' => 'completed']);
-            return back()->with('success', 'Patient consultation completed successfully.');
-        }
 
-        return back()->with('error', 'No active consultation found.');
+            // Find next scheduled appointment for today for this doctor
+            $nextScheduled = Appointment::where('doctor_id', $doctorId)
+                ->whereDate('appointment_date', today())
+                ->where('status', 'scheduled')
+                ->orderBy('appointment_time')
+                ->first();
+
+            if ($nextScheduled) {
+                // Set next patient as current
+                $nextScheduled->update(['status' => 'in_progress']);
+                return ['success' => true, 'message' => 'Patient consultation completed successfully. Next patient is now ready.'];
+            } else {
+                return ['success' => true, 'message' => 'Patient consultation completed successfully. No more patients for today.'];
+            }
+        });
+
+        // Clear dashboard cache
+        cache()->forget('dashboard_stats_' . today()->format('Y-m-d'));
+
+        if ($result['success']) {
+            return back()->with('success', $result['message']);
+        } else {
+            return back()->with('error', $result['message']);
+        }
     }
 
     /**
@@ -593,12 +626,41 @@ class AppointmentController extends Controller
             return back()->with('error', 'Unauthorized action.');
         }
 
-        $appointment->update([
-            'status' => 'cancelled',
-            'notes' => ($appointment->notes ? $appointment->notes . "\n" : '') . 'Cancelled on ' . now()->format('Y-m-d H:i')
-        ]);
+        // Use database transaction to ensure atomicity
+        $result = \DB::transaction(function () use ($appointment) {
+            // Check if this was the current patient
+            $wasCurrentPatient = ($appointment->status === 'in_progress');
+            
+            // Cancel the appointment with row locking
+            $appointment->lockForUpdate()->update([
+                'status' => 'cancelled',
+                'notes' => ($appointment->notes ? $appointment->notes . "\n" : '') . 'Cancelled on ' . now()->format('Y-m-d H:i')
+            ]);
 
-        return back()->with('success', 'Appointment cancelled successfully!');
+            // If we cancelled the current patient, automatically move to next
+            if ($wasCurrentPatient) {
+                $nextScheduled = Appointment::where('doctor_id', $appointment->doctor_id)
+                    ->whereDate('appointment_date', today())
+                    ->where('status', 'scheduled')
+                    ->orderBy('appointment_time')
+                    ->lockForUpdate()
+                    ->first();
+                
+                if ($nextScheduled) {
+                    $nextScheduled->update(['status' => 'in_progress']);
+                    return 'Current appointment cancelled. Next patient is now ready.';
+                } else {
+                    return 'Appointment cancelled successfully. No more patients for today.';
+                }
+            } else {
+                return 'Appointment cancelled successfully!';
+            }
+        });
+
+        // Clear dashboard cache
+        cache()->forget('dashboard_stats_' . today()->format('Y-m-d'));
+
+        return back()->with('success', $result);
     }
 
     /**
@@ -615,5 +677,7 @@ class AppointmentController extends Controller
         return redirect()->route('appointments.edit', $appointment)
             ->with('info', 'Please select a new date and time for this appointment.');
     }
+
+
 
 }

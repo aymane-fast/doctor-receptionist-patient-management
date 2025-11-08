@@ -60,26 +60,7 @@ class DashboardController extends Controller
             ->where('doctor_id', Auth::id())
             ->today()
             ->where('status', 'in_progress')
-            ->first();
-
-            // Auto-assign first scheduled appointment as current if none exists
-            $firstScheduled = Appointment::with('patient')
-                ->where('doctor_id', Auth::id())
-                ->today()
-                ->where('status', 'scheduled')
-                ->orderBy('appointment_time')
-                ->first();
-
-            if ($firstScheduled) {
-                // Clear any existing in_progress appointments for this doctor today
-                Appointment::where('doctor_id', Auth::id())
-                    ->today()
-                    ->where('status', 'in_progress')
-                    ->update(['status' => 'scheduled']);
-
-                $firstScheduled->update(['status' => 'in_progress']);
-                $currentAppointment = $firstScheduled;
-            }        $upcomingAppointments = Appointment::with('patient')
+            ->first();        $upcomingAppointments = Appointment::with('patient')
             ->where('doctor_id', Auth::id())
             ->upcoming()
             ->limit(5)
@@ -254,6 +235,54 @@ class DashboardController extends Controller
         }
 
         return view('dashboard.receptionist', compact('todayAppointments', 'currentByDoctor', 'nextByDoctor', 'upcomingAppointments', 'recentPatients', 'stats'));
+    }
+
+    /**
+     * Initialize first patient of the day (only call this once per doctor per day)
+     */
+    public function initializeFirstPatient(Request $request)
+    {
+        $doctorId = $request->doctor_id ?: Auth::id();
+
+        // Only receptionists can initialize for other doctors
+        if ($request->doctor_id && !Auth::user()->isReceptionist()) {
+            abort(403);
+        }
+
+        $result = \DB::transaction(function () use ($doctorId) {
+            // Check if there's already a current patient
+            $existing = Appointment::where('doctor_id', $doctorId)
+                ->whereDate('appointment_date', today())
+                ->where('status', 'in_progress')
+                ->exists();
+
+            if ($existing) {
+                return ['success' => false, 'message' => 'A patient is already set as current.'];
+            }
+
+            // Find first scheduled appointment for today
+            $firstScheduled = Appointment::where('doctor_id', $doctorId)
+                ->whereDate('appointment_date', today())
+                ->where('status', 'scheduled')
+                ->orderBy('appointment_time')
+                ->lockForUpdate()
+                ->first();
+
+            if (!$firstScheduled) {
+                return ['success' => false, 'message' => 'No scheduled appointments found for today.'];
+            }
+
+            // Set as current
+            $firstScheduled->update(['status' => 'in_progress']);
+
+            return ['success' => true, 'message' => "First patient of the day ({$firstScheduled->patient->full_name}) is now ready."];
+        });
+
+        if ($result['success']) {
+            return back()->with('success', $result['message']);
+        } else {
+            return back()->with('error', $result['message']);
+        }
     }
 
 
