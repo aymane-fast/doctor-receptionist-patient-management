@@ -85,8 +85,27 @@ class MedicalRecordController extends Controller
      */
     public function searchPatients(Request $request)
     {
-        $query = $request->get('query', '');
-        return response()->json(PatientSearchService::search($query));
+        // Accept both 'q' and 'query' parameters for compatibility
+        $query = $request->get('q', $request->get('query', ''));
+        
+        if (empty($query) || strlen($query) < 2) {
+            return response()->json([]);
+        }
+        
+        $patients = PatientSearchService::search($query);
+        
+        // Format for autocomplete display
+        $formattedPatients = $patients->map(function ($patient) {
+            return [
+                'id' => $patient['id'],
+                'name' => $patient['name'],
+                'phone' => $patient['phone'] ?? 'No phone',
+                'email' => $patient['email'] ?? 'No email',
+                'display' => $patient['display']
+            ];
+        });
+        
+        return response()->json($formattedPatients);
     }
 
     /**
