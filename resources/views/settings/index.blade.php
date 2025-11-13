@@ -275,76 +275,46 @@
     @endif
 
     @if(auth()->user()->isDoctor())
-    <!-- Data Export Section -->
+    <!-- Analytics & Data Management -->
     <div class="bg-white rounded-xl shadow-sm p-6">
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
-                <i class="fas fa-download text-emerald-600 mr-2"></i>
-                Data Export
+                <i class="fas fa-chart-bar text-blue-600 mr-2"></i>
+                Analytiques et Données
             </h3>
-            <p class="text-gray-600 text-sm">Export all your clinic data to a comprehensive Excel file with multiple organized sheets.</p>
+            <p class="text-gray-600 text-sm">Accédez aux statistiques de votre clinique et exportez vos données.</p>
         </div>
 
-        <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-6 border border-emerald-200">
-            <div class="flex items-start justify-between">
-                <div class="flex-1">
-                    <h4 class="font-semibold text-emerald-900 mb-2 flex items-center">
-                        <i class="fas fa-file-csv text-emerald-600 mr-2"></i>
-                        Complete Clinic Data Export
-                    </h4>
-                    <p class="text-emerald-700 text-sm mb-4">
-                        This will generate a comprehensive CSV file containing all your clinic data organized in sections:
-                    </p>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                        <div class="flex items-center text-xs text-emerald-700">
-                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
-                            Overview & Statistics
-                        </div>
-                        <div class="flex items-center text-xs text-emerald-700">
-                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
-                            All Patients Data
-                        </div>
-                        <div class="flex items-center text-xs text-emerald-700">
-                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
-                            Appointments History
-                        </div>
-                        <div class="flex items-center text-xs text-emerald-700">
-                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
-                            Medical Records
-                        </div>
-                        <div class="flex items-center text-xs text-emerald-700">
-                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
-                            Prescriptions Details
-                        </div>
-                        <div class="flex items-center text-xs text-emerald-700">
-                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
-                            Lab Orders
-                        </div>
-                        <div class="flex items-center text-xs text-emerald-700">
-                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
-                            Analytics & Demographics
-                        </div>
-                        <div class="flex items-center text-xs text-emerald-700">
-                            <i class="fas fa-check-circle text-emerald-500 mr-1"></i>
-                            Excel Compatible
-                        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Analytics Button -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
                     </div>
-                    <div class="text-xs text-emerald-600 bg-emerald-100 rounded-md px-3 py-2 inline-flex items-center">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Single CSV file with all clinic data, perfectly formatted for Excel, Google Sheets, and data analysis
-                    </div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Statistiques</h4>
+                    <p class="text-sm text-gray-600 mb-4">Visualisez les tendances, graphiques et rapports de votre clinique</p>
+                    <a href="{{ route('statistics.index') }}" 
+                       class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 inline-flex items-center space-x-2">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Voir les Statistiques</span>
+                    </a>
                 </div>
-                <div class="ml-6">
-                    <form action="{{ route('settings.export-data') }}" method="POST" id="exportForm">
-                        @csrf
-                        <button 
-                            type="submit" 
-                            id="exportBtn"
-                            class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2 transform hover:scale-105">
-                            <i class="fas fa-download text-lg"></i>
-                            <span>Export All Data</span>
-                        </button>
-                    </form>
+            </div>
+
+            <!-- Export Data Button -->
+            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-download text-white text-2xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Export de Données</h4>
+                    <p class="text-sm text-gray-600 mb-4">Exportez patients, rendez-vous, ordonnances en format Excel</p>
+                    <a href="{{ route('exports.index') }}" 
+                       class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 inline-flex items-center space-x-2">
+                        <i class="fas fa-file-export"></i>
+                        <span>Exporter les Données</span>
+                    </a>
                 </div>
             </div>
         </div>

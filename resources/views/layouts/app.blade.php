@@ -134,6 +134,12 @@
                                     <span class="text-xs font-medium">{{ __('common.prescriptions') }}</span>
                                 </a>
                                 @endif
+                                @if(auth()->user()->isReceptionist())
+                                <a href="{{ route('exports.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('exports.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
+                                    <i class="fas fa-download text-lg mb-1"></i>
+                                    <span class="text-xs font-medium">Export</span>
+                                </a>
+                                @endif
                                 <a href="{{ route('settings.index') }}" class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors {{ request()->routeIs('settings.*') ? 'bg-gray-200 text-blue-600' : 'text-gray-700' }}">
                                     <i class="fas fa-cog text-lg mb-1"></i>
                                     <span class="text-xs font-medium">{{ __('common.settings') }}</span>
@@ -256,6 +262,9 @@
                                         @if(auth()->user()->isDoctor())
                                         <a href="{{ route('statistics.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ request()->routeIs('statistics.*') ? 'bg-blue-50 text-blue-600' : '' }}">
                                             <i class="fas fa-chart-line mr-2"></i>{{ __('common.statistics') }}
+                                        </a>
+                                        <a href="{{ route('exports.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {{ request()->routeIs('exports.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                                            <i class="fas fa-file-export mr-2"></i>Export de Données
                                         </a>
                                         <div class="border-t border-gray-100"></div>
                                         @endif
