@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Setting;
-use App\Services\ClinicDataExportService;
 use Illuminate\Support\Facades\Response;
 
 class SettingsController extends Controller
@@ -110,32 +109,7 @@ class SettingsController extends Controller
         ]);
     }
 
-    /**
-     * Export all clinic data to Excel
-     */
-    public function exportClinicData()
-    {
-        if (!auth()->user()->isDoctor()) {
-            abort(403, 'Only doctors can export clinic data.');
-        }
 
-        try {
-            $exportService = new ClinicDataExportService();
-            $filePath = $exportService->exportAllData();
-            
-            // Get the filename for download
-            $filename = basename($filePath);
-            
-            return Response::download($filePath, $filename, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            ])->deleteFileAfterSend(true);
-            
-        } catch (\Exception $e) {
-            return redirect()->route('settings.index')
-                ->with('error', 'Failed to export data: ' . $e->getMessage());
-        }
-    }
 
     /**
      * Update appointment duration setting
