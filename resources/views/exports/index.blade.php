@@ -244,6 +244,71 @@ document.addEventListener('DOMContentLoaded', function() {
     const startDateInput = document.getElementById('start_date');
     const endDateInput = document.getElementById('end_date');
 
+    // Handle card clicks and visual states
+    const dataTypeCards = document.querySelectorAll('input[name="data_types[]"]');
+    
+    dataTypeCards.forEach(function(checkbox) {
+        const label = checkbox.nextElementSibling;
+        
+        // Add click handler to the label (card)
+        label.addEventListener('click', function(e) {
+            // Prevent the default label click if needed
+            e.preventDefault();
+            
+            // Toggle the checkbox
+            checkbox.checked = !checkbox.checked;
+            
+            // Update visual appearance
+            updateCardAppearance(checkbox, label);
+        });
+        
+        // Also handle direct checkbox changes
+        checkbox.addEventListener('change', function() {
+            updateCardAppearance(checkbox, label);
+        });
+        
+        // Set initial state
+        updateCardAppearance(checkbox, label);
+    });
+    
+    function updateCardAppearance(checkbox, label) {
+        if (checkbox.checked) {
+            // Checked state - blue theme
+            label.classList.remove('bg-white', 'border-gray-200', 'hover:bg-blue-50');
+            label.classList.add('bg-blue-50', 'border-blue-500', 'hover:bg-blue-100');
+            
+            // Update the checkmark icon
+            const checkIcon = label.querySelector('.fa-check');
+            if (checkIcon) {
+                checkIcon.style.opacity = '1';
+            }
+            
+            // Update the checkbox container
+            const checkboxContainer = label.querySelector('.w-5.h-5');
+            if (checkboxContainer) {
+                checkboxContainer.classList.remove('border-gray-300');
+                checkboxContainer.classList.add('bg-blue-500', 'border-blue-500');
+            }
+        } else {
+            // Unchecked state - default theme
+            label.classList.remove('bg-blue-50', 'border-blue-500', 'hover:bg-blue-100');
+            label.classList.add('bg-white', 'border-gray-200', 'hover:bg-blue-50');
+            
+            // Hide the checkmark icon
+            const checkIcon = label.querySelector('.fa-check');
+            if (checkIcon) {
+                checkIcon.style.opacity = '0';
+            }
+            
+            // Reset the checkbox container
+            const checkboxContainer = label.querySelector('.w-5.h-5');
+            if (checkboxContainer) {
+                checkboxContainer.classList.remove('bg-blue-500', 'border-blue-500');
+                checkboxContainer.classList.add('border-gray-300');
+            }
+        }
+    }
+
     // Form validation
     form.addEventListener('submit', function(e) {
         const checkedBoxes = document.querySelectorAll('input[name="data_types[]"]:checked');
