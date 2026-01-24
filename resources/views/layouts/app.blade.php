@@ -68,6 +68,21 @@
             animation: float 6s ease-in-out infinite;
         }
         
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+        
         @keyframes pulse-glow {
             0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.3); }
             50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }

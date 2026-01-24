@@ -276,4 +276,13 @@ class PatientController extends Controller
         return redirect()->route('patients.index')
                         ->with('success', 'Patient deleted successfully!');
     }
+    
+    /**
+     * Generate AI summary for patient
+     */
+    public function aiSummary(Patient $patient)
+    {
+        $summary = \App\Services\AIService::generatePatientSummary($patient);
+        return response()->json($summary);
+    }
 }

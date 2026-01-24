@@ -57,6 +57,11 @@
                 </div>
             </div>
             <div class="flex space-x-3">
+                <button id="aiSummaryBtn"
+                        class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                    <i class="fas fa-brain"></i>
+                    <span>{{ __('AI Summary') }}</span>
+                </button>
                 <a href="{{ route('appointments.create', ['patient_id' => $patient->id]) }}" 
                    class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl"
                    onclick="return confirmAppointment('{{ $patient->full_name }}', {{ $patient->allergies ? 'true' : 'false' }}, '{{ $patient->allergies }}')">
@@ -391,6 +396,77 @@
     </div>
 </div>
 
+<!-- AI Summary Modal -->
+<div id="aiSummaryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fade-in">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 p-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">AI Medical Summary</h3>
+                        <p class="text-purple-100 text-sm">Powered by Advanced AI</p>
+                    </div>
+                </div>
+                <button id="closeAiModal" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Modal Body -->
+        <div id="aiSummaryContent" class="p-8 overflow-y-auto max-h-[calc(90vh-200px)]">
+            <!-- Loading State -->
+            <div id="aiLoading" class="text-center py-12">
+                <div class="inline-block">
+                    <div class="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+                    <p class="text-gray-600 text-lg font-medium">Analyzing patient history...</p>
+                    <p class="text-gray-400 text-sm mt-2">This may take a few seconds</p>
+                </div>
+            </div>
+            
+            <!-- Error State -->
+            <div id="aiError" class="hidden text-center py-12">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                </div>
+                <h4 class="text-xl font-bold text-gray-800 mb-2">Failed to Generate Summary</h4>
+                <p class="text-gray-600 mb-6" id="aiErrorMessage"></p>
+                <button onclick="generateAISummary()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-redo mr-2"></i>Try Again
+                </button>
+            </div>
+            
+            <!-- Success State -->
+            <div id="aiSuccess" class="hidden">
+                <div class="prose prose-lg max-w-none">
+                    <div id="aiSummaryText" class="text-gray-800 leading-relaxed whitespace-pre-wrap"></div>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center space-x-2 text-sm text-gray-500">
+                        <i class="fas fa-clock"></i>
+                        <span id="aiGeneratedTime"></span>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="copyToClipboard()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                            <i class="fas fa-copy"></i>
+                            <span>Copy</span>
+                        </button>
+                        <button onclick="generateAISummary()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Regenerate</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 // Confirmation dialog for editing patient
@@ -408,6 +484,108 @@ function confirmAppointment(patientName, hasAllergies, allergies) {
     
     return confirm(message);
 }
+
+// AI Summary functionality
+const patientId = {{ $patient->id }};
+const aiSummaryModal = document.getElementById('aiSummaryModal');
+const aiSummaryBtn = document.getElementById('aiSummaryBtn');
+const closeAiModal = document.getElementById('closeAiModal');
+const aiLoading = document.getElementById('aiLoading');
+const aiError = document.getElementById('aiError');
+const aiSuccess = document.getElementById('aiSuccess');
+const aiSummaryText = document.getElementById('aiSummaryText');
+const aiGeneratedTime = document.getElementById('aiGeneratedTime');
+const aiErrorMessage = document.getElementById('aiErrorMessage');
+
+// Open modal and generate summary
+aiSummaryBtn.addEventListener('click', function() {
+    aiSummaryModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    generateAISummary();
+});
+
+// Close modal
+closeAiModal.addEventListener('click', closeModal);
+aiSummaryModal.addEventListener('click', function(e) {
+    if (e.target === aiSummaryModal) {
+        closeModal();
+    }
+});
+
+function closeModal() {
+    aiSummaryModal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Generate AI Summary
+function generateAISummary() {
+    // Reset states
+    aiLoading.classList.remove('hidden');
+    aiError.classList.add('hidden');
+    aiSuccess.classList.add('hidden');
+    
+    fetch(`/patients/${patientId}/ai-summary`)
+        .then(response => response.json())
+        .then(data => {
+            aiLoading.classList.add('hidden');
+            
+            if (data.success) {
+                aiSuccess.classList.remove('hidden');
+                aiSummaryText.innerHTML = formatSummary(data.summary);
+                aiGeneratedTime.textContent = `Generated: ${new Date(data.generated_at).toLocaleString()}`;
+            } else {
+                showError(data.error || 'An unexpected error occurred');
+            }
+        })
+        .catch(error => {
+            aiLoading.classList.add('hidden');
+            showError('Network error. Please check your connection and try again.');
+            console.error('AI Summary Error:', error);
+        });
+}
+
+function showError(message) {
+    aiError.classList.remove('hidden');
+    aiErrorMessage.textContent = message;
+}
+
+function formatSummary(text) {
+    // Format the AI summary for better readability
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900">$1</strong>')
+        .replace(/### (.*?)$/gm, '<h3 class="text-xl font-bold text-gray-900 mt-6 mb-3">$1</h3>')
+        .replace(/## (.*?)$/gm, '<h2 class="text-2xl font-bold text-gray-900 mt-8 mb-4">$1</h2>')
+        .replace(/# (.*?)$/gm, '<h1 class="text-3xl font-bold text-gray-900 mt-8 mb-4">$1</h1>')
+        .replace(/^\* (.*?)$/gm, '<li class="ml-4 mb-2">$1</li>')
+        .replace(/^\d+\. (.*?)$/gm, '<li class="ml-4 mb-2 list-decimal">$1</li>')
+        .replace(/\n\n/g, '</p><p class="mb-4">')
+        .replace(/^(?!<[h|l|p])(.+)$/gm, '<p class="mb-4">$1</p>');
+}
+
+function copyToClipboard() {
+    const text = aiSummaryText.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        // Show success feedback
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i><span>Copied!</span>';
+        btn.classList.add('bg-green-600', 'hover:bg-green-700');
+        btn.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            btn.classList.add('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
+        }, 2000);
+    });
+}
+
+// Close modal with ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !aiSummaryModal.classList.contains('hidden')) {
+        closeModal();
+    }
+});
 </script>
 @endpush
 @endsection

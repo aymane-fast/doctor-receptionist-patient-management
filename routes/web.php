@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
     
     // Patient management (accessible by both roles)
     Route::resource('patients', PatientController::class);
+    Route::get('/patients/{patient}/ai-summary', [PatientController::class, 'aiSummary'])->name('patients.ai-summary');
     
     // Appointment management (accessible by both roles)
     Route::resource('appointments', AppointmentController::class);
