@@ -352,7 +352,7 @@
             const query = this.value.trim();
             
             clearTimeout(searchTimeout);
-            
+             
             if (query.length < 2) {
                 resultsDiv.classList.add('hidden');
                 return;
