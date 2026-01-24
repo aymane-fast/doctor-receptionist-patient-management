@@ -359,7 +359,7 @@
             }
 
             searchTimeout = setTimeout(() => {
-                fetch(`/api/prescriptions/patients/search?query=${encodeURIComponent(query)}`)
+                fetch(`/api/patients/search?q=${encodeURIComponent(query)}`)
                     .then(response => response.json())
                     .then(data => {
                         resultsDiv.innerHTML = '';

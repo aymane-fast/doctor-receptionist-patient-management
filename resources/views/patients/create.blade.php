@@ -246,12 +246,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-2">
                         <label for="phone" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            {{ __('patients.phone_number') }}
+                            {{ __('patients.phone_number') }} <span class="text-red-500">{{ __('patients.required') }}</span>
                         </label>
                         <input type="tel" 
                                id="phone" 
                                name="phone" 
                                value="{{ old('phone') }}"
+                               required
                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('phone') border-red-500 @enderror">
                         @error('phone')
                         <p class="mt-2 text-sm text-red-600 flex items-center space-x-2">

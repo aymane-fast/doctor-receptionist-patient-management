@@ -187,12 +187,11 @@
 
                     <div class="space-y-2 md:col-span-2">
                         <label for="address" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            {{ __('patients.address') }} <span class="text-red-500">{{ __('patients.required') }}</span>
+                            {{ __('patients.address') }}
                         </label>
                         <textarea id="address" 
                                   name="address" 
                                   rows="4" 
-                                  required 
                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('address') border-red-500 @enderror">{{ old('address', $patient->address) }}</textarea>
                         @error('address')
                         <p class="mt-2 text-sm text-red-600 flex items-center space-x-2">

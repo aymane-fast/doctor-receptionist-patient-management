@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('gender', ['male', 'female']);
             $table->string('phone');
             $table->string('email')->nullable();
-            $table->text('address');
+            $table->text('address')->nullable();
             $table->string('id_card_number')->unique(); // Unique national ID card number
             $table->text('allergies')->nullable();
             $table->text('chronic_conditions')->nullable();
