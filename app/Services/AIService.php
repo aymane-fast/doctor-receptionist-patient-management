@@ -174,13 +174,13 @@ class AIService
         }
         
         $prompt .= "=== TASK ===\n";
-        $prompt .= "Provide a structured medical summary with these sections:\n\n";
-        $prompt .= "1. OVERVIEW (2-3 sentences about patient's general health status and visit frequency)\n";
-        $prompt .= "2. ACTIVE CONCERNS (Current health issues or ongoing treatments)\n";
-        $prompt .= "3. MEDICATION SUMMARY (Current or recent medications)\n";
-        $prompt .= "4. KEY ALERTS (Important warnings: allergies, chronic conditions, patterns)\n";
-        $prompt .= "5. HEALTH TREND (Improvement, stable, or concerns)\n\n";
-        $prompt .= "Use professional medical language but keep it concise. Focus on clinically relevant information.";
+        $prompt .= "Provide a BRIEF, scannable medical summary:\n\n";
+        $prompt .= "1. CLINICAL SUMMARY (3-4 lines MAXIMUM - must include: main health status, key ongoing conditions, current treatment approach, and any critical alerts)\n\n";
+        $prompt .= "2. Then provide brief bullet points for:\n";
+        $prompt .= "   • Recent Activity (visit frequency, last appointment)\n";
+        $prompt .= "   • Active Medications (if any)\n";
+        $prompt .= "   • Key Alerts (allergies, warnings - only if critical)\n\n";
+        $prompt .= "Keep it SHORT and scannable. The clinical summary must be comprehensive but ONLY 3-4 lines.";
         
         return $prompt;
     }
