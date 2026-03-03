@@ -50,7 +50,11 @@
                             <i class="fas fa-user text-white"></i>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-xl font-bold text-gray-900 mb-1">{{ $appointment->patient->first_name }} {{ $appointment->patient->last_name }}</h3>
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">
+                                <a href="{{ route('patients.show', $appointment->patient) }}" class="hover:text-blue-600 transition-colors">
+                                    {{ $appointment->patient->first_name }} {{ $appointment->patient->last_name }}
+                                </a>
+                            </h3>
                             <div class="flex flex-wrap gap-4 text-gray-600">
                                 <span class="flex items-center space-x-1">
                                     <i class="fas fa-phone text-sm"></i>
