@@ -68,7 +68,7 @@
                             <!-- Patient Search Input with Autocomplete -->
                             <input type="text" 
                                    id="patient_search" 
-                                   placeholder="Search patients by name, phone, or email..." 
+                                   placeholder="{{ __('appointments.search_patients_placeholder') }}" 
                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror"
                                    autocomplete="off"
                                    value="{{ $selectedPatient ? $selectedPatient->first_name . ' ' . $selectedPatient->last_name . ' - ' . $selectedPatient->phone : '' }}">
@@ -92,7 +92,7 @@
                                    target="_blank"
                                    class="text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center space-x-1">
                                     <i class="fas fa-plus text-xs"></i>
-                                    <span>Create New Patient</span>
+                                    <span>{{ __('patients.add_new_patient') }}</span>
                                 </a>
                             </div>
                         </div>
@@ -112,7 +112,7 @@
                         </label>
                         <select id="doctor_id" name="doctor_id" required 
                                 class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('doctor_id') border-red-500 @enderror">
-                            <option value="">Select a doctor</option>
+                            <option value="">{{ __('appointments.select_doctor') }}</option>
                             @foreach($doctors as $doctor)
                                 <option value="{{ $doctor->id }}" {{ old('doctor_id', request('doctor_id')) == $doctor->id ? 'selected' : '' }}>
                                     Dr. {{ $doctor->name }}
@@ -127,7 +127,7 @@
                         @enderror
                         @else
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Assigned Doctor
+                            {{ __('appointments.assigned_doctor') }}
                         </label>
                         <div class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600">
                             Dr. {{ auth()->user()->name }}
@@ -146,14 +146,14 @@
                     <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
                         <i class="fas fa-calendar-alt text-white text-sm"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900">Appointment Details</h3>
+                    <h3 class="text-lg font-bold text-gray-900">{{ __('appointments.appointment_details') }}</h3>
                 </div>
                 
                 <div class="grid md:grid-cols-3 gap-4 mb-4">
                     <!-- Appointment Date -->
                     <div>
                         <label for="appointment_date" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Date <span class="text-red-500">*</span>
+                            {{ __('appointments.appointment_date') }} <span class="text-red-500">*</span>
                         </label>
                         <input type="date" id="appointment_date" name="appointment_date" 
                                value="{{ old('appointment_date') }}" required
@@ -170,7 +170,7 @@
                     <!-- Appointment Time -->
                     <div>
                         <label for="appointment_time" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Time <span class="text-red-500">*</span>
+                            {{ __('appointments.appointment_time') }} <span class="text-red-500">*</span>
                         </label>
                         <input type="time" id="appointment_time" name="appointment_time" 
                                value="{{ old('appointment_time') }}" required
@@ -202,10 +202,10 @@
                     <!-- Purpose -->
                     <div>
                         <label for="reason" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Purpose/Reason for Visit
+                            {{ __('appointments.reason') }}
                         </label>
                         <textarea id="reason" name="reason" rows="3" 
-                                  placeholder="Brief description of the reason for this appointment..."
+                                  placeholder="{{ __('appointments.reason_placeholder') }}"
                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('reason') border-red-500 @enderror">{{ old('reason') }}</textarea>
                         @error('reason')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
@@ -218,10 +218,10 @@
                     <!-- Notes -->
                     <div>
                         <label for="notes" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Additional Notes
+                            {{ __('appointments.notes') }}
                         </label>
                         <textarea id="notes" name="notes" rows="3" 
-                                  placeholder="Any additional notes or special instructions..."
+                                  placeholder="{{ __('appointments.notes_placeholder') }}"
                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('notes') border-red-500 @enderror">{{ old('notes') }}</textarea>
                         @error('notes')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
@@ -238,13 +238,13 @@
                 <div class="flex flex-col sm:flex-row items-center justify-end space-y-3 sm:space-y-0 sm:space-x-3">
                     <button type="button" onclick="history.back()" 
                             class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-2 rounded-xl font-medium transition-all duration-200 text-center">
-                        Cancel
+                        {{ __('common.cancel') }}
                     </button>
 
                     <button type="submit" 
                             class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 deep-shadow flex items-center justify-center space-x-2">
                         <i class="fas fa-save"></i>
-                        <span>Schedule Appointment</span>
+                        <span>{{ __('appointments.schedule_appointment') }}</span>
                     </button>
                 </div>
             </div>

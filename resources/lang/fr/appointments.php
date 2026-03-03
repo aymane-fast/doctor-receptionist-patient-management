@@ -143,4 +143,10 @@ return [
     'appointment_duration' => 'Durée du Rendez-vous',
     'duration_help_text' => 'Temps alloué pour chaque rendez-vous incluant le temps tampon entre les patients',
     'appointment_duration_updated' => 'Durée du rendez-vous mise à jour avec succès',
+    
+    // Form placeholders
+    'reason_placeholder' => 'Brève description de la raison de ce rendez-vous...',
+    'notes_placeholder' => 'Notes ou instructions spéciales supplémentaires...',
+    'search_patients_placeholder' => 'Rechercher des patients par nom, téléphone ou email...',
+    'assigned_doctor' => 'Médecin assigné',
 ];

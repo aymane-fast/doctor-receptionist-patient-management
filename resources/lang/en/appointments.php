@@ -143,4 +143,10 @@ return [
     'appointment_duration' => 'Appointment Duration',
     'duration_help_text' => 'Time allocated for each appointment including buffer time between patients',
     'appointment_duration_updated' => 'Appointment duration updated successfully',
+    
+    // Form placeholders
+    'reason_placeholder' => 'Brief description of the reason for this appointment...',
+    'notes_placeholder' => 'Any additional notes or special instructions...',
+    'search_patients_placeholder' => 'Search patients by name, phone, or email...',
+    'assigned_doctor' => 'Assigned Doctor',
 ];
