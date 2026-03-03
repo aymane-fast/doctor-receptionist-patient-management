@@ -58,7 +58,8 @@
                         <input type="checkbox" 
                                id="book_today" 
                                name="book_today" 
-                               value="1" 
+                               value="1"
+                               form="patient_form"
                                {{ !\App\Models\Setting::isWithinWorkingHours() ? 'disabled' : '' }}
                                class="w-5 h-5 text-green-600 bg-white border-2 border-gray-300 rounded focus:ring-green-500 focus:border-green-500">
                         <span class="text-lg font-medium text-gray-700">{{ __('patients.book_appointment_today') }}</span>
