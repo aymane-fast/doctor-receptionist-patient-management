@@ -27,8 +27,8 @@
     <div class="glass-effect rounded-2xl p-6 modern-shadow">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-calendar-plus text-blue-600 text-lg"></i>
+                <div class="w-12 h-12 icon-tile rounded-xl flex items-center justify-center">
+                    <i class="fas fa-calendar-plus text-lg"></i>
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">
@@ -37,7 +37,7 @@
                     <p class="text-gray-600 mt-1">{{ __('appointments.create_appointment_description') }}</p>
                 </div>
             </div>
-            <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+            <button onclick="history.back()" class="btn-secondary px-4 py-2">
                 <i class="fas fa-arrow-left text-sm"></i>
                 <span>{{ __('common.back') }}</span>
             </button>
@@ -52,7 +52,7 @@
             <!-- Patient & Doctor Selection Section -->
             <div class="p-6 pb-0">
                 <div class="flex items-center space-x-2 mb-4">
-                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <div class="w-8 h-8 brand-mark rounded-lg flex items-center justify-center">
                         <i class="fas fa-users text-white text-sm"></i>
                     </div>
                     <h3 class="text-lg font-bold text-gray-900">{{ __('appointments.patient_information') }}</h3>
@@ -69,7 +69,7 @@
                             <input type="text" 
                                    id="patient_search" 
                                    placeholder="{{ __('appointments.search_patients_placeholder') }}" 
-                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror"
+                                   class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('patient_id') border-red-500 @enderror"
                                    autocomplete="off"
                                    value="{{ $selectedPatient ? $selectedPatient->first_name . ' ' . $selectedPatient->last_name . ' - ' . $selectedPatient->phone : '' }}">
                             
@@ -90,7 +90,7 @@
                             <div class="mt-2">
                                 <a href="{{ route('patients.create') }}" 
                                    target="_blank"
-                                   class="text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center space-x-1">
+                                   class="text-sm text-teal-700 hover:text-teal-900 transition-colors duration-200 flex items-center space-x-1">
                                     <i class="fas fa-plus text-xs"></i>
                                     <span>{{ __('patients.add_new_patient') }}</span>
                                 </a>
@@ -111,7 +111,7 @@
                             {{ __('common.doctor') }} <span class="text-red-500">*</span>
                         </label>
                         <select id="doctor_id" name="doctor_id" required 
-                                class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('doctor_id') border-red-500 @enderror">
+                                class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('doctor_id') border-red-500 @enderror">
                             <option value="">{{ __('appointments.select_doctor') }}</option>
                             @foreach($doctors as $doctor)
                                 <option value="{{ $doctor->id }}" data-mode="{{ $doctor->appointment_mode ?? 'scheduled' }}" {{ old('doctor_id', request('doctor_id')) == $doctor->id ? 'selected' : '' }}>
@@ -143,7 +143,7 @@
             <!-- Appointment Details Section -->
             <div class="p-6">
                 <div class="flex items-center space-x-2 mb-4">
-                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <div class="w-8 h-8 brand-mark rounded-lg flex items-center justify-center">
                         <i class="fas fa-calendar-alt text-white text-sm"></i>
                     </div>
                     <h3 class="text-lg font-bold text-gray-900">{{ __('appointments.appointment_details') }}</h3>
@@ -158,7 +158,7 @@
                         <input type="date" id="appointment_date" name="appointment_date" 
                                value="{{ old('appointment_date') }}" required
                                min="{{ date('Y-m-d') }}"
-                               class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('appointment_date') border-red-500 @enderror">
+                               class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('appointment_date') border-red-500 @enderror">
                         @error('appointment_date')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
                             <i class="fas fa-exclamation-circle text-xs"></i>
@@ -174,7 +174,7 @@
                         </label>
                         <input type="time" id="appointment_time" name="appointment_time" 
                                value="{{ old('appointment_time') }}"
-                               class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('appointment_time') border-red-500 @enderror">
+                               class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('appointment_time') border-red-500 @enderror">
                         @error('appointment_time')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
                             <i class="fas fa-exclamation-circle text-xs"></i>
@@ -185,7 +185,7 @@
                         <!-- Book Now Button -->
                         <div class="mt-3">
                             <button type="button" id="book_now_btn" 
-                                    class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
+                                    class="btn-ghost w-full px-4 py-2">
                                 <i class="fas fa-magic text-sm"></i>
                                 <span>{{ __('appointments.book_now') }}</span>
                             </button>
@@ -193,13 +193,13 @@
                         </div>
                     </div>
 
-                    <div id="queue_mode_notice" class="hidden md:col-span-2 bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                    <div id="queue_mode_notice" class="hidden md:col-span-2 soft-panel rounded-xl p-4">
                         <div class="flex items-start space-x-3">
-                            <i class="fas fa-list-ol text-indigo-600 mt-1"></i>
+                            <i class="fas fa-list-ol text-teal-700 mt-1"></i>
                             <div>
-                                <h4 class="font-semibold text-indigo-900">Queue mode</h4>
-                                <p class="text-sm text-indigo-700 mt-1">This doctor uses queue mode. The patient will receive the next queue number and an estimated consultation time automatically.</p>
-                                <p id="queue_mode_estimate" class="text-sm text-indigo-900 font-semibold mt-2 hidden"></p>
+                                <h4 class="font-semibold text-teal-900">Queue mode</h4>
+                                <p class="text-sm text-teal-800 mt-1">This doctor uses queue mode. The patient will receive the next queue number and an estimated consultation time automatically.</p>
+                                <p id="queue_mode_estimate" class="text-sm text-teal-900 font-semibold mt-2 hidden"></p>
                             </div>
                         </div>
                     </div>
@@ -217,7 +217,7 @@
                         </label>
                         <textarea id="reason" name="reason" rows="3" 
                                   placeholder="{{ __('appointments.reason_placeholder') }}"
-                                  class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('reason') border-red-500 @enderror">{{ old('reason') }}</textarea>
+                                  class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white resize-none @error('reason') border-red-500 @enderror">{{ old('reason') }}</textarea>
                         @error('reason')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
                             <i class="fas fa-exclamation-circle text-xs"></i>
@@ -233,7 +233,7 @@
                         </label>
                         <textarea id="notes" name="notes" rows="3" 
                                   placeholder="{{ __('appointments.notes_placeholder') }}"
-                                  class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('notes') border-red-500 @enderror">{{ old('notes') }}</textarea>
+                                  class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white resize-none @error('notes') border-red-500 @enderror">{{ old('notes') }}</textarea>
                         @error('notes')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
                             <i class="fas fa-exclamation-circle text-xs"></i>
@@ -248,12 +248,12 @@
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-b-2xl">
                 <div class="flex flex-col sm:flex-row items-center justify-end space-y-3 sm:space-y-0 sm:space-x-3">
                     <button type="button" onclick="history.back()" 
-                            class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-2 rounded-xl font-medium transition-all duration-200 text-center">
+                            class="btn-secondary w-full sm:w-auto px-6 py-2 text-center">
                         {{ __('common.cancel') }}
                     </button>
 
                     <button type="submit" 
-                            class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2 rounded-xl font-medium transition-all duration-200 deep-shadow flex items-center justify-center space-x-2">
+                            class="btn-primary w-full sm:w-auto px-6 py-2 deep-shadow">
                         <i class="fas fa-save"></i>
                         <span>{{ __('appointments.schedule_appointment') }}</span>
                     </button>
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         } else {
             resultsContainer.innerHTML = patients.map(patient => `
-                <div class="patient-result p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
+                <div class="patient-result p-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
                      data-id="${patient.id}" 
                      data-display="${patient.display}">
                     <div class="font-medium text-gray-900">${patient.name}</div>
@@ -581,11 +581,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 
                 if (data.mode === 'queue') {
-                    bookNowMessage.innerHTML = `<i class="fas fa-info-circle text-blue-500 mr-1"></i>${data.message}`;
+                    bookNowMessage.innerHTML = `<i class="fas fa-info-circle text-teal-600 mr-1"></i>${data.message}`;
                     bookNowMessage.classList.remove('hidden');
                 } else if (data.available) {
                     timeInput.value = data.next_slot.time;
-                    bookNowMessage.innerHTML = `<i class="fas fa-info-circle text-blue-500 mr-1"></i>${data.message}`;
+                    bookNowMessage.innerHTML = `<i class="fas fa-info-circle text-teal-600 mr-1"></i>${data.message}`;
                     bookNowMessage.classList.remove('hidden');
                 } else {
                     if (data.next_available_date && data.next_available_time) {

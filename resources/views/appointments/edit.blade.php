@@ -8,8 +8,8 @@
     <div class="glass-effect rounded-2xl p-6 modern-shadow">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center animate-float">
-                    <i class="fas fa-calendar-edit text-emerald-600 text-lg"></i>
+                <div class="w-12 h-12 icon-tile rounded-xl flex items-center justify-center animate-float">
+                    <i class="fas fa-calendar-edit text-lg"></i>
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">
@@ -18,7 +18,7 @@
                     <p class="text-gray-600 mt-1">{{ __('appointments.update_appointment_description') }}</p>
                 </div>
             </div>
-            <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+            <button onclick="history.back()" class="btn-secondary px-4 py-2">
                 <i class="fas fa-arrow-left"></i>
                 <span>{{ __('common.back') }}</span>
             </button>
@@ -34,7 +34,7 @@
                 <!-- Patient & Doctor Selection Section -->
                 <div class="p-6 pb-0">
                     <div class="flex items-center space-x-3 mb-4">
-                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <div class="w-8 h-8 brand-mark rounded-xl flex items-center justify-center">
                             <i class="fas fa-users text-white text-sm"></i>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900">{{ __('appointments.patient_information') }}</h3>
@@ -47,7 +47,7 @@
                                 {{ __('patients.patient') }} <span class="text-red-500">*</span>
                             </label>
                             <select id="patient_id" name="patient_id" required 
-                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror">
+                                    class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('patient_id') border-red-500 @enderror">
                                 <option value="">{{ __('appointments.select_patient') }}</option>
                                 @foreach($patients as $patient)
                                     <option value="{{ $patient->id }}" 
@@ -71,7 +71,7 @@
                                 Doctor <span class="text-red-500">*</span>
                             </label>
                             <select id="doctor_id" name="doctor_id" required 
-                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('doctor_id') border-red-500 @enderror">
+                                    class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('doctor_id') border-red-500 @enderror">
                                 <option value="">Select a doctor</option>
                                 @foreach($doctors as $doctor)
                                     <option value="{{ $doctor->id }}" 
@@ -104,7 +104,7 @@
                 <!-- Appointment Details Section -->
                 <div class="p-6">
                     <div class="flex items-center space-x-3 mb-4">
-                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <div class="w-8 h-8 brand-mark rounded-xl flex items-center justify-center">
                             <i class="fas fa-calendar-alt text-white text-sm"></i>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900">Appointment Details</h3>
@@ -118,7 +118,7 @@
                             </label>
                             <input type="date" id="appointment_date" name="appointment_date" 
                                    value="{{ old('appointment_date', \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d')) }}" required
-                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('appointment_date') border-red-500 @enderror">
+                                   class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('appointment_date') border-red-500 @enderror">
                             @error('appointment_date')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -141,7 +141,7 @@
                             @else
                             <input type="time" id="appointment_time" name="appointment_time" 
                                    value="{{ old('appointment_time', \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i')) }}" required
-                                   class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('appointment_time') border-red-500 @enderror">
+                                   class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('appointment_time') border-red-500 @enderror">
                             @endif
                             @error('appointment_time')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
@@ -157,7 +157,7 @@
                                 Status
                             </label>
                             <select id="status" name="status" 
-                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('status') border-red-500 @enderror">
+                                    class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('status') border-red-500 @enderror">
                                 <option value="scheduled" {{ old('status', $appointment->status) == 'scheduled' ? 'selected' : '' }}>{{ __('appointments.scheduled') }}</option>
                                 <option value="in_progress" {{ old('status', $appointment->status) == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
                                 <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
@@ -181,7 +181,7 @@
                             </label>
                             <textarea id="reason" name="reason" rows="3" 
                                       placeholder="Brief description of the reason for this appointment..."
-                                      class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('reason') border-red-500 @enderror">{{ old('reason', $appointment->reason) }}</textarea>
+                                      class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white resize-none @error('reason') border-red-500 @enderror">{{ old('reason', $appointment->reason) }}</textarea>
                             @error('reason')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -197,7 +197,7 @@
                             </label>
                             <textarea id="notes" name="notes" rows="3" 
                                       placeholder="Any additional notes or special instructions..."
-                                      class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('notes') border-red-500 @enderror">{{ old('notes', $appointment->notes) }}</textarea>
+                                      class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white resize-none @error('notes') border-red-500 @enderror">{{ old('notes', $appointment->notes) }}</textarea>
                             @error('notes')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -216,7 +216,7 @@
                             @csrf
                             @method('DELETE')
                             <button type="submit" 
-                                    class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-xl transition-all duration-200 flex items-center space-x-2"
+                                    class="btn-danger px-4 py-2"
                                     onclick="return confirm('{{ __('appointments.confirm_delete') }}')">
                                 <i class="fas fa-trash text-sm"></i>
                                 <span>Delete</span>
@@ -227,11 +227,11 @@
                     
                     <div class="flex items-center space-x-3">
                         <a href="{{ route('appointments.show', $appointment) }}" 
-                           class="bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white px-5 py-2 rounded-xl transition-all duration-200">
+                           class="btn-secondary px-5 py-2">
                             Cancel
                         </a>
                         <button type="submit" 
-                                class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-5 py-2 rounded-xl transition-all duration-200 flex items-center space-x-2">
+                                class="btn-primary px-5 py-2">
                             <i class="fas fa-save text-sm"></i>
                             <span>Update Appointment</span>
                         </button>

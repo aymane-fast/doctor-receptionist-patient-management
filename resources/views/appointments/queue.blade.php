@@ -7,8 +7,8 @@
     <div class="glass-effect rounded-2xl p-6 modern-shadow">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-list-ol text-indigo-600 text-lg"></i>
+                <div class="w-12 h-12 icon-tile rounded-xl flex items-center justify-center">
+                    <i class="fas fa-list-ol text-lg"></i>
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Appointment Queue</h1>
@@ -16,24 +16,24 @@
                 </div>
             </div>
 
-            <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+            <a href="{{ route('appointments.create') }}" class="btn-primary px-4 py-2">
                 <i class="fas fa-plus text-sm"></i>
                 <span>Add Patient</span>
             </a>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="section-card p-6">
         <form method="GET" action="{{ route('appointments.queue') }}" class="grid md:grid-cols-3 gap-4 items-end">
             <div>
                 <label for="date" class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                <input type="date" id="date" name="date" value="{{ $date }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                <input type="date" id="date" name="date" value="{{ $date }}" class="form-control w-full px-3 py-2">
             </div>
 
             @if(auth()->user()->isReceptionist())
             <div>
                 <label for="doctor_id" class="block text-sm font-medium text-gray-700 mb-2">Doctor</label>
-                <select id="doctor_id" name="doctor_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                <select id="doctor_id" name="doctor_id" class="form-control w-full px-3 py-2">
                     @foreach($doctors as $doctor)
                         <option value="{{ $doctor->id }}" {{ optional($selectedDoctor)->id === $doctor->id ? 'selected' : '' }}>
                             Dr. {{ $doctor->name }} - {{ $doctor->appointment_mode === 'queue' ? 'Queue' : 'Scheduled' }}
@@ -44,7 +44,7 @@
             @endif
 
             <div>
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium transition-colors">
+                <button type="submit" class="btn-primary px-5 py-2">
                     <i class="fas fa-filter mr-2"></i>View Queue
                 </button>
             </div>
@@ -58,7 +58,7 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div class="section-card overflow-hidden">
         @if($queueAppointments->count())
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-100">
@@ -74,9 +74,9 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($queueAppointments as $appointment)
-                        <tr class="{{ $appointment->status === 'in_progress' ? 'bg-blue-50' : 'bg-white' }}">
+                        <tr class="{{ $appointment->status === 'in_progress' ? 'bg-sky-50' : 'bg-white' }}">
                             <td class="px-6 py-4">
-                                <span class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-100 text-indigo-800 font-bold">
+                                <span class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-100 text-teal-800 font-bold">
                                     #{{ $appointment->queue_number }}
                                 </span>
                             </td>
@@ -90,10 +90,10 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="px-3 py-1 text-sm font-semibold rounded-full
-                                    @if($appointment->status === 'scheduled') bg-yellow-100 text-yellow-800
-                                    @elseif($appointment->status === 'in_progress') bg-blue-100 text-blue-800
-                                    @elseif($appointment->status === 'completed') bg-green-100 text-green-800
-                                    @else bg-red-100 text-red-800 @endif">
+                                    @if($appointment->status === 'scheduled') status-scheduled
+                                    @elseif($appointment->status === 'in_progress') status-in-progress
+                                    @elseif($appointment->status === 'completed') status-completed
+                                    @else status-cancelled @endif">
                                     {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
                                 </span>
                             </td>
@@ -115,7 +115,7 @@
                                         </form>
                                         <form method="POST" action="{{ route('appointments.set-current', $appointment) }}">
                                             @csrf
-                                            <button class="px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium">
+                                            <button class="btn-ghost px-3 py-2 text-sm">
                                                 Start
                                             </button>
                                         </form>
@@ -123,18 +123,18 @@
                                             @csrf
                                             @method('PATCH')
                                             <input type="hidden" name="status" value="completed">
-                                            <button class="px-3 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-sm font-medium">
+                                            <button class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm font-medium">
                                                 Complete
                                             </button>
                                         </form>
                                         <form method="POST" action="{{ route('appointments.cancel', $appointment) }}">
                                             @csrf
-                                            <button class="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium" onclick="return confirm('Cancel this queue entry?')">
+                                            <button class="btn-danger px-3 py-2 text-sm" onclick="return confirm('Cancel this queue entry?')">
                                                 Cancel
                                             </button>
                                         </form>
                                     @endif
-                                    <a href="{{ route('appointments.show', $appointment) }}" class="w-9 h-9 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg flex items-center justify-center" title="View">
+                                    <a href="{{ route('appointments.show', $appointment) }}" class="w-9 h-9 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-lg flex items-center justify-center" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </div>

@@ -8,8 +8,8 @@
     <div class="glass-effect rounded-3xl p-8 modern-shadow">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center animate-float">
-                    <i class="fas fa-calendar text-blue-600 text-2xl"></i>
+                <div class="w-16 h-16 icon-tile rounded-2xl flex items-center justify-center animate-float">
+                    <i class="fas fa-calendar text-2xl"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">
@@ -19,11 +19,11 @@
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row gap-3">
-                <a href="{{ route('appointments.queue') }}" class="bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                <a href="{{ route('appointments.queue') }}" class="btn-secondary px-6 py-3 rounded-2xl">
                     <i class="fas fa-list-ol"></i>
                     <span>Queue</span>
                 </a>
-                <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow">
+                <a href="{{ route('appointments.create') }}" class="btn-primary px-6 py-3 rounded-2xl deep-shadow">
                     <i class="fas fa-plus"></i>
                     <span>{{ __('appointments.schedule_appointment') }}</span>
                 </a>
@@ -35,7 +35,7 @@
     <div class="glass-effect rounded-3xl p-8 modern-shadow relative z-[10001]">
         <form method="GET" action="{{ route('appointments.index') }}" class="space-y-6">
             <div class="flex items-center space-x-3 mb-6">
-                <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                <div class="w-10 h-10 brand-mark rounded-xl flex items-center justify-center">
                     <i class="fas fa-filter text-white"></i>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900">{{ __('appointments.filter_appointments') }}</h3>
@@ -49,7 +49,7 @@
                             <input type="text" 
                                    id="patient_search" 
                                    placeholder="{{ __('appointments.search_placeholder') }}" 
-                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200"
+                                   class="form-control w-full px-4 py-3 bg-white/80 backdrop-blur-sm focus:bg-white"
                                    autocomplete="off"
                                    value="{{ request('search') }}">
                             
@@ -69,14 +69,14 @@
                                id="date" 
                                name="date" 
                                value="{{ request('date') }}"
-                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                               class="form-control w-full px-4 py-3 bg-white/80 backdrop-blur-sm focus:bg-white">
                     </div>
 
                     <div class="space-y-2">
                         <label for="status" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.status') }}</label>
                         <select id="status" 
                                 name="status" 
-                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                                class="form-control w-full px-4 py-3 bg-white/80 backdrop-blur-sm focus:bg-white">
                             <option value="">{{ __('appointments.all_statuses') }}</option>
                             <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>{{ __('appointments.scheduled') }}</option>
                             <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
@@ -89,7 +89,7 @@
                         <label for="appointment_mode" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Mode</label>
                         <select id="appointment_mode"
                                 name="appointment_mode"
-                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                                class="form-control w-full px-4 py-3 bg-white/80 backdrop-blur-sm focus:bg-white">
                             <option value="">All Modes</option>
                             <option value="scheduled" {{ request('appointment_mode') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
                             <option value="queue" {{ request('appointment_mode') == 'queue' ? 'selected' : '' }}>Queue</option>
@@ -101,7 +101,7 @@
                         <label for="doctor_id" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.doctor') }}</label>
                         <select id="doctor_id" 
                                 name="doctor_id" 
-                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                                class="form-control w-full px-4 py-3 bg-white/80 backdrop-blur-sm focus:bg-white">
                             <option value="">{{ __('appointments.all_doctors') }}</option>
                             @foreach($doctors as $doctor)
                             <option value="{{ $doctor->id }}" {{ request('doctor_id') == $doctor->id ? 'selected' : '' }}>
@@ -115,16 +115,16 @@
 
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100">
-                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg">
+                    <button type="submit" class="btn-primary px-6 py-2.5 text-sm shadow-md hover:shadow-lg">
                         <i class="fas fa-search text-sm"></i>
                         <span>{{ __('appointments.search') }}</span>
                     </button>
-                    <button type="submit" name="show_today" value="1" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg">
+                    <button type="submit" name="show_today" value="1" class="btn-ghost px-6 py-2.5 text-sm shadow-md hover:shadow-lg">
                         <i class="fas fa-calendar-day text-sm"></i>
                         <span>{{ __('appointments.today') }}</span>
                     </button>
                     @if(request()->query())
-                    <a href="{{ route('appointments.index') }}" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg" title="{{ __('appointments.clear') }}">
+                    <a href="{{ route('appointments.index') }}" class="btn-danger px-4 py-2.5 text-sm shadow-md hover:shadow-lg" title="{{ __('appointments.clear') }}">
                         <i class="fas fa-times text-sm"></i>
                     </a>
                     @endif
@@ -138,23 +138,23 @@
         @if(!$hasSearchQuery)
             <!-- Initial state - no search performed -->
             <div class="text-center py-16 px-8">
-                <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-float">
-                    <i class="fas fa-search text-blue-500 text-3xl"></i>
+                <div class="w-24 h-24 icon-tile rounded-3xl flex items-center justify-center mx-auto mb-6 animate-float">
+                    <i class="fas fa-search text-3xl"></i>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 mb-3">{{ __('appointments.search_to_begin') }}</h3>
                 <p class="text-gray-500 mb-6 text-lg max-w-md mx-auto">{{ __('appointments.search_instructions') }}</p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <form method="GET" action="{{ route('appointments.index') }}" class="inline">
-                        <button type="submit" name="show_today" value="1" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                        <button type="submit" name="show_today" value="1" class="btn-ghost px-6 py-3 rounded-2xl">
                             <i class="fas fa-calendar-day"></i>
                             <span>{{ __('appointments.show_today') }}</span>
                         </button>
                     </form>
-                    <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 inline-flex items-center space-x-2">
+                    <a href="{{ route('appointments.create') }}" class="btn-primary px-6 py-3 rounded-2xl">
                         <i class="fas fa-plus"></i>
                         <span>{{ __('appointments.schedule_appointment') }}</span>
                     </a>
-                    <a href="{{ route('appointments.queue') }}" class="bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 px-6 py-3 rounded-2xl font-medium transition-all duration-200 inline-flex items-center space-x-2">
+                    <a href="{{ route('appointments.queue') }}" class="btn-secondary px-6 py-3 rounded-2xl">
                         <i class="fas fa-list-ol"></i>
                         <span>Queue</span>
                     </a>
@@ -175,11 +175,11 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach($appointments as $appointment)
-                        <tr class="hover:bg-blue-50/60 transition-all duration-200 {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
+                        <tr class="hover:bg-teal-50/60 transition-all duration-200 {{ $loop->even ? 'bg-gray-50' : 'bg-white' }}">
                             <td class="px-8 py-6">
                                 <div class="flex items-center">
-                                    <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mr-4">
-                                        <i class="fas fa-user text-blue-600"></i>
+                                    <div class="w-12 h-12 icon-tile rounded-2xl flex items-center justify-center mr-4">
+                                        <i class="fas fa-user"></i>
                                     </div>
                                     <div>
                                         <div class="text-base font-semibold text-gray-900">{{ $appointment->patient->full_name }}</div>
@@ -189,8 +189,8 @@
                             </td>
                             <td class="px-8 py-6">
                                 <div class="flex items-center space-x-3">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">
-                                        <i class="fas fa-user-md text-emerald-600 text-sm"></i>
+                                    <div class="w-10 h-10 bg-teal-50 text-teal-700 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-user-md text-sm"></i>
                                     </div>
                                     <span class="text-base font-medium text-gray-900">{{ __('appointments.doctor_prefix') }} {{ $appointment->doctor->name }}</span>
                                 </div>
@@ -203,7 +203,7 @@
                                         <span>{{ $appointment->displayTime() }}</span>
                                     </div>
                                     @if($appointment->isQueueMode())
-                                    <div class="text-xs text-indigo-700 font-semibold">
+                                    <div class="text-xs text-teal-700 font-semibold">
                                         Queue #{{ $appointment->queue_number }} estimated
                                     </div>
                                     @endif
@@ -212,10 +212,10 @@
                             <td class="px-8 py-6">
                                 <div class="flex items-center space-x-3">
                                     <span class="px-3 py-2 text-sm font-bold rounded-xl
-                                        @if($appointment->status == 'scheduled') bg-yellow-100 text-yellow-800
-                                        @elseif($appointment->status == 'in_progress') bg-blue-100 text-blue-800
-                                        @elseif($appointment->status == 'completed') bg-green-100 text-green-800
-                                        @else bg-red-100 text-red-800 @endif">
+                                        @if($appointment->status == 'scheduled') status-scheduled
+                                        @elseif($appointment->status == 'in_progress') status-in-progress
+                                        @elseif($appointment->status == 'completed') status-completed
+                                        @else status-cancelled @endif">
                                         {{ __('appointments.' . $appointment->status) }}
                                     </span>
                                     
@@ -242,7 +242,7 @@
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="in_progress">
                                                 <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors">
-                                                    <i class="fas fa-play text-blue-600 mr-2"></i>{{ __('appointments.in_progress') }}
+                                                    <i class="fas fa-play text-sky-600 mr-2"></i>{{ __('appointments.in_progress') }}
                                                 </button>
                                             </form>
                                             @endif
@@ -280,15 +280,15 @@
                             </td>
                             <td class="px-8 py-6">
                                 <div class="flex items-center space-x-2">
-                                    <a href="{{ route('appointments.show', $appointment) }}" class="w-10 h-10 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-xl flex items-center justify-center transition-all duration-200 group">
+                                    <a href="{{ route('appointments.show', $appointment) }}" class="w-10 h-10 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-xl flex items-center justify-center transition-all duration-200 group">
                                         <i class="fas fa-eye text-sm group-hover:scale-110"></i>
                                     </a>
-                                    <a href="{{ route('appointments.edit', $appointment) }}" class="w-10 h-10 bg-emerald-100 hover:bg-emerald-200 text-emerald-600 rounded-xl flex items-center justify-center transition-all duration-200 group">
+                                    <a href="{{ route('appointments.edit', $appointment) }}" class="w-10 h-10 bg-sky-100 hover:bg-sky-200 text-sky-700 rounded-xl flex items-center justify-center transition-all duration-200 group">
                                         <i class="fas fa-edit text-sm group-hover:scale-110"></i>
                                     </a>
                                     @if(auth()->user()->isDoctor() && $appointment->status == 'completed' && !$appointment->medicalRecord)
                                     <a href="{{ route('medical-records.create', ['appointment_id' => $appointment->id]) }}" 
-                                       class="w-10 h-10 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-xl flex items-center justify-center transition-all duration-200 group" 
+                                       class="w-10 h-10 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl flex items-center justify-center transition-all duration-200 group" 
                                        title="Add Medical Record">
                                         <i class="fas fa-file-medical text-sm group-hover:scale-110"></i>
                                     </a>
@@ -309,7 +309,7 @@
             @endif
         @else
             <div class="text-center py-16 px-8">
-                <div class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-float">
+                <div class="w-24 h-24 icon-tile rounded-3xl flex items-center justify-center mx-auto mb-6 animate-float">
                     <i class="fas fa-calendar-times text-gray-400 text-3xl"></i>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-900 mb-3">{{ __('appointments.no_appointments_found') }}</h3>
@@ -320,7 +320,7 @@
                         {{ __('appointments.get_started_first_appointment') }}
                     @endif
                 </p>
-                <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-2xl font-medium transition-all duration-200 inline-flex items-center space-x-2 deep-shadow">
+                <a href="{{ route('appointments.create') }}" class="btn-primary px-8 py-4 rounded-2xl deep-shadow">
                     <i class="fas fa-plus"></i>
                     <span>{{ __('appointments.schedule_appointment') }}</span>
                 </a>
@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
             } else {
                 resultsContainer.innerHTML = patients.map(patient => `
-                    <div class="patient-result p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
+                    <div class="patient-result p-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
                          data-search="${patient.display}">
                         <div class="font-medium text-gray-900">${patient.name}</div>
                         <div class="text-sm text-gray-600">${patient.phone} • ${patient.email}</div>

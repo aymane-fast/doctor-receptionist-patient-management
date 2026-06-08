@@ -5,11 +5,11 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="section-card p-6">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-cog text-purple-600 text-2xl"></i>
+                <div class="w-16 h-16 icon-tile rounded-xl flex items-center justify-center">
+                    <i class="fas fa-cog text-2xl"></i>
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">{{ __('common.settings') }}</h1>
@@ -20,10 +20,10 @@
     </div>
 
     <!-- Language Settings -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="section-card p-6">
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
-                <i class="fas fa-language text-green-600 mr-2"></i>
+                <i class="fas fa-language text-teal-700 mr-2"></i>
                 {{ __('common.language') }} {{ __('common.settings') }}
             </h3>
             <p class="text-gray-600 text-sm">Choose your preferred language for the application interface.</p>
@@ -32,7 +32,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @foreach(\App\Models\Setting::getAvailableLanguages() as $code => $name)
                 <div class="border-2 rounded-lg p-4 transition-all duration-200 hover:shadow-md
-                    {{ app()->getLocale() == $code ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300' }}">
+                    {{ app()->getLocale() == $code ? 'border-teal-500 bg-teal-50' : 'border-gray-200 hover:border-gray-300' }}">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
                             <span class="text-2xl">{{ language_flag($code) }}</span>
@@ -43,12 +43,12 @@
                         </div>
                         @if(app()->getLocale() == $code)
                             <div class="flex items-center space-x-2">
-                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded-full">{{ __('common.active') }}</span>
-                                <i class="fas fa-check text-blue-600"></i>
+                                <span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded-full">{{ __('common.active') }}</span>
+                                <i class="fas fa-check text-teal-700"></i>
                             </div>
                         @else
                             <a href="{{ route('language.switch', $code) }}" 
-                               class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                               class="btn-secondary px-4 py-2 text-sm">
                                 {{ __('common.select') }}
                             </a>
                         @endif
@@ -60,10 +60,10 @@
 
     @if(auth()->user()->isDoctor())
     <!-- Clinic Information -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="section-card p-6">
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
-                <i class="fas fa-clinic-medical text-purple-600 mr-2"></i>
+                <i class="fas fa-clinic-medical text-teal-700 mr-2"></i>
                 Informations de la Clinique
             </h3>
             <p class="text-gray-600 text-sm">Configurez les informations de votre clinique pour les prescriptions et documents officiels.</p>
@@ -82,7 +82,7 @@
                     </label>
                     <input type="text" name="clinic_name" value="{{ \App\Models\Setting::get('clinic_name', '') }}" 
                            required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                           class="form-control w-full px-3 py-2">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -90,7 +90,7 @@
                     </label>
                     <input type="text" name="clinic_phone" value="{{ \App\Models\Setting::get('clinic_phone', '') }}" 
                            required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                           class="form-control w-full px-3 py-2">
                 </div>
             </div>
             
@@ -100,24 +100,24 @@
                 </label>
                 <textarea name="clinic_address" rows="3" 
                           required
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">{{ \App\Models\Setting::get('clinic_address', '') }}</textarea>
+                          class="form-control w-full px-3 py-2">{{ \App\Models\Setting::get('clinic_address', '') }}</textarea>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input type="email" name="clinic_email" value="{{ \App\Models\Setting::get('clinic_email', '') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                           class="form-control w-full px-3 py-2">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Site Web</label>
                     <input type="url" name="clinic_website" value="{{ \App\Models\Setting::get('clinic_website', '') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500">
+                           class="form-control w-full px-3 py-2">
                 </div>
             </div>
             
             <div class="flex justify-end">
-                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                <button type="submit" class="btn-primary px-6 py-2">
                     Sauvegarder les Informations
                 </button>
             </div>
@@ -126,10 +126,10 @@
     @endif
 
     <!-- Appointment Settings -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="section-card p-6">
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
-                <i class="fas fa-calendar-check text-indigo-600 mr-2"></i>
+                <i class="fas fa-calendar-check text-teal-700 mr-2"></i>
                 {{ __('appointments.appointment_settings') }}
             </h3>
             <p class="text-gray-600 text-sm">{{ __('appointments.appointment_settings_description') }}</p>
@@ -141,12 +141,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-hourglass-half text-indigo-500 mr-1"></i>
+                        <i class="fas fa-hourglass-half text-teal-600 mr-1"></i>
                         {{ __('appointments.appointment_duration') }}
                     </label>
                     <div class="relative">
                         <select name="appointment_duration" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 appearance-none bg-white">
+                                class="form-control w-full px-3 py-2 appearance-none bg-white">
                             @php $currentDuration = \App\Models\Setting::getAppointmentDuration(); @endphp
                             <option value="15" {{ $currentDuration == 15 ? 'selected' : '' }}>15 {{ __('common.minutes') }}</option>
                             <option value="20" {{ $currentDuration == 20 ? 'selected' : '' }}>20 {{ __('common.minutes') }}</option>
@@ -162,7 +162,7 @@
                 </div>
                 
                 <div class="flex items-end">
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                    <button type="submit" class="btn-primary px-6 py-2">
                         <i class="fas fa-save text-sm"></i>
                         <span>{{ __('common.save_changes') }}</span>
                     </button>
@@ -176,13 +176,13 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-list-ol text-indigo-500 mr-1"></i>
+                        <i class="fas fa-list-ol text-teal-600 mr-1"></i>
                         Appointment Mode
                     </label>
                     <select name="appointment_mode"
                             id="appointment_mode"
                             onchange="toggleQueueLimit()"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 bg-white">
+                            class="form-control w-full px-3 py-2 bg-white">
                         <option value="scheduled" {{ auth()->user()->appointment_mode !== 'queue' ? 'selected' : '' }}>Scheduled appointments</option>
                         <option value="queue" {{ auth()->user()->appointment_mode === 'queue' ? 'selected' : '' }}>Queue mode</option>
                     </select>
@@ -191,7 +191,7 @@
 
                 <div id="queue_limit_wrapper">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-users text-indigo-500 mr-1"></i>
+                        <i class="fas fa-users text-teal-600 mr-1"></i>
                         Daily Queue Limit
                     </label>
                     <input type="number"
@@ -200,12 +200,12 @@
                            max="500"
                            value="{{ old('queue_daily_limit', auth()->user()->queue_daily_limit) }}"
                            placeholder="No limit"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                           class="form-control w-full px-3 py-2">
                     <p class="text-xs text-gray-500 mt-1">Leave empty if the queue should not have a daily cap.</p>
                 </div>
 
                 <div class="flex items-end">
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                    <button type="submit" class="btn-primary px-6 py-2">
                         <i class="fas fa-save text-sm"></i>
                         <span>Save Mode</span>
                     </button>
@@ -217,10 +217,10 @@
 
     @if(auth()->user()->isDoctor())
     <!-- Working Hours Settings -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="section-card p-6">
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
-                <i class="fas fa-clock text-blue-600 mr-2"></i>
+                <i class="fas fa-clock text-teal-700 mr-2"></i>
                 {{ __('common.working_hours') }}
             </h3>
             <p class="text-gray-600 text-sm">{{ __('common.working_hours_description') }}</p>
@@ -253,7 +253,7 @@
                                    class="sr-only peer"
                                    {{ $workingHours[$day]['is_working'] ? 'checked' : '' }}
                                    onchange="toggleDayHours('{{ $day }}')">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-700"></div>
                         </label>
                     </div>
                     
@@ -263,7 +263,7 @@
                             <input type="time" 
                                    name="{{ $day }}_start" 
                                    value="{{ $workingHours[$day]['start_time'] }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   class="form-control w-full px-3 py-2"
                                    {{ $workingHours[$day]['is_working'] ? 'required' : '' }}>
                         </div>
                         
@@ -272,7 +272,7 @@
                             <input type="time" 
                                    name="{{ $day }}_end" 
                                    value="{{ $workingHours[$day]['end_time'] }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   class="form-control w-full px-3 py-2"
                                    {{ $workingHours[$day]['is_working'] ? 'required' : '' }}>
                         </div>
                     </div>
@@ -304,12 +304,12 @@
             </div>
 
             <div class="flex items-center space-x-4 pt-4 border-t border-gray-200">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                <button type="submit" class="btn-primary px-6 py-2">
                     <i class="fas fa-save"></i>
                     <span>{{ __('common.save_working_hours') }}</span>
                 </button>
                 
-                <button type="button" onclick="setDefaultHours()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                <button type="button" onclick="setDefaultHours()" class="btn-secondary px-6 py-2">
                     <i class="fas fa-undo"></i>
                     <span>Reset to Default</span>
                 </button>
@@ -320,10 +320,10 @@
 
     @if(auth()->user()->isDoctor())
     <!-- Analytics & Data Management -->
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="section-card p-6">
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
-                <i class="fas fa-chart-bar text-blue-600 mr-2"></i>
+                <i class="fas fa-chart-bar text-teal-700 mr-2"></i>
                 Analytiques et Données
             </h3>
             <p class="text-gray-600 text-sm">Accédez aux statistiques de votre clinique et exportez vos données.</p>
@@ -331,15 +331,15 @@
 
         <div class="grid md:grid-cols-2 gap-6">
             <!-- Analytics Button -->
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+            <div class="action-card p-6">
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div class="w-16 h-16 brand-mark rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-chart-line text-white text-2xl"></i>
                     </div>
                     <h4 class="font-semibold text-gray-900 mb-2">Statistiques</h4>
                     <p class="text-sm text-gray-600 mb-4">Visualisez les tendances, graphiques et rapports de votre clinique</p>
                     <a href="{{ route('statistics.index') }}" 
-                       class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 inline-flex items-center space-x-2">
+                       class="btn-primary px-6 py-3">
                         <i class="fas fa-chart-bar"></i>
                         <span>Voir les Statistiques</span>
                     </a>
@@ -347,15 +347,15 @@
             </div>
 
             <!-- Export Data Button -->
-            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200">
+            <div class="action-card p-6">
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div class="w-16 h-16 brand-mark rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-download text-white text-2xl"></i>
                     </div>
                     <h4 class="font-semibold text-gray-900 mb-2">Export de Données</h4>
                     <p class="text-sm text-gray-600 mb-4">Exportez patients, rendez-vous, ordonnances en format Excel</p>
                     <a href="{{ route('exports.index') }}" 
-                       class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 inline-flex items-center space-x-2">
+                       class="btn-primary px-6 py-3">
                         <i class="fas fa-file-export"></i>
                         <span>Exporter les Données</span>
                     </a>
@@ -368,9 +368,9 @@
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Today's Schedule -->
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="section-card p-6">
             <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
-                <i class="fas fa-calendar-day text-green-600 mr-2"></i>
+                <i class="fas fa-calendar-day text-teal-700 mr-2"></i>
                 {{ __('common.today_schedule') }}
             </h4>
             @php 
@@ -394,9 +394,9 @@
         </div>
 
         <!-- Weekly Summary -->
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="section-card p-6">
             <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
-                <i class="fas fa-calendar-week text-blue-600 mr-2"></i>
+                <i class="fas fa-calendar-week text-teal-700 mr-2"></i>
                 Weekly Summary
             </h4>
             @php
@@ -409,9 +409,9 @@
         </div>
 
         <!-- Export Status -->
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="section-card p-6">
             <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
-                <i class="fas fa-database text-purple-600 mr-2"></i>
+                <i class="fas fa-database text-teal-700 mr-2"></i>
                 Data Status
             </h4>
             <div class="space-y-2 text-sm text-gray-600">
@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <i class="fas ${
-                        type === 'info' ? 'fa-info-circle text-blue-500' :
+                        type === 'info' ? 'fa-info-circle text-teal-600' :
                         type === 'success' ? 'fa-check-circle text-green-500' :
                         type === 'error' ? 'fa-exclamation-circle text-red-500' : 'fa-bell text-gray-500'
                     }"></i>
