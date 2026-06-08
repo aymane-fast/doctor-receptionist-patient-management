@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'appointment_mode',
+        'queue_daily_limit',
         'phone',
         'address',
     ];
@@ -46,6 +48,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'queue_daily_limit' => 'integer',
         ];
     }
 
@@ -63,6 +66,16 @@ class User extends Authenticatable
     public function isReceptionist(): bool
     {
         return $this->role === 'receptionist';
+    }
+
+    public function usesQueueMode(): bool
+    {
+        return $this->appointment_mode === 'queue';
+    }
+
+    public function usesScheduledMode(): bool
+    {
+        return !$this->usesQueueMode();
     }
 
     /**

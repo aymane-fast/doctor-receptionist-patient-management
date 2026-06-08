@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
     // Settings (accessible by both roles)
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings/appointment-duration', [SettingsController::class, 'updateAppointmentDuration'])->name('settings.appointment-duration');
+    Route::post('/settings/appointment-mode', [SettingsController::class, 'updateAppointmentMode'])->name('settings.appointment-mode');
     Route::get('/api/settings/working-status', [SettingsController::class, 'workingStatus'])->name('api.settings.working-status');
     
     // Patient management (accessible by both roles)
@@ -46,6 +47,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/patients/{patient}/ai-summary', [PatientController::class, 'aiSummary'])->name('patients.ai-summary');
     
     // Appointment management (accessible by both roles)
+    Route::get('/appointments/queue', [AppointmentController::class, 'queue'])->name('appointments.queue');
+    Route::post('/appointments/{appointment}/queue-up', [AppointmentController::class, 'moveQueueUp'])->name('appointments.queue-up');
+    Route::post('/appointments/{appointment}/queue-down', [AppointmentController::class, 'moveQueueDown'])->name('appointments.queue-down');
     Route::resource('appointments', AppointmentController::class);
     Route::get('/api/patients/search', [AppointmentController::class, 'searchPatients'])->name('api.patients.search');
     Route::get('/api/working-hours', [AppointmentController::class, 'getWorkingHours'])->name('api.working-hours');

@@ -125,4 +125,26 @@ class SettingsController extends Controller
         return redirect()->route('settings.index')
             ->with('success', __('appointments.appointment_duration_updated'));
     }
+
+    public function updateAppointmentMode(Request $request)
+    {
+        if (!auth()->user()->isDoctor()) {
+            abort(403, 'Only doctors can modify appointment mode.');
+        }
+
+        $validated = $request->validate([
+            'appointment_mode' => 'required|in:scheduled,queue',
+            'queue_daily_limit' => 'nullable|integer|min:1|max:500',
+        ]);
+
+        auth()->user()->update([
+            'appointment_mode' => $validated['appointment_mode'],
+            'queue_daily_limit' => $validated['appointment_mode'] === 'queue'
+                ? ($validated['queue_daily_limit'] ?? null)
+                : null,
+        ]);
+
+        return redirect()->route('settings.index')
+            ->with('success', 'Appointment mode updated successfully.');
+    }
 }

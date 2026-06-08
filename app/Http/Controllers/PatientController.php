@@ -7,6 +7,7 @@ use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
 use App\Models\Setting;
+use App\Services\AppointmentSchedulingService;
 use Carbon\Carbon;
 
 class PatientController extends Controller
@@ -105,7 +106,7 @@ class PatientController extends Controller
             // Quick booking validation
             'book_today' => 'nullable|boolean',
             'appointment_date' => 'nullable|required_if:book_today,1|date|after_or_equal:today',
-            'appointment_time' => 'nullable|required_if:book_today,1|date_format:H:i',
+            'appointment_time' => 'nullable|date_format:H:i',
             'appointment_reason' => 'nullable|string|max:500',
             'appointment_priority' => 'nullable|in:normal,urgent,emergency',
         ]);
@@ -153,6 +154,25 @@ class PatientController extends Controller
                 'success' => false,
                 'message' => 'No doctor available for appointment booking.'
             ];
+        }
+
+        if ($doctor->usesQueueMode()) {
+            try {
+                app(AppointmentSchedulingService::class)->createQueueAppointment([
+                    'patient_id' => $patient->id,
+                    'doctor_id' => $doctor->id,
+                    'appointment_date' => $request->appointment_date ?? Carbon::now()->format('Y-m-d'),
+                    'reason' => $request->appointment_reason ?: __('appointments.walk_in_consultation'),
+                    'notes' => 'Walk-in patient appointment',
+                ]);
+            } catch (\InvalidArgumentException $e) {
+                return [
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ];
+            }
+
+            return ['success' => true];
         }
         
         // Use submitted date and time, or calculate automatically

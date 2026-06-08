@@ -110,14 +110,12 @@
                         <h3 class="text-lg font-bold text-gray-900">Appointment Details</h3>
                     </div>
                     
-                    <div class="grid md:grid-cols-4 gap-4">
+                    <div class="grid md:grid-cols-3 gap-4">
                         <!-- Appointment Date -->
                         <div>
                             <label for="appointment_date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
                                 Date <span class="text-red-500">*</span>
                             </label>
-                            <!-- Debug: Show the raw date value -->
-                            <small class="text-gray-500">Debug: {{ $appointment->appointment_date }} | Formatted: {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d') }}</small>
                             <input type="date" id="appointment_date" name="appointment_date" 
                                    value="{{ old('appointment_date', \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d')) }}" required
                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('appointment_date') border-red-500 @enderror">
@@ -132,11 +130,19 @@
                         <!-- Appointment Time -->
                         <div>
                             <label for="appointment_time" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                Time <span class="text-red-500">*</span>
+                                {{ $appointment->isQueueMode() ? 'Estimated Time' : 'Time' }} <span class="text-red-500">*</span>
                             </label>
+                            @if($appointment->isQueueMode())
+                            <div class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700">
+                                Queue #{{ $appointment->queue_number }} - {{ $appointment->displayTime() }}
+                            </div>
+                            <input type="hidden" name="appointment_time" value="{{ $appointment->appointment_time->format('H:i') }}">
+                            <p class="text-xs text-gray-500 mt-1">Queue estimated time is recalculated automatically when the queue order changes.</p>
+                            @else
                             <input type="time" id="appointment_time" name="appointment_time" 
                                    value="{{ old('appointment_time', \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i')) }}" required
                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('appointment_time') border-red-500 @enderror">
+                            @endif
                             @error('appointment_time')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
                                 <i class="fas fa-exclamation-circle"></i>
@@ -164,39 +170,19 @@
                             </p>
                             @enderror
                         </div>
-
-                        <!-- Appointment Type -->
-                        <div>
-                            <label for="appointment_type" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                Type
-                            </label>
-                            <select id="appointment_type" name="appointment_type" 
-                                    class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('appointment_type') border-red-500 @enderror">
-                                <option value="consultation" {{ old('appointment_type', $appointment->appointment_type) == 'consultation' ? 'selected' : '' }}>Consultation</option>
-                                <option value="follow-up" {{ old('appointment_type', $appointment->appointment_type) == 'follow-up' ? 'selected' : '' }}>Follow-up</option>
-                                <option value="emergency" {{ old('appointment_type', $appointment->appointment_type) == 'emergency' ? 'selected' : '' }}>Emergency</option>
-                                <option value="routine-checkup" {{ old('appointment_type', $appointment->appointment_type) == 'routine-checkup' ? 'selected' : '' }}>Routine Checkup</option>
-                            </select>
-                            @error('appointment_type')
-                            <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span>{{ $message }}</span>
-                            </p>
-                            @enderror
-                        </div>
                     </div>
 
                     <!-- Purpose & Notes in 2 columns -->
                     <div class="grid md:grid-cols-2 gap-4 mt-4">
                         <!-- Purpose -->
                         <div>
-                            <label for="purpose" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                            <label for="reason" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
                                 Purpose/Reason for Visit
                             </label>
-                            <textarea id="purpose" name="purpose" rows="3" 
+                            <textarea id="reason" name="reason" rows="3" 
                                       placeholder="Brief description of the reason for this appointment..."
-                                      class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('purpose') border-red-500 @enderror">{{ old('purpose', $appointment->purpose) }}</textarea>
-                            @error('purpose')
+                                      class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('reason') border-red-500 @enderror">{{ old('reason', $appointment->reason) }}</textarea>
+                            @error('reason')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <span>{{ $message }}</span>

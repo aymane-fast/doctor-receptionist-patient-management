@@ -122,7 +122,7 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-600">{{ __('appointments.time') }}</label>
+                            <label class="block text-sm font-medium text-gray-600">{{ $appointment->isQueueMode() ? 'Estimated Time' : __('appointments.time') }}</label>
                             <p class="font-bold text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center space-x-2">
                                 <i class="fas fa-clock text-gray-400"></i>
                                 <span>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A') }}</span>
@@ -145,16 +145,19 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-600">Type</label>
+                            <label class="block text-sm font-medium text-gray-600">Mode</label>
                             <p class="font-bold text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                {{ ucfirst(str_replace('-', ' ', $appointment->appointment_type)) }}
+                                {{ $appointment->isQueueMode() ? 'Queue' : 'Scheduled' }}
+                                @if($appointment->isQueueMode())
+                                    <span class="text-indigo-700">#{{ $appointment->queue_number }}</span>
+                                @endif
                             </p>
                         </div>
 
-                        @if($appointment->purpose)
+                        @if($appointment->reason)
                         <div class="md:col-span-2 space-y-2">
                             <label class="block text-sm font-medium text-gray-600">Purpose</label>
-                            <p class="text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-200 leading-relaxed">{{ $appointment->purpose }}</p>
+                            <p class="text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-200 leading-relaxed">{{ $appointment->reason }}</p>
                         </div>
                         @endif
 
@@ -184,9 +187,9 @@
                 <div class="p-6">
                 <div class="space-y-3">
                     @if($appointment->status != 'completed' && $appointment->status != 'cancelled')
-                        <form action="{{ route('appointments.update', $appointment) }}" method="POST" class="w-full">
+                        <form action="{{ route('appointments.update-status', $appointment) }}" method="POST" class="w-full">
                             @csrf
-                            @method('PUT')
+                            @method('PATCH')
                             <input type="hidden" name="status" value="completed">
                             <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
                                 <i class="fas fa-check"></i>
@@ -196,22 +199,18 @@
                     @endif
 
                     @if($appointment->status == 'scheduled')
-                        <form action="{{ route('appointments.update', $appointment) }}" method="POST" class="w-full">
+                        <form action="{{ route('appointments.set-current', $appointment) }}" method="POST" class="w-full">
                             @csrf
-                            @method('PUT')
-                            <input type="hidden" name="status" value="confirmed">
                             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
                                 <i class="fas fa-check-circle"></i>
-                                <span>Confirmer le rendez-vous</span>
+                                <span>Start consultation</span>
                             </button>
                         </form>
                     @endif
 
                     @if($appointment->status != 'cancelled' && $appointment->status != 'completed')
-                        <form action="{{ route('appointments.update', $appointment) }}" method="POST" class="w-full">
+                        <form action="{{ route('appointments.cancel', $appointment) }}" method="POST" class="w-full">
                             @csrf
-                            @method('PUT')
-                            <input type="hidden" name="status" value="cancelled">
                             <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
                                     onclick="return confirm('{{ __('appointments.cancel_confirmation') }}')">
                                 <i class="fas fa-times"></i>

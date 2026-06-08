@@ -12,8 +12,12 @@ class Appointment extends Model
     protected $fillable = [
         'patient_id',
         'doctor_id',
+        'appointment_mode',
         'appointment_date',
         'appointment_time',
+        'queue_number',
+        'queue_position',
+        'estimated_time',
         'status',
         'reason',
         'notes',
@@ -22,6 +26,9 @@ class Appointment extends Model
     protected $casts = [
         'appointment_date' => 'date',
         'appointment_time' => 'datetime:H:i',
+        'estimated_time' => 'datetime:H:i',
+        'queue_number' => 'integer',
+        'queue_position' => 'integer',
     ];
 
     /**
@@ -63,5 +70,20 @@ class Appointment extends Model
     {
         return $query->where('appointment_date', '>=', today())
                     ->where('status', '!=', 'cancelled');
+    }
+
+    public function isQueueMode(): bool
+    {
+        return $this->appointment_mode === 'queue';
+    }
+
+    public function isScheduledMode(): bool
+    {
+        return !$this->isQueueMode();
+    }
+
+    public function displayTime(): string
+    {
+        return $this->appointment_time?->format('g:i A') ?? '-';
     }
 }

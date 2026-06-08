@@ -114,7 +114,7 @@
                                 class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('doctor_id') border-red-500 @enderror">
                             <option value="">{{ __('appointments.select_doctor') }}</option>
                             @foreach($doctors as $doctor)
-                                <option value="{{ $doctor->id }}" {{ old('doctor_id', request('doctor_id')) == $doctor->id ? 'selected' : '' }}>
+                                <option value="{{ $doctor->id }}" data-mode="{{ $doctor->appointment_mode ?? 'scheduled' }}" {{ old('doctor_id', request('doctor_id')) == $doctor->id ? 'selected' : '' }}>
                                     Dr. {{ $doctor->name }}
                                 </option>
                             @endforeach
@@ -132,7 +132,7 @@
                         <div class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600">
                             Dr. {{ auth()->user()->name }}
                         </div>
-                        <input type="hidden" name="doctor_id" value="{{ auth()->id() }}">
+                        <input type="hidden" id="doctor_id" name="doctor_id" value="{{ auth()->id() }}" data-mode="{{ auth()->user()->appointment_mode ?? 'scheduled' }}">
                         @endif
                     </div>
                 </div>
@@ -168,12 +168,12 @@
                     </div>
 
                     <!-- Appointment Time -->
-                    <div>
+                    <div id="appointment_time_wrapper">
                         <label for="appointment_time" class="block text-sm font-semibold text-gray-700 mb-2">
                             {{ __('appointments.appointment_time') }} <span class="text-red-500">*</span>
                         </label>
                         <input type="time" id="appointment_time" name="appointment_time" 
-                               value="{{ old('appointment_time') }}" required
+                               value="{{ old('appointment_time') }}"
                                class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('appointment_time') border-red-500 @enderror">
                         @error('appointment_time')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
@@ -190,6 +190,17 @@
                                 <span>{{ __('appointments.book_now') }}</span>
                             </button>
                             <p id="book_now_message" class="mt-2 text-sm text-gray-600 hidden"></p>
+                        </div>
+                    </div>
+
+                    <div id="queue_mode_notice" class="hidden md:col-span-2 bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-list-ol text-indigo-600 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold text-indigo-900">Queue mode</h4>
+                                <p class="text-sm text-indigo-700 mt-1">This doctor uses queue mode. The patient will receive the next queue number and an estimated consultation time automatically.</p>
+                                <p id="queue_mode_estimate" class="text-sm text-indigo-900 font-semibold mt-2 hidden"></p>
+                            </div>
                         </div>
                     </div>
 
@@ -257,8 +268,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('patient_search');
     const patientIdInput = document.getElementById('patient_id');
     const resultsContainer = document.getElementById('patient_results');
+    const doctorInput = document.getElementById('doctor_id');
+    const timeWrapper = document.getElementById('appointment_time_wrapper');
+    const timeInput = document.getElementById('appointment_time');
+    const bookNowBtn = document.getElementById('book_now_btn');
+    const queueNotice = document.getElementById('queue_mode_notice');
+    const queueEstimate = document.getElementById('queue_mode_estimate');
     let searchTimeout;
     let selectedPatientId = patientIdInput.value;
+    const doctorModes = @json($doctorModes);
 
     // Patient Search Autocomplete
     searchInput.addEventListener('input', function() {
@@ -345,6 +363,69 @@ document.addEventListener('DOMContentLoaded', function() {
     function hideResults() {
         resultsContainer.classList.add('hidden');
     }
+
+    function selectedDoctorId() {
+        return doctorInput ? doctorInput.value : null;
+    }
+
+    function selectedDoctorMode() {
+        const doctorId = selectedDoctorId();
+        if (doctorModes[doctorId]) {
+            return doctorModes[doctorId].mode || 'scheduled';
+        }
+
+        return doctorInput?.dataset.mode || 'scheduled';
+    }
+
+    async function refreshAppointmentMode() {
+        const mode = selectedDoctorMode();
+        const isQueue = mode === 'queue';
+
+        timeWrapper.classList.toggle('hidden', isQueue);
+        queueNotice.classList.toggle('hidden', !isQueue);
+        timeInput.required = !isQueue;
+        if (bookNowBtn) {
+            bookNowBtn.classList.toggle('hidden', isQueue);
+        }
+
+        if (isQueue) {
+            timeInput.value = '';
+            await refreshQueueEstimate();
+        } else {
+            queueEstimate.classList.add('hidden');
+        }
+    }
+
+    async function refreshQueueEstimate() {
+        const dateInput = document.querySelector('input[name="appointment_date"]');
+        const doctorId = selectedDoctorId();
+        if (!dateInput.value || !doctorId) {
+            queueEstimate.classList.add('hidden');
+            return;
+        }
+
+        try {
+            const response = await fetch(`{{ route('api.appointments.next-available-slot') }}?date=${dateInput.value}&doctor_id=${doctorId}`);
+            const data = await response.json();
+            if (data.mode === 'queue') {
+                queueEstimate.textContent = `Next queue number: #${data.queue_number}. Estimated time: ${data.estimated_time}.`;
+                queueEstimate.classList.remove('hidden');
+            }
+        } catch (error) {
+            queueEstimate.classList.add('hidden');
+        }
+    }
+
+    if (doctorInput) {
+        doctorInput.addEventListener('change', refreshAppointmentMode);
+    }
+
+    const appointmentDateInput = document.querySelector('input[name="appointment_date"]');
+    if (appointmentDateInput) {
+        appointmentDateInput.addEventListener('change', refreshAppointmentMode);
+    }
+
+    refreshAppointmentMode();
 
     // Book Now functionality
     window.bookNow = function() {
@@ -479,8 +560,6 @@ document.addEventListener('DOMContentLoaded', function() {
         timeInput.value = '09:00';
     }
 
-    // Book Now functionality
-    const bookNowBtn = document.getElementById('book_now_btn');
     const bookNowMessage = document.getElementById('book_now_message');
     
     if (bookNowBtn) {
@@ -497,10 +576,14 @@ document.addEventListener('DOMContentLoaded', function() {
             bookNowBtn.disabled = true;
             
             try {
-                const response = await fetch(`{{ route('api.appointments.next-available-slot') }}?date=${dateInput.value}`);
+                const doctorId = selectedDoctorId();
+                const response = await fetch(`{{ route('api.appointments.next-available-slot') }}?date=${dateInput.value}&doctor_id=${doctorId || ''}`);
                 const data = await response.json();
                 
-                if (data.available) {
+                if (data.mode === 'queue') {
+                    bookNowMessage.innerHTML = `<i class="fas fa-info-circle text-blue-500 mr-1"></i>${data.message}`;
+                    bookNowMessage.classList.remove('hidden');
+                } else if (data.available) {
                     timeInput.value = data.next_slot.time;
                     bookNowMessage.innerHTML = `<i class="fas fa-info-circle text-blue-500 mr-1"></i>${data.message}`;
                     bookNowMessage.classList.remove('hidden');

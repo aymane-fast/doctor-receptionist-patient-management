@@ -169,6 +169,50 @@
                 </div>
             </div>
         </form>
+
+        @if(auth()->user()->isDoctor())
+        <form action="{{ route('settings.appointment-mode') }}" method="POST" class="mt-8 pt-6 border-t border-gray-200 space-y-4">
+            @csrf
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-list-ol text-indigo-500 mr-1"></i>
+                        Appointment Mode
+                    </label>
+                    <select name="appointment_mode"
+                            id="appointment_mode"
+                            onchange="toggleQueueLimit()"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 bg-white">
+                        <option value="scheduled" {{ auth()->user()->appointment_mode !== 'queue' ? 'selected' : '' }}>Scheduled appointments</option>
+                        <option value="queue" {{ auth()->user()->appointment_mode === 'queue' ? 'selected' : '' }}>Queue mode</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Scheduled mode uses fixed times. Queue mode assigns automatic numbers and estimated times.</p>
+                </div>
+
+                <div id="queue_limit_wrapper">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-users text-indigo-500 mr-1"></i>
+                        Daily Queue Limit
+                    </label>
+                    <input type="number"
+                           name="queue_daily_limit"
+                           min="1"
+                           max="500"
+                           value="{{ old('queue_daily_limit', auth()->user()->queue_daily_limit) }}"
+                           placeholder="No limit"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                    <p class="text-xs text-gray-500 mt-1">Leave empty if the queue should not have a daily cap.</p>
+                </div>
+
+                <div class="flex items-end">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                        <i class="fas fa-save text-sm"></i>
+                        <span>Save Mode</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+        @endif
     </div>
 
     @if(auth()->user()->isDoctor())
@@ -426,11 +470,23 @@ function setDefaultHours() {
     });
 }
 
+function toggleQueueLimit() {
+    const mode = document.getElementById('appointment_mode');
+    const wrapper = document.getElementById('queue_limit_wrapper');
+
+    if (!mode || !wrapper) {
+        return;
+    }
+
+    wrapper.classList.toggle('opacity-50', mode.value !== 'queue');
+}
+
 // Enhanced export functionality with loading animation
 document.addEventListener('DOMContentLoaded', function() {
     ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
         toggleDayHours(day);
     });
+    toggleQueueLimit();
     
 
 

@@ -8,6 +8,7 @@ use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
 use App\Models\Setting;
+use App\Services\AppointmentSchedulingService;
 use App\Services\PatientSearchService;
 use App\Http\Requests\Traits\ValidatesAppointments;
 use Carbon\Carbon;
@@ -16,6 +17,11 @@ use Illuminate\Validation\Rule;
 class AppointmentController extends Controller
 {
     use ValidatesAppointments;
+
+    private function scheduler(): AppointmentSchedulingService
+    {
+        return app(AppointmentSchedulingService::class);
+    }
     /**
      * Display a listing of appointments
      */
@@ -83,6 +89,10 @@ class AppointmentController extends Controller
                 $query->where('status', $request->status);
             }
 
+            if ($request->filled('appointment_mode')) {
+                $query->where('appointment_mode', $request->appointment_mode);
+            }
+
             // Filter by doctor for receptionists
             if ($request->filled('doctor_id') && Auth::user()->isReceptionist()) {
                 $query->where('doctor_id', $request->doctor_id);
@@ -94,6 +104,7 @@ class AppointmentController extends Controller
             }
 
             $appointments = $query->orderBy('appointment_date', 'desc')
+                                 ->orderByRaw("CASE WHEN appointment_mode = 'queue' THEN COALESCE(queue_position, 999999) ELSE 0 END")
                                  ->orderBy('appointment_time', 'desc')
                                  ->paginate(15)
                                  ->appends($request->query());
@@ -120,8 +131,14 @@ class AppointmentController extends Controller
         $doctors = Auth::user()->isDoctor()
             ? User::where('id', Auth::id())->get()
             : User::where('role', 'doctor')->get();
+        $doctorModes = $doctors->mapWithKeys(fn ($doctor) => [
+            $doctor->id => [
+                'mode' => $doctor->appointment_mode ?? 'scheduled',
+                'queue_limit' => $doctor->queue_daily_limit,
+            ],
+        ]);
         
-        return view('appointments.create', compact('patients', 'doctors', 'selectedPatient'));
+        return view('appointments.create', compact('patients', 'doctors', 'selectedPatient', 'doctorModes'));
     }
 
     /**
@@ -139,6 +156,37 @@ class AppointmentController extends Controller
     public function getNextAvailableSlot(Request $request)
     {
         $date = $request->get('date', now()->toDateString());
+        $doctorId = $this->resolveDoctorId($request);
+
+        if (!$doctorId) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Please select a doctor first'
+            ], 422);
+        }
+
+        $doctor = User::find($doctorId);
+        if ($doctor?->usesQueueMode()) {
+            $capacityError = $this->scheduler()->validateQueueCapacity($doctorId, $date);
+            if ($capacityError) {
+                return response()->json([
+                    'available' => false,
+                    'mode' => 'queue',
+                    'message' => $capacityError,
+                ]);
+            }
+
+            $position = $this->scheduler()->nextQueuePosition($doctorId, $date);
+            $estimatedTime = $this->scheduler()->estimatedQueueTime($date, $position);
+
+            return response()->json([
+                'available' => true,
+                'mode' => 'queue',
+                'queue_number' => $position,
+                'estimated_time' => $estimatedTime->format('H:i'),
+                'message' => "Queue mode: next number is #{$position}, estimated around " . $estimatedTime->format('g:i A') . '.',
+            ]);
+        }
         
         try {
             $requestedDate = \Carbon\Carbon::parse($date)->startOfDay();
@@ -163,100 +211,25 @@ class AppointmentController extends Controller
             ]);
         }
         
-        // Parse working hours
-        try {
-            $startTime = \Carbon\Carbon::createFromFormat('H:i', $workingHours['start_time']);
-            $endTime = \Carbon\Carbon::createFromFormat('H:i', $workingHours['end_time']);
-        } catch (\Exception $e) {
-            return response()->json([
-                'available' => false,
-                'message' => 'Invalid working hours format in settings',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-        
-        // If it's today, start from current time + appointment duration buffer
-        if ($isToday) {
-            $appointmentDuration = \App\Models\Setting::getAppointmentDuration();
-            $now = now();
-            $minTime = $now->copy()->addMinutes($appointmentDuration)->roundMinute($appointmentDuration); // Round to nearest appointment duration
-            if ($minTime->format('H:i') > $startTime->format('H:i')) {
-                $startTime = $minTime;
-            }
-        }
-        
-        // Get existing appointments for this date
-        $existingAppointments = \App\Models\Appointment::whereDate('appointment_date', $requestedDate)
-            ->where('status', '!=', 'cancelled')
-            ->get(['appointment_time'])
-            ->map(function ($appointment) {
-                return $appointment->appointment_time->format('H:i');
-            })
-            ->toArray();
-        
-        // Generate available slots (configurable intervals)
-        $appointmentDuration = \App\Models\Setting::getAppointmentDuration();
-        $availableSlots = [];
-        $currentSlot = $startTime->copy();
-        
-        while ($currentSlot->format('H:i') < $endTime->format('H:i')) {
-            $timeSlot = $currentSlot->format('H:i');
-            
-            // Check if this slot is available (no appointments within appointment duration)
-            $hasConflict = false;
-            foreach ($existingAppointments as $existingTime) {
-                $existingSlot = \Carbon\Carbon::createFromFormat('H:i', $existingTime);
-                $timeDiff = abs($currentSlot->diffInMinutes($existingSlot));
-                if ($timeDiff < $appointmentDuration) {
-                    $hasConflict = true;
-                    break;
-                }
-            }
-            
-            if (!$hasConflict) {
-                $availableSlots[] = [
-                    'time' => $timeSlot,
-                    'formatted' => $currentSlot->format('H:i'),
-                    'display' => $currentSlot->format('g:i A')
-                ];
-            }
-            
-            $currentSlot->addMinutes($appointmentDuration);
-        }
+        $availableSlots = $this->scheduler()->availableSlots($doctorId, $requestedDate);
         
         // Return the first available slot or indicate no availability
         if (empty($availableSlots)) {
-            // Try to find next working day with available slots
-            $nextWorkingDay = $requestedDate->copy()->addDay();
-            $attempts = 0;
-            while ($attempts < 7) { // Check up to 7 days ahead
-                $nextDayName = strtolower($nextWorkingDay->format('l'));
-                $nextDayHours = \App\Models\Setting::getWorkingHours($nextDayName);
-                
-                if ($nextDayHours && $nextDayHours['is_working']) {
-                    $nextDayStart = \Carbon\Carbon::createFromFormat('H:i', $nextDayHours['start_time']);
-                    $suggestedTime = $nextDayStart->format('g:i A');
-                    $message = $isToday 
-                        ? __('appointments.no_slots_today_tomorrow', ['time' => $suggestedTime])
-                        : __('appointments.no_slots_date_next', [
-                            'date' => $nextWorkingDay->format('M j, Y'), 
-                            'time' => $suggestedTime
-                        ]);
-                    
-                    return response()->json([
-                        'available' => false,
-                        'message' => $message,
-                        'next_available_date' => $nextWorkingDay->toDateString(),
-                        'next_available_time' => $nextDayStart->format('H:i'),
-                        'working_hours' => [
-                            'start' => $workingHours['start_time'],
-                            'end' => $workingHours['end_time']
-                        ]
-                    ]);
-                }
-                
-                $nextWorkingDay->addDay();
-                $attempts++;
+            $next = $this->scheduler()->nextWorkingDayWithSlot($doctorId, $requestedDate);
+            if ($next) {
+                return response()->json([
+                    'available' => false,
+                    'message' => __('appointments.no_slots_date_next', [
+                        'date' => Carbon::parse($next['date'])->format('M j, Y'),
+                        'time' => $next['slot']['display'],
+                    ]),
+                    'next_available_date' => $next['date'],
+                    'next_available_time' => $next['slot']['time'],
+                    'working_hours' => [
+                        'start' => $workingHours['start_time'],
+                        'end' => $workingHours['end_time']
+                    ]
+                ]);
             }
             
             return response()->json([
@@ -286,6 +259,7 @@ class AppointmentController extends Controller
         
         return response()->json([
             'available' => true,
+            'mode' => 'scheduled',
             'next_slot' => $nextSlot,
             'all_slots' => array_slice($availableSlots, 0, 8), // Return first 8 slots
             'message' => $message,
@@ -301,24 +275,50 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate($this->getAppointmentValidationRules());
+        $validated = $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'doctor_id' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'doctor'),
+            ],
+            'appointment_date' => 'required|date|after_or_equal:today',
+            'appointment_time' => 'nullable|date_format:H:i',
+            'reason' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
 
         if (Auth::user()->isDoctor()) {
             $validated['doctor_id'] = Auth::id();
         }
 
-        // All new appointments start as scheduled
+        $doctor = User::findOrFail($validated['doctor_id']);
+        $validated['appointment_mode'] = $doctor->appointment_mode ?? 'scheduled';
         $validated['status'] = 'scheduled';
+
+        if ($validated['appointment_mode'] === 'queue') {
+            try {
+                $appointment = $this->scheduler()->createQueueAppointment($validated);
+            } catch (\InvalidArgumentException $e) {
+                return back()->withErrors(['appointment_date' => $e->getMessage()])->withInput();
+            }
+
+            return redirect()->route('appointments.show', $appointment)
+                ->with('success', "Queue appointment created successfully. Queue #{$appointment->queue_number}, estimated around {$appointment->displayTime()}.");
+        }
+
+        if (empty($validated['appointment_time'])) {
+            return back()->withErrors(['appointment_time' => 'Appointment time is required for scheduled appointments.'])->withInput();
+        }
 
         // Validate working hours
         $workingHoursError = $this->validateWorkingHours($validated['appointment_date'], $validated['appointment_time']);
         if ($workingHoursError) {
-            return back()->withErrors(['appointment_time' => $workingHoursError]);
+            return back()->withErrors(['appointment_time' => $workingHoursError])->withInput();
         }
 
         // Check for conflicts
         if ($this->hasAppointmentConflict($validated['doctor_id'], $validated['appointment_date'], $validated['appointment_time'])) {
-            return back()->withErrors(['appointment_time' => 'Doctor already has an appointment at this time.']);
+            return back()->withErrors(['appointment_time' => 'Doctor already has an appointment at this time.'])->withInput();
         }
 
         $appointment = Appointment::create($validated);
@@ -368,7 +368,7 @@ class AppointmentController extends Controller
                 Rule::exists('users', 'id')->where('role', 'doctor'),
             ],
             'appointment_date' => 'required|date',
-            'appointment_time' => 'required|date_format:H:i',
+            'appointment_time' => 'nullable|date_format:H:i',
             'status' => 'required|in:scheduled,in_progress,completed,cancelled',
             'reason' => 'nullable|string',
             'notes' => 'nullable|string',
@@ -378,53 +378,31 @@ class AppointmentController extends Controller
             $validated['doctor_id'] = Auth::id();
         }
 
-        // Validate appointment is during working hours (only if not completed/cancelled)
-        if (!in_array($validated['status'], ['completed', 'cancelled'])) {
-            $appointmentDateTime = Carbon::parse($validated['appointment_date'] . ' ' . $validated['appointment_time']);
-            
-            if (!Setting::isTimeWithinWorkingHours($appointmentDateTime)) {
-                $workingHours = Setting::getWorkingHours($appointmentDateTime->format('l'));
-                $errorMessage = 'Appointment time is outside working hours. ';
-                
-                if ($workingHours && $workingHours['is_working']) {
-                    $errorMessage .= 'Working hours for ' . $appointmentDateTime->format('l') . ' are ' . 
-                                   $workingHours['start_time'] . ' - ' . $workingHours['end_time'] . '.';
-                } else {
-                    $errorMessage .= 'We are closed on ' . $appointmentDateTime->format('l') . '.';
-                }
-                
-                return back()->withErrors(['appointment_time' => $errorMessage]);
+        if ($appointment->isQueueMode()) {
+            $validated['appointment_mode'] = 'queue';
+            $validated['appointment_time'] = $appointment->appointment_time->format('H:i');
+        } else {
+            if (empty($validated['appointment_time'])) {
+                return back()->withErrors(['appointment_time' => 'Appointment time is required for scheduled appointments.'])->withInput();
             }
 
-            // Check if appointment is too close to end of working hours
-            $dayName = strtolower($appointmentDateTime->format('l'));
-            $workingHours = Setting::getWorkingHours($dayName);
-            if ($workingHours && $workingHours['is_working']) {
-                $endTime = Carbon::parse($validated['appointment_date'] . ' ' . $workingHours['end_time']);
-                $appointmentEndTime = $appointmentDateTime->copy()->addMinutes(\App\Models\Setting::getAppointmentDuration());
-                
-                if ($appointmentEndTime->gt($endTime)) {
-                    return back()->withErrors(['appointment_time' => 
-                        'Appointment would extend past working hours. Last appointment should be scheduled at least ' . \App\Models\Setting::getAppointmentDuration() . ' minutes before closing time (' . 
-                        $workingHours['end_time'] . ').'
-                    ]);
+            if (!in_array($validated['status'], ['completed', 'cancelled'])) {
+                $workingHoursError = $this->validateWorkingHours($validated['appointment_date'], $validated['appointment_time']);
+                if ($workingHoursError) {
+                    return back()->withErrors(['appointment_time' => $workingHoursError])->withInput();
                 }
             }
-        }
 
-        // Check for conflicts (excluding current appointment)
-        $existingAppointment = Appointment::where('doctor_id', $validated['doctor_id'])
-                                        ->whereDate('appointment_date', $validated['appointment_date'])
-                                        ->whereTime('appointment_time', $validated['appointment_time'])
-                                        ->where('status', '!=', 'cancelled')
-                                        ->where('id', '!=', $appointment->id)
-                                        ->first();
-
-        if ($existingAppointment) {
-            return back()->withErrors(['appointment_time' => 'Doctor already has an appointment at this time.']);
+            if ($this->hasAppointmentConflict($validated['doctor_id'], $validated['appointment_date'], $validated['appointment_time'], $appointment->id)) {
+                return back()->withErrors(['appointment_time' => 'Doctor already has an appointment at this time.'])->withInput();
+            }
         }
 
         $appointment->update($validated);
+
+        if ($appointment->isQueueMode()) {
+            $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
+        }
 
         return redirect()->route('appointments.show', $appointment)
                         ->with('success', 'Appointment updated successfully!');
@@ -438,6 +416,10 @@ class AppointmentController extends Controller
         $this->authorizeAppointmentAccess($appointment);
 
         $appointment->delete();
+
+        if ($appointment->isQueueMode()) {
+            $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
+        }
 
         return redirect()->route('appointments.index')
                         ->with('success', 'Appointment deleted successfully!');
@@ -456,6 +438,10 @@ class AppointmentController extends Controller
 
         $appointment->update(['status' => $request->status]);
 
+        if ($appointment->isQueueMode()) {
+            $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
+        }
+
         return back()->with('success', 'Appointment status updated successfully!');
     }
 
@@ -470,6 +456,62 @@ class AppointmentController extends Controller
         }
 
         abort(403);
+    }
+
+    private function resolveDoctorId(Request $request): ?int
+    {
+        if (Auth::user()->isDoctor()) {
+            return Auth::id();
+        }
+
+        if ($request->filled('doctor_id')) {
+            return (int) $request->doctor_id;
+        }
+
+        return User::where('role', 'doctor')->value('id');
+    }
+
+    public function queue(Request $request)
+    {
+        $date = $request->get('date', today()->toDateString());
+        $doctors = User::where('role', 'doctor')->orderBy('name')->get();
+        $doctorId = $this->resolveDoctorId($request);
+
+        if (!$doctorId) {
+            $queueAppointments = collect();
+            $selectedDoctor = null;
+        } else {
+            $selectedDoctor = User::findOrFail($doctorId);
+            if (Auth::user()->isDoctor() && $selectedDoctor->id !== Auth::id()) {
+                abort(403);
+            }
+
+            $queueAppointments = $this->scheduler()->queueAppointments($selectedDoctor->id, $date);
+        }
+
+        return view('appointments.queue', compact('queueAppointments', 'doctors', 'selectedDoctor', 'date'));
+    }
+
+    public function moveQueueUp(Appointment $appointment)
+    {
+        $this->authorizeAppointmentAccess($appointment);
+
+        if (!$this->scheduler()->moveQueueAppointment($appointment, 'up')) {
+            return back()->with('error', 'Unable to move this queue entry.');
+        }
+
+        return back()->with('success', 'Queue order updated.');
+    }
+
+    public function moveQueueDown(Appointment $appointment)
+    {
+        $this->authorizeAppointmentAccess($appointment);
+
+        if (!$this->scheduler()->moveQueueAppointment($appointment, 'down')) {
+            return back()->with('error', 'Unable to move this queue entry.');
+        }
+
+        return back()->with('success', 'Queue order updated.');
     }
 
     /**
@@ -551,6 +593,9 @@ class AppointmentController extends Controller
         cache()->forget('dashboard_stats_' . today()->format('Y-m-d'));
 
         if ($result['success']) {
+            $date = today()->toDateString();
+            $this->scheduler()->recalculateQueue($doctorId, $date);
+
             return back()->with('success', $result['message']);
         } else {
             return back()->with('error', $result['message']);
@@ -708,6 +753,10 @@ class AppointmentController extends Controller
 
         // Clear dashboard cache
         cache()->forget('dashboard_stats_' . today()->format('Y-m-d'));
+
+        if ($appointment->isQueueMode()) {
+            $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
+        }
 
         return back()->with('success', $result);
     }

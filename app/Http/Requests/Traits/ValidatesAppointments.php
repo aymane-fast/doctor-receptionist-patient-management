@@ -2,8 +2,7 @@
 
 namespace App\Http\Requests\Traits;
 
-use App\Models\Setting;
-use Carbon\Carbon;
+use App\Services\AppointmentSchedulingService;
 use Illuminate\Validation\Rule;
 
 trait ValidatesAppointments
@@ -31,23 +30,7 @@ trait ValidatesAppointments
      */
     protected function validateWorkingHours(string $date, string $time): ?string
     {
-        $appointmentDateTime = Carbon::parse($date . ' ' . $time);
-        
-        if (!Setting::isTimeWithinWorkingHours($appointmentDateTime)) {
-            $workingHours = Setting::getWorkingHours($appointmentDateTime->format('l'));
-            $errorMessage = 'Appointment time is outside working hours. ';
-            
-            if ($workingHours && $workingHours['is_working']) {
-                $errorMessage .= 'Working hours for ' . $appointmentDateTime->format('l') . ' are ' . 
-                               $workingHours['start_time'] . ' - ' . $workingHours['end_time'] . '.';
-            } else {
-                $errorMessage .= 'We are closed on ' . $appointmentDateTime->format('l') . '.';
-            }
-            
-            return $errorMessage;
-        }
-
-        return null;
+        return app(AppointmentSchedulingService::class)->validateScheduledTime($date, $time);
     }
 
     /**
@@ -55,17 +38,6 @@ trait ValidatesAppointments
      */
     protected function hasAppointmentConflict(int $doctorId, string $date, string $time, ?int $excludeId = null): bool
     {
-        $appointmentDateTime = Carbon::parse($date . ' ' . $time);
-        
-        $query = \App\Models\Appointment::where('doctor_id', $doctorId)
-            ->whereDate('appointment_date', $appointmentDateTime->toDateString())
-            ->whereTime('appointment_time', $appointmentDateTime->format('H:i:s'))
-            ->whereNotIn('status', ['cancelled', 'completed']);
-
-        if ($excludeId) {
-            $query->where('id', '!=', $excludeId);
-        }
-
-        return $query->exists();
+        return app(AppointmentSchedulingService::class)->hasScheduledConflict($doctorId, $date, $time, $excludeId);
     }
 }

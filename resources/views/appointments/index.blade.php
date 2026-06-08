@@ -18,10 +18,16 @@
                     <p class="text-gray-600 mt-2 text-lg">{{ __('appointments.manage_appointments_scheduling') }}</p>
                 </div>
             </div>
-            <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow">
-                <i class="fas fa-plus"></i>
-                <span>{{ __('appointments.schedule_appointment') }}</span>
-            </a>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a href="{{ route('appointments.queue') }}" class="bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                    <i class="fas fa-list-ol"></i>
+                    <span>Queue</span>
+                </a>
+                <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 deep-shadow">
+                    <i class="fas fa-plus"></i>
+                    <span>{{ __('appointments.schedule_appointment') }}</span>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -36,7 +42,7 @@
             </div>
             <div class="space-y-6">
                 <!-- Filter Fields -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                     <div class="space-y-2 relative z-[10000]">
                         <label for="patient_search" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('appointments.search') }}</label>
                         <div class="relative">
@@ -76,6 +82,17 @@
                             <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
                             <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
                             <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('appointments.cancelled') }}</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="appointment_mode" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Mode</label>
+                        <select id="appointment_mode"
+                                name="appointment_mode"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200">
+                            <option value="">All Modes</option>
+                            <option value="scheduled" {{ request('appointment_mode') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                            <option value="queue" {{ request('appointment_mode') == 'queue' ? 'selected' : '' }}>Queue</option>
                         </select>
                     </div>
 
@@ -137,6 +154,10 @@
                         <i class="fas fa-plus"></i>
                         <span>{{ __('appointments.schedule_appointment') }}</span>
                     </a>
+                    <a href="{{ route('appointments.queue') }}" class="bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 px-6 py-3 rounded-2xl font-medium transition-all duration-200 inline-flex items-center space-x-2">
+                        <i class="fas fa-list-ol"></i>
+                        <span>Queue</span>
+                    </a>
                 </div>
             </div>
         @elseif($appointments->count() > 0)
@@ -179,8 +200,13 @@
                                     <div class="text-base font-semibold text-gray-900">{{ $appointment->appointment_date->format('M j, Y') }}</div>
                                     <div class="text-sm text-gray-500 flex items-center space-x-1">
                                         <i class="fas fa-clock text-xs"></i>
-                                        <span>{{ $appointment->appointment_time->format('g:i A') }}</span>
+                                        <span>{{ $appointment->displayTime() }}</span>
                                     </div>
+                                    @if($appointment->isQueueMode())
+                                    <div class="text-xs text-indigo-700 font-semibold">
+                                        Queue #{{ $appointment->queue_number }} estimated
+                                    </div>
+                                    @endif
                                 </div>
                             </td>
                             <td class="px-8 py-6">
