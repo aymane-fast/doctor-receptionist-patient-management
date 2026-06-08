@@ -254,7 +254,7 @@
                     </div>
 
                     <!-- Treatment Plan -->
-                    @if($medicalRecord->treatment_plan)
+                    @if($medicalRecord->treatment)
                     <div class="border border-gray-200 rounded-lg p-4">
                         <div class="flex items-center mb-3">
                             <div class="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center mr-3">
@@ -263,7 +263,7 @@
                             <label class="font-bold text-gray-900">{{ __('medical_records.treatment_plan') }}</label>
                         </div>
                         <div class="bg-cyan-50 border-l-4 border-cyan-400 rounded-lg p-4">
-                            <p class="text-gray-900 whitespace-pre-wrap leading-relaxed">{{ $medicalRecord->treatment_plan }}</p>
+                            <p class="text-gray-900 whitespace-pre-wrap leading-relaxed">{{ $medicalRecord->treatment }}</p>
                         </div>
                     </div>
                     @endif

@@ -71,7 +71,9 @@ class MedicalRecordController extends Controller
         $selectedPatient = null;
         
         if ($request->has('appointment_id')) {
-            $appointment = Appointment::with('patient')->findOrFail($request->appointment_id);
+            $appointment = Appointment::with('patient')
+                ->where('doctor_id', Auth::id())
+                ->findOrFail($request->appointment_id);
             $selectedPatient = $appointment->patient;
         } elseif ($request->has('patient_id')) {
             $selectedPatient = Patient::find($request->patient_id);
@@ -130,18 +132,24 @@ class MedicalRecordController extends Controller
             'blood_pressure' => 'nullable|string',
             'temperature' => 'nullable|numeric|min:0',
             'heart_rate' => 'nullable|integer|min:0',
+            'oxygen_saturation' => 'nullable|integer|min:0|max:100',
         ]);
 
         $validated['doctor_id'] = Auth::id();
 
+        if (!empty($validated['appointment_id'])) {
+            $appointment = Appointment::where('id', $validated['appointment_id'])
+                ->where('doctor_id', Auth::id())
+                ->firstOrFail();
+
+            $validated['patient_id'] = $appointment->patient_id;
+        }
+
         $record = MedicalRecord::create($validated);
 
         // Update appointment status if linked
-        if ($request->appointment_id) {
-            $appointment = Appointment::find($request->appointment_id);
-            if ($appointment) {
-                $appointment->update(['status' => 'completed']);
-            }
+        if (!empty($validated['appointment_id'])) {
+            $appointment->update(['status' => 'completed']);
         }
 
         return redirect()->route('medical-records.show', $record)
@@ -198,7 +206,16 @@ class MedicalRecordController extends Controller
             'blood_pressure' => 'nullable|string',
             'temperature' => 'nullable|numeric|min:0',
             'heart_rate' => 'nullable|integer|min:0',
+            'oxygen_saturation' => 'nullable|integer|min:0|max:100',
         ]);
+
+        if (!empty($validated['appointment_id'])) {
+            $appointment = Appointment::where('id', $validated['appointment_id'])
+                ->where('doctor_id', Auth::id())
+                ->firstOrFail();
+
+            $validated['patient_id'] = $appointment->patient_id;
+        }
 
         $medicalRecord->update($validated);
 

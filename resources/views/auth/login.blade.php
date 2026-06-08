@@ -60,13 +60,6 @@
                 <i class="fas fa-sign-in-alt mr-2"></i> {{ __('auth.sign_in') }}
             </button>
         </form>
-
-        <div class="mt-6 text-center">
-            <p class="text-sm text-gray-600">
-                {{ __('auth.need_account') }} 
-                <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-800 font-medium">{{ __('auth.register_here') }}</a>
-            </p>
-        </div>
     </div>
 </body>
 </html>

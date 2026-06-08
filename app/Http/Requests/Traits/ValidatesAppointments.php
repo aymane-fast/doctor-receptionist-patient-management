@@ -4,6 +4,7 @@ namespace App\Http\Requests\Traits;
 
 use App\Models\Setting;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 
 trait ValidatesAppointments
 {
@@ -14,7 +15,10 @@ trait ValidatesAppointments
     {
         return [
             'patient_id' => 'required|exists:patients,id',
-            'doctor_id' => 'required|exists:users,id',
+            'doctor_id' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'doctor'),
+            ],
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required|date_format:H:i',
             'reason' => 'nullable|string',

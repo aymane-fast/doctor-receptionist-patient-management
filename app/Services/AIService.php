@@ -101,11 +101,12 @@ class AIService
                     'vital_signs' => [
                         'bp' => $record->blood_pressure,
                         'temp' => $record->temperature,
-                        'pulse' => $record->pulse_rate,
+                        'pulse' => $record->heart_rate,
+                        'oxygen_saturation' => $record->oxygen_saturation,
                         'weight' => $record->weight
                     ],
                     'doctor' => $record->doctor->name ?? 'N/A',
-                    'treatment' => $record->treatment_plan
+                    'treatment' => $record->treatment
                 ];
             })
         ];

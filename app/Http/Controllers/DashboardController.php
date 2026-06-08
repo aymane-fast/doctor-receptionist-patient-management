@@ -192,11 +192,11 @@ class DashboardController extends Controller
         }
 
         if (request('age_from')) {
-            $recentPatientsQuery->whereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= ?', [request('age_from')]);
+            $recentPatientsQuery->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) >= ?', [request('age_from')]);
         }
 
         if (request('age_to')) {
-            $recentPatientsQuery->whereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) <= ?', [request('age_to')]);
+            $recentPatientsQuery->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) <= ?', [request('age_to')]);
         }
 
         if (request('reg_date_from')) {

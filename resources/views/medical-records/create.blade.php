@@ -177,6 +177,22 @@
                         </div>
                     </div>
 
+                    <!-- Treatment Plan -->
+                    <div class="mb-4">
+                        <label for="treatment" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                            {{ __('medical_records.treatment_plan') }}
+                        </label>
+                        <textarea id="treatment" name="treatment" rows="4"
+                                  placeholder="{{ __('medical_records.treatment_recommendations') }}"
+                                  class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('treatment') border-red-500 @enderror">{{ old('treatment') }}</textarea>
+                        @error('treatment')
+                        <p class="mt-1 text-sm text-red-600 flex items-center space-x-1">
+                            <i class="fas fa-exclamation-circle text-xs"></i>
+                            <span>{{ $message }}</span>
+                        </p>
+                        @enderror
+                    </div>
+
                     <!-- Vital Signs Section -->
                     <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
                         <div class="flex items-center space-x-2 mb-3">

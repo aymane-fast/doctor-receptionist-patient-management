@@ -23,6 +23,7 @@ class MedicalRecord extends Model
         'blood_pressure',
         'temperature',
         'heart_rate',
+        'oxygen_saturation',
     ];
 
     protected $casts = [
@@ -30,6 +31,7 @@ class MedicalRecord extends Model
         'weight' => 'decimal:2',
         'height' => 'decimal:2',
         'temperature' => 'decimal:1',
+        'oxygen_saturation' => 'integer',
     ];
 
     /**

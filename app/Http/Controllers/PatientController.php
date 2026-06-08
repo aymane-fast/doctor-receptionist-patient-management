@@ -160,6 +160,8 @@ class PatientController extends Controller
         $appointmentTime = $request->appointment_time;
         
         // If no time provided, calculate it automatically
+        $appointmentDuration = Setting::getAppointmentDuration();
+
         if (!$appointmentTime) {
             $currentTime = Carbon::now();
             
@@ -182,8 +184,8 @@ class PatientController extends Controller
             
             // Calculate next available time slot
             if ($lastAppointment) {
-                // Add 30 minutes to the last appointment time
-                $nextTime = Carbon::parse($appointmentDate . ' ' . $lastAppointment->appointment_time)->addMinutes(30);
+                $nextTime = Carbon::parse($appointmentDate . ' ' . $lastAppointment->appointment_time)
+                    ->addMinutes($appointmentDuration);
             } else {
                 // Start from current time or working start time, whichever is later
                 $workingStart = Carbon::parse($appointmentDate . ' ' . $workingHours['start_time']);
@@ -192,7 +194,7 @@ class PatientController extends Controller
             
             // Check if appointment would be within working hours
             $workingEnd = Carbon::parse($appointmentDate . ' ' . $workingHours['end_time']);
-            $appointmentEnd = $nextTime->copy()->addMinutes(30); // Assume 30-minute appointments
+            $appointmentEnd = $nextTime->copy()->addMinutes($appointmentDuration);
             
             if ($appointmentEnd->gt($workingEnd)) {
                 return [
@@ -219,13 +221,32 @@ class PatientController extends Controller
             $workingStart = Carbon::parse($appointmentDate . ' ' . $workingHours['start_time']);
             $workingEnd = Carbon::parse($appointmentDate . ' ' . $workingHours['end_time']);
             
-            if ($submittedTime->lt($workingStart) || $submittedTime->addMinutes(30)->gt($workingEnd)) {
+            if ($submittedTime->lt($workingStart) || $submittedTime->copy()->addMinutes($appointmentDuration)->gt($workingEnd)) {
                 return [
                     'success' => false,
                     'message' => 'Selected time is outside working hours (' . 
                                $workingHours['start_time'] . ' - ' . $workingHours['end_time'] . ').'
                 ];
             }
+        }
+
+        $hasConflict = Appointment::where('doctor_id', $doctor->id)
+            ->whereDate('appointment_date', $appointmentDate)
+            ->whereTime('appointment_time', Carbon::parse($appointmentTime)->format('H:i:s'))
+            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->exists();
+
+        if ($hasConflict) {
+            return [
+                'success' => false,
+                'message' => 'Doctor already has an appointment at this time.'
+            ];
+        }
+
+        $priority = $request->appointment_priority ?: 'normal';
+        $notes = 'Walk-in patient appointment';
+        if (in_array($priority, ['urgent', 'emergency'], true)) {
+            $notes .= ' - Priority: ' . ucfirst($priority);
         }
         
         // Create the appointment
@@ -235,8 +256,8 @@ class PatientController extends Controller
             'appointment_date' => $appointmentDate,
             'appointment_time' => $appointmentTime,
             'reason' => $request->appointment_reason ?: __('appointments.walk_in_consultation'),
-            'status' => $request->appointment_priority === 'emergency' ? 'urgent' : 'scheduled',
-            'notes' => 'Walk-in patient appointment',
+            'status' => 'scheduled',
+            'notes' => $notes,
         ]);
         
         return ['success' => true];

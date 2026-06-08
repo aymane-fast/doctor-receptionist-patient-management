@@ -119,6 +119,14 @@ class PrescriptionController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        if (!empty($validated['medical_record_id'])) {
+            $medicalRecord = MedicalRecord::where('id', $validated['medical_record_id'])
+                ->where('doctor_id', Auth::id())
+                ->firstOrFail();
+
+            $validated['patient_id'] = $medicalRecord->patient_id;
+        }
+
         $prescription = Prescription::create([
             'patient_id' => $validated['patient_id'],
             'doctor_id' => Auth::id(),
@@ -130,6 +138,7 @@ class PrescriptionController extends Controller
             'frequency' => '-',
             'duration_days' => 0,
             'instructions' => null,
+            'notes' => $validated['notes'] ?? null,
         ]);
 
         // Create prescription items
@@ -197,7 +206,16 @@ class PrescriptionController extends Controller
             'duration_days' => 'required|integer|min:1',
             'instructions' => 'required|string',
             'prescribed_date' => 'required|date|before_or_equal:today',
+            'notes' => 'nullable|string',
         ]);
+
+        if (!empty($validated['medical_record_id'])) {
+            $medicalRecord = MedicalRecord::where('id', $validated['medical_record_id'])
+                ->where('doctor_id', Auth::id())
+                ->firstOrFail();
+
+            $validated['patient_id'] = $medicalRecord->patient_id;
+        }
 
         $prescription->update($validated);
 

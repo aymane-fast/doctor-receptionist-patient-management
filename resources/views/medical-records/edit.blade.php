@@ -238,13 +238,13 @@
 
                     <!-- Treatment Plan -->
                     <div class="mb-6">
-                        <label for="treatment_plan" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="treatment" class="block text-sm font-medium text-gray-700 mb-2">
                             {{ __('medical_records.treatment_plan') }}
                         </label>
-                        <textarea id="treatment_plan" name="treatment_plan" rows="4"
+                        <textarea id="treatment" name="treatment" rows="4"
                                   placeholder="{{ __('medical_records.treatment_recommendations') }}"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('treatment_plan', $medicalRecord->treatment_plan) }}</textarea>
-                        @error('treatment_plan')
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('treatment', $medicalRecord->treatment) }}</textarea>
+                        @error('treatment')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>

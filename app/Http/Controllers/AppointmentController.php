@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Services\PatientSearchService;
 use App\Http\Requests\Traits\ValidatesAppointments;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 
 class AppointmentController extends Controller
 {
@@ -116,7 +117,9 @@ class AppointmentController extends Controller
             $selectedPatient = Patient::find($request->patient_id);
         }
         
-        $doctors = User::where('role', 'doctor')->get();
+        $doctors = Auth::user()->isDoctor()
+            ? User::where('id', Auth::id())->get()
+            : User::where('role', 'doctor')->get();
         
         return view('appointments.create', compact('patients', 'doctors', 'selectedPatient'));
     }
@@ -300,6 +303,10 @@ class AppointmentController extends Controller
     {
         $validated = $request->validate($this->getAppointmentValidationRules());
 
+        if (Auth::user()->isDoctor()) {
+            $validated['doctor_id'] = Auth::id();
+        }
+
         // All new appointments start as scheduled
         $validated['status'] = 'scheduled';
 
@@ -325,6 +332,8 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
+        $this->authorizeAppointmentAccess($appointment);
+
         $appointment->load(['patient', 'doctor', 'medicalRecord']);
         
         return view('appointments.show', compact('appointment'));
@@ -335,8 +344,12 @@ class AppointmentController extends Controller
      */
     public function edit(Appointment $appointment)
     {
+        $this->authorizeAppointmentAccess($appointment);
+
         $patients = Patient::all();
-        $doctors = User::where('role', 'doctor')->get();
+        $doctors = Auth::user()->isDoctor()
+            ? User::where('id', Auth::id())->get()
+            : User::where('role', 'doctor')->get();
         
         return view('appointments.edit', compact('appointment', 'patients', 'doctors'));
     }
@@ -346,15 +359,24 @@ class AppointmentController extends Controller
      */
     public function update(Request $request, Appointment $appointment)
     {
+        $this->authorizeAppointmentAccess($appointment);
+
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
-            'doctor_id' => 'required|exists:users,id',
+            'doctor_id' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'doctor'),
+            ],
             'appointment_date' => 'required|date',
             'appointment_time' => 'required|date_format:H:i',
             'status' => 'required|in:scheduled,in_progress,completed,cancelled',
             'reason' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
+
+        if (Auth::user()->isDoctor()) {
+            $validated['doctor_id'] = Auth::id();
+        }
 
         // Validate appointment is during working hours (only if not completed/cancelled)
         if (!in_array($validated['status'], ['completed', 'cancelled'])) {
@@ -413,6 +435,8 @@ class AppointmentController extends Controller
      */
     public function destroy(Appointment $appointment)
     {
+        $this->authorizeAppointmentAccess($appointment);
+
         $appointment->delete();
 
         return redirect()->route('appointments.index')
@@ -424,6 +448,8 @@ class AppointmentController extends Controller
      */
     public function updateStatus(Request $request, Appointment $appointment)
     {
+        $this->authorizeAppointmentAccess($appointment);
+
         $request->validate([
             'status' => 'required|in:scheduled,in_progress,completed,cancelled'
         ]);
@@ -431,6 +457,19 @@ class AppointmentController extends Controller
         $appointment->update(['status' => $request->status]);
 
         return back()->with('success', 'Appointment status updated successfully!');
+    }
+
+    private function authorizeAppointmentAccess(Appointment $appointment): void
+    {
+        if (Auth::user()->isReceptionist()) {
+            return;
+        }
+
+        if (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id()) {
+            return;
+        }
+
+        abort(403);
     }
 
     /**
@@ -523,6 +562,10 @@ class AppointmentController extends Controller
      */
     public function createFollowUp(Request $request, Patient $patient)
     {
+        if (!Auth::user()->isDoctor()) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'current_appointment_id' => 'required|exists:appointments,id',
             'follow_up_number' => 'required|integer|min:1|max:365',
@@ -531,7 +574,10 @@ class AppointmentController extends Controller
         ]);
 
         // Calculate the follow-up date
-        $currentAppointment = Appointment::findOrFail($validated['current_appointment_id']);
+        $currentAppointment = Appointment::where('id', $validated['current_appointment_id'])
+            ->where('patient_id', $patient->id)
+            ->where('doctor_id', Auth::id())
+            ->firstOrFail();
         $followUpDate = Carbon::now();
         $followUpAmount = (int) $validated['follow_up_number']; // Cast to integer
         
@@ -581,8 +627,12 @@ class AppointmentController extends Controller
             $appointmentTime->addMinutes(\App\Models\Setting::getAppointmentDuration());
         }
 
+        if ($appointmentTime->format('H:i') > $workingHours['end_time']) {
+            return back()->with('error', 'No available follow-up slots were found during working hours.');
+        }
+
         // Create the follow-up appointment
-        $followUpAppointment = Appointment::create([
+        Appointment::create([
             'patient_id' => $patient->id,
             'doctor_id' => Auth::id(),
             'appointment_date' => $appointmentTime->format('Y-m-d'),

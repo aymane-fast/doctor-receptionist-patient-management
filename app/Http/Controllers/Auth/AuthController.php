@@ -55,6 +55,10 @@ class AuthController extends Controller
      */
     public function showRegister()
     {
+        if (!Auth::user()?->isDoctor()) {
+            abort(403);
+        }
+
         return view('auth.register');
     }
 
@@ -63,6 +67,10 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+        if (!Auth::user()?->isDoctor()) {
+            abort(403);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -72,7 +80,7 @@ class AuthController extends Controller
             'address' => 'nullable|string',
         ]);
 
-        $user = User::create([
+        User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -81,6 +89,6 @@ class AuthController extends Controller
             'address' => $request->address,
         ]);
 
-        return redirect()->route('login')->with('success', 'User created successfully!');
+        return redirect()->route('dashboard')->with('success', 'User created successfully!');
     }
 }
