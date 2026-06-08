@@ -167,6 +167,14 @@ class AppointmentController extends Controller
 
         $doctor = User::find($doctorId);
         if ($doctor?->usesQueueMode()) {
+            if (!$this->scheduler()->workingWindow($date)) {
+                return response()->json([
+                    'available' => false,
+                    'mode' => 'queue',
+                    'message' => 'No working hours for this day',
+                ]);
+            }
+
             $capacityError = $this->scheduler()->validateQueueCapacity($doctorId, $date);
             if ($capacityError) {
                 return response()->json([
@@ -360,6 +368,8 @@ class AppointmentController extends Controller
     public function update(Request $request, Appointment $appointment)
     {
         $this->authorizeAppointmentAccess($appointment);
+        $previousDoctorId = $appointment->doctor_id;
+        $previousDate = $appointment->appointment_date->toDateString();
 
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
@@ -401,6 +411,7 @@ class AppointmentController extends Controller
         $appointment->update($validated);
 
         if ($appointment->isQueueMode()) {
+            $this->scheduler()->recalculateQueue($previousDoctorId, $previousDate);
             $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
         }
 

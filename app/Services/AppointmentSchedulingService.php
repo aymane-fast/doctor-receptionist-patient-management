@@ -260,7 +260,6 @@ class AppointmentSchedulingService
     {
         return Appointment::where('doctor_id', $doctorId)
             ->whereDate('appointment_date', $date)
-            ->where('appointment_mode', 'scheduled')
             ->whereNotIn('status', ['cancelled', 'completed'])
             ->when($excludeId, fn ($query) => $query->where('id', '!=', $excludeId))
             ->get();
