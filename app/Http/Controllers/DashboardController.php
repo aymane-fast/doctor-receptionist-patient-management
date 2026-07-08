@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
-use App\Models\Prescription;
 
 class DashboardController extends Controller
 {

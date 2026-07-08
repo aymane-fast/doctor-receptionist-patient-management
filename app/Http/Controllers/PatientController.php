@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\Appointment;
-use App\Models\MedicalRecord;
 use App\Models\Setting;
 use App\Services\AppointmentSchedulingService;
 use Carbon\Carbon;
@@ -201,19 +200,22 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
-        $patient->load(['appointments.doctor', 'medicalRecords.doctor', 'prescriptions.doctor']);
-        
-        $recentAppointments = $patient->appointments()
-                                    ->with('doctor')
-                                    ->latest('appointment_date')
-                                    ->take(5)
-                                    ->get();
+        $patient->load([
+            'appointments.doctor',
+            'medicalRecords.doctor',
+            'medicalRecords.prescriptions',
+            'prescriptions.doctor',
+        ]);
 
-        $recentRecords = $patient->medicalRecords()
-                                ->with('doctor')
-                                ->latest('visit_date')
-                                ->take(5)
-                                ->get();
+        $recentAppointments = $patient->appointments
+            ->sortByDesc('appointment_date')
+            ->take(5)
+            ->values();
+
+        $recentRecords = $patient->medicalRecords
+            ->sortByDesc('visit_date')
+            ->take(5)
+            ->values();
 
         return view('patients.show', compact('patient', 'recentAppointments', 'recentRecords'));
     }

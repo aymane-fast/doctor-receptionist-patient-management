@@ -8,17 +8,30 @@ use Illuminate\Support\Facades\Schema;
 
 class Setting extends Model
 {
+    /**
+     * Container binding used to memoize all settings for the current request.
+     */
+    private const CACHE_BINDING = 'app.settings.cache';
+
     protected $fillable = [
         'key',
         'value',
         'type',
         'clinic_name',
-        'clinic_address', 
+        'clinic_address',
         'clinic_phone',
         'clinic_email',
         'clinic_website',
         'clinic_logo'
     ];
+
+    protected static function booted(): void
+    {
+        $flush = static fn () => app()->forgetInstance(self::CACHE_BINDING);
+
+        static::saved($flush);
+        static::deleted($flush);
+    }
 
     /**
      * Get a setting value by key
@@ -29,8 +42,9 @@ class Setting extends Model
             return $default;
         }
 
-        $setting = self::where('key', $key)->first();
-        return $setting ? $setting->value : $default;
+        $settings = self::allCached();
+
+        return array_key_exists($key, $settings) ? $settings[$key] : $default;
     }
 
     /**
@@ -51,6 +65,20 @@ class Setting extends Model
     public static function settingsTableExists(): bool
     {
         return Schema::hasTable('settings');
+    }
+
+    /**
+     * All settings, loaded once per request. Settings are read dozens of
+     * times per request (middleware, working hours, clinic info), so a
+     * single query replaces one query per key.
+     */
+    private static function allCached(): array
+    {
+        if (!app()->bound(self::CACHE_BINDING)) {
+            app()->instance(self::CACHE_BINDING, self::query()->pluck('value', 'key')->all());
+        }
+
+        return app(self::CACHE_BINDING);
     }
 
     /**

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Setting;
-use Illuminate\Support\Facades\Response;
 
 class SettingsController extends Controller
 {

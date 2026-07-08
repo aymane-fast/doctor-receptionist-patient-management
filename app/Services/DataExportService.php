@@ -6,11 +6,8 @@ use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
 use App\Models\Prescription;
-use App\Models\PrescriptionItem;
-use App\Models\Order;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 
 class DataExportService
 {

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Appointment;
-use App\Models\Patient;
 
 class DoctorController extends Controller
 {

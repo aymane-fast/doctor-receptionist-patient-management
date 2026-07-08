@@ -255,6 +255,11 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
+        // Doctors always book for themselves
+        if (Auth::user()->isDoctor()) {
+            $request->merge(['doctor_id' => Auth::id()]);
+        }
+
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'doctor_id' => [
@@ -266,10 +271,6 @@ class AppointmentController extends Controller
             'reason' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
-
-        if (Auth::user()->isDoctor()) {
-            $validated['doctor_id'] = Auth::id();
-        }
 
         $doctor = User::findOrFail($validated['doctor_id']);
         $validated['appointment_mode'] = $doctor->appointment_mode ?? 'scheduled';
@@ -331,7 +332,7 @@ class AppointmentController extends Controller
     {
         $this->authorizeAppointmentAccess($appointment);
 
-        $patients = Patient::all();
+        $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
         $doctors = Auth::user()->isDoctor()
             ? User::where('id', Auth::id())->get()
             : User::where('role', 'doctor')->get();
@@ -348,6 +349,11 @@ class AppointmentController extends Controller
         $previousDoctorId = $appointment->doctor_id;
         $previousDate = $appointment->appointment_date->toDateString();
 
+        // Doctors cannot reassign appointments to someone else
+        if (Auth::user()->isDoctor()) {
+            $request->merge(['doctor_id' => Auth::id()]);
+        }
+
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'doctor_id' => [
@@ -360,10 +366,6 @@ class AppointmentController extends Controller
             'reason' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
-
-        if (Auth::user()->isDoctor()) {
-            $validated['doctor_id'] = Auth::id();
-        }
 
         if ($appointment->isQueueMode()) {
             $validated['appointment_mode'] = 'queue';

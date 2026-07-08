@@ -7,9 +7,7 @@ use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
 use App\Models\MedicalRecord;
-use App\Models\Prescription;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class StatisticsController extends Controller
 {
