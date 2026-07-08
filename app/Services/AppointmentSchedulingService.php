@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentSchedulingService
 {
@@ -137,26 +138,36 @@ class AppointmentSchedulingService
             throw new \InvalidArgumentException('No working hours are configured for this day.');
         }
 
-        $limitError = $this->validateQueueCapacity($data['doctor_id'], $data['appointment_date']);
-        if ($limitError) {
-            throw new \InvalidArgumentException($limitError);
-        }
+        return DB::transaction(function () use ($data) {
+            // Serialize concurrent queue joins for the same doctor/day so two
+            // requests cannot be handed the same queue number.
+            Appointment::where('doctor_id', $data['doctor_id'])
+                ->whereDate('appointment_date', $data['appointment_date'])
+                ->where('appointment_mode', 'queue')
+                ->lockForUpdate()
+                ->count();
 
-        $position = $this->nextQueuePosition($data['doctor_id'], $data['appointment_date']);
-        $estimatedTime = $this->estimatedQueueTime($data['appointment_date'], $position);
+            $limitError = $this->validateQueueCapacity($data['doctor_id'], $data['appointment_date']);
+            if ($limitError) {
+                throw new \InvalidArgumentException($limitError);
+            }
 
-        $appointment = Appointment::create(array_merge($data, [
-            'appointment_mode' => 'queue',
-            'appointment_time' => $estimatedTime->format('H:i:s'),
-            'estimated_time' => $estimatedTime->format('H:i:s'),
-            'queue_number' => $position,
-            'queue_position' => $position,
-            'status' => 'scheduled',
-        ]));
+            $position = $this->nextQueuePosition($data['doctor_id'], $data['appointment_date']);
+            $estimatedTime = $this->estimatedQueueTime($data['appointment_date'], $position);
 
-        $this->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
+            $appointment = Appointment::create(array_merge($data, [
+                'appointment_mode' => 'queue',
+                'appointment_time' => $estimatedTime->format('H:i:s'),
+                'estimated_time' => $estimatedTime->format('H:i:s'),
+                'queue_number' => $position,
+                'queue_position' => $position,
+                'status' => 'scheduled',
+            ]));
 
-        return $appointment->refresh();
+            $this->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
+
+            return $appointment->refresh();
+        });
     }
 
     public function recalculateQueue(int $doctorId, string|Carbon $date): void

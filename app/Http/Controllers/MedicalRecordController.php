@@ -31,20 +31,10 @@ class MedicalRecordController extends Controller
             $query = MedicalRecord::with(['patient', 'doctor', 'appointment'])
                                  ->where('doctor_id', Auth::id());
 
-            // Search by patient information using PatientSearchService
+            // Search by patient information
             if ($request->filled('search')) {
                 $searchTerm = $request->search;
-                $searchResults = PatientSearchService::search($searchTerm);
-                $patientIds = $searchResults->pluck('id')->toArray();
-                
-                if (!empty($patientIds)) {
-                    // Order by the search relevance from PatientSearchService
-                    $query->whereIn('patient_id', $patientIds)
-                          ->orderByRaw('FIELD(patient_id, ' . implode(',', $patientIds) . ')');
-                } else {
-                    // No patients found, return empty results
-                    $query->whereRaw('1 = 0');
-                }
+                $query->whereHas('patient', fn ($q) => $q->search($searchTerm));
             }
 
             // Filter by date

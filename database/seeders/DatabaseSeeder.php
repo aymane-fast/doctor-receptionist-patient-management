@@ -26,6 +26,10 @@ class DatabaseSeeder extends Seeder
             PrescriptionItemSeeder::class, // Creates items for each prescription with pricing
         ]);
 
+        // Seeded databases already have staff accounts; close the public
+        // first-run wizard so it cannot be used to add another owner account.
+        \App\Models\Setting::setSetupComplete(true);
+
         $this->command->info('✅ Medical clinic database seeding completed successfully!');
         $this->command->info('📊 Data created:');
         $this->command->info('   - 2 Users (1 doctor, 1 receptionist)');

@@ -109,7 +109,7 @@ class DataExportService
             'data' => $patients->map(function ($patient) {
                 $lastAppointment = $patient->appointments->first();
                 return [
-                    $patient->patient_id,
+                    $patient->id,
                     $patient->first_name,
                     $patient->last_name,
                     $patient->email ?? '',
@@ -172,7 +172,7 @@ class DataExportService
             'data' => $appointments->map(function ($appointment) {
                 return [
                     $appointment->id,
-                    $appointment->patient->patient_id,
+                    $appointment->patient->id,
                     $appointment->patient->first_name . ' ' . $appointment->patient->last_name,
                     $appointment->doctor->name ?? 'Not assigned',
                     $this->formatDate($appointment->appointment_date),
@@ -223,7 +223,6 @@ class DataExportService
                 'Patient Name',
                 'Doctor Name',
                 'Visit Date',
-                'Visit Type',
                 'Symptoms',
                 'Diagnosis',
                 'Treatment',
@@ -239,11 +238,10 @@ class DataExportService
             'data' => $records->map(function ($record) {
                 return [
                     $record->id,
-                    $record->patient->patient_id,
+                    $record->patient->id,
                     $record->patient->first_name . ' ' . $record->patient->last_name,
                     $record->doctor->name ?? 'Not specified',
                     $this->formatDate($record->visit_date),
-                    ucfirst($record->visit_type ?? 'consultation'),
                     $record->symptoms ?? '',
                     $record->diagnosis ?? '',
                     $record->treatment ?? '',
@@ -290,7 +288,7 @@ class DataExportService
                 foreach ($prescription->items as $item) {
                     $prescriptionData[] = [
                         $prescription->id,
-                        $prescription->patient->patient_id,
+                        $prescription->patient->id,
                         $prescription->patient->first_name . ' ' . $prescription->patient->last_name,
                         $prescription->doctor->name ?? 'Not specified',
                         $this->formatDate($prescription->prescribed_date),
@@ -370,8 +368,7 @@ class DataExportService
                 'Email',
                 'Role',
                 'Email Verified',
-                'Created Date',
-                'Last Login'
+                'Created Date'
             ],
             'data' => $users->map(function ($user) {
                 return [
@@ -380,8 +377,7 @@ class DataExportService
                     $user->email,
                     ucfirst($user->role),
                     $user->email_verified_at ? 'Yes' : 'No',
-                    $user->created_at->format('Y-m-d H:i:s'),
-                    $user->last_login_at ? $user->last_login_at->format('Y-m-d H:i:s') : 'Never'
+                    $user->created_at->format('Y-m-d H:i:s')
                 ];
             })->toArray(),
             'summary' => [
@@ -406,8 +402,10 @@ class DataExportService
         // Export info
         fputcsv($output, ['Export des Données de la Clinique']);
         fputcsv($output, ['Généré le:', $exportResult['info']['generated_at']->format('d/m/Y H:i:s')]);
-        if ($exportResult['info']['date_range']['start']) {
-            fputcsv($output, ['Période:', $exportResult['info']['date_range']['start']->format('d/m/Y') . ' au ' . $exportResult['info']['date_range']['end']->format('d/m/Y')]);
+        $rangeStart = $exportResult['info']['date_range']['start'];
+        $rangeEnd = $exportResult['info']['date_range']['end'];
+        if ($rangeStart || $rangeEnd) {
+            fputcsv($output, ['Période:', ($rangeStart ? $rangeStart->format('d/m/Y') : '...') . ' au ' . ($rangeEnd ? $rangeEnd->format('d/m/Y') : '...')]);
         }
         fputcsv($output, ['Types de données:', implode(', ', $exportResult['info']['data_types'])]);
         fputcsv($output, []);

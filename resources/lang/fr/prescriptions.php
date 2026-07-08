@@ -175,4 +175,5 @@ return [
     'no_prescriptions_for_date' => 'Aucune ordonnance trouvée pour la date sélectionnée.',
     'no_prescriptions_found_desc' => 'Aucune ordonnance trouvée correspondant à vos critères de recherche.',
     'clear_search' => 'Effacer la Recherche',
+    'at_least_one_medication' => 'Une ordonnance doit contenir au moins un médicament.',
 ];

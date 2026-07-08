@@ -17,9 +17,11 @@ class LanguageController extends Controller
             return redirect()->back()->with('error', 'Language not supported');
         }
 
-        // Update the language in settings
-        Setting::setLanguage($language);
-        
+        // Only staff may change the clinic-wide default; guests only switch their session
+        if (auth()->check()) {
+            Setting::setLanguage($language);
+        }
+
         // Update session
         session(['locale' => $language]);
 

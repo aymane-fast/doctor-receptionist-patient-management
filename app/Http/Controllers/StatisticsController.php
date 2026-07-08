@@ -49,17 +49,20 @@ class StatisticsController extends Controller
         // Trend data (last 7 days)
         $trendData = [];
         $trendLabels = [];
+        $dailyCounts = $this->appointmentCountsByDay(Carbon::now()->subDays(6), Carbon::now());
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
             $trendLabels[] = $date->format('M j');
-            $trendData[] = Appointment::whereDate('appointment_date', $date)->count();
+            $trendData[] = $dailyCounts[$date->toDateString()] ?? 0;
         }
-        
+
         // Peak hours analysis
+        $countsByHour = Appointment::query()
+            ->get(['appointment_time'])
+            ->countBy(fn ($appointment) => $appointment->appointment_time?->hour);
         $hourlyDistribution = [];
         for ($hour = 8; $hour <= 17; $hour++) {
-            $count = Appointment::whereRaw('HOUR(appointment_time) = ?', [$hour])->count();
-            $hourlyDistribution[] = $count;
+            $hourlyDistribution[] = $countsByHour[$hour] ?? 0;
         }
         
         // Age groups - Fixed calculation
@@ -72,7 +75,7 @@ class StatisticsController extends Controller
         ];
         
         // Get all patients with valid birth dates
-        $patients = Patient::whereNotNull('birth_date')->get();
+        $patients = Patient::whereNotNull('birth_date')->get(['birth_date']);
         
         foreach ($patients as $patient) {
             try {
@@ -103,23 +106,24 @@ class StatisticsController extends Controller
         }
         
         // Revenue calculations
-        $consultationPrice = \App\Models\Setting::where('key', 'consultation_price')->first();
-        $pricePerConsultation = $consultationPrice ? (float) $consultationPrice->value : 50.0; // Default 50 if not set
-        
+        $pricePerConsultation = (float) \App\Models\Setting::get('consultation_price', 50.0);
+
         // Monthly revenue for the last 12 months
         $monthlyRevenue = [];
         $monthlyLabels = [];
-        
+
+        $completedByMonth = Appointment::where('status', 'completed')
+            ->whereBetween('appointment_date', [
+                Carbon::now()->subMonths(11)->startOfMonth()->toDateString(),
+                Carbon::now()->endOfMonth()->toDateString(),
+            ])
+            ->get(['appointment_date'])
+            ->countBy(fn ($appointment) => $appointment->appointment_date->format('Y-m'));
+
         for ($i = 11; $i >= 0; $i--) {
             $month = Carbon::now()->subMonths($i);
             $monthlyLabels[] = $month->format('M Y');
-            
-            $completedAppointmentsCount = Appointment::where('status', 'completed')
-                ->whereYear('appointment_date', $month->year)
-                ->whereMonth('appointment_date', $month->month)
-                ->count();
-                
-            $monthlyRevenue[] = $completedAppointmentsCount * $pricePerConsultation;
+            $monthlyRevenue[] = ($completedByMonth[$month->format('Y-m')] ?? 0) * $pricePerConsultation;
         }
         
         // Total revenue calculations
@@ -149,6 +153,7 @@ class StatisticsController extends Controller
                 'title' => 'New Appointment Scheduled',
                 'description' => "Appointment for {$appointment->patient->first_name} {$appointment->patient->last_name} with Dr. {$appointment->doctor->name}",
                 'time' => $appointment->created_at->diffForHumans(),
+                'timestamp' => $appointment->created_at,
                 'icon' => 'fas fa-calendar-plus',
                 'color' => 'from-blue-500 to-blue-600'
             ];
@@ -161,6 +166,7 @@ class StatisticsController extends Controller
                 'title' => 'New Patient Registered',
                 'description' => "{$patient->first_name} {$patient->last_name} joined the clinic",
                 'time' => $patient->created_at->diffForHumans(),
+                'timestamp' => $patient->created_at,
                 'icon' => 'fas fa-user-plus',
                 'color' => 'from-green-500 to-green-600'
             ];
@@ -177,16 +183,15 @@ class StatisticsController extends Controller
                 'title' => 'Medical Record Created',
                 'description' => "New record for {$record->patient->first_name} {$record->patient->last_name}",
                 'time' => $record->created_at->diffForHumans(),
+                'timestamp' => $record->created_at,
                 'icon' => 'fas fa-file-medical',
                 'color' => 'from-purple-500 to-purple-600'
             ];
         }
-        
-        // Sort activities by time
-        usort($recentActivities, function($a, $b) {
-            return strtotime($b['time']) - strtotime($a['time']);
-        });
-        
+
+        // Sort activities newest first
+        usort($recentActivities, fn ($a, $b) => $b['timestamp'] <=> $a['timestamp']);
+
         $recentActivities = array_slice($recentActivities, 0, 10);
         
         // Top patients (most visits)
@@ -256,13 +261,14 @@ class StatisticsController extends Controller
     {
         $data = [];
         $labels = [];
-        
+        $counts = $this->appointmentCountsByDay(Carbon::now()->subDays(6), Carbon::now());
+
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
             $labels[] = $date->format('D j');  // Mon 1
-            $data[] = Appointment::whereDate('appointment_date', $date)->count();
+            $data[] = $counts[$date->toDateString()] ?? 0;
         }
-        
+
         return response()->json(['labels' => $labels, 'data' => $data]);
     }
 
@@ -271,13 +277,14 @@ class StatisticsController extends Controller
         $data = [];
         $labels = [];
         $daysInMonth = Carbon::now()->daysInMonth;
-        
+        $counts = $this->appointmentCountsByDay(Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth());
+
         for ($day = 1; $day <= $daysInMonth; $day++) {
             $date = Carbon::now()->startOfMonth()->addDays($day - 1);
             $labels[] = $date->format('j');  // Day number
-            $data[] = Appointment::whereDate('appointment_date', $date)->count();
+            $data[] = $counts[$date->toDateString()] ?? 0;
         }
-        
+
         return response()->json(['labels' => $labels, 'data' => $data]);
     }
 
@@ -285,16 +292,30 @@ class StatisticsController extends Controller
     {
         $data = [];
         $labels = [];
-        
+
+        $countsByMonth = Appointment::whereBetween('appointment_date', [
+                Carbon::now()->subMonths(11)->startOfMonth()->toDateString(),
+                Carbon::now()->endOfMonth()->toDateString(),
+            ])
+            ->get(['appointment_date'])
+            ->countBy(fn ($appointment) => $appointment->appointment_date->format('Y-m'));
+
         for ($i = 11; $i >= 0; $i--) {
             $month = Carbon::now()->subMonths($i);
             $labels[] = $month->format('M Y');  // Jan 2025
-            $monthCount = Appointment::whereYear('appointment_date', $month->year)
-                                   ->whereMonth('appointment_date', $month->month)
-                                   ->count();
-            $data[] = $monthCount;
+            $data[] = $countsByMonth[$month->format('Y-m')] ?? 0;
         }
-        
+
         return response()->json(['labels' => $labels, 'data' => $data]);
+    }
+
+    /**
+     * Count appointments per day within the given date range (inclusive).
+     */
+    private function appointmentCountsByDay(Carbon $start, Carbon $end)
+    {
+        return Appointment::whereBetween('appointment_date', [$start->toDateString(), $end->toDateString()])
+            ->get(['appointment_date'])
+            ->countBy(fn ($appointment) => $appointment->appointment_date->toDateString());
     }
 }

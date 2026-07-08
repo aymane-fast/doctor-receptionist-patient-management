@@ -191,20 +191,17 @@ class AIService
      */
     private static function callGroqAPI(string $prompt): string
     {
-        $apiKey = env('GROQ_API_KEY');
-        
+        $apiKey = config('services.groq.api_key');
+
         if (empty($apiKey)) {
             throw new \Exception('GROQ_API_KEY not configured in .env file');
         }
-        
+
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $apiKey,
             'Content-Type' => 'application/json',
-        ])->withOptions([
-            'verify' => false, // Disable SSL verification for local development
         ])->timeout(30)->post('https://api.groq.com/openai/v1/chat/completions', [
-            'model' => 'llama-3.3-70b-versatile', // Updated model (Jan 2026)
-
+            'model' => config('services.groq.model'),
             'messages' => [
                 [
                     'role' => 'system',

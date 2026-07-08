@@ -27,20 +27,10 @@ class PrescriptionController extends Controller
             $query = Prescription::with(['patient', 'doctor', 'medicalRecord'])
                 ->where('doctor_id', Auth::id());
 
-            // Search by patient information using PatientSearchService
+            // Search by patient information
             if ($request->filled('search')) {
                 $searchTerm = $request->search;
-                $searchResults = PatientSearchService::search($searchTerm);
-                $patientIds = $searchResults->pluck('id')->toArray();
-                
-                if (!empty($patientIds)) {
-                    // Order by the search relevance from PatientSearchService
-                    $query->whereIn('patient_id', $patientIds)
-                          ->orderByRaw('FIELD(patient_id, ' . implode(',', $patientIds) . ')');
-                } else {
-                    // No patients found, return empty results
-                    $query->whereRaw('1 = 0');
-                }
+                $query->whereHas('patient', fn ($q) => $q->search($searchTerm));
             }
 
             // Filter by prescribed date
@@ -127,33 +117,40 @@ class PrescriptionController extends Controller
             $validated['patient_id'] = $medicalRecord->patient_id;
         }
 
-        $prescription = Prescription::create([
-            'patient_id' => $validated['patient_id'],
-            'doctor_id' => Auth::id(),
-            'medical_record_id' => $validated['medical_record_id'] ?? null,
-            'prescribed_date' => $validated['prescribed_date'],
-            // legacy columns required by current schema
-            'medication_name' => 'Multiple medications',
-            'dosage' => '-',
-            'frequency' => '-',
-            'duration_days' => 0,
-            'instructions' => null,
-            'notes' => $validated['notes'] ?? null,
-        ]);
+        $prescription = \DB::transaction(function () use ($validated) {
+            $prescription = Prescription::create([
+                'patient_id' => $validated['patient_id'],
+                'doctor_id' => Auth::id(),
+                'medical_record_id' => $validated['medical_record_id'] ?? null,
+                'prescribed_date' => $validated['prescribed_date'],
+                'notes' => $validated['notes'] ?? null,
+            ]);
 
-        // Create prescription items
-        foreach ($validated['items'] as $item) {
+            $this->syncItems($prescription, $validated['items']);
+
+            return $prescription;
+        });
+
+        return redirect()->route('prescriptions.show', $prescription)
+            ->with('success', 'Prescription created successfully!');
+    }
+
+    /**
+     * Replace the prescription's medication items with the submitted set.
+     */
+    private function syncItems(Prescription $prescription, array $items): void
+    {
+        $prescription->items()->delete();
+
+        foreach ($items as $item) {
             $prescription->items()->create([
                 'medication_name' => $item['medication_name'],
-                'dosage' => $item['dosage'], 
+                'dosage' => $item['dosage'],
                 'frequency' => $item['frequency'],
                 'duration_days' => $item['duration_days'] ?? null,
                 'instructions' => $item['instructions'] ?? null,
             ]);
         }
-
-        return redirect()->route('prescriptions.show', $prescription)
-            ->with('success', 'Prescription created successfully!');
     }
 
     public function show(Prescription $prescription)
@@ -200,12 +197,13 @@ class PrescriptionController extends Controller
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'medical_record_id' => 'nullable|exists:medical_records,id',
-            'medication_name' => 'required|string|max:255',
-            'dosage' => 'required|string|max:255',
-            'frequency' => 'required|string|max:255',
-            'duration_days' => 'required|integer|min:1',
-            'instructions' => 'required|string',
             'prescribed_date' => 'required|date|before_or_equal:today',
+            'items' => 'required|array|min:1',
+            'items.*.medication_name' => 'required|string|max:255',
+            'items.*.dosage' => 'required|string|max:255',
+            'items.*.frequency' => 'required|string|max:255',
+            'items.*.duration_days' => 'nullable|integer|min:1',
+            'items.*.instructions' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
 
@@ -217,7 +215,22 @@ class PrescriptionController extends Controller
             $validated['patient_id'] = $medicalRecord->patient_id;
         }
 
-        $prescription->update($validated);
+        \DB::transaction(function () use ($prescription, $validated) {
+            $prescription->update([
+                'patient_id' => $validated['patient_id'],
+                'medical_record_id' => $validated['medical_record_id'] ?? null,
+                'prescribed_date' => $validated['prescribed_date'],
+                'notes' => $validated['notes'] ?? null,
+                // Clear legacy single-medication columns now that items are authoritative.
+                'medication_name' => null,
+                'dosage' => null,
+                'frequency' => null,
+                'duration_days' => null,
+                'instructions' => null,
+            ]);
+
+            $this->syncItems($prescription, $validated['items']);
+        });
 
         return redirect()->route('prescriptions.show', $prescription)
             ->with('success', 'Prescription updated successfully!');

@@ -175,4 +175,5 @@ return [
     'no_prescriptions_for_date' => 'No prescriptions found for the selected date.',
     'no_prescriptions_found_desc' => 'No prescriptions found matching your search criteria.',
     'clear_search' => 'Clear Search',
+    'at_least_one_medication' => 'A prescription must contain at least one medication.',
 ];

@@ -68,8 +68,9 @@ class SetupService
             $working = !empty($data["{$day}_working"]);
 
             Setting::set("{$day}_working", $working ? '1' : '0', 'boolean');
-            Setting::set("{$day}_start", $data["{$day}_start"], 'time');
-            Setting::set("{$day}_end", $data["{$day}_end"], 'time');
+            // Times are only validated (and may be omitted) for non-working days.
+            Setting::set("{$day}_start", $data["{$day}_start"] ?? '09:00', 'time');
+            Setting::set("{$day}_end", $data["{$day}_end"] ?? '17:00', 'time');
         }
     }
 

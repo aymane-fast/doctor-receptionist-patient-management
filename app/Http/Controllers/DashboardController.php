@@ -38,14 +38,7 @@ class DashboardController extends Controller
         // Apply appointment filters
         if (request('patient_search')) {
             $searchTerm = request('patient_search');
-            $todayAppointmentsQuery->whereHas('patient', function($query) use ($searchTerm) {
-                $query->where('first_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('id_card_number', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('email', 'like', '%' . $searchTerm . '%')
-                      ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
-            });
+            $todayAppointmentsQuery->whereHas('patient', fn ($query) => $query->search($searchTerm));
         }
 
         if (request('status_filter')) {
@@ -75,14 +68,7 @@ class DashboardController extends Controller
         // Apply medical records filters
         if (request('record_patient_search')) {
             $searchTerm = request('record_patient_search');
-            $recentRecordsQuery->whereHas('patient', function($query) use ($searchTerm) {
-                $query->where('first_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('id_card_number', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('email', 'like', '%' . $searchTerm . '%')
-                      ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
-            });
+            $recentRecordsQuery->whereHas('patient', fn ($query) => $query->search($searchTerm));
         }
 
         if (request('record_date_from')) {
@@ -140,14 +126,7 @@ class DashboardController extends Controller
         // Apply appointment filters
         if (request('patient_search')) {
             $searchTerm = request('patient_search');
-            $todayAppointmentsQuery->whereHas('patient', function($query) use ($searchTerm) {
-                $query->where('first_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('id_card_number', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('email', 'like', '%' . $searchTerm . '%')
-                      ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
-            });
+            $todayAppointmentsQuery->whereHas('patient', fn ($query) => $query->search($searchTerm));
         }
 
         if (request('doctor_filter')) {
@@ -180,23 +159,16 @@ class DashboardController extends Controller
 
         // Apply patient filters
         if (request('patient_name_search')) {
-            $searchTerm = request('patient_name_search');
-            $recentPatientsQuery->where(function($query) use ($searchTerm) {
-                $query->where('first_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('phone', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('id_card_number', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('email', 'like', '%' . $searchTerm . '%')
-                      ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ['%' . $searchTerm . '%']);
-            });
+            $recentPatientsQuery->search(request('patient_name_search'));
         }
 
-        if (request('age_from')) {
-            $recentPatientsQuery->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) >= ?', [request('age_from')]);
+        // Age X means born at most X years (and at most X+1 years minus a day) ago.
+        if (is_numeric(request('age_from'))) {
+            $recentPatientsQuery->whereDate('birth_date', '<=', now()->subYears((int) request('age_from'))->toDateString());
         }
 
-        if (request('age_to')) {
-            $recentPatientsQuery->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) <= ?', [request('age_to')]);
+        if (is_numeric(request('age_to'))) {
+            $recentPatientsQuery->whereDate('birth_date', '>', now()->subYears((int) request('age_to') + 1)->toDateString());
         }
 
         if (request('reg_date_from')) {
@@ -242,6 +214,10 @@ class DashboardController extends Controller
      */
     public function initializeFirstPatient(Request $request)
     {
+        $request->validate([
+            'doctor_id' => 'nullable|exists:users,id',
+        ]);
+
         $doctorId = $request->doctor_id ?: Auth::id();
 
         // Only receptionists can initialize for other doctors
