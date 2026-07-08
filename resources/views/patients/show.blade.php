@@ -39,8 +39,8 @@
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $patient->full_name }}</h1>
                     <div class="flex items-center space-x-4 mb-2">
                         <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">ID: {{ $patient->id_card_number }}</span>
-                        <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold">{{ $patient->age }} years old</span>
-                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">{{ ucfirst($patient->gender) }}</span>
+                        <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold">{{ $patient->age !== null ? $patient->age . ' years old' : 'Age unknown' }}</span>
+                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">{{ $patient->gender ? ucfirst($patient->gender) : '—' }}</span>
                     </div>
                     <div class="flex items-center space-x-4 text-gray-600">
                         <span class="flex items-center space-x-2">
@@ -191,7 +191,7 @@
                     </div>
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('patients.birth_date') }}</span>
-                        <span class="font-semibold text-gray-900">{{ $patient->birth_date->format('M d, Y') }}</span>
+                        <span class="font-semibold text-gray-900">{{ $patient->birth_date?->format('M d, Y') ?? 'Not provided' }}</span>
                     </div>
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('patients.id_card') }}</span>

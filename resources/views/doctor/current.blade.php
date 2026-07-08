@@ -64,13 +64,13 @@
                     <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
                         <div class="flex items-center space-x-2">
                             <i class="fas fa-birthday-cake text-amber-600 text-sm"></i>
-                            <span class="text-amber-800 font-medium text-sm">{{ $patient->age }} {{ __('current_patient.years') }}</span>
+                            <span class="text-amber-800 font-medium text-sm">{{ $patient->age !== null ? $patient->age . ' ' . __('current_patient.years') : '—' }}</span>
                         </div>
                     </div>
                     <div class="bg-purple-50 rounded-xl p-3 border border-purple-200">
                         <div class="flex items-center space-x-2">
                             <i class="fas fa-venus-mars text-purple-600 text-sm"></i>
-                            <span class="text-purple-800 font-medium text-sm">{{ ucfirst($patient->gender) }}</span>
+                            <span class="text-purple-800 font-medium text-sm">{{ $patient->gender ? ucfirst($patient->gender) : '—' }}</span>
                         </div>
                     </div>
                 </div>

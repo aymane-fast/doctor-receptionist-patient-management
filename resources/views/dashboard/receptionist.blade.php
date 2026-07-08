@@ -422,7 +422,7 @@
                                         <p class="text-sm text-gray-500 flex items-center space-x-3">
                                             <span>{{ $patient->id_card_number }}</span>
                                             <span>•</span>
-                                            <span>{{ __('dashboard.age') }}: {{ $patient->age }}</span>
+                                            <span>{{ __('dashboard.age') }}: {{ $patient->age ?? '—' }}</span>
                                         </p>
                                     </div>
                                 </div>

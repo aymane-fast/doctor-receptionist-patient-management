@@ -89,7 +89,7 @@
                         <input type="date" 
                                id="birth_date" 
                                name="birth_date" 
-                               value="{{ old('birth_date', $patient->birth_date->format('Y-m-d')) }}"
+                               value="{{ old('birth_date', $patient->birth_date?->format('Y-m-d')) }}"
                                required 
                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('birth_date') border-red-500 @enderror">
                         @error('birth_date')

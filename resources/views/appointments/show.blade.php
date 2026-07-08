@@ -68,7 +68,7 @@
                                 @endif
                                 <span class="flex items-center space-x-1">
                                     <i class="fas fa-birthday-cake text-sm"></i>
-                                    <span>{{ $appointment->patient->age }} years old</span>
+                                    <span>{{ $appointment->patient->age !== null ? $appointment->patient->age . ' years old' : 'Age unknown' }}</span>
                                 </span>
                             </div>
                         </div>

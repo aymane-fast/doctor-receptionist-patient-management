@@ -23,6 +23,17 @@ it('creates a patient with only the required fields', function () {
     $response->assertRedirect(route('patients.show', $patient));
 });
 
+it('renders profile and edit pages for a patient without birth date or gender', function () {
+    $receptionist = User::factory()->receptionist()->create();
+    $patient = Patient::factory()->create([
+        'birth_date' => null,
+        'gender' => null,
+    ]);
+
+    $this->actingAs($receptionist)->get(route('patients.show', $patient))->assertOk();
+    $this->actingAs($receptionist)->get(route('patients.edit', $patient))->assertOk();
+});
+
 it('rejects duplicate ID card numbers', function () {
     $receptionist = User::factory()->receptionist()->create();
     Patient::factory()->create(['id_card_number' => 'DUP001']);

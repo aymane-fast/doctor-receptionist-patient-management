@@ -120,13 +120,13 @@
                                     <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
                                         <i class="fas fa-birthday-cake text-amber-600 text-xs"></i>
                                     </div>
-                                    <span class="font-medium">{{ $patient->age }} {{ __('patients.years') }}</span>
+                                    <span class="font-medium">{{ $patient->age !== null ? $patient->age . ' ' . __('patients.years') : '—' }}</span>
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
                                     <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
                                         <i class="fas fa-venus-mars text-purple-600 text-xs"></i>
                                     </div>
-                                    <span class="font-medium">{{ ucfirst($patient->gender) }}</span>
+                                    <span class="font-medium">{{ $patient->gender ? ucfirst($patient->gender) : '—' }}</span>
                                 </div>
                             </div>
                             

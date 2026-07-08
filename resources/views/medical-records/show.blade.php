@@ -55,8 +55,8 @@
                         <div class="flex-1">
                             <div class="flex items-center gap-4 mb-1">
                                 <h3 class="text-xl font-bold text-gray-900">{{ $medicalRecord->patient->first_name }} {{ $medicalRecord->patient->last_name }}</h3>
-                                <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-sm font-semibold">{{ $medicalRecord->patient->age }}y</span>
-                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm font-semibold">{{ ucfirst($medicalRecord->patient->gender) }}</span>
+                                <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-sm font-semibold">{{ $medicalRecord->patient->age !== null ? $medicalRecord->patient->age . 'y' : '—' }}</span>
+                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm font-semibold">{{ $medicalRecord->patient->gender ? ucfirst($medicalRecord->patient->gender) : '—' }}</span>
                             </div>
                             <p class="text-gray-600">{{ $medicalRecord->patient->phone }} • {{ $medicalRecord->patient->email }}</p>
                         </div>

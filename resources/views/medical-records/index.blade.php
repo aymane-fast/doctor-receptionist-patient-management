@@ -105,7 +105,7 @@
                                         <i class="fas fa-id-card w-3"></i>
                                         <span>{{ $record->patient->id_card_number }}</span>
                                         <span class="text-gray-400">•</span>
-                                        <span>{{ $record->patient->age }} years</span>
+                                        <span>{{ $record->patient->age !== null ? $record->patient->age . ' years' : '—' }}</span>
                                     </p>
                                 </div>
                             </div>
