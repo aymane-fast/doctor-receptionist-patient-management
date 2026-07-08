@@ -16,13 +16,14 @@ use Illuminate\Support\Facades\Schema;
 
 pest()->extend(Tests\TestCase::class)
     ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->beforeEach(function () {
+        // Most feature tests exercise a fully set-up clinic; individual tests
+        // may flip this back off to exercise the first-run wizard.
+        if (Schema::hasTable('settings')) {
+            Setting::setSetupComplete(true);
+        }
+    })
     ->in('Feature');
-
-beforeEach(function () {
-    if (Schema::hasTable('settings')) {
-        Setting::setSetupComplete(true);
-    }
-});
 
 /*
 |--------------------------------------------------------------------------

@@ -29,6 +29,8 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => 'receptionist',
+            'appointment_mode' => 'scheduled',
         ];
     }
 
@@ -39,6 +41,28 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function doctor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'doctor',
+        ]);
+    }
+
+    public function receptionist(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'receptionist',
+        ]);
+    }
+
+    public function queueMode(?int $dailyLimit = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'appointment_mode' => 'queue',
+            'queue_daily_limit' => $dailyLimit,
         ]);
     }
 }
