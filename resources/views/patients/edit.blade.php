@@ -300,14 +300,16 @@
             <!-- Submit Section -->
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-8 rounded-b-3xl">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                    <!-- Delete Button -->
+                    <!-- Delete Button (doctors only — deletion removes the medical history) -->
                     <div>
-                        <button type="button" 
-                                onclick="document.getElementById('delete-form').submit()"
-                                class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 group">
-                            <i class="fas fa-trash group-hover:scale-110 transition-transform"></i>
-                            <span>{{ __('patients.delete_patient') }}</span>
-                        </button>
+                        @if(auth()->user()->isDoctor())
+                            <button type="button"
+                                    onclick="document.getElementById('delete-form').submit()"
+                                    class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 group">
+                                <i class="fas fa-trash group-hover:scale-110 transition-transform"></i>
+                                <span>{{ __('patients.delete_patient') }}</span>
+                            </button>
+                        @endif
                     </div>
                     
                     <!-- Action Buttons -->
@@ -325,23 +327,28 @@
         </form>
     </div>
 
-    <!-- Hidden Delete Form -->
-    <form id="delete-form" method="POST" action="{{ route('patients.destroy', $patient) }}" class="hidden">
-        @csrf
-        @method('DELETE')
-    </form>
+    @if(auth()->user()->isDoctor())
+        <!-- Hidden Delete Form -->
+        <form id="delete-form" method="POST" action="{{ route('patients.destroy', $patient) }}" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endif
 </div>
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Add confirmation dialog for delete action
-    document.querySelector('button[onclick*="delete-form"]').addEventListener('click', function(e) {
-        e.preventDefault();
-        if (confirm('{{ __('patients.delete_confirmation') }}')) {
-            document.getElementById('delete-form').submit();
-        }
-    });
+    const deleteButton = document.querySelector('button[onclick*="delete-form"]');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('{{ __('patients.delete_confirmation') }}')) {
+                document.getElementById('delete-form').submit();
+            }
+        });
+    }
 });
 </script>
 @endpush

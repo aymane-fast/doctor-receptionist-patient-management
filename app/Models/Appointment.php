@@ -64,12 +64,12 @@ class Appointment extends Model
     }
 
     /**
-     * Scope for upcoming appointments
+     * Scope for upcoming appointments (still awaiting the patient)
      */
     public function scopeUpcoming($query)
     {
         return $query->where('appointment_date', '>=', today())
-                    ->where('status', '!=', 'cancelled');
+                    ->whereNotIn('status', ['cancelled', 'completed']);
     }
 
     public function isQueueMode(): bool

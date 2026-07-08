@@ -114,8 +114,8 @@ class PatientController extends Controller
     {
         // Get the authenticated user - if not a doctor, get the first available doctor
         $user = auth()->user();
-        $doctor = $user->role === 'doctor' ? $user : \App\Models\User::where('role', 'doctor')->first();
-        
+        $doctor = $user->isDoctor() ? $user : \App\Models\User::where('role', 'doctor')->first();
+
         if (!$doctor) {
             return [
                 'success' => false,
@@ -123,9 +123,11 @@ class PatientController extends Controller
             ];
         }
 
+        $scheduler = app(AppointmentSchedulingService::class);
+
         if ($doctor->usesQueueMode()) {
             try {
-                app(AppointmentSchedulingService::class)->createQueueAppointment([
+                $scheduler->createQueueAppointment([
                     'patient_id' => $patient->id,
                     'doctor_id' => $doctor->id,
                     'appointment_date' => $request->appointment_date ?? Carbon::now()->format('Y-m-d'),
@@ -141,93 +143,37 @@ class PatientController extends Controller
 
             return ['success' => true];
         }
-        
-        // Use submitted date and time, or calculate automatically
+
+        // Use submitted date and time, or find the next open slot automatically
         $appointmentDate = $request->appointment_date ?? Carbon::now()->format('Y-m-d');
         $appointmentTime = $request->appointment_time;
-        
-        // If no time provided, calculate it automatically
-        $appointmentDuration = Setting::getAppointmentDuration();
 
         if (!$appointmentTime) {
-            $currentTime = Carbon::now();
-            
-            // Get working hours for the appointment date
-            $dayName = strtolower(Carbon::parse($appointmentDate)->format('l'));
-            $workingHours = Setting::getWorkingHours($dayName);
-            
-            if (!$workingHours['is_working']) {
+            $slot = $scheduler->nextAvailableSlot($doctor->id, $appointmentDate);
+
+            if (!$slot) {
                 return [
                     'success' => false,
-                    'message' => 'Cannot book appointment - closed on ' . ucfirst($dayName) . '.'
+                    'message' => 'No available slots remain within working hours for this day.'
                 ];
             }
-            
-            // Find the last appointment for this doctor on the selected date
-            $lastAppointment = Appointment::where('doctor_id', $doctor->id)
-                                         ->whereDate('appointment_date', $appointmentDate)
-                                         ->orderBy('appointment_time', 'desc')
-                                         ->first();
-            
-            // Calculate next available time slot
-            if ($lastAppointment) {
-                $nextTime = Carbon::parse($appointmentDate . ' ' . $lastAppointment->appointment_time)
-                    ->addMinutes($appointmentDuration);
-            } else {
-                // Start from current time or working start time, whichever is later
-                $workingStart = Carbon::parse($appointmentDate . ' ' . $workingHours['start_time']);
-                $nextTime = $currentTime->gt($workingStart) ? $currentTime->copy()->addMinutes(15) : $workingStart;
-            }
-            
-            // Check if appointment would be within working hours
-            $workingEnd = Carbon::parse($appointmentDate . ' ' . $workingHours['end_time']);
-            $appointmentEnd = $nextTime->copy()->addMinutes($appointmentDuration);
-            
-            if ($appointmentEnd->gt($workingEnd)) {
-                return [
-                    'success' => false,
-                    'message' => 'Cannot book appointment - would extend past working hours. Working hours are ' . 
-                               $workingHours['start_time'] . ' - ' . $workingHours['end_time'] . '.'
-                ];
-            }
-            
-            $appointmentTime = $nextTime->format('H:i');
+
+            $appointmentTime = $slot['time'];
         } else {
-            // Validate the submitted time is within working hours
-            $dayName = strtolower(Carbon::parse($appointmentDate)->format('l'));
-            $workingHours = Setting::getWorkingHours($dayName);
-            
-            if (!$workingHours['is_working']) {
+            $workingHoursError = $scheduler->validateScheduledTime($appointmentDate, $appointmentTime);
+            if ($workingHoursError) {
                 return [
                     'success' => false,
-                    'message' => 'Cannot book appointment - closed on ' . ucfirst($dayName) . '.'
+                    'message' => $workingHoursError,
                 ];
             }
-            
-            $submittedTime = Carbon::parse($appointmentDate . ' ' . $appointmentTime);
-            $workingStart = Carbon::parse($appointmentDate . ' ' . $workingHours['start_time']);
-            $workingEnd = Carbon::parse($appointmentDate . ' ' . $workingHours['end_time']);
-            
-            if ($submittedTime->lt($workingStart) || $submittedTime->copy()->addMinutes($appointmentDuration)->gt($workingEnd)) {
+
+            if ($scheduler->hasScheduledConflict($doctor->id, $appointmentDate, $appointmentTime)) {
                 return [
                     'success' => false,
-                    'message' => 'Selected time is outside working hours (' . 
-                               $workingHours['start_time'] . ' - ' . $workingHours['end_time'] . ').'
+                    'message' => 'Doctor already has an appointment at this time.'
                 ];
             }
-        }
-
-        $hasConflict = Appointment::where('doctor_id', $doctor->id)
-            ->whereDate('appointment_date', $appointmentDate)
-            ->whereTime('appointment_time', Carbon::parse($appointmentTime)->format('H:i:s'))
-            ->whereNotIn('status', ['cancelled', 'completed'])
-            ->exists();
-
-        if ($hasConflict) {
-            return [
-                'success' => false,
-                'message' => 'Doctor already has an appointment at this time.'
-            ];
         }
 
         $priority = $request->appointment_priority ?: 'normal';
@@ -311,6 +257,12 @@ class PatientController extends Controller
      */
     public function destroy(Patient $patient)
     {
+        // Deleting a patient cascades to appointments, medical records and
+        // prescriptions — restrict this to doctors.
+        if (!auth()->user()->isDoctor()) {
+            abort(403, 'Only doctors can delete patient records.');
+        }
+
         $patient->delete();
 
         return redirect()->route('patients.index')

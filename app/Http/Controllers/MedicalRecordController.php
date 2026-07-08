@@ -112,7 +112,7 @@ class MedicalRecordController extends Controller
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'appointment_id' => 'nullable|exists:appointments,id',
-            'visit_date' => 'required|date',
+            'visit_date' => 'required|date|before_or_equal:today',
             'symptoms' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'treatment' => 'nullable|string',
@@ -186,7 +186,7 @@ class MedicalRecordController extends Controller
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'appointment_id' => 'nullable|exists:appointments,id',
-            'visit_date' => 'required|date',
+            'visit_date' => 'required|date|before_or_equal:today',
             'symptoms' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'treatment' => 'nullable|string',
