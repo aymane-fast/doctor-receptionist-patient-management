@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class Setting extends Model
 {
@@ -24,6 +25,10 @@ class Setting extends Model
      */
     public static function get($key, $default = null)
     {
+        if (!self::settingsTableExists()) {
+            return $default;
+        }
+
         $setting = self::where('key', $key)->first();
         return $setting ? $setting->value : $default;
     }
@@ -33,10 +38,19 @@ class Setting extends Model
      */
     public static function set($key, $value, $type = 'string')
     {
+        if (!self::settingsTableExists()) {
+            return null;
+        }
+
         return self::updateOrCreate(
             ['key' => $key],
             ['value' => $value, 'type' => $type]
         );
+    }
+
+    public static function settingsTableExists(): bool
+    {
+        return Schema::hasTable('settings');
     }
 
     /**
@@ -85,23 +99,37 @@ class Setting extends Model
     public static function getNextWorkingTime()
     {
         $current = Carbon::now();
-        
-        // Check today first
+
         if (self::isWithinWorkingHours($current)) {
             return $current;
         }
-        
-        // Look for next working day within 7 days
+
+        // Return the next future opening, never a time that has already passed.
         for ($i = 0; $i < 7; $i++) {
             $testDate = $current->copy()->addDays($i);
             $day = strtolower($testDate->format('l'));
             $workingHours = self::getWorkingHours($day);
-            
-            if ($workingHours['is_working']) {
-                return $testDate->setTimeFromTimeString($workingHours['start_time']);
+
+            if (!$workingHours['is_working']) {
+                continue;
+            }
+
+            $openingTime = $testDate->copy()->setTimeFromTimeString($workingHours['start_time']);
+            $closingTime = $testDate->copy()->setTimeFromTimeString($workingHours['end_time']);
+
+            if ($current->lt($openingTime)) {
+                return $openingTime;
+            }
+
+            if ($current->betweenIncluded($openingTime, $closingTime)) {
+                return $current;
+            }
+
+            if ($current->gt($closingTime)) {
+                continue;
             }
         }
-        
+
         return null; // No working day found in next 7 days
     }
 
@@ -214,5 +242,34 @@ class Setting extends Model
     public static function setAppointmentDuration($minutes)
     {
         self::set('appointment_duration', (int) $minutes);
+    }
+
+    public static function isSetupComplete(): bool
+    {
+        return filter_var(self::get('setup_complete', false), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    public static function setSetupComplete(bool $complete): void
+    {
+        self::set('setup_complete', $complete ? '1' : '0', 'boolean');
+    }
+
+    public static function getDeploymentMode(): string
+    {
+        return self::get('deployment_mode', 'production');
+    }
+
+    public static function getDefaultAppointmentMode(): string
+    {
+        $mode = self::get('default_appointment_mode', 'scheduled');
+
+        return in_array($mode, ['scheduled', 'queue'], true) ? $mode : 'scheduled';
+    }
+
+    public static function getDefaultQueueDailyLimit(): ?int
+    {
+        $value = self::get('default_queue_daily_limit');
+
+        return $value === null || $value === '' ? null : (int) $value;
     }
 }

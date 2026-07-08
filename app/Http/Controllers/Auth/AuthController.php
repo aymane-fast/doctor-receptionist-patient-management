@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Setting;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -85,6 +86,12 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'appointment_mode' => $request->role === 'doctor'
+                ? Setting::getDefaultAppointmentMode()
+                : 'scheduled',
+            'queue_daily_limit' => $request->role === 'doctor' && Setting::getDefaultAppointmentMode() === 'queue'
+                ? Setting::getDefaultQueueDailyLimit()
+                : null,
             'phone' => $request->phone,
             'address' => $request->address,
         ]);

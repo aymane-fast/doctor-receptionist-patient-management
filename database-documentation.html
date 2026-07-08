@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation de la base de données</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --panel: #ffffff;
+            --panel-soft: #f8fafc;
+            --border: #d9e2ec;
+            --text: #102033;
+            --muted: #5b6b7f;
+            --primary: #0f766e;
+            --primary-soft: #e6fffb;
+            --accent: #1d4ed8;
+            --accent-soft: #eff6ff;
+            --warning: #b45309;
+            --warning-soft: #fff7ed;
+            --shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        .page {
+            max-width: 1480px;
+            margin: 0 auto;
+            padding: 32px 36px 72px;
+        }
+
+        .hero {
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+            box-shadow: var(--shadow);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        h1, h2, h3, h4 {
+            margin: 0;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-top: 18px;
+        }
+
+        h2 {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            margin: 0 0 12px;
+            color: var(--muted);
+        }
+
+        .hero p.lead {
+            max-width: 1000px;
+            margin-top: 14px;
+            font-size: 18px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .summary-card {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px 20px;
+            background: var(--panel);
+        }
+
+        .summary-card strong {
+            display: block;
+            font-size: 30px;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .summary-card span {
+            display: block;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .toc {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: var(--accent);
+            border: 1px solid #c7d2fe;
+            background: var(--accent-soft);
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .section {
+            margin-top: 34px;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            padding: 28px;
+        }
+
+        .section-intro {
+            max-width: 1040px;
+            margin-bottom: 20px;
+        }
+
+        .subtle-box {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--panel-soft);
+            padding: 18px 20px;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 18px;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .badge.pk,
+        .badge.primary {
+            background: #ecfdf5;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .badge.fk,
+        .badge.foreign {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .badge.unique {
+            background: #f5f3ff;
+            border-color: #ddd6fe;
+            color: #6d28d9;
+        }
+
+        .badge.nullable {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #b45309;
+        }
+
+        .badge.default {
+            background: #fdf2f8;
+            border-color: #fbcfe8;
+            color: #be185d;
+        }
+
+        .badge.index {
+            background: #eef2ff;
+            border-color: #c7d2fe;
+            color: #3730a3;
+        }
+
+        .badge.timestamp {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #334155;
+        }
+
+        .overview-table,
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .overview-table th,
+        .overview-table td,
+        .data-table th,
+        .data-table td {
+            border: 1px solid var(--border);
+            padding: 12px 14px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .overview-table th,
+        .data-table th {
+            background: #f8fafc;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .overview-table td,
+        .data-table td {
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .overview-table td strong,
+        .data-table td strong {
+            color: var(--text);
+        }
+
+        .table-list {
+            display: grid;
+            gap: 24px;
+        }
+
+        .table-card {
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 22px;
+            background: var(--panel);
+        }
+
+        .table-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 18px;
+            margin-bottom: 8px;
+        }
+
+        .table-card-header p {
+            margin-top: 8px;
+            max-width: 980px;
+        }
+
+        .table-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .table-stats {
+            min-width: 150px;
+            text-align: right;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .constraint-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .relation-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+        }
+
+        .relation-list {
+            margin: 0;
+            padding-left: 22px;
+            color: var(--muted);
+        }
+
+        .relation-list li {
+            margin-bottom: 10px;
+        }
+
+        .callout {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-left: 4px solid var(--warning);
+            background: var(--warning-soft);
+            color: #7c2d12;
+            border-radius: 12px;
+        }
+
+        .diagram-box {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: #ffffff;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            min-width: 1000px;
+            min-height: 380px;
+        }
+
+        details {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--panel-soft);
+            padding: 14px 16px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        code {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2px 6px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.95em;
+            color: #0f172a;
+        }
+
+        footer {
+            margin-top: 26px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media (max-width: 1200px) {
+            .summary-grid,
+            .metadata-grid,
+            .relation-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .page {
+                padding: 20px 18px 48px;
+            }
+
+            h1 {
+                font-size: 34px;
+            }
+
+            .summary-grid,
+            .metadata-grid,
+            .relation-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-card-header {
+                flex-direction: column;
+            }
+
+            .table-stats {
+                text-align: left;
+            }
+
+            .mermaid {
+                min-width: 820px;
+            }
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+            }
+
+            .page {
+                max-width: none;
+                padding: 0;
+            }
+
+            .hero,
+            .section,
+            .table-card {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="hero">
+            <div class="eyebrow">Laravel · Documentation schema</div>
+            <h1>Documentation de la base de donnees</h1>
+            <p class="lead">
+                Ce document presente la structure de la base de donnees du projet Laravel en se basant
+                exclusivement sur les fichiers de migration du dossier <code>database/migrations</code>.
+                Il decrit les tables, les colonnes, les contraintes, les relations detectees et fournit
+                deux diagrammes Mermaid pour faciliter l'analyse et la capture en screenshot.
+            </p>
+            <div class="summary-grid" id="summary-grid"></div>
+            <nav class="toc">
+                <a href="#introduction">Introduction</a>
+                <a href="#tables">Tables</a>
+                <a href="#relations">Relations</a>
+                <a href="#erd">MCD / ERD</a>
+                <a href="#uml">UML</a>
+            </nav>
+        </header>
+
+        <section class="section" id="introduction">
+            <h2>1. Introduction</h2>
+            <p class="section-intro">
+                L'objectif de cette page est de presenter la structure logique de la base de donnees du projet.
+                La lecture a ete faite uniquement a partir des migrations, sans executer <code>php artisan migrate</code>
+                et sans interroger une base reelle. Le schema ci-dessous correspond donc a l'etat attendu apres
+                l'application cumulative des migrations dans l'ordre chronologique.
+            </p>
+            <div class="metadata-grid">
+                <div class="subtle-box">
+                    <h3>Source de verite utilisee</h3>
+                    <p>
+                        Uniquement les fichiers de migration Laravel du projet. Les relations listees ici
+                        proviennent des cles etrangeres declarees dans les migrations. Aucune relation
+                        supplementaire n'a ete inventee.
+                    </p>
+                    <div class="legend">
+                        <span class="badge pk">PK = cle primaire</span>
+                        <span class="badge fk">FK = cle etrangere</span>
+                        <span class="badge unique">UQ = unique</span>
+                        <span class="badge nullable">nullable</span>
+                        <span class="badge default">default</span>
+                        <span class="badge index">index</span>
+                        <span class="badge timestamp">timestamps</span>
+                    </div>
+                </div>
+                <details>
+                    <summary>Afficher la liste des migrations analysees</summary>
+                    <table class="overview-table" id="migrations-table"></table>
+                </details>
+            </div>
+        </section>
+
+        <section class="section" id="tables">
+            <h2>2. Tables de la base de donnees</h2>
+            <p class="section-intro">
+                Chaque table ci-dessous est documentee avec ses colonnes, son type de donnees, les contraintes
+                detectees dans les migrations et une courte description fonctionnelle.
+            </p>
+            <table class="overview-table" id="overview-table"></table>
+            <div class="table-list" id="tables-container"></div>
+        </section>
+
+        <section class="section" id="relations">
+            <h2>3. Relations entre les tables</h2>
+            <p class="section-intro">
+                Les relations suivantes sont deduites uniquement des cles etrangeres explicites declarees dans les migrations.
+                Les colonnes simplement indexees mais non contraintes par <code>constrained()</code> ne sont pas considerees comme
+                des relations basees sur une cle etrangere.
+            </p>
+            <div class="relation-grid">
+                <div class="subtle-box">
+                    <h3>Lecture metier en francais simple</h3>
+                    <ul class="relation-list" id="relations-list"></ul>
+                    <div class="callout">
+                        La colonne <code>sessions.user_id</code> est bien de type <code>foreignId</code>, mais la migration
+                        ne declare pas de contrainte de cle etrangere. Elle n'est donc pas ajoutee a la liste des relations formelles.
+                    </div>
+                </div>
+                <div class="subtle-box">
+                    <h3>Matrice technique des relations</h3>
+                    <table class="overview-table" id="relations-table"></table>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="erd">
+            <h2>4. MCD / Diagramme entite-relation</h2>
+            <p class="section-intro">
+                Le diagramme Mermaid suivant represente les tables et les cles etrangeres detectees.
+                Les tables techniques Laravel sans relation explicite apparaissent isolees.
+            </p>
+            <div class="diagram-box">
+                <pre class="mermaid">
+erDiagram
+    USERS {
+        BIGINT id PK
+        STRING email UQ
+        ENUM role
+        ENUM appointment_mode
+        UINT queue_daily_limit
+    }
+    PASSWORD_RESET_TOKENS {
+        STRING email PK
+        STRING token
+        TIMESTAMP created_at
+    }
+    SESSIONS {
+        STRING id PK
+        BIGINT user_id
+        LONGTEXT payload
+        INT last_activity
+    }
+    CACHE {
+        STRING key PK
+        MEDIUMTEXT value
+        INT expiration
+    }
+    CACHE_LOCKS {
+        STRING key PK
+        STRING owner
+        INT expiration
+    }
+    JOBS {
+        BIGINT id PK
+        STRING queue
+        LONGTEXT payload
+        TINYINT attempts
+    }
+    JOB_BATCHES {
+        STRING id PK
+        STRING name
+        INT total_jobs
+        INT failed_jobs
+    }
+    FAILED_JOBS {
+        BIGINT id PK
+        STRING uuid UQ
+        LONGTEXT exception
+        TIMESTAMP failed_at
+    }
+    PATIENTS {
+        BIGINT id PK
+        STRING first_name
+        STRING last_name
+        DATE birth_date
+        STRING id_card_number UQ
+    }
+    APPOINTMENTS {
+        BIGINT id PK
+        BIGINT patient_id FK
+        BIGINT doctor_id FK
+        ENUM appointment_mode
+        DATE appointment_date
+        TIME appointment_time
+        BOOLEAN is_current
+        UINT queue_number
+        UINT queue_position
+        TIME estimated_time
+        ENUM status
+    }
+    MEDICAL_RECORDS {
+        BIGINT id PK
+        BIGINT patient_id FK
+        BIGINT doctor_id FK
+        BIGINT appointment_id FK
+        DATE visit_date
+        TEXT diagnosis
+        TEXT treatment
+        INT heart_rate
+    }
+    PRESCRIPTIONS {
+        BIGINT id PK
+        BIGINT patient_id FK
+        BIGINT doctor_id FK
+        BIGINT medical_record_id FK
+        STRING medication_name
+        STRING dosage
+        DATE prescribed_date
+    }
+    PRESCRIPTION_ITEMS {
+        BIGINT id PK
+        BIGINT prescription_id FK
+        STRING medication_name
+        STRING dosage
+        STRING frequency
+    }
+    ORDERS {
+        BIGINT id PK
+        BIGINT patient_id FK
+        BIGINT doctor_id FK
+        BIGINT medical_record_id FK
+        ENUM order_type
+        STRING test_name
+        ENUM status
+    }
+    SETTINGS {
+        BIGINT id PK
+        STRING key UQ
+        TEXT value
+        STRING clinic_name
+        STRING type
+    }
+
+    PATIENTS ||--o{ APPOINTMENTS : "patient_id"
+    USERS ||--o{ APPOINTMENTS : "doctor_id"
+    PATIENTS ||--o{ MEDICAL_RECORDS : "patient_id"
+    USERS ||--o{ MEDICAL_RECORDS : "doctor_id"
+    APPOINTMENTS o|--o{ MEDICAL_RECORDS : "appointment_id"
+    PATIENTS ||--o{ PRESCRIPTIONS : "patient_id"
+    USERS ||--o{ PRESCRIPTIONS : "doctor_id"
+    MEDICAL_RECORDS o|--o{ PRESCRIPTIONS : "medical_record_id"
+    PRESCRIPTIONS ||--o{ PRESCRIPTION_ITEMS : "prescription_id"
+    PATIENTS ||--o{ ORDERS : "patient_id"
+    USERS ||--o{ ORDERS : "doctor_id"
+    MEDICAL_RECORDS o|--o{ ORDERS : "medical_record_id"
+                </pre>
+            </div>
+        </section>
+
+        <section class="section" id="uml">
+            <h2>5. Diagramme de classes UML</h2>
+            <p class="section-intro">
+                Ce diagramme de classes Mermaid se concentre sur les principaux modeles metier Laravel deduits des tables applicatives.
+                Les tables purement techniques de Laravel comme le cache ou les jobs n'y sont pas representees.
+            </p>
+            <div class="diagram-box">
+                <pre class="mermaid">
+classDiagram
+    direction LR
+
+    class User {
+        +id : bigint
+        +name : string
+        +email : string
+        +role : enum
+        +appointment_mode : enum
+        +queue_daily_limit : unsignedInteger
+    }
+
+    class Patient {
+        +id : bigint
+        +first_name : string
+        +last_name : string
+        +birth_date : date
+        +gender : enum
+        +id_card_number : string
+    }
+
+    class Appointment {
+        +id : bigint
+        +patient_id : bigint
+        +doctor_id : bigint
+        +appointment_mode : enum
+        +appointment_date : date
+        +appointment_time : time
+        +status : enum
+    }
+
+    class MedicalRecord {
+        +id : bigint
+        +patient_id : bigint
+        +doctor_id : bigint
+        +appointment_id : bigint?
+        +visit_date : date
+        +diagnosis : text
+        +treatment : text
+    }
+
+    class Prescription {
+        +id : bigint
+        +patient_id : bigint
+        +doctor_id : bigint
+        +medical_record_id : bigint?
+        +medication_name : string
+        +prescribed_date : date
+    }
+
+    class PrescriptionItem {
+        +id : bigint
+        +prescription_id : bigint
+        +medication_name : string
+        +dosage : string
+        +frequency : string
+    }
+
+    class Order {
+        +id : bigint
+        +patient_id : bigint
+        +doctor_id : bigint
+        +medical_record_id : bigint?
+        +order_type : enum
+        +status : enum
+    }
+
+    class Setting {
+        +id : bigint
+        +key : string
+        +value : text
+        +type : string
+        +clinic_name : string?
+    }
+
+    User "1" --> "0..*" Appointment : doctor_id
+    Patient "1" --> "0..*" Appointment : patient_id
+    User "1" --> "0..*" MedicalRecord : doctor_id
+    Patient "1" --> "0..*" MedicalRecord : patient_id
+    Appointment "0..1" --> "0..*" MedicalRecord : appointment_id
+    User "1" --> "0..*" Prescription : doctor_id
+    Patient "1" --> "0..*" Prescription : patient_id
+    MedicalRecord "0..1" --> "0..*" Prescription : medical_record_id
+    Prescription "1" --> "0..*" PrescriptionItem : prescription_id
+    User "1" --> "0..*" Order : doctor_id
+    Patient "1" --> "0..*" Order : patient_id
+    MedicalRecord "0..1" --> "0..*" Order : medical_record_id
+                </pre>
+            </div>
+        </section>
+
+        <footer>
+            Document genere a partir des migrations Laravel uniquement. Aucun schema n'a ete devine en dehors des fichiers de <code>database/migrations</code>.
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        const migrations = [
+            "0001_01_01_000000_create_users_table.php",
+            "0001_01_01_000001_create_cache_table.php",
+            "0001_01_01_000002_create_jobs_table.php",
+            "2025_07_08_221234_create_patients_table.php",
+            "2025_07_08_221240_create_appointments_table.php",
+            "2025_07_08_221247_create_medical_records_table.php",
+            "2025_07_08_221254_create_prescriptions_table.php",
+            "2025_08_09_000001_add_is_current_to_appointments_table.php",
+            "2025_08_09_001000_create_orders_table.php",
+            "2025_08_09_001100_create_prescription_items_table.php",
+            "2025_08_13_205308_create_settings_table.php",
+            "2025_10_13_204003_add_clinic_information_to_settings_table.php",
+            "2026_06_08_000001_add_missing_clinical_fields.php",
+            "2026_06_08_000002_add_appointment_modes_and_queue_fields.php"
+        ];
+
+        const schemaTables = [
+            {
+                name: "users",
+                category: "metier",
+                description: "Comptes du personnel de l'application. Cette table regroupe les medecins et les receptionnistes.",
+                sources: [
+                    "0001_01_01_000000_create_users_table.php",
+                    "2026_06_08_000002_add_appointment_modes_and_queue_fields.php"
+                ],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique de l'utilisateur." },
+                    { name: "name", type: "VARCHAR(255)", constraints: ["required"], description: "Nom complet du membre du personnel." },
+                    { name: "email", type: "VARCHAR(255)", constraints: ["required", "unique"], description: "Adresse e-mail utilisee pour la connexion." },
+                    { name: "email_verified_at", type: "TIMESTAMP", constraints: ["nullable"], description: "Date de verification de l'adresse e-mail." },
+                    { name: "password", type: "VARCHAR(255)", constraints: ["required"], description: "Mot de passe hache." },
+                    { name: "role", type: "ENUM('doctor','receptionist')", constraints: ["required", "default: receptionist"], description: "Role metier du compte." },
+                    { name: "appointment_mode", type: "ENUM('scheduled','queue')", constraints: ["required", "default: scheduled"], description: "Mode de rendez-vous privilegie pour le medecin." },
+                    { name: "queue_daily_limit", type: "UNSIGNED INTEGER", constraints: ["nullable"], description: "Nombre maximum de patients acceptes dans la file d'attente sur une journee." },
+                    { name: "phone", type: "VARCHAR(255)", constraints: ["nullable"], description: "Numero de telephone du membre du personnel." },
+                    { name: "address", type: "TEXT", constraints: ["nullable"], description: "Adresse postale ou professionnelle." },
+                    { name: "remember_token", type: "VARCHAR(100)", constraints: ["nullable"], description: "Jeton genere par Laravel pour l'option \"se souvenir de moi\"." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de creation de l'enregistrement." },
+                    { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de derniere mise a jour." }
+                ]
+            },
+            {
+                name: "password_reset_tokens",
+                category: "framework",
+                description: "Table technique Laravel pour la reinitialisation des mots de passe.",
+                sources: ["0001_01_01_000000_create_users_table.php"],
+                columns: [
+                    { name: "email", type: "VARCHAR(255)", constraints: ["PK"], description: "Adresse e-mail du compte qui demande une reinitialisation." },
+                    { name: "token", type: "VARCHAR(255)", constraints: ["required"], description: "Jeton de reinitialisation." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["nullable"], description: "Date de creation du jeton." }
+                ]
+            },
+            {
+                name: "sessions",
+                category: "framework",
+                description: "Persistance des sessions Laravel cote base de donnees.",
+                sources: ["0001_01_01_000000_create_users_table.php"],
+                columns: [
+                    { name: "id", type: "VARCHAR(255)", constraints: ["PK"], description: "Identifiant unique de la session." },
+                    { name: "user_id", type: "BIGINT UNSIGNED", constraints: ["nullable", "index"], description: "Utilisateur connecte associe a la session. La migration ne declare pas de cle etrangere." },
+                    { name: "ip_address", type: "VARCHAR(45)", constraints: ["nullable"], description: "Adresse IP du client." },
+                    { name: "user_agent", type: "TEXT", constraints: ["nullable"], description: "Informations du navigateur ou du client." },
+                    { name: "payload", type: "LONGTEXT", constraints: ["required"], description: "Contenu serialize de la session." },
+                    { name: "last_activity", type: "INTEGER", constraints: ["required", "index"], description: "Derniere activite, generalement stockee sous forme de timestamp entier." }
+                ]
+            },
+            {
+                name: "cache",
+                category: "framework",
+                description: "Stockage du cache applicatif Laravel en base.",
+                sources: ["0001_01_01_000001_create_cache_table.php"],
+                columns: [
+                    { name: "key", type: "VARCHAR(255)", constraints: ["PK"], description: "Cle unique de l'entree de cache." },
+                    { name: "value", type: "MEDIUMTEXT", constraints: ["required"], description: "Valeur de cache serialisee." },
+                    { name: "expiration", type: "INTEGER", constraints: ["required"], description: "Expiration de l'entree de cache sous forme d'entier." }
+                ]
+            },
+            {
+                name: "cache_locks",
+                category: "framework",
+                description: "Verrous utilises par Laravel pour securiser certaines operations de cache.",
+                sources: ["0001_01_01_000001_create_cache_table.php"],
+                columns: [
+                    { name: "key", type: "VARCHAR(255)", constraints: ["PK"], description: "Cle unique du verrou." },
+                    { name: "owner", type: "VARCHAR(255)", constraints: ["required"], description: "Proprietaire du verrou." },
+                    { name: "expiration", type: "INTEGER", constraints: ["required"], description: "Date ou duree d'expiration du verrou." }
+                ]
+            },
+            {
+                name: "jobs",
+                category: "framework",
+                description: "File de jobs Laravel lorsque le systeme de queue utilise la base de donnees.",
+                sources: ["0001_01_01_000002_create_jobs_table.php"],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique du job en file d'attente." },
+                    { name: "queue", type: "VARCHAR(255)", constraints: ["required", "index"], description: "Nom de la file logique." },
+                    { name: "payload", type: "LONGTEXT", constraints: ["required"], description: "Charge utile serialisee du job." },
+                    { name: "attempts", type: "UNSIGNED TINYINT", constraints: ["required"], description: "Nombre de tentatives deja executees." },
+                    { name: "reserved_at", type: "UNSIGNED INTEGER", constraints: ["nullable"], description: "Instant ou le job a ete reserve par un worker." },
+                    { name: "available_at", type: "UNSIGNED INTEGER", constraints: ["required"], description: "Instant a partir duquel le job peut etre traite." },
+                    { name: "created_at", type: "UNSIGNED INTEGER", constraints: ["required"], description: "Date de creation du job sous forme d'entier." }
+                ]
+            },
+            {
+                name: "job_batches",
+                category: "framework",
+                description: "Lots de jobs Laravel pour suivre les executions groupees.",
+                sources: ["0001_01_01_000002_create_jobs_table.php"],
+                columns: [
+                    { name: "id", type: "VARCHAR(255)", constraints: ["PK"], description: "Identifiant unique du lot." },
+                    { name: "name", type: "VARCHAR(255)", constraints: ["required"], description: "Nom du lot de jobs." },
+                    { name: "total_jobs", type: "INTEGER", constraints: ["required"], description: "Nombre total de jobs dans le lot." },
+                    { name: "pending_jobs", type: "INTEGER", constraints: ["required"], description: "Nombre de jobs encore en attente." },
+                    { name: "failed_jobs", type: "INTEGER", constraints: ["required"], description: "Nombre de jobs echoues." },
+                    { name: "failed_job_ids", type: "LONGTEXT", constraints: ["required"], description: "Liste serialisee des identifiants de jobs echoues." },
+                    { name: "options", type: "MEDIUMTEXT", constraints: ["nullable"], description: "Options additionnelles du lot." },
+                    { name: "cancelled_at", type: "INTEGER", constraints: ["nullable"], description: "Date d'annulation du lot." },
+                    { name: "created_at", type: "INTEGER", constraints: ["required"], description: "Date de creation du lot." },
+                    { name: "finished_at", type: "INTEGER", constraints: ["nullable"], description: "Date de fin du lot." }
+                ]
+            },
+            {
+                name: "failed_jobs",
+                category: "framework",
+                description: "Historique des jobs Laravel qui ont echoue.",
+                sources: ["0001_01_01_000002_create_jobs_table.php"],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant technique de l'echec." },
+                    { name: "uuid", type: "VARCHAR(255)", constraints: ["required", "unique"], description: "UUID unique du job echoue." },
+                    { name: "connection", type: "TEXT", constraints: ["required"], description: "Connexion de queue utilisee." },
+                    { name: "queue", type: "TEXT", constraints: ["required"], description: "Nom de la file concernee." },
+                    { name: "payload", type: "LONGTEXT", constraints: ["required"], description: "Charge utile du job." },
+                    { name: "exception", type: "LONGTEXT", constraints: ["required"], description: "Trace ou message d'exception capture." },
+                    { name: "failed_at", type: "TIMESTAMP", constraints: ["required", "default: CURRENT_TIMESTAMP"], description: "Date de l'echec." }
+                ]
+            },
+            {
+                name: "patients",
+                category: "metier",
+                description: "Dossier administratif de base du patient, avec ses informations personnelles, ses alertes et ses contacts.",
+                sources: ["2025_07_08_221234_create_patients_table.php"],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique du patient." },
+                    { name: "first_name", type: "VARCHAR(255)", constraints: ["required"], description: "Prenom du patient." },
+                    { name: "last_name", type: "VARCHAR(255)", constraints: ["required"], description: "Nom du patient." },
+                    { name: "birth_date", type: "DATE", constraints: ["required"], description: "Date de naissance." },
+                    { name: "gender", type: "ENUM('male','female')", constraints: ["required"], description: "Sexe renseigne dans le dossier." },
+                    { name: "phone", type: "VARCHAR(255)", constraints: ["required"], description: "Numero principal de contact." },
+                    { name: "email", type: "VARCHAR(255)", constraints: ["nullable"], description: "Adresse e-mail du patient." },
+                    { name: "address", type: "TEXT", constraints: ["nullable"], description: "Adresse postale." },
+                    { name: "id_card_number", type: "VARCHAR(255)", constraints: ["required", "unique"], description: "Numero de carte d'identite du patient." },
+                    { name: "allergies", type: "TEXT", constraints: ["nullable"], description: "Allergies signalees." },
+                    { name: "chronic_conditions", type: "TEXT", constraints: ["nullable"], description: "Pathologies chroniques connues." },
+                    { name: "emergency_contact_name", type: "VARCHAR(255)", constraints: ["nullable"], description: "Nom du contact d'urgence." },
+                    { name: "emergency_contact_phone", type: "VARCHAR(255)", constraints: ["nullable"], description: "Telephone du contact d'urgence." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de creation du dossier patient." },
+                    { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de mise a jour du dossier patient." }
+                ]
+            },
+            {
+                name: "appointments",
+                category: "metier",
+                description: "Gestion des rendez-vous et de la file d'attente. Cette table centralise les reservations planifiees et le mode queue.",
+                sources: [
+                    "2025_07_08_221240_create_appointments_table.php",
+                    "2025_08_09_000001_add_is_current_to_appointments_table.php",
+                    "2026_06_08_000002_add_appointment_modes_and_queue_fields.php"
+                ],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique du rendez-vous." },
+                    { name: "patient_id", type: "BIGINT UNSIGNED", constraints: ["FK -> patients.id", "required", "on delete: cascade"], description: "Patient concerne par le rendez-vous." },
+                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade"], description: "Utilisateur reference comme medecin pour le rendez-vous." },
+                    { name: "appointment_mode", type: "ENUM('scheduled','queue')", constraints: ["required", "default: scheduled"], description: "Mode de prise en charge : horaire fixe ou file d'attente." },
+                    { name: "appointment_date", type: "DATE", constraints: ["required"], description: "Jour du rendez-vous ou du passage en file." },
+                    { name: "appointment_time", type: "TIME", constraints: ["required"], description: "Heure de rendez-vous ou heure calculee de passage." },
+                    { name: "queue_number", type: "UNSIGNED INTEGER", constraints: ["nullable"], description: "Numero attribue au patient en mode file d'attente." },
+                    { name: "queue_position", type: "UNSIGNED INTEGER", constraints: ["nullable"], description: "Position courante dans la file." },
+                    { name: "estimated_time", type: "TIME", constraints: ["nullable"], description: "Heure estimee de passage en mode queue." },
+                    { name: "is_current", type: "BOOLEAN", constraints: ["required", "default: false"], description: "Indique si ce rendez-vous est actuellement en cours de traitement." },
+                    { name: "status", type: "ENUM('scheduled','in_progress','completed','cancelled')", constraints: ["required", "default: scheduled"], description: "Etat du rendez-vous." },
+                    { name: "reason", type: "TEXT", constraints: ["nullable"], description: "Motif de consultation." },
+                    { name: "notes", type: "TEXT", constraints: ["nullable"], description: "Notes libres associees au rendez-vous." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de creation." },
+                    { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de derniere mise a jour." }
+                ]
+            },
+            {
+                name: "medical_records",
+                category: "metier",
+                description: "Compte-rendu clinique d'une consultation, relie a un patient, a un medecin et eventuellement a un rendez-vous.",
+                sources: [
+                    "2025_07_08_221247_create_medical_records_table.php",
+                    "2026_06_08_000001_add_missing_clinical_fields.php"
+                ],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique du dossier medical." },
+                    { name: "patient_id", type: "BIGINT UNSIGNED", constraints: ["FK -> patients.id", "required", "on delete: cascade"], description: "Patient auquel appartient ce dossier medical." },
+                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade"], description: "Medecin ayant saisi ou valide l'enregistrement." },
+                    { name: "appointment_id", type: "BIGINT UNSIGNED", constraints: ["FK -> appointments.id", "nullable", "on delete: set null"], description: "Rendez-vous source si un lien existe." },
+                    { name: "visit_date", type: "DATE", constraints: ["required"], description: "Date de la visite clinique." },
+                    { name: "symptoms", type: "TEXT", constraints: ["nullable"], description: "Symptomes rapportes." },
+                    { name: "diagnosis", type: "TEXT", constraints: ["nullable"], description: "Diagnostic pose." },
+                    { name: "treatment", type: "TEXT", constraints: ["nullable"], description: "Traitement ou plan therapeutique." },
+                    { name: "notes", type: "TEXT", constraints: ["nullable"], description: "Notes cliniques libres." },
+                    { name: "weight", type: "DECIMAL(5,2)", constraints: ["nullable"], description: "Poids releve pendant la consultation." },
+                    { name: "height", type: "DECIMAL(5,2)", constraints: ["nullable"], description: "Taille du patient." },
+                    { name: "blood_pressure", type: "VARCHAR(255)", constraints: ["nullable"], description: "Tension arterielle." },
+                    { name: "temperature", type: "DECIMAL(4,1)", constraints: ["nullable"], description: "Temperature corporelle." },
+                    { name: "heart_rate", type: "INTEGER", constraints: ["nullable"], description: "Frequence cardiaque." },
+                    { name: "oxygen_saturation", type: "UNSIGNED TINYINT", constraints: ["nullable"], description: "Saturation en oxygene." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de creation." },
+                    { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de mise a jour." }
+                ]
+            },
+            {
+                name: "prescriptions",
+                category: "metier",
+                description: "Ordonnances associees a un patient et, si besoin, a un dossier medical.",
+                sources: [
+                    "2025_07_08_221254_create_prescriptions_table.php",
+                    "2026_06_08_000001_add_missing_clinical_fields.php"
+                ],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique de l'ordonnance." },
+                    { name: "patient_id", type: "BIGINT UNSIGNED", constraints: ["FK -> patients.id", "required", "on delete: cascade"], description: "Patient concerne par la prescription." },
+                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade"], description: "Medecin prescripteur." },
+                    { name: "medical_record_id", type: "BIGINT UNSIGNED", constraints: ["FK -> medical_records.id", "nullable", "on delete: set null"], description: "Dossier medical d'origine, si present." },
+                    { name: "medication_name", type: "VARCHAR(255)", constraints: ["required"], description: "Nom du medicament ou traitement principal." },
+                    { name: "dosage", type: "VARCHAR(255)", constraints: ["required"], description: "Dosage prescrit." },
+                    { name: "frequency", type: "VARCHAR(255)", constraints: ["required"], description: "Frequence de prise." },
+                    { name: "duration_days", type: "INTEGER", constraints: ["required"], description: "Duree du traitement en jours." },
+                    { name: "instructions", type: "TEXT", constraints: ["nullable"], description: "Consignes complementaires." },
+                    { name: "prescribed_date", type: "DATE", constraints: ["required"], description: "Date de prescription." },
+                    { name: "notes", type: "TEXT", constraints: ["nullable"], description: "Notes ajoutees a l'ordonnance." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de creation." },
+                    { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de mise a jour." }
+                ]
+            },
+            {
+                name: "orders",
+                category: "metier",
+                description: "Demandes d'examens complementaires, de laboratoire ou d'imagerie.",
+                sources: ["2025_08_09_001000_create_orders_table.php"],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique de la demande." },
+                    { name: "patient_id", type: "BIGINT UNSIGNED", constraints: ["FK -> patients.id", "required", "on delete: cascade"], description: "Patient concerne par la demande." },
+                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade"], description: "Medecin demandeur." },
+                    { name: "medical_record_id", type: "BIGINT UNSIGNED", constraints: ["FK -> medical_records.id", "nullable", "on delete: set null"], description: "Dossier medical source, si applicable." },
+                    { name: "order_type", type: "ENUM('lab','scan')", constraints: ["required"], description: "Type de demande : laboratoire ou imagerie." },
+                    { name: "test_name", type: "VARCHAR(255)", constraints: ["required"], description: "Nom de l'examen demande." },
+                    { name: "notes", type: "TEXT", constraints: ["nullable"], description: "Commentaires complementaires." },
+                    { name: "requested_date", type: "DATE", constraints: ["required"], description: "Date de la demande." },
+                    { name: "status", type: "ENUM('requested','completed','cancelled')", constraints: ["required", "default: requested"], description: "Etat de la demande." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de creation." },
+                    { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de mise a jour." }
+                ]
+            },
+            {
+                name: "prescription_items",
+                category: "metier",
+                description: "Lignes detaillees d'une ordonnance. Une ordonnance peut ainsi contenir plusieurs medicaments.",
+                sources: ["2025_08_09_001100_create_prescription_items_table.php"],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique de la ligne de prescription." },
+                    { name: "prescription_id", type: "BIGINT UNSIGNED", constraints: ["FK -> prescriptions.id", "required", "on delete: cascade"], description: "Ordonnance parente." },
+                    { name: "medication_name", type: "VARCHAR(255)", constraints: ["required"], description: "Nom du medicament pour cette ligne." },
+                    { name: "dosage", type: "VARCHAR(255)", constraints: ["required"], description: "Dosage de cette ligne." },
+                    { name: "frequency", type: "VARCHAR(255)", constraints: ["required"], description: "Frequence de prise de cette ligne." },
+                    { name: "duration_days", type: "INTEGER", constraints: ["nullable"], description: "Duree eventuelle de la prise." },
+                    { name: "instructions", type: "TEXT", constraints: ["nullable"], description: "Instructions complementaires pour cette ligne." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de creation." },
+                    { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de mise a jour." }
+                ]
+            },
+            {
+                name: "settings",
+                category: "metier",
+                description: "Parametres generiques du cabinet et de l'application. La table sert de magasin cle/valeur pour les reglages globaux.",
+                sources: [
+                    "2025_08_13_205308_create_settings_table.php",
+                    "2025_10_13_204003_add_clinic_information_to_settings_table.php"
+                ],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant technique du parametre." },
+                    { name: "key", type: "VARCHAR(255)", constraints: ["required", "unique"], description: "Cle unique du parametre." },
+                    { name: "value", type: "TEXT", constraints: ["required"], description: "Valeur stockee pour la cle." },
+                    { name: "clinic_name", type: "VARCHAR(255)", constraints: ["nullable"], description: "Nom du cabinet si renseigne directement sur la ligne." },
+                    { name: "clinic_address", type: "TEXT", constraints: ["nullable"], description: "Adresse du cabinet." },
+                    { name: "clinic_phone", type: "VARCHAR(255)", constraints: ["nullable"], description: "Telephone principal du cabinet." },
+                    { name: "clinic_email", type: "VARCHAR(255)", constraints: ["nullable"], description: "Adresse e-mail du cabinet." },
+                    { name: "clinic_website", type: "VARCHAR(255)", constraints: ["nullable"], description: "Site web du cabinet." },
+                    { name: "clinic_logo", type: "VARCHAR(255)", constraints: ["nullable"], description: "Chemin ou reference du logo du cabinet." },
+                    { name: "type", type: "VARCHAR(255)", constraints: ["required", "default: string"], description: "Type logique de la valeur stockee." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de creation." },
+                    { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de mise a jour." }
+                ],
+                extraNote: "La migration de creation insere aussi deux reglages par defaut : app_language = en et appointment_duration = 30."
+            }
+        ];
+
+        const relations = [
+            {
+                from: "appointments",
+                fromColumn: "patient_id",
+                to: "patients",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un patient peut avoir plusieurs rendez-vous. Chaque rendez-vous appartient a un seul patient."
+            },
+            {
+                from: "appointments",
+                fromColumn: "doctor_id",
+                to: "users",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un utilisateur peut etre reference comme medecin dans plusieurs rendez-vous. Chaque rendez-vous pointe vers un seul utilisateur."
+            },
+            {
+                from: "medical_records",
+                fromColumn: "patient_id",
+                to: "patients",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un patient peut avoir plusieurs dossiers medicaux. Chaque dossier medical appartient a un seul patient."
+            },
+            {
+                from: "medical_records",
+                fromColumn: "doctor_id",
+                to: "users",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un utilisateur peut etre associe a plusieurs dossiers medicaux comme medecin auteur."
+            },
+            {
+                from: "medical_records",
+                fromColumn: "appointment_id",
+                to: "appointments",
+                toColumn: "id",
+                nullable: "oui",
+                onDelete: "set null",
+                sentence: "Un dossier medical peut etre rattache a un rendez-vous, mais ce lien reste optionnel. Un rendez-vous peut etre reference par plusieurs dossiers medicaux faute de contrainte d'unicite."
+            },
+            {
+                from: "prescriptions",
+                fromColumn: "patient_id",
+                to: "patients",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un patient peut recevoir plusieurs ordonnances. Chaque ordonnance appartient a un seul patient."
+            },
+            {
+                from: "prescriptions",
+                fromColumn: "doctor_id",
+                to: "users",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un utilisateur peut emettre plusieurs ordonnances comme medecin prescripteur."
+            },
+            {
+                from: "prescriptions",
+                fromColumn: "medical_record_id",
+                to: "medical_records",
+                toColumn: "id",
+                nullable: "oui",
+                onDelete: "set null",
+                sentence: "Une ordonnance peut provenir d'un dossier medical, mais le lien est facultatif. Un meme dossier medical peut porter plusieurs ordonnances."
+            },
+            {
+                from: "orders",
+                fromColumn: "patient_id",
+                to: "patients",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un patient peut avoir plusieurs demandes d'examens. Chaque demande appartient a un seul patient."
+            },
+            {
+                from: "orders",
+                fromColumn: "doctor_id",
+                to: "users",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un utilisateur peut creer plusieurs demandes d'examens en tant que medecin."
+            },
+            {
+                from: "orders",
+                fromColumn: "medical_record_id",
+                to: "medical_records",
+                toColumn: "id",
+                nullable: "oui",
+                onDelete: "set null",
+                sentence: "Une demande d'examen peut etre liee a un dossier medical, sans obligation. Un meme dossier medical peut porter plusieurs demandes."
+            },
+            {
+                from: "prescription_items",
+                fromColumn: "prescription_id",
+                to: "prescriptions",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Une ordonnance peut contenir plusieurs lignes de prescription. Chaque ligne appartient a une seule ordonnance."
+            }
+        ];
+
+        const summaryCards = [
+            {
+                value: schemaTables.length,
+                label: "tables recensees",
+                detail: "Etat cumulatif deduit des migrations"
+            },
+            {
+                value: migrations.length,
+                label: "migrations analysees",
+                detail: "Source de verite unique"
+            },
+            {
+                value: relations.length,
+                label: "relations FK detectees",
+                detail: "Cles etrangeres explicites uniquement"
+            },
+            {
+                value: schemaTables.filter(table => table.category === "metier").length,
+                label: "tables metier",
+                detail: "Le reste correspond aux tables techniques Laravel"
+            }
+        ];
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        function badgeClass(text) {
+            const value = text.toLowerCase();
+            if (value.includes("pk")) return "pk";
+            if (value.includes("fk")) return "fk";
+            if (value.includes("unique")) return "unique";
+            if (value.includes("nullable")) return "nullable";
+            if (value.includes("default")) return "default";
+            if (value.includes("index")) return "index";
+            if (value.includes("timestamps")) return "timestamp";
+            return "";
+        }
+
+        function renderBadges(items) {
+            return `
+                <div class="constraint-list">
+                    ${items.map(item => `<span class="badge ${badgeClass(item)}">${escapeHtml(item)}</span>`).join("")}
+                </div>
+            `;
+        }
+
+        function renderSummary() {
+            document.getElementById("summary-grid").innerHTML = summaryCards.map(card => `
+                <div class="summary-card">
+                    <strong>${escapeHtml(card.value)}</strong>
+                    <span>${escapeHtml(card.label)}</span>
+                    <p>${escapeHtml(card.detail)}</p>
+                </div>
+            `).join("");
+        }
+
+        function renderMigrationsTable() {
+            const table = document.getElementById("migrations-table");
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Fichier de migration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${migrations.map((migration, index) => `
+                        <tr>
+                            <td><strong>${index + 1}</strong></td>
+                            <td><code>${escapeHtml(migration)}</code></td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            `;
+        }
+
+        function renderOverviewTable() {
+            const table = document.getElementById("overview-table");
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Table</th>
+                        <th>Categorie</th>
+                        <th>Colonnes</th>
+                        <th>Source migrations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${schemaTables.map(tableDef => `
+                        <tr>
+                            <td><strong>${escapeHtml(tableDef.name)}</strong></td>
+                            <td>${tableDef.category === "metier" ? "Metier / applicatif" : "Technique Laravel"}</td>
+                            <td>${tableDef.columns.length}</td>
+                            <td>${tableDef.sources.map(source => `<code>${escapeHtml(source)}</code>`).join("<br>")}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            `;
+        }
+
+        function renderTables() {
+            const container = document.getElementById("tables-container");
+            container.innerHTML = schemaTables.map(tableDef => `
+                <article class="table-card" id="table-${escapeHtml(tableDef.name)}">
+                    <div class="table-card-header">
+                        <div>
+                            <h3>${escapeHtml(tableDef.name)}</h3>
+                            <p>${escapeHtml(tableDef.description)}</p>
+                            <div class="table-meta">
+                                <span class="badge">${tableDef.category === "metier" ? "Table metier" : "Table technique Laravel"}</span>
+                                ${tableDef.sources.map(source => `<span class="badge">${escapeHtml(source)}</span>`).join("")}
+                            </div>
+                            ${tableDef.extraNote ? `<div class="callout">${escapeHtml(tableDef.extraNote)}</div>` : ""}
+                        </div>
+                        <div class="table-stats">
+                            <div><strong>${tableDef.columns.length}</strong> colonnes</div>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Colonne</th>
+                                    <th>Type de donnees</th>
+                                    <th>Contraintes</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableDef.columns.map(column => `
+                                    <tr>
+                                        <td><strong>${escapeHtml(column.name)}</strong></td>
+                                        <td><code>${escapeHtml(column.type)}</code></td>
+                                        <td>${renderBadges(column.constraints)}</td>
+                                        <td>${escapeHtml(column.description)}</td>
+                                    </tr>
+                                `).join("")}
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            `).join("");
+        }
+
+        function renderRelations() {
+            document.getElementById("relations-list").innerHTML = relations
+                .map(relation => `<li>${escapeHtml(relation.sentence)}</li>`)
+                .join("");
+
+            document.getElementById("relations-table").innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Table source</th>
+                        <th>Colonne FK</th>
+                        <th>Table cible</th>
+                        <th>Nullable</th>
+                        <th>Suppression</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${relations.map(relation => `
+                        <tr>
+                            <td><strong>${escapeHtml(relation.from)}</strong></td>
+                            <td><code>${escapeHtml(relation.fromColumn)}</code> → <code>${escapeHtml(relation.toColumn)}</code></td>
+                            <td><strong>${escapeHtml(relation.to)}</strong></td>
+                            <td>${escapeHtml(relation.nullable)}</td>
+                            <td>${escapeHtml(relation.onDelete)}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            `;
+        }
+
+        renderSummary();
+        renderMigrationsTable();
+        renderOverviewTable();
+        renderTables();
+        renderRelations();
+
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: "base",
+            securityLevel: "loose",
+            themeVariables: {
+                primaryColor: "#ffffff",
+                primaryTextColor: "#102033",
+                primaryBorderColor: "#d9e2ec",
+                lineColor: "#0f766e",
+                secondaryColor: "#f8fafc",
+                tertiaryColor: "#eff6ff",
+                fontFamily: "Segoe UI, Helvetica Neue, Arial, sans-serif"
+            }
+        });
+    </script>
+</body>
+</html>

@@ -10,17 +10,25 @@ use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StatisticsController;
+use App\Models\Setting;
 
 // Public routes
 Route::get('/', function () {
-    return redirect('/login');
+    return Setting::isSetupComplete()
+        ? redirect('/login')
+        : redirect('/setup');
 });
 
 // Language switching routes (accessible to all)
 Route::get('/lang/{language}', [LanguageController::class, 'switch'])->name('language.switch');
 Route::get('/api/languages', [LanguageController::class, 'getAvailableLanguages'])->name('api.languages');
 Route::get('/api/language/current', [LanguageController::class, 'getCurrentLanguage'])->name('api.language.current');
+
+// First-run setup wizard
+Route::get('/setup', [SetupController::class, 'show'])->name('setup.show');
+Route::post('/setup', [SetupController::class, 'store'])->name('setup.store');
 
 // Authentication routes
 Route::middleware('guest')->group(function () {

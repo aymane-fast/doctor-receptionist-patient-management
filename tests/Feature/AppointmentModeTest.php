@@ -9,6 +9,7 @@ use Carbon\Carbon;
 beforeEach(function () {
     Carbon::setTestNow(Carbon::parse('2026-06-08 08:00:00'));
     Setting::setAppointmentDuration(15);
+    Setting::setSetupComplete(true);
 });
 
 afterEach(function () {

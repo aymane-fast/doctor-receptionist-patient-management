@@ -11,9 +11,18 @@
 |
 */
 
+use App\Models\Setting;
+use Illuminate\Support\Facades\Schema;
+
 pest()->extend(Tests\TestCase::class)
     ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
+
+beforeEach(function () {
+    if (Schema::hasTable('settings')) {
+        Setting::setSetupComplete(true);
+    }
+});
 
 /*
 |--------------------------------------------------------------------------
