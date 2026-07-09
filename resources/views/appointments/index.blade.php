@@ -211,12 +211,8 @@
                             </td>
                             <td class="px-8 py-6">
                                 <div class="flex items-center space-x-3">
-                                    <span class="px-3 py-2 text-sm font-bold rounded-xl
-                                        @if($appointment->status == 'scheduled') status-scheduled
-                                        @elseif($appointment->status == 'in_progress') status-in-progress
-                                        @elseif($appointment->status == 'completed') status-completed
-                                        @else status-cancelled @endif">
-                                        {{ __('appointments.' . $appointment->status) }}
+                                    <span class="px-3 py-2 text-sm font-bold rounded-xl {{ \App\Models\Appointment::statusBadgeClasses($appointment->status) }}">
+                                        {{ \App\Models\Appointment::statusLabel($appointment->status) }}
                                     </span>
                                     
                                     <!-- Quick Status Update -->
@@ -258,12 +254,23 @@
                                             </form>
                                             @endif
                                             
+                                            @if($appointment->status == 'scheduled')
+                                            <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="no_show">
+                                                <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors">
+                                                    <i class="fas fa-user-slash text-orange-600 mr-2"></i>{{ __('appointments.no_show') }}
+                                                </button>
+                                            </form>
+                                            @endif
+
                                             @if($appointment->status != 'cancelled')
                                             <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="cancelled">
-                                                <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors" 
+                                                <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors"
                                                         onclick="return confirm('{{ __('appointments.confirm_cancel') }}')">
                                                     <i class="fas fa-times text-red-600 mr-2"></i>{{ __('appointments.cancelled') }}
                                                 </button>
