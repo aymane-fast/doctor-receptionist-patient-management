@@ -89,18 +89,21 @@
                                 <div class="text-xs text-gray-500">Approximate</div>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="px-3 py-1 text-sm font-semibold rounded-full
-                                    @if($appointment->status === 'scheduled') status-scheduled
-                                    @elseif($appointment->status === 'in_progress') status-in-progress
-                                    @elseif($appointment->status === 'completed') status-completed
-                                    @else status-cancelled @endif">
-                                    {{ ucfirst(str_replace('_', ' ', $appointment->status)) }}
-                                </span>
+                                <div class="flex flex-col gap-1">
+                                    <span class="px-3 py-1 text-sm font-semibold rounded-full text-center {{ \App\Models\Appointment::statusBadgeClasses($appointment->status) }}">
+                                        {{ \App\Models\Appointment::statusLabel($appointment->status) }}
+                                    </span>
+                                    @if($appointment->isCheckedIn() && $appointment->status === 'scheduled')
+                                        <span class="text-xs text-teal-700 font-medium text-center">
+                                            <i class="fas fa-user-check mr-1"></i>{{ __('appointments.checked_in') }}
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-700">{{ $appointment->reason ?: '-' }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-wrap gap-2">
-                                    @if(!in_array($appointment->status, ['completed', 'cancelled'], true))
+                                    @if($appointment->status === 'scheduled')
                                         <form method="POST" action="{{ route('appointments.queue-up', $appointment) }}">
                                             @csrf
                                             <button class="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700" title="Move up">
@@ -113,24 +116,39 @@
                                                 <i class="fas fa-arrow-down"></i>
                                             </button>
                                         </form>
+                                        @if(!$appointment->isCheckedIn())
+                                            <form method="POST" action="{{ route('appointments.check-in', $appointment) }}">
+                                                @csrf
+                                                <button class="px-3 py-2 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-lg text-sm font-medium" title="{{ __('appointments.check_in') }}">
+                                                    <i class="fas fa-user-check"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                         <form method="POST" action="{{ route('appointments.set-current', $appointment) }}">
                                             @csrf
                                             <button class="btn-ghost px-3 py-2 text-sm">
                                                 Start
                                             </button>
                                         </form>
-                                        <form method="POST" action="{{ route('appointments.update-status', $appointment) }}">
+                                        <form method="POST" action="{{ route('appointments.no-show', $appointment) }}">
                                             @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status" value="completed">
-                                            <button class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm font-medium">
-                                                Complete
+                                            <button class="px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium" onclick="return confirm('{{ __('appointments.mark_no_show') }}?')">
+                                                {{ __('appointments.mark_no_show') }}
                                             </button>
                                         </form>
                                         <form method="POST" action="{{ route('appointments.cancel', $appointment) }}">
                                             @csrf
                                             <button class="btn-danger px-3 py-2 text-sm" onclick="return confirm('Cancel this queue entry?')">
                                                 Cancel
+                                            </button>
+                                        </form>
+                                    @elseif($appointment->status === 'in_progress')
+                                        <form method="POST" action="{{ route('appointments.update-status', $appointment) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="completed">
+                                            <button class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm font-medium">
+                                                Complete
                                             </button>
                                         </form>
                                     @endif

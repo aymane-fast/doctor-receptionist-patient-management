@@ -46,7 +46,7 @@ return [
     'check_up' => 'Bilan de santé',
     'routine' => 'Routine',
     'urgent' => 'Urgent',
-    
+
     // Additional translations for appointments index
     'manage_appointments_scheduling' => 'Gérer les rendez-vous et la planification des patients',
     'filter_appointments' => 'Filtrer les Rendez-vous',
@@ -68,7 +68,7 @@ return [
     'view_details' => 'Voir les Détails',
     'start_consultation' => 'Commencer la Consultation',
     'reschedule_appointment' => 'Reprogrammer le Rendez-vous',
-    
+
     // Create appointment page
     'schedule_new_appointment' => 'Programmer un Nouveau Rendez-vous',
     'create_appointment_description' => 'Créer un nouveau rendez-vous pour les soins du patient',
@@ -79,13 +79,13 @@ return [
     'patient_information' => 'Informations du Patient',
     'appointment_details_form' => 'Détails du Rendez-vous',
     'submit_appointment' => 'Programmer le Rendez-vous',
-    
+
     // Edit appointment page
     'edit_appointment' => 'Modifier le Rendez-vous',
     'update_appointment_description' => 'Mettre à jour les détails et informations du rendez-vous',
     'back_to_details' => 'Retour aux Détails',
     'update_appointment' => 'Mettre à Jour le Rendez-vous',
-    
+
     // Show appointment page
     'appointment_details_comprehensive' => 'Informations complètes et actions du rendez-vous',
     'appointment_info' => 'Informations du Rendez-vous',
@@ -105,7 +105,7 @@ return [
     'back_to_list' => 'Retour aux Rendez-vous',
     'edit' => 'Modifier',
     'book_now' => 'Réserver Maintenant',
-    
+
     // Smart scheduling messages
     'only_one_slot_today' => 'Un seul créneau disponible aujourd\'hui à :time',
     'next_slot_today' => 'Prochain créneau disponible aujourd\'hui est :time (:count créneaux disponibles)',
@@ -113,7 +113,7 @@ return [
     'no_slots_today_tomorrow' => 'Aucun créneau disponible aujourd\'hui. Prochain disponible : demain à :time',
     'no_slots_date_next' => 'Aucun créneau disponible à cette date. Prochain disponible : :date à :time',
     'no_slots_week' => 'Aucun créneau disponible trouvé dans la semaine prochaine',
-    
+
     // Additional missing translations
     'patient' => 'Patient',
     'doctor' => 'Médecin',
@@ -123,7 +123,7 @@ return [
     'no_match_filter_criteria' => 'Aucun rendez-vous ne correspond à vos critères de filtre. Essayez d\'ajuster votre recherche ou vos filtres.',
     'get_started_first_appointment' => 'Commencez par programmer votre premier rendez-vous avec un patient.',
     'confirm_cancel' => 'Êtes-vous sûr de vouloir annuler ce rendez-vous ?',
-    
+
     // Common appointment reasons
     'follow_up_appointment' => 'Rendez-vous de suivi',
     'walk_in_consultation' => 'Consultation sans rendez-vous',
@@ -136,17 +136,30 @@ return [
     'lab_results_review' => 'Examen des résultats de laboratoire',
     'medication_review' => 'Révision des médicaments',
     'doctor_prefix' => 'Dr.',
-    
+
     // Appointment settings
     'appointment_settings' => 'Paramètres des Rendez-vous',
     'appointment_settings_description' => 'Configurer la durée des rendez-vous et les préférences de planification',
     'appointment_duration' => 'Durée du Rendez-vous',
     'duration_help_text' => 'Temps alloué pour chaque rendez-vous incluant le temps tampon entre les patients',
     'appointment_duration_updated' => 'Durée du rendez-vous mise à jour avec succès',
-    
+
     // Form placeholders
     'reason_placeholder' => 'Brève description de la raison de ce rendez-vous...',
     'notes_placeholder' => 'Notes ou instructions spéciales supplémentaires...',
     'search_patients_placeholder' => 'Rechercher des patients par nom, téléphone ou email...',
     'assigned_doctor' => 'Médecin assigné',
+    'check_in' => "Enregistrer l'arrivée",
+    'checked_in' => 'Arrivé',
+    'arrived_at' => 'Arrivé à :time',
+    'not_arrived' => 'Pas encore arrivé',
+    'mark_no_show' => 'Marquer absent',
+    'call_next_patient' => 'Appeler le patient suivant',
+    'no_current_patient_hint' => 'Aucun patient en consultation actuellement.',
+    'patient_checked_in' => 'Arrivée du patient enregistrée.',
+    'appointment_marked_no_show' => 'Rendez-vous marqué comme absence.',
+    'already_has_appointment_today' => 'Ce patient a déjà un rendez-vous actif avec ce médecin ce jour-là.',
+    'cannot_change_finished' => 'Ce rendez-vous ne peut plus être modifié.',
+    'cannot_start_finished' => 'Seul un patient en attente peut être défini comme patient actuel.',
+    'appointment_not_checkinable' => "Seuls les rendez-vous planifiés peuvent être enregistrés à l'arrivée.",
 ];

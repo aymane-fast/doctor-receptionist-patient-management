@@ -131,16 +131,15 @@
 
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-600">{{ __('appointments.status') }}</label>
-                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
-                                    @if($appointment->status == 'scheduled') status-scheduled
-                                    @elseif($appointment->status == 'confirmed') status-in-progress
-                                    @elseif($appointment->status == 'completed') status-completed
-                                    @elseif($appointment->status == 'cancelled') status-cancelled
-                                    @elseif($appointment->status == 'no-show') bg-gray-100 text-gray-800
-                                    @endif">
-                                    {{ ucfirst(str_replace('-', ' ', $appointment->status)) }}
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold {{ \App\Models\Appointment::statusBadgeClasses($appointment->status) }}">
+                                    {{ \App\Models\Appointment::statusLabel($appointment->status) }}
                                 </span>
+                                @if($appointment->isCheckedIn())
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-teal-100 text-teal-700">
+                                        <i class="fas fa-user-check mr-1"></i>{{ __('appointments.arrived_at', ['time' => $appointment->checked_in_at->format('g:i A')]) }}
+                                    </span>
+                                @endif
                             </div>
                         </div>
 
@@ -186,14 +185,12 @@
                 </div>
                 <div class="p-6">
                 <div class="space-y-3">
-                    @if($appointment->status != 'completed' && $appointment->status != 'cancelled')
-                        <form action="{{ route('appointments.update-status', $appointment) }}" method="POST" class="w-full">
+                    @if($appointment->status == 'scheduled' && !$appointment->isCheckedIn())
+                        <form action="{{ route('appointments.check-in', $appointment) }}" method="POST" class="w-full">
                             @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="status" value="completed">
                             <button type="submit" class="btn-primary w-full px-4 py-3">
-                                <i class="fas fa-check"></i>
-                                <span>Marquer comme Terminé</span>
+                                <i class="fas fa-user-check"></i>
+                                <span>{{ __('appointments.check_in') }}</span>
                             </button>
                         </form>
                     @endif
@@ -202,25 +199,48 @@
                         <form action="{{ route('appointments.set-current', $appointment) }}" method="POST" class="w-full">
                             @csrf
                             <button type="submit" class="btn-ghost w-full px-4 py-3">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Start consultation</span>
+                                <i class="fas fa-play-circle"></i>
+                                <span>{{ __('appointments.start_consultation') ?? 'Start consultation' }}</span>
                             </button>
                         </form>
                     @endif
 
-                    @if($appointment->status != 'cancelled' && $appointment->status != 'completed')
+                    @if($appointment->status == 'in_progress')
+                        <form action="{{ route('appointments.update-status', $appointment) }}" method="POST" class="w-full">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="status" value="completed">
+                            <button type="submit" class="btn-primary w-full px-4 py-3">
+                                <i class="fas fa-check"></i>
+                                <span>{{ __('appointments.mark_completed') ?? 'Mark as completed' }}</span>
+                            </button>
+                        </form>
+                    @endif
+
+                    @if($appointment->status == 'scheduled')
+                        <form action="{{ route('appointments.no-show', $appointment) }}" method="POST" class="w-full">
+                            @csrf
+                            <button type="submit" class="btn-ghost w-full px-4 py-3"
+                                    onclick="return confirm('{{ __('appointments.mark_no_show') }}?')">
+                                <i class="fas fa-user-slash"></i>
+                                <span>{{ __('appointments.mark_no_show') }}</span>
+                            </button>
+                        </form>
+                    @endif
+
+                    @if($appointment->isCancellable())
                         <form action="{{ route('appointments.cancel', $appointment) }}" method="POST" class="w-full">
                             @csrf
                             <button type="submit" class="btn-danger w-full px-4 py-3"
                                     onclick="return confirm('{{ __('appointments.cancel_confirmation') }}')">
                                 <i class="fas fa-times"></i>
-                                <span>Annuler le rendez-vous</span>
+                                <span>{{ __('appointments.cancel_appointment') ?? 'Cancel appointment' }}</span>
                             </button>
                         </form>
                     @endif
 
                     @if(auth()->user()->isDoctor() && $appointment->status == 'completed')
-                        <a href="{{ route('medical-records.create', ['patient_id' => $appointment->patient_id, 'appointment_id' => $appointment->id]) }}" 
+                        <a href="{{ route('medical-records.create', ['patient_id' => $appointment->patient_id, 'appointment_id' => $appointment->id]) }}"
                            class="btn-primary w-full px-4 py-3">
                             <i class="fas fa-file-medical"></i>
                             <span>{{ __('appointments.add_medical_record') }}</span>

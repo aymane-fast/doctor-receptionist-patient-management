@@ -330,20 +330,33 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center space-x-2">
-                                    <span class="text-xs px-2 py-1 rounded-full {{ $appointment->status === 'confirmed' ? 'bg-green-100 text-green-600' : ($appointment->status === 'cancelled' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600') }}">
-                                        {{ ucfirst($appointment->status) }}
+                                    @if($appointment->isCheckedIn() && $appointment->status === 'scheduled')
+                                        <span class="text-xs px-2 py-1 rounded-full bg-teal-100 text-teal-700" title="{{ __('appointments.arrived_at', ['time' => $appointment->checked_in_at->format('g:i A')]) }}">
+                                            <i class="fas fa-user-check mr-1"></i>{{ __('appointments.checked_in') }}
+                                        </span>
+                                    @endif
+                                    <span class="text-xs px-2 py-1 rounded-full {{ \App\Models\Appointment::statusBadgeClasses($appointment->status) }}">
+                                        {{ \App\Models\Appointment::statusLabel($appointment->status) }}
                                     </span>
                                     <div class="flex items-center space-x-1">
                                         <a href="{{ route('appointments.show', $appointment) }}" class="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors" title="View Details">
                                             <i class="fas fa-eye text-blue-600 text-sm"></i>
                                         </a>
                                         @if($appointment->status === 'scheduled')
+                                            @if(!$appointment->isCheckedIn())
+                                                <button onclick="submitAction('{{ route('appointments.check-in', $appointment) }}')" class="w-8 h-8 bg-teal-100 hover:bg-teal-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('appointments.check_in') }}">
+                                                    <i class="fas fa-user-check text-teal-600 text-sm"></i>
+                                                </button>
+                                            @endif
                                             <button onclick="setAsCurrent({{ $appointment->id }})" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="Set as Current Patient">
                                                 <i class="fas fa-play text-green-600 text-sm"></i>
                                             </button>
                                             <a href="{{ route('appointments.reschedule', $appointment) }}" class="w-8 h-8 bg-purple-100 hover:bg-purple-200 rounded-lg flex items-center justify-center transition-colors" title="Reschedule Appointment">
                                                 <i class="fas fa-clock text-purple-600 text-sm"></i>
                                             </a>
+                                            <button onclick="submitAction('{{ route('appointments.no-show', $appointment) }}', '{{ __('appointments.mark_no_show') }}?')" class="w-8 h-8 bg-orange-100 hover:bg-orange-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('appointments.mark_no_show') }}">
+                                                <i class="fas fa-user-slash text-orange-600 text-sm"></i>
+                                            </button>
                                             <button onclick="cancelAppointment({{ $appointment->id }})" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors" title="Cancel Appointment">
                                                 <i class="fas fa-times text-red-600 text-sm"></i>
                                             </button>
@@ -674,18 +687,38 @@ document.getElementById('receptionPatientFiltersModal').addEventListener('click'
     if (e.target === this) closeReceptionPatientFilters();
 });
 
+// Generic POST action with optional confirmation
+function submitAction(url, confirmMessage = null) {
+    if (confirmMessage && !confirm(confirmMessage)) {
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = '_token';
+    csrfToken.value = '{{ csrf_token() }}';
+
+    form.appendChild(csrfToken);
+    document.body.appendChild(form);
+    form.submit();
+}
+
 // Quick action functions
 function setAsCurrent(appointmentId) {
     if (confirm('Set this appointment as the current patient?')) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/appointments/${appointmentId}/set-current`;
-        
+
         const csrfToken = document.createElement('input');
         csrfToken.type = 'hidden';
         csrfToken.name = '_token';
         csrfToken.value = '{{ csrf_token() }}';
-        
+
         form.appendChild(csrfToken);
         document.body.appendChild(form);
         form.submit();

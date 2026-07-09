@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Traits\ValidatesAppointments;
 use App\Models\Appointment;
 use App\Models\Patient;
-use App\Models\User;
 use App\Models\Setting;
+use App\Models\User;
 use App\Services\AppointmentSchedulingService;
 use App\Services\PatientSearchService;
-use App\Http\Requests\Traits\ValidatesAppointments;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class AppointmentController extends Controller
@@ -22,6 +22,7 @@ class AppointmentController extends Controller
     {
         return app(AppointmentSchedulingService::class);
     }
+
     /**
      * Display a listing of appointments
      */
@@ -29,8 +30,8 @@ class AppointmentController extends Controller
     {
         // Check if there's a search query or show_today request
         $hasSearchQuery = $request->filled('search') || $request->filled('date') || $request->filled('status') || $request->filled('doctor_id') || $request->has('show_today');
-        
-        if (!$hasSearchQuery) {
+
+        if (! $hasSearchQuery) {
             // No search performed, return empty collection
             $appointments = collect();
         } else {
@@ -72,10 +73,10 @@ class AppointmentController extends Controller
             }
 
             $appointments = $query->orderBy('appointment_date', 'desc')
-                                 ->orderByRaw("CASE WHEN appointment_mode = 'queue' THEN COALESCE(queue_position, 999999) ELSE 0 END")
-                                 ->orderBy('appointment_time', 'desc')
-                                 ->paginate(15)
-                                 ->appends($request->query());
+                ->orderByRaw("CASE WHEN appointment_mode = 'queue' THEN COALESCE(queue_position, 999999) ELSE 0 END")
+                ->orderBy('appointment_time', 'desc')
+                ->paginate(15)
+                ->appends($request->query());
         }
 
         $doctors = User::where('role', 'doctor')->get();
@@ -90,12 +91,12 @@ class AppointmentController extends Controller
     {
         $patients = collect(); // Start with empty collection
         $selectedPatient = null;
-        
+
         // If patient_id is provided in URL, get that patient
         if ($request->has('patient_id')) {
             $selectedPatient = Patient::find($request->patient_id);
         }
-        
+
         $doctors = Auth::user()->isDoctor()
             ? User::where('id', Auth::id())->get()
             : User::where('role', 'doctor')->get();
@@ -105,7 +106,7 @@ class AppointmentController extends Controller
                 'queue_limit' => $doctor->queue_daily_limit,
             ],
         ]);
-        
+
         return view('appointments.create', compact('patients', 'doctors', 'selectedPatient', 'doctorModes'));
     }
 
@@ -115,6 +116,7 @@ class AppointmentController extends Controller
     public function searchPatients(Request $request)
     {
         $query = $request->get('q', '');
+
         return response()->json(PatientSearchService::search($query));
     }
 
@@ -130,16 +132,16 @@ class AppointmentController extends Controller
         $date = $request->get('date', now()->toDateString());
         $doctorId = $this->resolveDoctorId($request);
 
-        if (!$doctorId) {
+        if (! $doctorId) {
             return response()->json([
                 'available' => false,
-                'message' => 'Please select a doctor first'
+                'message' => 'Please select a doctor first',
             ], 422);
         }
 
         $doctor = User::find($doctorId);
         if ($doctor?->usesQueueMode()) {
-            if (!$this->scheduler()->workingWindow($date)) {
+            if (! $this->scheduler()->workingWindow($date)) {
                 return response()->json([
                     'available' => false,
                     'mode' => 'queue',
@@ -156,43 +158,43 @@ class AppointmentController extends Controller
                 ]);
             }
 
-            $position = $this->scheduler()->nextQueuePosition($doctorId, $date);
-            $estimatedTime = $this->scheduler()->estimatedQueueTime($date, $position);
+            $ticket = $this->scheduler()->nextQueueNumber($doctorId, $date);
+            $estimatedTime = $this->scheduler()->estimatedQueueJoinTime($doctorId, $date);
 
             return response()->json([
                 'available' => true,
                 'mode' => 'queue',
-                'queue_number' => $position,
+                'queue_number' => $ticket,
                 'estimated_time' => $estimatedTime->format('H:i'),
-                'message' => "Queue mode: next number is #{$position}, estimated around " . $estimatedTime->format('g:i A') . '.',
+                'message' => "Queue mode: next number is #{$ticket}, estimated around ".$estimatedTime->format('g:i A').'.',
             ]);
         }
-        
+
         try {
             $requestedDate = \Carbon\Carbon::parse($date)->startOfDay();
         } catch (\Exception $e) {
             return response()->json([
                 'available' => false,
-                'message' => 'Invalid date format provided'
+                'message' => 'Invalid date format provided',
             ], 400);
         }
-        
+
         // Check if the requested date is today
         $isToday = $requestedDate->isToday();
-        
+
         // Get working hours for the requested day
         $dayOfWeek = strtolower($requestedDate->format('l'));
         $workingHours = \App\Models\Setting::getWorkingHours($dayOfWeek);
-        
-        if (!$workingHours || !$workingHours['is_working']) {
+
+        if (! $workingHours || ! $workingHours['is_working']) {
             return response()->json([
                 'available' => false,
-                'message' => 'No working hours for this day'
+                'message' => 'No working hours for this day',
             ]);
         }
-        
+
         $availableSlots = $this->scheduler()->availableSlots($doctorId, $requestedDate);
-        
+
         // Return the first available slot or indicate no availability
         if (empty($availableSlots)) {
             $next = $this->scheduler()->nextWorkingDayWithSlot($doctorId, $requestedDate);
@@ -207,36 +209,36 @@ class AppointmentController extends Controller
                     'next_available_time' => $next['slot']['time'],
                     'working_hours' => [
                         'start' => $workingHours['start_time'],
-                        'end' => $workingHours['end_time']
-                    ]
+                        'end' => $workingHours['end_time'],
+                    ],
                 ]);
             }
-            
+
             return response()->json([
                 'available' => false,
                 'message' => __('appointments.no_slots_week'),
                 'working_hours' => [
                     'start' => $workingHours['start_time'],
-                    'end' => $workingHours['end_time']
-                ]
+                    'end' => $workingHours['end_time'],
+                ],
             ]);
         }
-        
+
         $nextSlot = $availableSlots[0];
-        
+
         // Generate UX message explaining the choice
         $message = '';
         if ($isToday) {
-            $message = count($availableSlots) === 1 
+            $message = count($availableSlots) === 1
                 ? __('appointments.only_one_slot_today', ['time' => $nextSlot['display']])
                 : __('appointments.next_slot_today', ['time' => $nextSlot['display'], 'count' => count($availableSlots)]);
         } else {
             $message = __('appointments.earliest_slot_date', [
-                'date' => $requestedDate->format('M j, Y'), 
-                'time' => $nextSlot['display']
+                'date' => $requestedDate->format('M j, Y'),
+                'time' => $nextSlot['display'],
             ]);
         }
-        
+
         return response()->json([
             'available' => true,
             'mode' => 'scheduled',
@@ -245,8 +247,8 @@ class AppointmentController extends Controller
             'message' => $message,
             'working_hours' => [
                 'start' => $workingHours['start_time'],
-                'end' => $workingHours['end_time']
-            ]
+                'end' => $workingHours['end_time'],
+            ],
         ]);
     }
 
@@ -276,6 +278,11 @@ class AppointmentController extends Controller
         $validated['appointment_mode'] = $doctor->appointment_mode ?? 'scheduled';
         $validated['status'] = 'scheduled';
 
+        // A patient should not hold two active appointments with the same doctor on one day
+        if ($this->scheduler()->hasActiveSameDayAppointment($validated['patient_id'], $validated['doctor_id'], $validated['appointment_date'])) {
+            return back()->withErrors(['patient_id' => __('appointments.already_has_appointment_today')])->withInput();
+        }
+
         if ($validated['appointment_mode'] === 'queue') {
             try {
                 $appointment = $this->scheduler()->createQueueAppointment($validated);
@@ -292,7 +299,7 @@ class AppointmentController extends Controller
         }
 
         // Reject times that have already passed today
-        if (Carbon::parse($validated['appointment_date'] . ' ' . $validated['appointment_time'])->isPast()) {
+        if (Carbon::parse($validated['appointment_date'].' '.$validated['appointment_time'])->isPast()) {
             return back()->withErrors(['appointment_time' => 'Appointment time has already passed. Please choose a future time.'])->withInput();
         }
 
@@ -310,7 +317,7 @@ class AppointmentController extends Controller
         $appointment = Appointment::create($validated);
 
         return redirect()->route('appointments.show', $appointment)
-                        ->with('success', 'Appointment created successfully!');
+            ->with('success', 'Appointment created successfully!');
     }
 
     /**
@@ -321,7 +328,7 @@ class AppointmentController extends Controller
         $this->authorizeAppointmentAccess($appointment);
 
         $appointment->load(['patient', 'doctor', 'medicalRecord']);
-        
+
         return view('appointments.show', compact('appointment'));
     }
 
@@ -336,7 +343,7 @@ class AppointmentController extends Controller
         $doctors = Auth::user()->isDoctor()
             ? User::where('id', Auth::id())->get()
             : User::where('role', 'doctor')->get();
-        
+
         return view('appointments.edit', compact('appointment', 'patients', 'doctors'));
     }
 
@@ -375,7 +382,7 @@ class AppointmentController extends Controller
                 return back()->withErrors(['appointment_time' => 'Appointment time is required for scheduled appointments.'])->withInput();
             }
 
-            if (!in_array($validated['status'], ['completed', 'cancelled'])) {
+            if (! in_array($validated['status'], ['completed', 'cancelled'])) {
                 $workingHoursError = $this->validateWorkingHours($validated['appointment_date'], $validated['appointment_time']);
                 if ($workingHoursError) {
                     return back()->withErrors(['appointment_time' => $workingHoursError])->withInput();
@@ -395,7 +402,7 @@ class AppointmentController extends Controller
         }
 
         return redirect()->route('appointments.show', $appointment)
-                        ->with('success', 'Appointment updated successfully!');
+            ->with('success', 'Appointment updated successfully!');
     }
 
     /**
@@ -412,7 +419,7 @@ class AppointmentController extends Controller
         }
 
         return redirect()->route('appointments.index')
-                        ->with('success', 'Appointment deleted successfully!');
+            ->with('success', 'Appointment deleted successfully!');
     }
 
     /**
@@ -423,7 +430,7 @@ class AppointmentController extends Controller
         $this->authorizeAppointmentAccess($appointment);
 
         $request->validate([
-            'status' => 'required|in:scheduled,in_progress,completed,cancelled'
+            'status' => 'required|in:scheduled,in_progress,completed,cancelled,no_show',
         ]);
 
         $appointment->update(['status' => $request->status]);
@@ -435,17 +442,62 @@ class AppointmentController extends Controller
         return back()->with('success', 'Appointment status updated successfully!');
     }
 
+    /**
+     * Record that a patient has physically arrived at the clinic.
+     */
+    public function checkIn(Appointment $appointment)
+    {
+        $this->authorizeAppointmentAccess($appointment);
+
+        if ($appointment->status !== 'scheduled') {
+            return back()->with('error', __('appointments.appointment_not_checkinable') ?? 'Only scheduled appointments can be checked in.');
+        }
+
+        if (! $appointment->isCheckedIn()) {
+            $appointment->update(['checked_in_at' => now()]);
+        }
+
+        return back()->with('success', __('appointments.patient_checked_in'));
+    }
+
+    /**
+     * Mark an appointment as a no-show (patient never arrived).
+     */
+    public function markNoShow(Appointment $appointment)
+    {
+        $this->authorizeAppointmentAccess($appointment);
+
+        // A patient in consultation or already seen cannot be a no-show.
+        if ($appointment->status !== 'scheduled') {
+            return back()->with('error', __('appointments.cannot_change_finished') ?? 'This appointment can no longer be changed.');
+        }
+
+        $appointment->update([
+            'status' => 'no_show',
+            'notes' => ($appointment->notes ? $appointment->notes."\n" : '').'Marked no-show on '.now()->format('Y-m-d H:i'),
+        ]);
+
+        if ($appointment->isQueueMode()) {
+            $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
+        }
+
+        return back()->with('success', __('appointments.appointment_marked_no_show'));
+    }
+
     private function authorizeAppointmentAccess(Appointment $appointment): void
     {
-        if (Auth::user()->isReceptionist()) {
-            return;
+        if (! $this->canManageAppointment($appointment)) {
+            abort(403);
         }
+    }
 
-        if (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id()) {
-            return;
-        }
-
-        abort(403);
+    /**
+     * Receptionists manage every appointment; doctors only their own.
+     */
+    private function canManageAppointment(Appointment $appointment): bool
+    {
+        return Auth::user()->isReceptionist()
+            || (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id());
     }
 
     private function resolveDoctorId(Request $request): ?int
@@ -471,7 +523,7 @@ class AppointmentController extends Controller
         $doctors = User::where('role', 'doctor')->orderBy('name')->get();
         $doctorId = $this->resolveDoctorId($request);
 
-        if (!$doctorId) {
+        if (! $doctorId) {
             $queueAppointments = collect();
             $selectedDoctor = null;
         } else {
@@ -490,7 +542,7 @@ class AppointmentController extends Controller
     {
         $this->authorizeAppointmentAccess($appointment);
 
-        if (!$this->scheduler()->moveQueueAppointment($appointment, 'up')) {
+        if (! $this->scheduler()->moveQueueAppointment($appointment, 'up')) {
             return back()->with('error', 'Unable to move this queue entry.');
         }
 
@@ -501,7 +553,7 @@ class AppointmentController extends Controller
     {
         $this->authorizeAppointmentAccess($appointment);
 
-        if (!$this->scheduler()->moveQueueAppointment($appointment, 'down')) {
+        if (! $this->scheduler()->moveQueueAppointment($appointment, 'down')) {
             return back()->with('error', 'Unable to move this queue entry.');
         }
 
@@ -513,22 +565,33 @@ class AppointmentController extends Controller
      */
     public function setCurrent(Request $request, Appointment $appointment)
     {
-        // Only receptionists or the owning doctor can set current
-        if (!(Auth::user()->isReceptionist() || (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id()))) {
+        if (! $this->canManageAppointment($appointment)) {
             abort(403);
+        }
+
+        if (! in_array($appointment->status, ['scheduled', 'in_progress'], true)) {
+            return back()->with('error', __('appointments.cannot_start_finished') ?? 'Only a waiting patient can be set as current.');
         }
 
         // Use database transaction to ensure atomicity
         \DB::transaction(function () use ($appointment) {
-            // First, clear ANY existing in_progress status for this doctor today
+            // Return the previous current patient to the waiting list
             Appointment::where('doctor_id', $appointment->doctor_id)
                 ->whereDate('appointment_date', today())
                 ->where('status', 'in_progress')
+                ->where('id', '!=', $appointment->id)
                 ->update(['status' => 'scheduled']);
 
-            // Then set this appointment as current/in progress
-            $appointment->update(['status' => 'in_progress']);
+            // The patient is in the room, so they have arrived
+            $appointment->update([
+                'status' => 'in_progress',
+                'checked_in_at' => $appointment->checked_in_at ?? now(),
+            ]);
         });
+
+        if ($appointment->isQueueMode()) {
+            $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
+        }
 
         return back()->with('success', 'Patient session started successfully.');
     }
@@ -545,7 +608,7 @@ class AppointmentController extends Controller
         $doctorId = $request->doctor_id ?: Auth::id();
 
         // Only receptionists can specify a doctor; doctors can only mark their own
-        if ($request->doctor_id && !Auth::user()->isReceptionist()) {
+        if ($request->doctor_id && ! Auth::user()->isReceptionist()) {
             abort(403);
         }
 
@@ -557,27 +620,20 @@ class AppointmentController extends Controller
                 ->where('status', 'in_progress')
                 ->first();
 
-            if (!$current) {
+            if (! $current) {
                 return ['success' => false, 'message' => 'No active consultation found.'];
             }
 
-            // Mark current as completed
+            // Mark current as completed, then call the next patient (arrived first)
             $current->update(['status' => 'completed']);
+            $next = $this->scheduler()->promoteNextPatient($doctorId);
 
-            // Find next scheduled appointment for today for this doctor
-            $nextScheduled = Appointment::where('doctor_id', $doctorId)
-                ->whereDate('appointment_date', today())
-                ->where('status', 'scheduled')
-                ->orderBy('appointment_time')
-                ->first();
-
-            if ($nextScheduled) {
-                // Set next patient as current
-                $nextScheduled->update(['status' => 'in_progress']);
-                return ['success' => true, 'message' => 'Patient consultation completed successfully. Next patient is now ready.'];
-            } else {
-                return ['success' => true, 'message' => 'Patient consultation completed successfully. No more patients for today.'];
-            }
+            return [
+                'success' => true,
+                'message' => $next
+                    ? 'Patient consultation completed successfully. Next patient is now ready.'
+                    : 'Patient consultation completed successfully. No more patients for today.',
+            ];
         });
 
         if ($result['success']) {
@@ -595,7 +651,7 @@ class AppointmentController extends Controller
      */
     public function createFollowUp(Request $request, Patient $patient)
     {
-        if (!Auth::user()->isDoctor()) {
+        if (! Auth::user()->isDoctor()) {
             abort(403);
         }
 
@@ -629,12 +685,16 @@ class AppointmentController extends Controller
             }
         }
 
-        if (!$targetDate) {
+        if (! $targetDate) {
             return back()->with('error', 'No working day was found near the requested follow-up date.');
         }
 
         $reason = $validated['follow_up_reason'] ?: __('appointments.follow_up_appointment');
-        $notes = 'Follow-up from appointment on ' . Carbon::parse($currentAppointment->appointment_date)->format('M j, Y');
+        $notes = 'Follow-up from appointment on '.Carbon::parse($currentAppointment->appointment_date)->format('M j, Y');
+
+        if ($this->scheduler()->hasActiveSameDayAppointment($patient->id, Auth::id(), $targetDate->toDateString())) {
+            return back()->with('error', __('appointments.already_has_appointment_today'));
+        }
 
         if (Auth::user()->usesQueueMode()) {
             try {
@@ -655,9 +715,9 @@ class AppointmentController extends Controller
 
         // Find a free slot on the target date, or the next day that has one
         $slot = $this->scheduler()->nextAvailableSlot(Auth::id(), $targetDate);
-        if (!$slot) {
+        if (! $slot) {
             $next = $this->scheduler()->nextWorkingDayWithSlot(Auth::id(), $targetDate);
-            if (!$next) {
+            if (! $next) {
                 return back()->with('error', 'No available follow-up slots were found during working hours.');
             }
 
@@ -677,7 +737,7 @@ class AppointmentController extends Controller
 
         $timeAmount = $validated['follow_up_number'];
         $timeUnit = $validated['follow_up_unit'];
-        $appointmentDateTime = Carbon::parse($targetDate->toDateString() . ' ' . $slot['time'])->format('M j, Y \a\t g:i A');
+        $appointmentDateTime = Carbon::parse($targetDate->toDateString().' '.$slot['time'])->format('M j, Y \a\t g:i A');
 
         return redirect()->route('doctor.current')->with('success',
             "Follow-up appointment scheduled for {$timeAmount} {$timeUnit} from now on {$appointmentDateTime}");
@@ -690,12 +750,12 @@ class AppointmentController extends Controller
     {
         $workingHours = Setting::getAllWorkingHours();
         $currentWorkingHours = Setting::getWorkingHours();
-        
+
         return response()->json([
             'all_days' => $workingHours,
             'today' => $currentWorkingHours,
             'is_within_hours' => Setting::isWithinWorkingHours(),
-            'next_working_time' => Setting::getNextWorkingTime()?->format('Y-m-d H:i:s')
+            'next_working_time' => Setting::getNextWorkingTime()?->format('Y-m-d H:i:s'),
         ]);
     }
 
@@ -704,39 +764,33 @@ class AppointmentController extends Controller
      */
     public function cancel(Appointment $appointment)
     {
-        // Only receptionists or the owning doctor can cancel
-        if (!(Auth::user()->isReceptionist() || (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id()))) {
+        if (! $this->canManageAppointment($appointment)) {
             return back()->with('error', 'Unauthorized action.');
+        }
+
+        if (! $appointment->isCancellable()) {
+            return back()->with('error', __('appointments.cannot_change_finished') ?? 'This appointment can no longer be changed.');
         }
 
         // Use database transaction to ensure atomicity
         $result = \DB::transaction(function () use ($appointment) {
             // Check if this was the current patient
             $wasCurrentPatient = ($appointment->status === 'in_progress');
-            
+
             // Cancel the appointment
             $appointment->update([
                 'status' => 'cancelled',
-                'notes' => ($appointment->notes ? $appointment->notes . "\n" : '') . 'Cancelled on ' . now()->format('Y-m-d H:i')
+                'notes' => ($appointment->notes ? $appointment->notes."\n" : '').'Cancelled on '.now()->format('Y-m-d H:i'),
             ]);
 
-            // If we cancelled the current patient, automatically move to next
+            // If we cancelled the current patient, automatically call the next one
             if ($wasCurrentPatient) {
-                $nextScheduled = Appointment::where('doctor_id', $appointment->doctor_id)
-                    ->whereDate('appointment_date', today())
-                    ->where('status', 'scheduled')
-                    ->orderBy('appointment_time')
-                    ->first();
-                
-                if ($nextScheduled) {
-                    $nextScheduled->update(['status' => 'in_progress']);
-                    return 'Current appointment cancelled. Next patient is now ready.';
-                } else {
-                    return 'Appointment cancelled successfully. No more patients for today.';
-                }
-            } else {
-                return 'Appointment cancelled successfully!';
+                return $this->scheduler()->promoteNextPatient($appointment->doctor_id)
+                    ? 'Current appointment cancelled. Next patient is now ready.'
+                    : 'Appointment cancelled successfully. No more patients for today.';
             }
+
+            return 'Appointment cancelled successfully!';
         });
 
         if ($appointment->isQueueMode()) {
@@ -752,7 +806,7 @@ class AppointmentController extends Controller
     public function reschedule(Appointment $appointment)
     {
         // Only receptionists or the owning doctor can reschedule
-        if (!(Auth::user()->isReceptionist() || (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id()))) {
+        if (! (Auth::user()->isReceptionist() || (Auth::user()->isDoctor() && $appointment->doctor_id === Auth::id()))) {
             return back()->with('error', 'Unauthorized action.');
         }
 
@@ -760,7 +814,4 @@ class AppointmentController extends Controller
         return redirect()->route('appointments.edit', $appointment)
             ->with('info', 'Please select a new date and time for this appointment.');
     }
-
-
-
 }

@@ -1,18 +1,18 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\PatientController;
-use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\MedicalRecordController;
-use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\DoctorController;
-use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\MedicalRecordController;
+use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StatisticsController;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::get('/', function () {
@@ -43,17 +43,17 @@ Route::middleware('auth')->group(function () {
     // Dashboard (accessible by both roles)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/initialize-first-patient', [DashboardController::class, 'initializeFirstPatient'])->name('dashboard.initialize-first-patient');
-    
+
     // Settings (accessible by both roles)
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings/appointment-duration', [SettingsController::class, 'updateAppointmentDuration'])->name('settings.appointment-duration');
     Route::post('/settings/appointment-mode', [SettingsController::class, 'updateAppointmentMode'])->name('settings.appointment-mode');
     Route::get('/api/settings/working-status', [SettingsController::class, 'workingStatus'])->name('api.settings.working-status');
-    
+
     // Patient management (accessible by both roles)
     Route::resource('patients', PatientController::class);
     Route::get('/patients/{patient}/ai-summary', [PatientController::class, 'aiSummary'])->name('patients.ai-summary');
-    
+
     // Appointment management (accessible by both roles)
     Route::get('/appointments/queue', [AppointmentController::class, 'queue'])->name('appointments.queue');
     Route::post('/appointments/{appointment}/queue-up', [AppointmentController::class, 'moveQueueUp'])->name('appointments.queue-up');
@@ -63,23 +63,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/working-hours', [AppointmentController::class, 'getWorkingHours'])->name('api.working-hours');
     Route::patch('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
     Route::post('/appointments/{appointment}/set-current', [AppointmentController::class, 'setCurrent'])->name('appointments.set-current');
+    Route::post('/appointments/{appointment}/check-in', [AppointmentController::class, 'checkIn'])->name('appointments.check-in');
+    Route::post('/appointments/{appointment}/no-show', [AppointmentController::class, 'markNoShow'])->name('appointments.no-show');
     Route::post('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::get('/appointments/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])->name('appointments.reschedule');
     Route::post('/appointments/current/mark-done', [AppointmentController::class, 'markCurrentDone'])->name('appointments.mark-current-done');
     Route::post('/appointments/{patient}/follow-up', [AppointmentController::class, 'createFollowUp'])->name('appointments.create-follow-up');
-    
-    
+
     // Patient search APIs (accessible by both roles for autocomplete)
     Route::get('/api/medical-records/patients/search', [MedicalRecordController::class, 'searchPatients'])->name('api.medical-records.patients.search');
     Route::get('/api/prescriptions/patients/search', [PrescriptionController::class, 'searchPatients'])->name('api.prescriptions.patients.search');
-    
+
     // Available slots API
     Route::get('/api/appointments/next-available-slot', [AppointmentController::class, 'getNextAvailableSlot'])->name('api.appointments.next-available-slot');
-    
+
     // Prescription management (accessible by both roles)
     Route::resource('prescriptions', PrescriptionController::class);
     Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescriptions.print');
-    
+
 });
 
 // Doctor-only routes
@@ -89,17 +90,16 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
 
     Route::get('/doctor/current', [DoctorController::class, 'current'])->name('doctor.current');
     Route::resource('medical-records', MedicalRecordController::class);
-    
+
     // Statistics (accessible by doctors only)
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
     Route::get('/api/statistics', [StatisticsController::class, 'api'])->name('api.statistics');
     Route::get('/api/statistics/trend', [StatisticsController::class, 'getTrendData'])->name('api.statistics.trend');
-    
+
     // Doctor-only settings
     Route::post('/settings/working-hours', [SettingsController::class, 'updateWorkingHours'])->name('settings.working-hours');
     Route::post('/settings/clinic-info', [SettingsController::class, 'updateClinicInfo'])->name('settings.clinic-info');
 
-    
     // Modern export system for doctors
     Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('exports.index');
     Route::post('/exports', [App\Http\Controllers\ExportController::class, 'export'])->name('exports.export');

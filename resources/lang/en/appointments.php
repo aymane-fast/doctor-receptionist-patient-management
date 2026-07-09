@@ -46,7 +46,7 @@ return [
     'check_up' => 'Check-up',
     'routine' => 'Routine',
     'urgent' => 'Urgent',
-    
+
     // Additional translations for appointments index
     'manage_appointments_scheduling' => 'Manage patient appointments and scheduling',
     'filter_appointments' => 'Filter Appointments',
@@ -68,7 +68,7 @@ return [
     'view_details' => 'View Details',
     'start_consultation' => 'Start Consultation',
     'reschedule_appointment' => 'Reschedule Appointment',
-    
+
     // Create appointment page
     'schedule_new_appointment' => 'Schedule New Appointment',
     'create_appointment_description' => 'Create a new appointment for patient care',
@@ -91,13 +91,13 @@ return [
     'prescriptions' => 'Prescriptions',
     'appointment_details_form' => 'Appointment Details',
     'submit_appointment' => 'Schedule Appointment',
-    
+
     // Edit appointment page
     'edit_appointment' => 'Edit Appointment',
     'update_appointment_description' => 'Update appointment details and information',
     'back_to_details' => 'Back to Details',
     'update_appointment' => 'Update Appointment',
-    
+
     // Show appointment page
     'appointment_details_comprehensive' => 'Comprehensive appointment information and actions',
     'appointment_actions' => 'Appointment Actions',
@@ -105,7 +105,7 @@ return [
     'back_to_list' => 'Back to Appointments',
     'edit' => 'Edit',
     'book_now' => 'Book Now',
-    
+
     // Smart scheduling messages
     'only_one_slot_today' => 'Only one slot available today at :time',
     'next_slot_today' => 'Next available slot today is :time (:count slots available)',
@@ -113,7 +113,7 @@ return [
     'no_slots_today_tomorrow' => 'No available slots today. Next available: tomorrow at :time',
     'no_slots_date_next' => 'No available slots on this date. Next available: :date at :time',
     'no_slots_week' => 'No available slots found in the next week',
-    
+
     // Additional missing translations
     'patient' => 'Patient',
     'doctor' => 'Doctor',
@@ -123,10 +123,10 @@ return [
     'no_match_filter_criteria' => 'No appointments match your filter criteria. Try adjusting your search or filters.',
     'get_started_first_appointment' => 'Get started by scheduling your first appointment with a patient.',
     'confirm_cancel' => 'Are you sure you want to cancel this appointment?',
-    
+
     // Common appointment reasons
     'follow_up_appointment' => 'Follow-up appointment',
-    'walk_in_consultation' => 'Walk-in consultation', 
+    'walk_in_consultation' => 'Walk-in consultation',
     'emergency_consultation' => 'Emergency consultation',
     'routine_checkup' => 'Routine check-up',
     'general_consultation' => 'General consultation',
@@ -136,17 +136,30 @@ return [
     'lab_results_review' => 'Lab results review',
     'medication_review' => 'Medication review',
     'doctor_prefix' => 'Dr.',
-    
+
     // Appointment settings
     'appointment_settings' => 'Appointment Settings',
     'appointment_settings_description' => 'Configure appointment duration and scheduling preferences',
     'appointment_duration' => 'Appointment Duration',
     'duration_help_text' => 'Time allocated for each appointment including buffer time between patients',
     'appointment_duration_updated' => 'Appointment duration updated successfully',
-    
+
     // Form placeholders
     'reason_placeholder' => 'Brief description of the reason for this appointment...',
     'notes_placeholder' => 'Any additional notes or special instructions...',
     'search_patients_placeholder' => 'Search patients by name, phone, or email...',
     'assigned_doctor' => 'Assigned Doctor',
+    'check_in' => 'Check In',
+    'checked_in' => 'Arrived',
+    'arrived_at' => 'Arrived at :time',
+    'not_arrived' => 'Not arrived',
+    'mark_no_show' => 'Mark No-Show',
+    'call_next_patient' => 'Call Next Patient',
+    'no_current_patient_hint' => 'No patient is currently in consultation.',
+    'patient_checked_in' => 'Patient checked in.',
+    'appointment_marked_no_show' => 'Appointment marked as a no-show.',
+    'already_has_appointment_today' => 'This patient already has an active appointment with this doctor on that day.',
+    'cannot_change_finished' => 'This appointment can no longer be changed.',
+    'cannot_start_finished' => 'Only a waiting patient can be set as current.',
+    'appointment_not_checkinable' => 'Only scheduled appointments can be checked in.',
 ];

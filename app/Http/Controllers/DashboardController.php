@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
+use App\Models\Patient;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -16,7 +16,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         if ($user->isDoctor()) {
             return $this->doctorDashboard();
         } else {
@@ -52,13 +52,14 @@ class DashboardController extends Controller
             ->where('doctor_id', Auth::id())
             ->today()
             ->where('status', 'in_progress')
-            ->first();        $upcomingAppointments = Appointment::with('patient')
-            ->where('doctor_id', Auth::id())
-            ->upcoming()
-            ->limit(5)
-            ->orderBy('appointment_date')
-            ->orderBy('appointment_time')
-            ->get();
+            ->first();
+        $upcomingAppointments = Appointment::with('patient')
+        ->where('doctor_id', Auth::id())
+        ->upcoming()
+        ->limit(5)
+        ->orderBy('appointment_date')
+        ->orderBy('appointment_time')
+        ->get();
 
         // Medical records with filtering
         $recentRecordsQuery = MedicalRecord::with('patient')
@@ -83,7 +84,7 @@ class DashboardController extends Controller
             ->paginate(5, ['*'], 'doc_records_page');
 
         $stats = [
-            'total_patients' => Patient::whereHas('appointments', function($query) {
+            'total_patients' => Patient::whereHas('appointments', function ($query) {
                 $query->where('doctor_id', Auth::id());
             })->count(),
             'today_appointments' => Appointment::where('doctor_id', Auth::id())
@@ -220,7 +221,7 @@ class DashboardController extends Controller
         $doctorId = $request->doctor_id ?: Auth::id();
 
         // Only receptionists can initialize for other doctors
-        if ($request->doctor_id && !Auth::user()->isReceptionist()) {
+        if ($request->doctor_id && ! Auth::user()->isReceptionist()) {
             abort(403);
         }
 
@@ -235,21 +236,14 @@ class DashboardController extends Controller
                 return ['success' => false, 'message' => 'A patient is already set as current.'];
             }
 
-            // Find first scheduled appointment for today
-            $firstScheduled = Appointment::where('doctor_id', $doctorId)
-                ->whereDate('appointment_date', today())
-                ->where('status', 'scheduled')
-                ->orderBy('appointment_time')
-                ->first();
+            // Call the next patient (arrived patients first)
+            $next = app(\App\Services\AppointmentSchedulingService::class)->promoteNextPatient($doctorId);
 
-            if (!$firstScheduled) {
+            if (! $next) {
                 return ['success' => false, 'message' => 'No scheduled appointments found for today.'];
             }
 
-            // Set as current
-            $firstScheduled->update(['status' => 'in_progress']);
-
-            return ['success' => true, 'message' => "First patient of the day ({$firstScheduled->patient->full_name}) is now ready."];
+            return ['success' => true, 'message' => "Next patient ({$next->patient->full_name}) is now ready."];
         });
 
         if ($result['success']) {
@@ -258,6 +252,4 @@ class DashboardController extends Controller
             return back()->with('error', $result['message']);
         }
     }
-
-
 }

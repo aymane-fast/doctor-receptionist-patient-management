@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Patient;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
+use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\User;
 use Carbon\Carbon;
@@ -16,15 +16,20 @@ class DataExportService
      */
     private function formatDate($date, $format = 'Y-m-d'): string
     {
-        if (!$date) return '';
-        if (is_string($date)) return $date;
+        if (! $date) {
+            return '';
+        }
+        if (is_string($date)) {
+            return $date;
+        }
+
         return $date->format($format);
     }
 
     /**
      * Export selected data types with date range filtering
      */
-    public function exportData(array $dataTypes, string $startDate = null, string $endDate = null): array
+    public function exportData(array $dataTypes, ?string $startDate = null, ?string $endDate = null): array
     {
         $exportData = [];
         $exportInfo = [
@@ -33,7 +38,7 @@ class DataExportService
                 'start' => $startDate ? Carbon::parse($startDate) : null,
                 'end' => $endDate ? Carbon::parse($endDate) : null,
             ],
-            'data_types' => $dataTypes
+            'data_types' => $dataTypes,
         ];
 
         // Export each selected data type
@@ -60,16 +65,16 @@ class DataExportService
 
         return [
             'data' => $exportData,
-            'info' => $exportInfo
+            'info' => $exportInfo,
         ];
     }
 
     /**
      * Export patients data
      */
-    private function exportPatients(string $startDate = null, string $endDate = null): array
+    private function exportPatients(?string $startDate = null, ?string $endDate = null): array
     {
-        $query = Patient::with(['appointments' => function($q) {
+        $query = Patient::with(['appointments' => function ($q) {
             $q->orderBy('appointment_date', 'desc');
         }]);
 
@@ -101,10 +106,11 @@ class DataExportService
                 'Conditions chroniques',
                 'Total rendez-vous',
                 'Dernière visite',
-                'Date d\'inscription'
+                'Date d\'inscription',
             ],
             'data' => $patients->map(function ($patient) {
                 $lastAppointment = $patient->appointments->first();
+
                 return [
                     $patient->id,
                     $patient->first_name,
@@ -122,7 +128,7 @@ class DataExportService
                     $patient->chronic_conditions ?? '',
                     $patient->appointments->count(),
                     $lastAppointment ? $this->formatDate($lastAppointment->appointment_date) : '',
-                    $patient->created_at->format('Y-m-d H:i:s')
+                    $patient->created_at->format('Y-m-d H:i:s'),
                 ];
             })->toArray(),
             'summary' => [
@@ -130,14 +136,14 @@ class DataExportService
                 'male_count' => $patients->where('gender', 'male')->count(),
                 'female_count' => $patients->where('gender', 'female')->count(),
                 'with_emergency_contact' => $patients->whereNotNull('emergency_contact_name')->count(),
-            ]
+            ],
         ];
     }
 
     /**
      * Export appointments data
      */
-    private function exportAppointments(string $startDate = null, string $endDate = null): array
+    private function exportAppointments(?string $startDate = null, ?string $endDate = null): array
     {
         $query = Appointment::with(['patient', 'doctor']);
 
@@ -150,8 +156,8 @@ class DataExportService
         }
 
         $appointments = $query->orderBy('appointment_date', 'desc')
-                             ->orderBy('appointment_time', 'desc')
-                             ->get();
+            ->orderBy('appointment_time', 'desc')
+            ->get();
 
         return [
             'headers' => [
@@ -164,26 +170,27 @@ class DataExportService
                 'Statut',
                 'Motif',
                 'Notes',
-                'Date de Création'
+                'Date de Création',
             ],
             'data' => $appointments->map(function ($appointment) {
                 return [
                     $appointment->id,
                     $appointment->patient->id,
-                    $appointment->patient->first_name . ' ' . $appointment->patient->last_name,
+                    $appointment->patient->first_name.' '.$appointment->patient->last_name,
                     $appointment->doctor->name ?? 'Not assigned',
                     $this->formatDate($appointment->appointment_date),
                     $appointment->appointment_time ? $appointment->appointment_time->format('H:i') : '',
-                    match($appointment->status) {
+                    match ($appointment->status) {
                         'completed' => 'Terminé',
                         'scheduled' => 'Planifié',
                         'cancelled' => 'Annulé',
                         'in_progress' => 'En cours',
+                        'no_show' => 'Absent',
                         default => ucfirst($appointment->status)
                     },
                     $appointment->reason ?? '',
                     $appointment->notes ?? '',
-                    $appointment->created_at->format('Y-m-d H:i:s')
+                    $appointment->created_at->format('Y-m-d H:i:s'),
                 ];
             })->toArray(),
             'summary' => [
@@ -192,14 +199,15 @@ class DataExportService
                 'scheduled' => $appointments->where('status', 'scheduled')->count(),
                 'cancelled' => $appointments->where('status', 'cancelled')->count(),
                 'in_progress' => $appointments->where('status', 'in_progress')->count(),
-            ]
+                'no_show' => $appointments->where('status', 'no_show')->count(),
+            ],
         ];
     }
 
     /**
      * Export medical records data
      */
-    private function exportMedicalRecords(string $startDate = null, string $endDate = null): array
+    private function exportMedicalRecords(?string $startDate = null, ?string $endDate = null): array
     {
         $query = MedicalRecord::with(['patient', 'doctor']);
 
@@ -230,13 +238,13 @@ class DataExportService
                 'Heart Rate',
                 'Oxygen Saturation',
                 'Notes',
-                'Created Date'
+                'Created Date',
             ],
             'data' => $records->map(function ($record) {
                 return [
                     $record->id,
                     $record->patient->id,
-                    $record->patient->first_name . ' ' . $record->patient->last_name,
+                    $record->patient->first_name.' '.$record->patient->last_name,
                     $record->doctor->name ?? 'Not specified',
                     $this->formatDate($record->visit_date),
                     $record->symptoms ?? '',
@@ -249,7 +257,7 @@ class DataExportService
                     $record->heart_rate ?? '',
                     $record->oxygen_saturation ?? '',
                     $record->notes ?? '',
-                    $record->created_at->format('Y-m-d H:i:s')
+                    $record->created_at->format('Y-m-d H:i:s'),
                 ];
             })->toArray(),
             'summary' => [
@@ -257,14 +265,14 @@ class DataExportService
                 'with_diagnosis' => $records->whereNotNull('diagnosis')->count(),
                 'with_treatment' => $records->whereNotNull('treatment')->count(),
                 'with_vitals' => $records->whereNotNull('weight')->whereNotNull('height')->count(),
-            ]
+            ],
         ];
     }
 
     /**
      * Export prescriptions data
      */
-    private function exportPrescriptions(string $startDate = null, string $endDate = null): array
+    private function exportPrescriptions(?string $startDate = null, ?string $endDate = null): array
     {
         $query = Prescription::with(['patient', 'doctor', 'items']);
 
@@ -286,7 +294,7 @@ class DataExportService
                     $prescriptionData[] = [
                         $prescription->id,
                         $prescription->patient->id,
-                        $prescription->patient->first_name . ' ' . $prescription->patient->last_name,
+                        $prescription->patient->first_name.' '.$prescription->patient->last_name,
                         $prescription->doctor->name ?? 'Not specified',
                         $this->formatDate($prescription->prescribed_date),
                         $item->medication_name ?? '',
@@ -295,7 +303,7 @@ class DataExportService
                         $item->duration_days ?? '',
                         $item->instructions ?? '',
                         $prescription->notes ?? '',
-                        $prescription->created_at->format('Y-m-d H:i:s')
+                        $prescription->created_at->format('Y-m-d H:i:s'),
                     ];
                 }
             } else {
@@ -303,7 +311,7 @@ class DataExportService
                 $prescriptionData[] = [
                     $prescription->id,
                     $prescription->patient->patient_id,
-                    $prescription->patient->first_name . ' ' . $prescription->patient->last_name,
+                    $prescription->patient->first_name.' '.$prescription->patient->last_name,
                     $prescription->doctor->name ?? 'Not specified',
                     $this->formatDate($prescription->prescribed_date),
                     $prescription->medication_name ?? '',
@@ -312,7 +320,7 @@ class DataExportService
                     $prescription->duration_days ?? '',
                     $prescription->instructions ?? '',
                     $prescription->notes ?? '',
-                    $prescription->created_at->format('Y-m-d H:i:s')
+                    $prescription->created_at->format('Y-m-d H:i:s'),
                 ];
             }
         }
@@ -330,21 +338,21 @@ class DataExportService
                 'Duration (Days)',
                 'Instructions',
                 'Notes',
-                'Created Date'
+                'Created Date',
             ],
             'data' => $prescriptionData,
             'summary' => [
                 'total_prescriptions' => $prescriptions->count(),
                 'total_medication_items' => collect($prescriptionData)->count(),
                 'unique_patients' => $prescriptions->unique('patient_id')->count(),
-            ]
+            ],
         ];
     }
 
     /**
      * Export users data
      */
-    private function exportUsers(string $startDate = null, string $endDate = null): array
+    private function exportUsers(?string $startDate = null, ?string $endDate = null): array
     {
         $query = User::query();
 
@@ -365,7 +373,7 @@ class DataExportService
                 'Email',
                 'Role',
                 'Email Verified',
-                'Created Date'
+                'Created Date',
             ],
             'data' => $users->map(function ($user) {
                 return [
@@ -374,7 +382,7 @@ class DataExportService
                     $user->email,
                     ucfirst($user->role),
                     $user->email_verified_at ? 'Yes' : 'No',
-                    $user->created_at->format('Y-m-d H:i:s')
+                    $user->created_at->format('Y-m-d H:i:s'),
                 ];
             })->toArray(),
             'summary' => [
@@ -382,7 +390,7 @@ class DataExportService
                 'doctors' => $users->where('role', 'doctor')->count(),
                 'receptionists' => $users->where('role', 'receptionist')->count(),
                 'verified_users' => $users->whereNotNull('email_verified_at')->count(),
-            ]
+            ],
         ];
     }
 
@@ -392,7 +400,7 @@ class DataExportService
     public function generateCSV(array $exportResult): string
     {
         $output = fopen('php://temp', 'r+');
-        
+
         // Add UTF-8 BOM
         fwrite($output, "\xEF\xBB\xBF");
 
@@ -402,7 +410,7 @@ class DataExportService
         $rangeStart = $exportResult['info']['date_range']['start'];
         $rangeEnd = $exportResult['info']['date_range']['end'];
         if ($rangeStart || $rangeEnd) {
-            fputcsv($output, ['Période:', ($rangeStart ? $rangeStart->format('d/m/Y') : '...') . ' au ' . ($rangeEnd ? $rangeEnd->format('d/m/Y') : '...')]);
+            fputcsv($output, ['Période:', ($rangeStart ? $rangeStart->format('d/m/Y') : '...').' au '.($rangeEnd ? $rangeEnd->format('d/m/Y') : '...')]);
         }
         fputcsv($output, ['Types de données:', implode(', ', $exportResult['info']['data_types'])]);
         fputcsv($output, []);
@@ -411,15 +419,15 @@ class DataExportService
         foreach ($exportResult['data'] as $dataType => $data) {
             fputcsv($output, [strtoupper(str_replace('_', ' ', $dataType))]);
             fputcsv($output, $data['headers']);
-            
+
             foreach ($data['data'] as $row) {
                 fputcsv($output, $row);
             }
-            
+
             fputcsv($output, []);
             fputcsv($output, ['Résumé:']);
             foreach ($data['summary'] as $key => $value) {
-                $translatedKey = match($key) {
+                $translatedKey = match ($key) {
                     'total_count' => 'Total',
                     'male_count' => 'Hommes',
                     'female_count' => 'Femmes',
@@ -428,6 +436,7 @@ class DataExportService
                     'scheduled' => 'Planifiés',
                     'cancelled' => 'Annulés',
                     'in_progress' => 'En cours',
+                    'no_show' => 'Absents',
                     'with_diagnosis' => 'Avec diagnostic',
                     'with_treatment' => 'Avec traitement',
                     'with_vitals' => 'Avec signes vitaux',
@@ -440,7 +449,7 @@ class DataExportService
                     'verified_users' => 'Utilisateurs vérifiés',
                     default => ucfirst(str_replace('_', ' ', $key))
                 };
-                fputcsv($output, [$translatedKey . ':', $value]);
+                fputcsv($output, [$translatedKey.':', $value]);
             }
             fputcsv($output, []);
             fputcsv($output, []);

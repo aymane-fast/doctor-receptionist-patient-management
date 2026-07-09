@@ -2,12 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Appointment extends Model
 {
     use HasFactory;
+
+    /**
+     * All statuses an appointment can be in. "no_show" means the patient
+     * never arrived, which clinics track separately from cancellations.
+     */
+    public const STATUSES = ['scheduled', 'in_progress', 'completed', 'cancelled', 'no_show'];
+
+    /**
+     * Statuses that still occupy the doctor's time (block a slot / hold a queue spot).
+     */
+    public const ACTIVE_STATUSES = ['scheduled', 'in_progress'];
 
     protected $fillable = [
         'patient_id',
@@ -19,6 +30,7 @@ class Appointment extends Model
         'queue_position',
         'estimated_time',
         'status',
+        'checked_in_at',
         'reason',
         'notes',
     ];
@@ -27,6 +39,7 @@ class Appointment extends Model
         'appointment_date' => 'date',
         'appointment_time' => 'datetime:H:i',
         'estimated_time' => 'datetime:H:i',
+        'checked_in_at' => 'datetime',
         'queue_number' => 'integer',
         'queue_position' => 'integer',
     ];
@@ -69,7 +82,15 @@ class Appointment extends Model
     public function scopeUpcoming($query)
     {
         return $query->where('appointment_date', '>=', today())
-                    ->whereNotIn('status', ['cancelled', 'completed']);
+            ->whereIn('status', self::ACTIVE_STATUSES);
+    }
+
+    /**
+     * Scope for appointments still waiting to be seen
+     */
+    public function scopeWaiting($query)
+    {
+        return $query->where('status', 'scheduled');
     }
 
     public function isQueueMode(): bool
@@ -79,11 +100,50 @@ class Appointment extends Model
 
     public function isScheduledMode(): bool
     {
-        return !$this->isQueueMode();
+        return ! $this->isQueueMode();
+    }
+
+    public function isCheckedIn(): bool
+    {
+        return $this->checked_in_at !== null;
+    }
+
+    /**
+     * Whether the appointment can still be cancelled or marked as a no-show.
+     */
+    public function isCancellable(): bool
+    {
+        return in_array($this->status, self::ACTIVE_STATUSES, true);
     }
 
     public function displayTime(): string
     {
         return $this->appointment_time?->format('g:i A') ?? '-';
+    }
+
+    /**
+     * Human label for a status (shared by views and exports).
+     */
+    public static function statusLabel(string $status): string
+    {
+        return match ($status) {
+            'in_progress' => __('appointments.in_progress'),
+            'no_show' => __('appointments.no_show'),
+            default => __('appointments.'.$status),
+        };
+    }
+
+    /**
+     * Tailwind badge classes per status (shared by views).
+     */
+    public static function statusBadgeClasses(string $status): string
+    {
+        return match ($status) {
+            'completed' => 'bg-green-100 text-green-700',
+            'in_progress' => 'bg-blue-100 text-blue-700',
+            'cancelled' => 'bg-red-100 text-red-600',
+            'no_show' => 'bg-orange-100 text-orange-700',
+            default => 'bg-yellow-100 text-yellow-700',
+        };
     }
 }

@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Appointment;
+use App\Models\MedicalRecord;
 use App\Models\Patient;
 use App\Models\User;
-use App\Models\MedicalRecord;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class StatisticsController extends Controller
 {
     public function index()
     {
         $statistics = $this->gatherStatistics();
+
         return view('statistics.index', compact('statistics'));
     }
 
@@ -23,27 +24,34 @@ class StatisticsController extends Controller
         $totalPatients = Patient::count();
         $totalAppointments = Appointment::count();
         $activeDoctors = User::where('role', 'doctor')->count();
-        
+
         // New patients this month
         $newPatientsThisMonth = Patient::whereMonth('created_at', Carbon::now()->month)
-                                     ->whereYear('created_at', Carbon::now()->year)
-                                     ->count();
-        
+            ->whereYear('created_at', Carbon::now()->year)
+            ->count();
+
         // Appointments this week
         $appointmentsThisWeek = Appointment::whereBetween('appointment_date', [
             Carbon::now()->startOfWeek(),
-            Carbon::now()->endOfWeek()
+            Carbon::now()->endOfWeek(),
         ])->count();
-        
+
         // Success rate (completed appointments percentage)
         $completedAppointments = Appointment::where('status', 'completed')->count();
         $successRate = $totalAppointments > 0 ? round(($completedAppointments / $totalAppointments) * 100, 1) : 0;
-        
+
         // Status distribution
         $scheduledAppointments = Appointment::where('status', 'scheduled')->count();
         $inProgressAppointments = Appointment::where('status', 'in_progress')->count();
         $cancelledAppointments = Appointment::where('status', 'cancelled')->count();
-        
+        $noShowAppointments = Appointment::where('status', 'no_show')->count();
+
+        // No-show rate over appointments that were expected (kept or missed)
+        $expectedAppointments = $completedAppointments + $noShowAppointments;
+        $noShowRate = $expectedAppointments > 0
+            ? round(($noShowAppointments / $expectedAppointments) * 100, 1)
+            : 0;
+
         // Trend data (last 7 days)
         $trendData = [];
         $trendLabels = [];
@@ -62,7 +70,7 @@ class StatisticsController extends Controller
         for ($hour = 8; $hour <= 17; $hour++) {
             $hourlyDistribution[] = $countsByHour[$hour] ?? 0;
         }
-        
+
         // Age groups - Fixed calculation
         $ageGroups = [
             ['range' => '0-18', 'count' => 0, 'percentage' => 0],
@@ -71,15 +79,15 @@ class StatisticsController extends Controller
             ['range' => '51-70', 'count' => 0, 'percentage' => 0],
             ['range' => '70+', 'count' => 0, 'percentage' => 0],
         ];
-        
+
         // Get all patients with valid birth dates
         $patients = Patient::whereNotNull('birth_date')->get(['birth_date']);
-        
+
         foreach ($patients as $patient) {
             try {
                 $birthDate = Carbon::parse($patient->birth_date);
                 $age = $birthDate->age;
-                
+
                 if ($age <= 18) {
                     $ageGroups[0]['count']++;
                 } elseif ($age <= 30) {
@@ -96,13 +104,13 @@ class StatisticsController extends Controller
                 continue;
             }
         }
-        
+
         // Calculate percentages based on patients with valid birth dates
         $totalPatientsWithAge = $patients->count();
         foreach ($ageGroups as &$group) {
             $group['percentage'] = $totalPatientsWithAge > 0 ? round(($group['count'] / $totalPatientsWithAge) * 100, 1) : 0;
         }
-        
+
         // Revenue calculations
         $pricePerConsultation = (float) \App\Models\Setting::get('consultation_price', 50.0);
 
@@ -123,29 +131,22 @@ class StatisticsController extends Controller
             $monthlyLabels[] = $month->format('M Y');
             $monthlyRevenue[] = ($completedByMonth[$month->format('Y-m')] ?? 0) * $pricePerConsultation;
         }
-        
+
         // Total revenue calculations
         $totalRevenue = array_sum($monthlyRevenue);
         $thisMonthRevenue = end($monthlyRevenue);
         $lastMonthRevenue = count($monthlyRevenue) > 1 ? $monthlyRevenue[count($monthlyRevenue) - 2] : 0;
         $revenueGrowth = $lastMonthRevenue > 0 ? round((($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1) : 0;
-        
-        // Revenue breakdown by appointment type
-        $revenueByType = [
-            ['type' => 'General Consultation', 'amount' => $thisMonthRevenue * 0.6, 'count' => (int)($completedAppointments * 0.6)],
-            ['type' => 'Follow-up Visit', 'amount' => $thisMonthRevenue * 0.25, 'count' => (int)($completedAppointments * 0.25)],
-            ['type' => 'Emergency Visit', 'amount' => $thisMonthRevenue * 0.15, 'count' => (int)($completedAppointments * 0.15)],
-        ];
-        
+
         // Recent activities
         $recentActivities = [];
-        
+
         // Recent appointments
         $recentAppointments = Appointment::with(['patient', 'doctor'])
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
-        
+
         foreach ($recentAppointments as $appointment) {
             $recentActivities[] = [
                 'title' => 'New Appointment Scheduled',
@@ -153,10 +154,10 @@ class StatisticsController extends Controller
                 'time' => $appointment->created_at->diffForHumans(),
                 'timestamp' => $appointment->created_at,
                 'icon' => 'fas fa-calendar-plus',
-                'color' => 'from-blue-500 to-blue-600'
+                'color' => 'from-blue-500 to-blue-600',
             ];
         }
-        
+
         // Recent patients
         $recentPatients = Patient::orderBy('created_at', 'desc')->take(3)->get();
         foreach ($recentPatients as $patient) {
@@ -166,16 +167,16 @@ class StatisticsController extends Controller
                 'time' => $patient->created_at->diffForHumans(),
                 'timestamp' => $patient->created_at,
                 'icon' => 'fas fa-user-plus',
-                'color' => 'from-green-500 to-green-600'
+                'color' => 'from-green-500 to-green-600',
             ];
         }
-        
+
         // Recent medical records
         $recentRecords = MedicalRecord::with(['patient', 'doctor'])
             ->orderBy('created_at', 'desc')
             ->take(2)
             ->get();
-        
+
         foreach ($recentRecords as $record) {
             $recentActivities[] = [
                 'title' => 'Medical Record Created',
@@ -183,7 +184,7 @@ class StatisticsController extends Controller
                 'time' => $record->created_at->diffForHumans(),
                 'timestamp' => $record->created_at,
                 'icon' => 'fas fa-file-medical',
-                'color' => 'from-purple-500 to-purple-600'
+                'color' => 'from-purple-500 to-purple-600',
             ];
         }
 
@@ -191,7 +192,7 @@ class StatisticsController extends Controller
         usort($recentActivities, fn ($a, $b) => $b['timestamp'] <=> $a['timestamp']);
 
         $recentActivities = array_slice($recentActivities, 0, 10);
-        
+
         // Top patients (most visits)
         $topPatients = Patient::withCount('appointments')
             ->orderBy('appointments_count', 'desc')
@@ -199,13 +200,13 @@ class StatisticsController extends Controller
             ->get()
             ->map(function ($patient) {
                 return [
-                    'name' => $patient->first_name . ' ' . $patient->last_name,
+                    'name' => $patient->first_name.' '.$patient->last_name,
                     'phone' => $patient->phone,
-                    'visits' => $patient->appointments_count
+                    'visits' => $patient->appointments_count,
                 ];
             })
             ->toArray();
-        
+
         return [
             'total_patients' => $totalPatients,
             'total_appointments' => $totalAppointments,
@@ -217,6 +218,8 @@ class StatisticsController extends Controller
             'scheduled_appointments' => $scheduledAppointments,
             'in_progress_appointments' => $inProgressAppointments,
             'cancelled_appointments' => $cancelledAppointments,
+            'no_show_appointments' => $noShowAppointments,
+            'no_show_rate' => $noShowRate,
             'trend_data' => $trendData,
             'trend_labels' => $trendLabels,
             'hourly_distribution' => $hourlyDistribution,
@@ -230,7 +233,6 @@ class StatisticsController extends Controller
             'total_revenue' => $totalRevenue,
             'this_month_revenue' => $thisMonthRevenue,
             'revenue_growth' => $revenueGrowth,
-            'revenue_by_type' => $revenueByType
         ];
     }
 
@@ -242,7 +244,7 @@ class StatisticsController extends Controller
     public function getTrendData(Request $request)
     {
         $timeframe = $request->get('timeframe', 'week');
-        
+
         switch ($timeframe) {
             case 'week':
                 return $this->getWeeklyTrend();
@@ -292,9 +294,9 @@ class StatisticsController extends Controller
         $labels = [];
 
         $countsByMonth = Appointment::whereBetween('appointment_date', [
-                Carbon::now()->subMonths(11)->startOfMonth()->toDateString(),
-                Carbon::now()->endOfMonth()->toDateString(),
-            ])
+            Carbon::now()->subMonths(11)->startOfMonth()->toDateString(),
+            Carbon::now()->endOfMonth()->toDateString(),
+        ])
             ->get(['appointment_date'])
             ->countBy(fn ($appointment) => $appointment->appointment_date->format('Y-m'));
 

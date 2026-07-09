@@ -36,6 +36,13 @@
                     {{ __('current_patient.no_patient_assigned') }}
                 </p>
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <form action="{{ route('dashboard.initialize-first-patient') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+                            <i class="fas fa-user-check"></i>
+                            <span>{{ __('appointments.call_next_patient') }}</span>
+                        </button>
+                    </form>
                     <a href="{{ route('appointments.index') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
                         <i class="fas fa-calendar-alt"></i>
                         <span>{{ __('current_patient.view_appointments') }}</span>

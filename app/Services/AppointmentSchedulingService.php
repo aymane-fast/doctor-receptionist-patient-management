@@ -27,13 +27,13 @@ class AppointmentSchedulingService
         $appointmentDate = $date instanceof Carbon ? $date->copy() : Carbon::parse($date);
         $workingHours = $this->workingHoursForDate($appointmentDate);
 
-        if (!$workingHours['is_working'] || empty($workingHours['start_time']) || empty($workingHours['end_time'])) {
+        if (! $workingHours['is_working'] || empty($workingHours['start_time']) || empty($workingHours['end_time'])) {
             return null;
         }
 
         return [
-            'start' => Carbon::parse($appointmentDate->toDateString() . ' ' . $workingHours['start_time']),
-            'end' => Carbon::parse($appointmentDate->toDateString() . ' ' . $workingHours['end_time']),
+            'start' => Carbon::parse($appointmentDate->toDateString().' '.$workingHours['start_time']),
+            'end' => Carbon::parse($appointmentDate->toDateString().' '.$workingHours['end_time']),
             'raw' => $workingHours,
         ];
     }
@@ -41,17 +41,17 @@ class AppointmentSchedulingService
     public function validateScheduledTime(string $date, string $time): ?string
     {
         $window = $this->workingWindow($date);
-        $appointmentStart = Carbon::parse($date . ' ' . $time);
+        $appointmentStart = Carbon::parse($date.' '.$time);
         $appointmentEnd = $appointmentStart->copy()->addMinutes($this->duration());
 
-        if (!$window) {
-            return 'We are closed on ' . $appointmentStart->format('l') . '.';
+        if (! $window) {
+            return 'We are closed on '.$appointmentStart->format('l').'.';
         }
 
         if ($appointmentStart->lt($window['start']) || $appointmentEnd->gt($window['end'])) {
-            return 'Appointment time is outside working hours. Working hours for ' .
-                $appointmentStart->format('l') . ' are ' .
-                $window['raw']['start_time'] . ' - ' . $window['raw']['end_time'] . '.';
+            return 'Appointment time is outside working hours. Working hours for '.
+                $appointmentStart->format('l').' are '.
+                $window['raw']['start_time'].' - '.$window['raw']['end_time'].'.';
         }
 
         return null;
@@ -59,12 +59,12 @@ class AppointmentSchedulingService
 
     public function hasScheduledConflict(int $doctorId, string $date, string $time, ?int $excludeId = null): bool
     {
-        $slotStart = Carbon::parse($date . ' ' . $time);
+        $slotStart = Carbon::parse($date.' '.$time);
         $slotEnd = $slotStart->copy()->addMinutes($this->duration());
 
         return $this->blockingAppointments($doctorId, $date, $excludeId)
             ->contains(function (Appointment $appointment) use ($slotStart, $slotEnd) {
-                $existingStart = Carbon::parse($appointment->appointment_date->toDateString() . ' ' . $appointment->appointment_time->format('H:i:s'));
+                $existingStart = Carbon::parse($appointment->appointment_date->toDateString().' '.$appointment->appointment_time->format('H:i:s'));
                 $existingEnd = $existingStart->copy()->addMinutes($this->duration());
 
                 return $slotStart->lt($existingEnd) && $slotEnd->gt($existingStart);
@@ -76,7 +76,7 @@ class AppointmentSchedulingService
         $appointmentDate = $date instanceof Carbon ? $date : Carbon::parse($date);
         $window = $this->workingWindow($appointmentDate);
 
-        if (!$window) {
+        if (! $window) {
             return [];
         }
 
@@ -92,7 +92,7 @@ class AppointmentSchedulingService
         $current = $start->copy();
 
         while ($current->copy()->addMinutes($this->duration())->lte($window['end'])) {
-            if (!$this->hasScheduledConflict($doctorId, $appointmentDate->toDateString(), $current->format('H:i'), $excludeId)) {
+            if (! $this->hasScheduledConflict($doctorId, $appointmentDate->toDateString(), $current->format('H:i'), $excludeId)) {
                 $slots[] = [
                     'time' => $current->format('H:i'),
                     'formatted' => $current->format('H:i'),
@@ -134,7 +134,7 @@ class AppointmentSchedulingService
 
     public function createQueueAppointment(array $data): Appointment
     {
-        if (!$this->workingWindow($data['appointment_date'])) {
+        if (! $this->workingWindow($data['appointment_date'])) {
             throw new \InvalidArgumentException('No working hours are configured for this day.');
         }
 
@@ -152,15 +152,14 @@ class AppointmentSchedulingService
                 throw new \InvalidArgumentException($limitError);
             }
 
-            $position = $this->nextQueuePosition($data['doctor_id'], $data['appointment_date']);
-            $estimatedTime = $this->estimatedQueueTime($data['appointment_date'], $position);
+            $estimatedTime = $this->estimatedQueueJoinTime($data['doctor_id'], $data['appointment_date']);
 
             $appointment = Appointment::create(array_merge($data, [
                 'appointment_mode' => 'queue',
                 'appointment_time' => $estimatedTime->format('H:i:s'),
                 'estimated_time' => $estimatedTime->format('H:i:s'),
-                'queue_number' => $position,
-                'queue_position' => $position,
+                'queue_number' => $this->nextQueueNumber($data['doctor_id'], $data['appointment_date']),
+                'queue_position' => $this->nextQueuePosition($data['doctor_id'], $data['appointment_date']),
                 'status' => 'scheduled',
             ]));
 
@@ -170,26 +169,41 @@ class AppointmentSchedulingService
         });
     }
 
+    /**
+     * Re-sequence queue positions and refresh estimated times.
+     *
+     * Ticket numbers (queue_number) are never rewritten — a patient told
+     * "you are #7" stays #7 all day. Only patients still waiting get new
+     * estimates, anchored to the current time so a 3 PM walk-in is not
+     * promised a 9 AM slot.
+     */
     public function recalculateQueue(int $doctorId, string|Carbon $date): void
     {
-        $appointments = $this->queueAppointments($doctorId, $date);
+        $appointmentDate = $date instanceof Carbon ? $date->copy() : Carbon::parse($date);
+        $appointments = $this->queueAppointments($doctorId, $appointmentDate);
 
         foreach ($appointments->values() as $index => $appointment) {
-            $position = $index + 1;
-            $estimatedTime = $this->estimatedQueueTime($appointment->appointment_date, $position);
+            if ($appointment->queue_position !== $index + 1) {
+                $appointment->updateQuietly(['queue_position' => $index + 1]);
+            }
+        }
+
+        $base = $this->queueEstimateBase($doctorId, $appointmentDate);
+        $waiting = $appointments->where('status', 'scheduled')->values();
+
+        foreach ($waiting as $index => $appointment) {
+            $estimated = $base->copy()->addMinutes($index * $this->duration());
 
             $appointment->updateQuietly([
-                'queue_position' => $position,
-                'queue_number' => $position,
-                'estimated_time' => $estimatedTime->format('H:i:s'),
-                'appointment_time' => $estimatedTime->format('H:i:s'),
+                'estimated_time' => $estimated->format('H:i:s'),
+                'appointment_time' => $estimated->format('H:i:s'),
             ]);
         }
     }
 
     public function moveQueueAppointment(Appointment $appointment, string $direction): bool
     {
-        if (!$appointment->isQueueMode() || in_array($appointment->status, ['completed', 'cancelled'], true)) {
+        if (! $appointment->isQueueMode() || $appointment->status !== 'scheduled') {
             return false;
         }
 
@@ -199,12 +213,12 @@ class AppointmentSchedulingService
         $swapWith = Appointment::where('doctor_id', $appointment->doctor_id)
             ->whereDate('appointment_date', $appointment->appointment_date)
             ->where('appointment_mode', 'queue')
-            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->where('status', 'scheduled')
             ->where('queue_position', $operator, $appointment->queue_position)
             ->orderBy('queue_position', $order)
             ->first();
 
-        if (!$swapWith) {
+        if (! $swapWith) {
             return false;
         }
 
@@ -220,14 +234,14 @@ class AppointmentSchedulingService
     public function validateQueueCapacity(int $doctorId, string|Carbon $date): ?string
     {
         $doctor = \App\Models\User::find($doctorId);
-        if (!$doctor || !$doctor->queue_daily_limit) {
+        if (! $doctor || ! $doctor->queue_daily_limit) {
             return null;
         }
 
         $count = Appointment::where('doctor_id', $doctorId)
             ->whereDate('appointment_date', $date)
             ->where('appointment_mode', 'queue')
-            ->where('status', '!=', 'cancelled')
+            ->whereNotIn('status', ['cancelled', 'no_show'])
             ->count();
 
         if ($count >= $doctor->queue_daily_limit) {
@@ -237,22 +251,112 @@ class AppointmentSchedulingService
         return null;
     }
 
-    public function nextQueuePosition(int $doctorId, string|Carbon $date): int
+    /**
+     * Next ticket number for the day. Numbers are never reused, even when a
+     * ticket was cancelled or marked no-show.
+     */
+    public function nextQueueNumber(int $doctorId, string|Carbon $date): int
     {
-        return Appointment::where('doctor_id', $doctorId)
+        return (int) Appointment::where('doctor_id', $doctorId)
             ->whereDate('appointment_date', $date)
             ->where('appointment_mode', 'queue')
-            ->where('status', '!=', 'cancelled')
+            ->max('queue_number') + 1;
+    }
+
+    public function nextQueuePosition(int $doctorId, string|Carbon $date): int
+    {
+        return (int) Appointment::where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', $date)
+            ->where('appointment_mode', 'queue')
+            ->whereNotIn('status', ['cancelled', 'no_show'])
             ->max('queue_position') + 1;
     }
 
-    public function estimatedQueueTime(string|Carbon $date, int $position): Carbon
+    /**
+     * Estimated consultation time for a patient joining the queue right now.
+     */
+    public function estimatedQueueJoinTime(int $doctorId, string|Carbon $date): Carbon
     {
-        $appointmentDate = $date instanceof Carbon ? $date : Carbon::parse($date);
-        $window = $this->workingWindow($appointmentDate);
-        $start = $window ? $window['start'] : Carbon::parse($appointmentDate->toDateString() . ' 09:00');
+        $appointmentDate = $date instanceof Carbon ? $date->copy() : Carbon::parse($date);
 
-        return $start->copy()->addMinutes(($position - 1) * $this->duration());
+        $waitingCount = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', $appointmentDate)
+            ->where('appointment_mode', 'queue')
+            ->where('status', 'scheduled')
+            ->count();
+
+        return $this->queueEstimateBase($doctorId, $appointmentDate)
+            ->addMinutes($waitingCount * $this->duration());
+    }
+
+    /**
+     * Where queue estimates start from: the opening time, or the current
+     * time once the day is underway, plus the consultation currently in
+     * progress (which has to finish first).
+     */
+    private function queueEstimateBase(int $doctorId, Carbon $date): Carbon
+    {
+        $window = $this->workingWindow($date);
+        $base = $window ? $window['start']->copy() : Carbon::parse($date->toDateString().' 09:00');
+
+        if ($date->isToday() && now()->gt($base)) {
+            $base = now()->copy()->startOfMinute();
+        }
+
+        $hasInProgress = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', $date)
+            ->where('status', 'in_progress')
+            ->exists();
+
+        if ($hasInProgress) {
+            $base->addMinutes($this->duration());
+        }
+
+        return $base;
+    }
+
+    /**
+     * Promote today's next patient to "in consultation" for this doctor.
+     * Patients who have checked in (arrived) always come first; if nobody
+     * has arrived yet, fall back to the planned order.
+     */
+    public function promoteNextPatient(int $doctorId): ?Appointment
+    {
+        $waiting = Appointment::where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', today())
+            ->where('status', 'scheduled');
+
+        $next = (clone $waiting)
+            ->whereNotNull('checked_in_at')
+            ->orderBy('appointment_time')
+            ->orderBy('queue_position')
+            ->first()
+            ?? $waiting
+                ->orderBy('appointment_time')
+                ->orderBy('queue_position')
+                ->first();
+
+        $next?->update([
+            'status' => 'in_progress',
+            // The patient is in the consultation room, so they have arrived.
+            'checked_in_at' => $next->checked_in_at ?? now(),
+        ]);
+
+        return $next;
+    }
+
+    /**
+     * Whether the patient already holds an active appointment with this
+     * doctor on the given day (guards against accidental double booking).
+     */
+    public function hasActiveSameDayAppointment(int $patientId, int $doctorId, string|Carbon $date, ?int $excludeId = null): bool
+    {
+        return Appointment::where('patient_id', $patientId)
+            ->where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', $date)
+            ->whereIn('status', Appointment::ACTIVE_STATUSES)
+            ->when($excludeId, fn ($query) => $query->where('id', '!=', $excludeId))
+            ->exists();
     }
 
     public function queueAppointments(int $doctorId, string|Carbon $date): Collection
@@ -261,7 +365,7 @@ class AppointmentSchedulingService
             ->where('doctor_id', $doctorId)
             ->whereDate('appointment_date', $date)
             ->where('appointment_mode', 'queue')
-            ->where('status', '!=', 'cancelled')
+            ->whereNotIn('status', ['cancelled', 'no_show'])
             ->orderBy('queue_position')
             ->orderBy('created_at')
             ->get();
@@ -271,7 +375,7 @@ class AppointmentSchedulingService
     {
         return Appointment::where('doctor_id', $doctorId)
             ->whereDate('appointment_date', $date)
-            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->whereIn('status', Appointment::ACTIVE_STATUSES)
             ->when($excludeId, fn ($query) => $query->where('id', '!=', $excludeId))
             ->get();
     }
