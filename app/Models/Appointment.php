@@ -31,6 +31,7 @@ class Appointment extends Model
         'estimated_time',
         'status',
         'checked_in_at',
+        'reminder_sent_at',
         'reason',
         'notes',
     ];
@@ -40,9 +41,36 @@ class Appointment extends Model
         'appointment_time' => 'datetime:H:i',
         'estimated_time' => 'datetime:H:i',
         'checked_in_at' => 'datetime',
+        'reminder_sent_at' => 'datetime',
         'queue_number' => 'integer',
         'queue_position' => 'integer',
     ];
+
+    /**
+     * Audit every status transition (creation and changes). Quiet updates
+     * (queue re-sequencing) do not fire events and are intentionally not
+     * logged — they never touch status.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (Appointment $appointment) {
+            $appointment->statusLogs()->create([
+                'changed_by' => auth()->id(),
+                'from_status' => null,
+                'to_status' => $appointment->status,
+            ]);
+        });
+
+        static::updated(function (Appointment $appointment) {
+            if ($appointment->wasChanged('status')) {
+                $appointment->statusLogs()->create([
+                    'changed_by' => auth()->id(),
+                    'from_status' => $appointment->getOriginal('status'),
+                    'to_status' => $appointment->status,
+                ]);
+            }
+        });
+    }
 
     /**
      * Patient relationship
@@ -50,6 +78,14 @@ class Appointment extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    /**
+     * Status change audit trail
+     */
+    public function statusLogs()
+    {
+        return $this->hasMany(AppointmentStatusLog::class)->latest('id');
     }
 
     /**

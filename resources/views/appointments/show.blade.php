@@ -218,6 +218,17 @@
                     @endif
 
                     @if($appointment->status == 'scheduled')
+                        @if(!$appointment->isQueueMode())
+                            <form action="{{ route('appointments.rebook-next-slot', $appointment) }}" method="POST" class="w-full">
+                                @csrf
+                                <button type="submit" class="btn-ghost w-full px-4 py-3"
+                                        onclick="return confirm('{{ __('appointments.rebook_next_slot') }}?')">
+                                    <i class="fas fa-calendar-day"></i>
+                                    <span>{{ __('appointments.rebook_next_slot') }}</span>
+                                </button>
+                            </form>
+                        @endif
+
                         <form action="{{ route('appointments.no-show', $appointment) }}" method="POST" class="w-full">
                             @csrf
                             <button type="submit" class="btn-ghost w-full px-4 py-3"
@@ -277,6 +288,45 @@
                 </div>
                 </div>
             </div>
+
+            <!-- Status History (audit trail) -->
+            @if($appointment->statusLogs->isNotEmpty())
+            <div class="section-card overflow-hidden">
+                <div class="soft-panel px-6 py-4 border-b border-teal-100">
+                    <h3 class="text-lg font-bold text-teal-900 flex items-center">
+                        <div class="w-8 h-8 icon-tile rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        {{ __('appointments.status_history') }}
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-3">
+                        @foreach($appointment->statusLogs as $log)
+                        <div class="flex items-start justify-between py-2 border-b border-gray-100 last:border-b-0">
+                            <div>
+                                <div class="text-sm font-semibold text-gray-900">
+                                    @if($log->from_status)
+                                        {{ \App\Models\Appointment::statusLabel($log->from_status) }}
+                                        <i class="fas fa-arrow-right text-gray-400 text-xs mx-1"></i>
+                                    @endif
+                                    <span class="px-2 py-0.5 rounded-full text-xs {{ \App\Models\Appointment::statusBadgeClasses($log->to_status) }}">
+                                        {{ \App\Models\Appointment::statusLabel($log->to_status) }}
+                                    </span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    {{ $log->changedBy?->name ?? __('appointments.system_action') }}
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500 whitespace-nowrap ml-3">
+                                {{ $log->created_at->format('M j, g:i A') }}
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <!-- Related Records -->
             @if(auth()->user()->isDoctor())

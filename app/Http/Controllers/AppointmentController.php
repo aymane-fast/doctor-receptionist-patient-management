@@ -309,12 +309,24 @@ class AppointmentController extends Controller
             return back()->withErrors(['appointment_time' => $workingHoursError])->withInput();
         }
 
-        // Check for conflicts
-        if ($this->hasAppointmentConflict($validated['doctor_id'], $validated['appointment_date'], $validated['appointment_time'])) {
-            return back()->withErrors(['appointment_time' => 'Doctor already has an appointment at this time.'])->withInput();
-        }
+        // Conflict check + create inside one transaction, serialized per
+        // doctor/day, so two receptionists cannot land in the same slot.
+        try {
+            $appointment = \DB::transaction(function () use ($validated) {
+                Appointment::where('doctor_id', $validated['doctor_id'])
+                    ->whereDate('appointment_date', $validated['appointment_date'])
+                    ->lockForUpdate()
+                    ->count();
 
-        $appointment = Appointment::create($validated);
+                if ($this->hasAppointmentConflict($validated['doctor_id'], $validated['appointment_date'], $validated['appointment_time'])) {
+                    throw new \InvalidArgumentException('Doctor already has an appointment at this time.');
+                }
+
+                return Appointment::create($validated);
+            });
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['appointment_time' => $e->getMessage()])->withInput();
+        }
 
         return redirect()->route('appointments.show', $appointment)
             ->with('success', 'Appointment created successfully!');
@@ -327,7 +339,7 @@ class AppointmentController extends Controller
     {
         $this->authorizeAppointmentAccess($appointment);
 
-        $appointment->load(['patient', 'doctor', 'medicalRecord']);
+        $appointment->load(['patient', 'doctor', 'medicalRecord', 'statusLogs.changedBy']);
 
         return view('appointments.show', compact('appointment'));
     }
@@ -797,7 +809,72 @@ class AppointmentController extends Controller
             $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
         }
 
+        // A freed slot is an opportunity: surface the waitlist to the front desk.
+        $waitingCount = \App\Models\WaitlistEntry::waiting()
+            ->where('doctor_id', $appointment->doctor_id)
+            ->count();
+
+        if ($waitingCount > 0) {
+            $result .= ' '.__('appointments.waitlist_hint_after_cancel', ['count' => $waitingCount]);
+        }
+
         return back()->with('success', $result);
+    }
+
+    /**
+     * Move a waiting appointment to the next free slot (today or the next
+     * day with availability), without hunting through the calendar.
+     */
+    public function rebookNextSlot(Appointment $appointment)
+    {
+        if (! $this->canManageAppointment($appointment)) {
+            abort(403);
+        }
+
+        if ($appointment->isQueueMode()) {
+            return back()->with('error', __('appointments.rebook_queue_mode'));
+        }
+
+        if ($appointment->status !== 'scheduled') {
+            return back()->with('error', __('appointments.rebook_only_scheduled'));
+        }
+
+        // Search up to two weeks ahead, skipping days where the patient
+        // already has another active appointment with this doctor.
+        $newDate = null;
+        $newSlot = null;
+
+        for ($i = 0; $i <= 14; $i++) {
+            $candidate = today()->addDays($i);
+
+            if ($this->scheduler()->hasActiveSameDayAppointment($appointment->patient_id, $appointment->doctor_id, $candidate, $appointment->id)) {
+                continue;
+            }
+
+            $slot = $this->scheduler()->nextAvailableSlot($appointment->doctor_id, $candidate, $appointment->id);
+            if ($slot) {
+                $newDate = $candidate;
+                $newSlot = $slot;
+                break;
+            }
+        }
+
+        if (! $newSlot) {
+            return back()->with('error', __('appointments.rebook_no_slot'));
+        }
+
+        $previous = $appointment->appointment_date->format('M j, Y').' '.$appointment->displayTime();
+
+        $appointment->update([
+            'appointment_date' => $newDate->toDateString(),
+            'appointment_time' => $newSlot['time'],
+            'notes' => ($appointment->notes ? $appointment->notes."\n" : '')
+                ."Rebooked from {$previous} on ".now()->format('Y-m-d H:i'),
+        ]);
+
+        $datetime = Carbon::parse($newDate->toDateString().' '.$newSlot['time'])->format('M j, Y \a\t g:i A');
+
+        return back()->with('success', __('appointments.rebooked_to', ['datetime' => $datetime]));
     }
 
     /**

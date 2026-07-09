@@ -54,6 +54,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('patients', PatientController::class);
     Route::get('/patients/{patient}/ai-summary', [PatientController::class, 'aiSummary'])->name('patients.ai-summary');
 
+    // Waitlist (accessible by both roles)
+    Route::get('/waitlist', [App\Http\Controllers\WaitlistController::class, 'index'])->name('waitlist.index');
+    Route::post('/waitlist', [App\Http\Controllers\WaitlistController::class, 'store'])->name('waitlist.store');
+    Route::post('/waitlist/{entry}/book', [App\Http\Controllers\WaitlistController::class, 'book'])->name('waitlist.book');
+    Route::post('/waitlist/{entry}/cancel', [App\Http\Controllers\WaitlistController::class, 'cancel'])->name('waitlist.cancel');
+
     // Appointment management (accessible by both roles)
     Route::get('/appointments/queue', [AppointmentController::class, 'queue'])->name('appointments.queue');
     Route::post('/appointments/{appointment}/queue-up', [AppointmentController::class, 'moveQueueUp'])->name('appointments.queue-up');
@@ -67,6 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/appointments/{appointment}/no-show', [AppointmentController::class, 'markNoShow'])->name('appointments.no-show');
     Route::post('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::get('/appointments/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])->name('appointments.reschedule');
+    Route::post('/appointments/{appointment}/rebook-next-slot', [AppointmentController::class, 'rebookNextSlot'])->name('appointments.rebook-next-slot');
     Route::post('/appointments/current/mark-done', [AppointmentController::class, 'markCurrentDone'])->name('appointments.mark-current-done');
     Route::post('/appointments/{patient}/follow-up', [AppointmentController::class, 'createFollowUp'])->name('appointments.create-follow-up');
 

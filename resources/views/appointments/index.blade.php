@@ -23,6 +23,10 @@
                     <i class="fas fa-list-ol"></i>
                     <span>Queue</span>
                 </a>
+                <a href="{{ route('waitlist.index') }}" class="btn-secondary px-6 py-3 rounded-2xl">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span>{{ __('appointments.waitlist') }}</span>
+                </a>
                 <a href="{{ route('appointments.create') }}" class="btn-primary px-6 py-3 rounded-2xl deep-shadow">
                     <i class="fas fa-plus"></i>
                     <span>{{ __('appointments.schedule_appointment') }}</span>

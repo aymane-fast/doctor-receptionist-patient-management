@@ -138,6 +138,33 @@ class StatisticsController extends Controller
         $lastMonthRevenue = count($monthlyRevenue) > 1 ? $monthlyRevenue[count($monthlyRevenue) - 2] : 0;
         $revenueGrowth = $lastMonthRevenue > 0 ? round((($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1) : 0;
 
+        // Per-doctor performance (one portable grouped query)
+        $statusByDoctor = Appointment::selectRaw('doctor_id, status, count(*) as total')
+            ->groupBy('doctor_id', 'status')
+            ->get()
+            ->groupBy('doctor_id');
+
+        $doctorPerformance = User::where('role', 'doctor')->orderBy('name')->get()
+            ->map(function ($doctor) use ($statusByDoctor, $pricePerConsultation) {
+                $byStatus = $statusByDoctor->get($doctor->id, collect())->pluck('total', 'status');
+                $completed = (int) ($byStatus['completed'] ?? 0);
+                $noShow = (int) ($byStatus['no_show'] ?? 0);
+                $expected = $completed + $noShow;
+
+                return [
+                    'name' => $doctor->name,
+                    'mode' => $doctor->appointment_mode ?? 'scheduled',
+                    'total' => (int) $byStatus->sum(),
+                    'completed' => $completed,
+                    'cancelled' => (int) ($byStatus['cancelled'] ?? 0),
+                    'no_show' => $noShow,
+                    'no_show_rate' => $expected > 0 ? round(($noShow / $expected) * 100, 1) : 0,
+                    'revenue' => $completed * $pricePerConsultation,
+                ];
+            })
+            ->values()
+            ->toArray();
+
         // Recent activities
         $recentActivities = [];
 
@@ -220,6 +247,7 @@ class StatisticsController extends Controller
             'cancelled_appointments' => $cancelledAppointments,
             'no_show_appointments' => $noShowAppointments,
             'no_show_rate' => $noShowRate,
+            'doctor_performance' => $doctorPerformance,
             'trend_data' => $trendData,
             'trend_labels' => $trendLabels,
             'hourly_distribution' => $hourlyDistribution,

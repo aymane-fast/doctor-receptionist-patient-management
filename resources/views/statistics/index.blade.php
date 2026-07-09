@@ -196,6 +196,45 @@
         </div>
     </div>
 
+    <!-- Doctor Performance -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 border border-white/20">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">
+                <i class="fas fa-user-md text-teal-600 mr-2"></i>{{ __('statistics.doctor_performance') }}
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-100">
+                    <thead>
+                        <tr class="text-left text-xs font-bold text-gray-500 uppercase">
+                            <th class="px-4 py-3">{{ __('appointments.doctor') }}</th>
+                            <th class="px-4 py-3">Mode</th>
+                            <th class="px-4 py-3">{{ __('statistics.total_appointments') }}</th>
+                            <th class="px-4 py-3">{{ __('appointments.completed') }}</th>
+                            <th class="px-4 py-3">{{ __('appointments.cancelled') }}</th>
+                            <th class="px-4 py-3">{{ __('appointments.no_show') }}</th>
+                            <th class="px-4 py-3">{{ __('statistics.no_show_rate') }}</th>
+                            <th class="px-4 py-3">{{ __('statistics.estimated_revenue') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach($statistics['doctor_performance'] ?? [] as $doctor)
+                        <tr class="{{ $loop->even ? 'bg-gray-50' : 'bg-white' }}">
+                            <td class="px-4 py-3 font-semibold text-gray-900">Dr. {{ $doctor['name'] }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ ucfirst($doctor['mode']) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">{{ $doctor['total'] }}</td>
+                            <td class="px-4 py-3 text-sm text-emerald-700 font-semibold">{{ $doctor['completed'] }}</td>
+                            <td class="px-4 py-3 text-sm text-red-600">{{ $doctor['cancelled'] }}</td>
+                            <td class="px-4 py-3 text-sm text-orange-600">{{ $doctor['no_show'] }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">{{ $doctor['no_show_rate'] }}%</td>
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-900">{{ number_format($doctor['revenue'], 2) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Recent Activity & Top Patients -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
