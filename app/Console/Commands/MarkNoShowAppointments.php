@@ -21,37 +21,48 @@ class MarkNoShowAppointments extends Command
      *
      * @var string
      */
-    protected $description = 'Mark still-scheduled appointments from past days as no-shows';
+    protected $description = 'Close out past days: still-scheduled visits become no-shows, unclosed in-progress visits become completed';
 
     /**
      * Execute the console command.
      */
     public function handle(AppointmentSchedulingService $scheduler): int
     {
-        $query = Appointment::where('status', 'scheduled');
+        $dateFilter = function ($query) {
+            if ($date = $this->option('date')) {
+                $query->whereDate('appointment_date', $date);
+            } else {
+                $query->whereDate('appointment_date', '<', today());
+            }
+        };
 
-        if ($date = $this->option('date')) {
-            $query->whereDate('appointment_date', $date);
-        } else {
-            // Anything still "scheduled" before today never happened.
-            $query->whereDate('appointment_date', '<', today());
-        }
+        // Still "scheduled" on a past day → the patient never came.
+        $noShows = Appointment::where('status', 'scheduled')->tap($dateFilter)->get();
 
-        $appointments = $query->get();
-
-        if ($appointments->isEmpty()) {
-            $this->info('No stale appointments to mark as no-show.');
-
-            return self::SUCCESS;
-        }
+        // Left "in_progress" on a past day → the visit happened but was
+        // never closed (doctor forgot to complete it before leaving).
+        $unclosed = Appointment::where('status', 'in_progress')->tap($dateFilter)->get();
 
         $touchedQueues = [];
 
-        foreach ($appointments as $appointment) {
+        foreach ($noShows as $appointment) {
             $appointment->update([
                 'status' => 'no_show',
+                'checked_in_at' => null,
                 'notes' => ($appointment->notes ? $appointment->notes."\n" : '')
                     .'Automatically marked no-show on '.now()->format('Y-m-d H:i'),
+            ]);
+
+            if ($appointment->isQueueMode()) {
+                $touchedQueues[$appointment->doctor_id.'|'.$appointment->appointment_date->toDateString()] = $appointment;
+            }
+        }
+
+        foreach ($unclosed as $appointment) {
+            $appointment->update([
+                'status' => 'completed',
+                'notes' => ($appointment->notes ? $appointment->notes."\n" : '')
+                    .'Automatically closed (left in progress) on '.now()->format('Y-m-d H:i'),
             ]);
 
             if ($appointment->isQueueMode()) {
@@ -63,7 +74,7 @@ class MarkNoShowAppointments extends Command
             $scheduler->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
         }
 
-        $this->info("Marked {$appointments->count()} appointment(s) as no-show.");
+        $this->info("Marked {$noShows->count()} no-show(s) and closed {$unclosed->count()} unfinished consultation(s).");
 
         return self::SUCCESS;
     }

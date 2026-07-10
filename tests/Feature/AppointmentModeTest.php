@@ -19,8 +19,8 @@ afterEach(function () {
 function makeClinicUser(string $role = 'doctor', array $attributes = []): User
 {
     return User::create(array_merge([
-        'name' => ucfirst($role) . ' User',
-        'email' => uniqid($role . '_') . '@example.com',
+        'name' => ucfirst($role).' User',
+        'email' => uniqid($role.'_').'@example.com',
         'password' => 'password',
         'role' => $role,
     ], $attributes));

@@ -113,6 +113,7 @@
                             <form action="{{ route('appointments.mark-current-done') }}" method="POST" onsubmit="handleMarkComplete(this)">
                                 @csrf
                                 <input type="hidden" name="doctor_id" value="{{ $curr->doctor_id }}">
+                                <input type="hidden" name="appointment_id" value="{{ $curr->id }}">
                                 <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                                     <i class="fas fa-check-circle text-xl"></i>
                                     <span class="text-lg">{{ __('dashboard.mark_complete') }}</span>

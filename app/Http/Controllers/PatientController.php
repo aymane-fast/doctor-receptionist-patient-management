@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Patient;
 use App\Models\Appointment;
+use App\Models\Patient;
 use App\Models\Setting;
 use App\Services\AppointmentSchedulingService;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class PatientController extends Controller
 {
@@ -22,7 +22,7 @@ class PatientController extends Controller
         // Only query patients if there's a search term or date filter
         if ($request->filled('search') || $request->filled('date')) {
             $hasSearchQuery = true;
-            
+
             $query = Patient::query();
 
             // Search functionality
@@ -68,7 +68,7 @@ class PatientController extends Controller
             'chronic_conditions' => 'nullable|string',
             'emergency_contact_name' => 'nullable|string|max:255',
             'emergency_contact_phone' => 'nullable|string|max:255',
-            
+
             // Quick booking validation
             'book_today' => 'nullable|boolean',
             'appointment_date' => 'nullable|required_if:book_today,1|date|after_or_equal:today',
@@ -82,28 +82,29 @@ class PatientController extends Controller
         // Handle automatic appointment booking for today
         if ($request->has('book_today') && $request->book_today) {
             // Check if we're within working hours for appointments
-            if (!Setting::isWithinWorkingHours()) {
+            if (! Setting::isWithinWorkingHours()) {
                 $nextWorking = Setting::getNextWorkingTime();
                 $errorMessage = 'Cannot book appointment outside working hours. ';
                 if ($nextWorking) {
-                    $errorMessage .= 'Next available time is ' . $nextWorking->locale(app()->getLocale())->isoFormat('dddd, D MMM HH:mm') . '.';
+                    $errorMessage .= 'Next available time is '.$nextWorking->locale(app()->getLocale())->isoFormat('dddd, D MMM HH:mm').'.';
                 }
+
                 return back()->withErrors(['book_today' => $errorMessage])->withInput();
             }
-            
+
             $appointmentResult = $this->createTodayAppointment($patient, $request);
-            if (!$appointmentResult['success']) {
+            if (! $appointmentResult['success']) {
                 return back()->withErrors(['book_today' => $appointmentResult['message']])->withInput();
             }
-            
+
             // For walk-in patients, redirect to dashboard after successful booking
             return redirect()->route('dashboard')
-                            ->with('success', 'Patient created successfully and appointment booked for today!');
+                ->with('success', 'Patient created successfully and appointment booked for today!');
         }
 
         // For regular patient creation, redirect to the patient's profile
         return redirect()->route('patients.show', $patient)
-                        ->with('success', 'Patient created successfully!');
+            ->with('success', 'Patient created successfully!');
     }
 
     /**
@@ -115,23 +116,27 @@ class PatientController extends Controller
         $user = auth()->user();
         $doctor = $user->isDoctor() ? $user : \App\Models\User::where('role', 'doctor')->first();
 
-        if (!$doctor) {
+        if (! $doctor) {
             return [
                 'success' => false,
-                'message' => 'No doctor available for appointment booking.'
+                'message' => 'No doctor available for appointment booking.',
             ];
         }
 
         $scheduler = app(AppointmentSchedulingService::class);
 
         if ($doctor->usesQueueMode()) {
+            $queueDate = $request->appointment_date ?? Carbon::now()->format('Y-m-d');
+
             try {
                 $scheduler->createQueueAppointment([
                     'patient_id' => $patient->id,
                     'doctor_id' => $doctor->id,
-                    'appointment_date' => $request->appointment_date ?? Carbon::now()->format('Y-m-d'),
+                    'appointment_date' => $queueDate,
                     'reason' => $request->appointment_reason ?: __('appointments.walk_in_consultation'),
                     'notes' => 'Walk-in patient appointment',
+                    // A walk-in joining today's queue is standing at the desk
+                    'checked_in_at' => Carbon::parse($queueDate)->isToday() ? now() : null,
                 ]);
             } catch (\InvalidArgumentException $e) {
                 return [
@@ -147,13 +152,13 @@ class PatientController extends Controller
         $appointmentDate = $request->appointment_date ?? Carbon::now()->format('Y-m-d');
         $appointmentTime = $request->appointment_time;
 
-        if (!$appointmentTime) {
+        if (! $appointmentTime) {
             $slot = $scheduler->nextAvailableSlot($doctor->id, $appointmentDate);
 
-            if (!$slot) {
+            if (! $slot) {
                 return [
                     'success' => false,
-                    'message' => 'No available slots remain within working hours for this day.'
+                    'message' => 'No available slots remain within working hours for this day.',
                 ];
             }
 
@@ -170,7 +175,7 @@ class PatientController extends Controller
             if ($scheduler->hasScheduledConflict($doctor->id, $appointmentDate, $appointmentTime)) {
                 return [
                     'success' => false,
-                    'message' => 'Doctor already has an appointment at this time.'
+                    'message' => 'Doctor already has an appointment at this time.',
                 ];
             }
         }
@@ -178,20 +183,40 @@ class PatientController extends Controller
         $priority = $request->appointment_priority ?: 'normal';
         $notes = 'Walk-in patient appointment';
         if (in_array($priority, ['urgent', 'emergency'], true)) {
-            $notes .= ' - Priority: ' . ucfirst($priority);
+            $notes .= ' - Priority: '.ucfirst($priority);
         }
-        
-        // Create the appointment
-        Appointment::create([
-            'patient_id' => $patient->id,
-            'doctor_id' => $doctor->id,
-            'appointment_date' => $appointmentDate,
-            'appointment_time' => $appointmentTime,
-            'reason' => $request->appointment_reason ?: __('appointments.walk_in_consultation'),
-            'status' => 'scheduled',
-            'notes' => $notes,
-        ]);
-        
+
+        // Create inside a per-doctor/day lock so a simultaneous booking at
+        // the front desk cannot land in the same slot.
+        try {
+            \DB::transaction(function () use ($patient, $doctor, $appointmentDate, $appointmentTime, $scheduler, $request, $notes) {
+                Appointment::where('doctor_id', $doctor->id)
+                    ->whereDate('appointment_date', $appointmentDate)
+                    ->lockForUpdate()
+                    ->count();
+
+                if ($scheduler->hasScheduledConflict($doctor->id, $appointmentDate, $appointmentTime)) {
+                    throw new \InvalidArgumentException('Doctor already has an appointment at this time.');
+                }
+
+                Appointment::create([
+                    'patient_id' => $patient->id,
+                    'doctor_id' => $doctor->id,
+                    'appointment_date' => $appointmentDate,
+                    'appointment_time' => $appointmentTime,
+                    'reason' => $request->appointment_reason ?: __('appointments.walk_in_consultation'),
+                    'status' => 'scheduled',
+                    'checked_in_at' => now(), // the walk-in patient is at the desk
+                    'notes' => $notes,
+                ]);
+            });
+        } catch (\InvalidArgumentException $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+            ];
+        }
+
         return ['success' => true];
     }
 
@@ -241,7 +266,7 @@ class PatientController extends Controller
             'phone' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
-            'id_card_number' => 'required|string|max:255|unique:patients,id_card_number,' . $patient->id,
+            'id_card_number' => 'required|string|max:255|unique:patients,id_card_number,'.$patient->id,
             'allergies' => 'nullable|string',
             'chronic_conditions' => 'nullable|string',
             'emergency_contact_name' => 'nullable|string|max:255',
@@ -251,7 +276,7 @@ class PatientController extends Controller
         $patient->update($validated);
 
         return redirect()->route('patients.show', $patient)
-                        ->with('success', 'Patient updated successfully!');
+            ->with('success', 'Patient updated successfully!');
     }
 
     /**
@@ -261,22 +286,23 @@ class PatientController extends Controller
     {
         // Deleting a patient cascades to appointments, medical records and
         // prescriptions — restrict this to doctors.
-        if (!auth()->user()->isDoctor()) {
+        if (! auth()->user()->isDoctor()) {
             abort(403, 'Only doctors can delete patient records.');
         }
 
         $patient->delete();
 
         return redirect()->route('patients.index')
-                        ->with('success', 'Patient deleted successfully!');
+            ->with('success', 'Patient deleted successfully!');
     }
-    
+
     /**
      * Generate AI summary for patient
      */
     public function aiSummary(Patient $patient)
     {
         $summary = \App\Services\AIService::generatePatientSummary($patient);
+
         return response()->json($summary);
     }
 }

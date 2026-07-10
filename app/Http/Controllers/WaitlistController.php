@@ -6,9 +6,9 @@ use App\Models\Appointment;
 use App\Models\User;
 use App\Models\WaitlistEntry;
 use App\Services\AppointmentSchedulingService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class WaitlistController extends Controller
@@ -113,24 +113,39 @@ class WaitlistController extends Controller
                 continue;
             }
 
-            $slot = $this->scheduler->nextAvailableSlot($entry->doctor_id, $candidate);
-            if (! $slot) {
+            // Lock the day and re-check the slot before creating, so two
+            // waitlist bookings cannot claim the same opening at once.
+            $appointment = DB::transaction(function () use ($entry, $candidate) {
+                Appointment::where('doctor_id', $entry->doctor_id)
+                    ->whereDate('appointment_date', $candidate)
+                    ->lockForUpdate()
+                    ->count();
+
+                $slot = $this->scheduler->nextAvailableSlot($entry->doctor_id, $candidate);
+                if (! $slot) {
+                    return null;
+                }
+
+                $created = Appointment::create([
+                    'patient_id' => $entry->patient_id,
+                    'doctor_id' => $entry->doctor_id,
+                    'appointment_date' => $candidate->toDateString(),
+                    'appointment_time' => $slot['time'],
+                    'status' => 'scheduled',
+                    'reason' => $entry->reason ?: __('appointments.from_waitlist'),
+                    'notes' => 'Booked from waitlist',
+                ]);
+
+                $entry->update(['status' => 'booked']);
+
+                return $created;
+            });
+
+            if (! $appointment) {
                 continue;
             }
 
-            $appointment = Appointment::create([
-                'patient_id' => $entry->patient_id,
-                'doctor_id' => $entry->doctor_id,
-                'appointment_date' => $candidate->toDateString(),
-                'appointment_time' => $slot['time'],
-                'status' => 'scheduled',
-                'reason' => $entry->reason ?: __('appointments.from_waitlist'),
-                'notes' => 'Booked from waitlist',
-            ]);
-
-            $entry->update(['status' => 'booked']);
-
-            $datetime = Carbon::parse($candidate->toDateString().' '.$slot['time'])->format('M j, Y \a\t g:i A');
+            $datetime = $appointment->appointment_date->format('M j, Y').' at '.$appointment->displayTime();
 
             return redirect()->route('appointments.show', $appointment)
                 ->with('success', __('appointments.waitlist_booked', ['datetime' => $datetime]));

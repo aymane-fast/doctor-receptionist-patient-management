@@ -128,6 +128,7 @@
                     
                     <form action="{{ route('appointments.mark-current-done') }}" method="POST">
                         @csrf
+                        <input type="hidden" name="appointment_id" value="{{ $currentAppointment->id }}">
                         <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
                             <i class="fas fa-check-circle"></i>
                             <span>{{ __('current_patient.complete_visit_next_patient') }}</span>

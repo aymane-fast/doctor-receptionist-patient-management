@@ -152,6 +152,24 @@ class Appointment extends Model
         return in_array($this->status, self::ACTIVE_STATUSES, true);
     }
 
+    /**
+     * Valid status transitions. Undo paths exist for every human mistake
+     * (accidental complete/cancel/no-show), but impossible histories —
+     * e.g. a cancelled visit jumping straight to completed — are rejected.
+     */
+    public const TRANSITIONS = [
+        'scheduled' => ['in_progress', 'completed', 'cancelled', 'no_show'],
+        'in_progress' => ['completed', 'scheduled', 'cancelled'],
+        'completed' => ['in_progress', 'scheduled'],
+        'cancelled' => ['scheduled'],
+        'no_show' => ['scheduled'],
+    ];
+
+    public function canTransitionTo(string $status): bool
+    {
+        return in_array($status, self::TRANSITIONS[$this->status] ?? [], true);
+    }
+
     public function displayTime(): string
     {
         return $this->appointment_time?->format('g:i A') ?? '-';

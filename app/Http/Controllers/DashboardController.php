@@ -54,12 +54,12 @@ class DashboardController extends Controller
             ->where('status', 'in_progress')
             ->first();
         $upcomingAppointments = Appointment::with('patient')
-        ->where('doctor_id', Auth::id())
-        ->upcoming()
-        ->limit(5)
-        ->orderBy('appointment_date')
-        ->orderBy('appointment_time')
-        ->get();
+            ->where('doctor_id', Auth::id())
+            ->upcoming()
+            ->limit(5)
+            ->orderBy('appointment_date')
+            ->orderBy('appointment_time')
+            ->get();
 
         // Medical records with filtering
         $recentRecordsQuery = MedicalRecord::with('patient')
@@ -92,6 +92,7 @@ class DashboardController extends Controller
                 ->count(),
             'pending_appointments' => Appointment::where('doctor_id', Auth::id())
                 ->where('status', 'scheduled')
+                ->where('appointment_date', '>=', today())
                 ->count(),
             'completed_today' => Appointment::where('doctor_id', Auth::id())
                 ->today()
@@ -186,7 +187,9 @@ class DashboardController extends Controller
         $stats = [
             'total_patients' => Patient::count(),
             'today_appointments' => Appointment::today()->count(),
-            'scheduled_appointments' => Appointment::where('status', 'scheduled')->count(),
+            'scheduled_appointments' => Appointment::where('status', 'scheduled')
+                ->where('appointment_date', '>=', today())
+                ->count(),
             'new_patients_this_week' => Patient::where('created_at', '>=', now()->startOfWeek())->count(),
         ];
 
@@ -226,6 +229,12 @@ class DashboardController extends Controller
         }
 
         $result = \DB::transaction(function () use ($doctorId) {
+            // Serialize with other staff starting/completing consultations
+            Appointment::where('doctor_id', $doctorId)
+                ->whereDate('appointment_date', today())
+                ->lockForUpdate()
+                ->count();
+
             // Check if there's already a current patient
             $existing = Appointment::where('doctor_id', $doctorId)
                 ->whereDate('appointment_date', today())
