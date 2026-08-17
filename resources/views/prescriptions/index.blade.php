@@ -4,49 +4,19 @@
 
 @section('content')
 <div class="space-y-8">
-    <!-- Pharmacy-Style Header -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-xl">
-                            <i class="fas fa-prescription-bottle text-white text-2xl"></i>
-                        </div>
-                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                            <i class="fas fa-plus text-white text-xs"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h1 class="text-3xl font-bold text-gray-900">
-                            <span class="text-gradient">{{ __('prescriptions.title') }}</span>
-                        </h1>
-                        <p class="text-gray-600 text-lg mt-2">{{ __('prescriptions.subtitle') }}</p>
-                        @if($hasSearchQuery && $prescriptions->count() > 0)
-                        <div class="flex items-center mt-3 space-x-4 text-sm text-gray-500">
-                            <span class="flex items-center space-x-1">
-                                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span>{{ $prescriptions->filter(function($p) { return empty($p->status) || $p->status === 'active'; })->count() }} {{ __('prescriptions.active') }}</span>
-                            </span>
-                            <span class="flex items-center space-x-1">
-                                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                <span>{{ $prescriptions->where('status', 'completed')->count() }} {{ __('prescriptions.completed') }}</span>
-                            </span>
-                            <span class="flex items-center space-x-1">
-                                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
-                                <span>{{ $prescriptions->count() }} {{ __('prescriptions.total_records') }}</span>
-                            </span>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('prescriptions.create') }}" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg">
+    <x-ui.page-header
+        :title="__('prescriptions.title')"
+        :description="__('prescriptions.subtitle')"
+        icon="fa-prescription-bottle-medical"
+        eyebrow="Medication"
+    >
+        <x-slot:actions>
+                    <a href="{{ route('prescriptions.create') }}" class="btn-primary px-6 py-3">
                         <i class="fas fa-plus"></i>
                         <span>{{ __('prescriptions.new_prescription') }}</span>
                     </a>
-                </div>
-            </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Enhanced Search and Filter Controls -->
     <div class="glass-effect rounded-3xl p-8 modern-shadow relative z-[10001]">
@@ -91,12 +61,12 @@
                     </div>
                 </div>
                 <div class="flex space-x-4">
-                    <button type="submit" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg">
+                    <button type="submit" class="btn-primary px-6 py-3">
                         <i class="fas fa-search"></i>
                         <span>{{ __('prescriptions.search') }}</span>
                     </button>
                     @if(request('search') || request('date'))
-                    <a href="{{ route('prescriptions.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-4 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg">
+                    <a href="{{ route('prescriptions.index') }}" class="btn-secondary px-6 py-3">
                         <i class="fas fa-times"></i>
                         <span>{{ __('prescriptions.clear') }}</span>
                     </a>
@@ -155,7 +125,7 @@
                                         <p class="text-sm text-gray-600 mt-1">{{ $prescription->patient->id_card_number }}</p>
                                         <p class="text-xs text-gray-500 mt-1 flex items-center space-x-2">
                                             <i class="fas fa-user-md text-teal-500"></i>
-                                            <span>Dr. {{ $prescription->doctor->name }}</span>
+                                            <span>{{ $prescription->doctor->professional_name }}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -240,9 +210,9 @@
                                     </a>
                                     @if($prescription->medicalRecord)
                                     <a href="{{ route('medical-records.show', $prescription->medicalRecord) }}" 
-                                       class="w-9 h-9 bg-purple-100 hover:bg-purple-200 rounded-xl flex items-center justify-center transition-all duration-200 group/btn" 
+                                       class="btn-ghost w-9 h-9 p-0 group/btn"
                                        title="{{ __('prescriptions.view_medical_record') }}">
-                                        <i class="fas fa-file-medical text-purple-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
+                                        <i class="fas fa-file-medical text-sm group-hover/btn:scale-110 transition-transform"></i>
                                     </a>
                                     @endif
                                 </div>

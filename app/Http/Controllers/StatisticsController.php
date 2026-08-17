@@ -152,7 +152,7 @@ class StatisticsController extends Controller
                 $expected = $completed + $noShow;
 
                 return [
-                    'name' => $doctor->name,
+                    'name' => $doctor->professional_name,
                     'mode' => $doctor->appointment_mode ?? 'scheduled',
                     'total' => (int) $byStatus->sum(),
                     'completed' => $completed,
@@ -177,7 +177,7 @@ class StatisticsController extends Controller
         foreach ($recentAppointments as $appointment) {
             $recentActivities[] = [
                 'title' => 'New Appointment Scheduled',
-                'description' => "Appointment for {$appointment->patient->first_name} {$appointment->patient->last_name} with Dr. {$appointment->doctor->name}",
+                'description' => "Appointment for {$appointment->patient->first_name} {$appointment->patient->last_name} with {$appointment->doctor->professional_name}",
                 'time' => $appointment->created_at->diffForHumans(),
                 'timestamp' => $appointment->created_at,
                 'icon' => 'fas fa-calendar-plus',

@@ -4,24 +4,19 @@
 
 @section('content')
 <div class="space-y-6">
-    <div class="glass-effect rounded-2xl p-6 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 icon-tile rounded-xl flex items-center justify-center">
-                    <i class="fas fa-list-ol text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Appointment Queue</h1>
-                    <p class="text-gray-600 mt-1">Manage queue order and estimated consultation times.</p>
-                </div>
-            </div>
-
+    <x-ui.page-header
+        title="Appointment Queue"
+        description="Manage queue order and estimated consultation times."
+        icon="fa-list-ol"
+        eyebrow="Daily flow"
+    >
+        <x-slot:actions>
             <a href="{{ route('appointments.create') }}" class="btn-primary px-4 py-2">
                 <i class="fas fa-plus text-sm"></i>
                 <span>Add Patient</span>
             </a>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <div class="section-card p-6">
         <form method="GET" action="{{ route('appointments.queue') }}" class="grid md:grid-cols-3 gap-4 items-end">
@@ -36,7 +31,7 @@
                 <select id="doctor_id" name="doctor_id" class="form-control w-full px-3 py-2">
                     @foreach($doctors as $doctor)
                         <option value="{{ $doctor->id }}" {{ optional($selectedDoctor)->id === $doctor->id ? 'selected' : '' }}>
-                            Dr. {{ $doctor->name }} - {{ $doctor->appointment_mode === 'queue' ? 'Queue' : 'Scheduled' }}
+                            {{ $doctor->professional_name }} - {{ $doctor->appointment_mode === 'queue' ? 'Queue' : 'Scheduled' }}
                         </option>
                     @endforeach
                 </select>
@@ -54,7 +49,7 @@
     @if($selectedDoctor && $selectedDoctor->appointment_mode !== 'queue')
         <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-yellow-800">
             <i class="fas fa-info-circle mr-2"></i>
-            Dr. {{ $selectedDoctor->name }} is currently using scheduled appointment mode.
+            {{ $selectedDoctor->professional_name }} is currently using scheduled appointment mode.
         </div>
     @endif
 

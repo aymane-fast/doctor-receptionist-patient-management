@@ -4,26 +4,19 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Modern Header -->
-    <div class="glass-effect rounded-2xl p-6 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center animate-float">
-                    <i class="fas fa-user-md text-blue-600 text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">
-                        <span class="text-gradient">{{ __('current_patient.title') }}</span>
-                    </h1>
-                    <p class="text-gray-600 mt-1">{{ __('current_patient.subtitle') }}</p>
-                </div>
-            </div>
-            <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+    <x-ui.page-header
+        :title="__('current_patient.title')"
+        :description="__('current_patient.subtitle')"
+        icon="fa-user-doctor"
+        eyebrow="Consultation workspace"
+    >
+        <x-slot:actions>
+            <button onclick="history.back()" class="btn-secondary px-4 py-2">
                 <i class="fas fa-arrow-left text-sm"></i>
                 <span>{{ __('common.back') }}</span>
             </button>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     @if(!$currentAppointment)
         <div class="glass-effect rounded-2xl modern-shadow overflow-hidden">
@@ -38,12 +31,12 @@
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
                     <form action="{{ route('dashboard.initialize-first-patient') }}" method="POST">
                         @csrf
-                        <button type="submit" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+                        <button type="submit" class="btn-primary px-6 py-3">
                             <i class="fas fa-user-check"></i>
                             <span>{{ __('appointments.call_next_patient') }}</span>
                         </button>
                     </form>
-                    <a href="{{ route('appointments.index') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+                    <a href="{{ route('appointments.index') }}" class="btn-secondary px-6 py-3">
                         <i class="fas fa-calendar-alt"></i>
                         <span>{{ __('current_patient.view_appointments') }}</span>
                     </a>
@@ -74,23 +67,23 @@
                             <span class="text-amber-800 font-medium text-sm">{{ $patient->age !== null ? $patient->age . ' ' . __('current_patient.years') : '—' }}</span>
                         </div>
                     </div>
-                    <div class="bg-purple-50 rounded-xl p-3 border border-purple-200">
+                    <div class="soft-panel rounded-xl p-3">
                         <div class="flex items-center space-x-2">
-                            <i class="fas fa-venus-mars text-purple-600 text-sm"></i>
-                            <span class="text-purple-800 font-medium text-sm">{{ $patient->gender ? ucfirst($patient->gender) : '—' }}</span>
+                            <i class="fas fa-venus-mars text-emerald-700 text-sm"></i>
+                            <span class="text-emerald-800 font-medium text-sm">{{ $patient->gender ? ucfirst($patient->gender) : '—' }}</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-blue-50 rounded-xl p-3 border border-blue-200 mb-4">
+                <div class="soft-panel rounded-xl p-3 mb-4">
                     <div class="flex items-center space-x-2">
-                        <i class="fas fa-clock text-blue-600"></i>
-                        <span class="text-blue-800 font-medium">{{ __('current_patient.appointment') }}: {{ $currentAppointment->appointment_time->format('g:i A') }}</span>
+                        <i class="fas fa-clock text-emerald-700"></i>
+                        <span class="text-emerald-900 font-medium">{{ __('current_patient.appointment') }}: {{ $currentAppointment->appointment_time->format('g:i A') }}</span>
                     </div>
                 </div>
 
                 <div class="pt-4 border-t border-gray-200">
-                    <a href="{{ route('patients.show', $patient) }}" class="w-full bg-gradient-to-r from-blue-100 to-blue-50 hover:from-blue-200 hover:to-blue-100 text-blue-800 px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 border border-blue-200">
+                    <a href="{{ route('patients.show', $patient) }}" class="btn-secondary w-full px-4 py-3">
                         <i class="fas fa-history"></i>
                         <span>{{ __('current_patient.view_full_patient_history') }}</span>
                     </a>
@@ -100,7 +93,7 @@
             <!-- Quick Actions Card -->
             <div class="glass-effect rounded-2xl p-6 modern-shadow">
                 <div class="flex items-center space-x-3 mb-4">
-                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                         <i class="fas fa-bolt text-white text-sm"></i>
                     </div>
                     <h3 class="text-lg font-bold text-gray-900">{{ __('current_patient.quick_actions') }}</h3>
@@ -108,20 +101,20 @@
                 
                 <div class="space-y-3">
                     <a href="{{ route('medical-records.create', ['patient_id' => $patient->id, 'appointment_id' => $currentAppointment->id]) }}" 
-                       class="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+                       class="btn-primary w-full px-4 py-3 justify-start">
                         <i class="fas fa-file-medical-alt"></i>
                         <span>{{ __('current_patient.new_medical_record') }}</span>
                     </a>
                     
                     <a href="{{ route('prescriptions.create', ['patient_id' => $patient->id]) }}" 
-                       class="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+                       class="btn-primary w-full px-4 py-3 justify-start">
                         <i class="fas fa-prescription-bottle-alt"></i>
                         <span>{{ __('current_patient.write_prescription') }}</span>
                     </a>
 
                     <!-- Quick Follow-up Button -->
                     <button onclick="openFollowUpModal()" 
-                            class="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+                            class="btn-secondary w-full px-4 py-3 justify-start">
                         <i class="fas fa-calendar-plus"></i>
                         <span>{{ __('current_patient.schedule_follow_up') }}</span>
                     </button>
@@ -129,7 +122,7 @@
                     <form action="{{ route('appointments.mark-current-done') }}" method="POST">
                         @csrf
                         <input type="hidden" name="appointment_id" value="{{ $currentAppointment->id }}">
-                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
+                        <button type="submit" class="btn-primary w-full px-4 py-3">
                             <i class="fas fa-check-circle"></i>
                             <span>{{ __('current_patient.complete_visit_next_patient') }}</span>
                         </button>
@@ -144,7 +137,7 @@
             <div class="glass-effect rounded-2xl modern-shadow overflow-hidden">
                 <div class="p-6 border-b border-gray-200/50">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                             <i class="fas fa-calendar-check text-white text-sm"></i>
                         </div>
                         <h2 class="text-lg font-bold text-gray-900">{{ __('current_patient.recent_appointments') }}</h2>
@@ -159,17 +152,17 @@
                             <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                                            <i class="fas fa-calendar text-blue-600"></i>
+                                        <div class="icon-tile w-12 h-12 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-calendar"></i>
                                         </div>
                                         <div>
                                             <div class="font-semibold text-gray-900">{{ $ap->appointment_date->format('M j, Y') }} at {{ $ap->appointment_time->format('g:i A') }}</div>
-                                            <div class="text-sm text-gray-600">Dr. {{ $ap->doctor->name }}</div>
+                                            <div class="text-sm text-gray-600">{{ $ap->doctor->professional_name }}</div>
                                             <div class="flex items-center space-x-2 mt-1">
                                                 @if($ap->status === 'completed')
                                                     <span class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-lg">{{ __('current_patient.completed') }}</span>
                                                 @elseif($ap->status === 'in_progress')
-                                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-lg">{{ __('current_patient.in_progress') }}</span>
+                                                    <span class="status-in-progress px-2 py-1">{{ __('current_patient.in_progress') }}</span>
                                                 @elseif($ap->status === 'cancelled')
                                                     <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-lg">{{ __('current_patient.cancelled') }}</span>
                                                 @else
@@ -178,7 +171,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <a href="{{ route('appointments.show', $ap) }}" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                                    <a href="{{ route('appointments.show', $ap) }}" class="btn-ghost px-3 py-2">
                                         <i class="fas fa-eye text-sm"></i>
                                         <span>{{ __('current_patient.view') }}</span>
                                     </a>
@@ -221,7 +214,7 @@
                                         </div>
                                         <div>
                                             <div class="font-semibold text-gray-900">{{ $rec->visit_date->format('M j, Y') }}</div>
-                                            <div class="text-sm text-gray-600">Dr. {{ $rec->doctor->name }}</div>
+                                            <div class="text-sm text-gray-600">{{ $rec->doctor->professional_name }}</div>
                                             @if($rec->diagnosis)
                                             <div class="text-xs text-gray-500 mt-1">{{ Str::limit($rec->diagnosis, 50) }}</div>
                                             @endif
@@ -250,7 +243,7 @@
             <div class="glass-effect rounded-2xl modern-shadow overflow-hidden">
                 <div class="p-6 border-b border-gray-200/50">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                             <i class="fas fa-prescription-bottle-alt text-white text-sm"></i>
                         </div>
                         <h2 class="text-lg font-bold text-gray-900">{{ __('current_patient.recent_prescriptions') }}</h2>
@@ -265,16 +258,16 @@
                             <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
-                                            <i class="fas fa-pills text-purple-600"></i>
+                                        <div class="icon-tile w-12 h-12 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-pills"></i>
                                         </div>
                                         <div>
                                             <div class="font-semibold text-gray-900">{{ $rx->medication_name }}</div>
-                                            <div class="text-sm text-purple-600 font-medium">{{ $rx->dosage }}</div>
-                                            <div class="text-xs text-gray-500">{{ $rx->prescribed_date->format('M j, Y') }} • Dr. {{ $rx->doctor->name }}</div>
+                                            <div class="text-sm text-emerald-700 font-medium">{{ $rx->dosage }}</div>
+                                            <div class="text-xs text-gray-500">{{ $rx->prescribed_date->format('M j, Y') }} • {{ $rx->doctor->professional_name }}</div>
                                         </div>
                                     </div>
-                                    <a href="{{ route('prescriptions.show', $rx) }}" class="bg-purple-100 hover:bg-purple-200 text-purple-800 px-3 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                                    <a href="{{ route('prescriptions.show', $rx) }}" class="btn-ghost px-3 py-2">
                                         <i class="fas fa-eye text-sm"></i>
                                         <span>{{ __('current_patient.view') }}</span>
                                     </a>
@@ -312,14 +305,14 @@
             @csrf
             <input type="hidden" name="current_appointment_id" value="{{ $currentAppointment->id }}">
             
-            <div class="bg-blue-50 rounded-xl p-4 border border-blue-200 mb-4">
+            <div class="soft-panel rounded-xl p-4 mb-4">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-user text-blue-600"></i>
+                    <div class="icon-tile w-10 h-10 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-user"></i>
                     </div>
                     <div>
-                        <div class="font-semibold text-blue-900">{{ $patient->full_name }}</div>
-                        <div class="text-sm text-blue-600">{{ $patient->id_card_number }}</div>
+                        <div class="font-semibold text-gray-900">{{ $patient->full_name }}</div>
+                        <div class="text-sm text-emerald-700">{{ $patient->id_card_number }}</div>
                     </div>
                 </div>
             </div>
@@ -410,5 +403,3 @@ document.getElementById('followUpModal')?.addEventListener('click', function(e) 
 </script>
 
 @endsection
-
-

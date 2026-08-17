@@ -21,71 +21,56 @@
     </div>
     @endif
 
-    <!-- Patient Header -->
-    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-6">
-                <div class="relative">
-                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-user text-white text-2xl"></i>
-                    </div>
-                    @if($patient->appointments->where('status', 'completed')->isNotEmpty())
-                    <div class="absolute -bottom-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                        {{ $patient->appointments->count() }}
-                    </div>
-                    @endif
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $patient->full_name }}</h1>
-                    <div class="flex items-center space-x-4 mb-2">
-                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">ID: {{ $patient->id_card_number }}</span>
-                        <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold">{{ $patient->age !== null ? $patient->age . ' years old' : 'Age unknown' }}</span>
-                        <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold">{{ $patient->gender ? ucfirst($patient->gender) : '—' }}</span>
-                    </div>
-                    <div class="flex items-center space-x-4 text-gray-600">
-                        <span class="flex items-center space-x-2">
-                            <i class="fas fa-phone text-blue-500"></i>
-                            <span class="font-medium">{{ $patient->phone }}</span>
-                        </span>
-                        @if($patient->appointments->where('status', 'completed')->isNotEmpty())
-                        <span class="flex items-center space-x-2">
-                            <i class="fas fa-calendar text-green-500"></i>
-                            <span>Last visit: {{ $patient->appointments->where('status', 'completed')->sortByDesc('appointment_date')->first()->appointment_date->format('M d, Y') }}</span>
-                        </span>
-                        @endif
-                    </div>
-                </div>
-            </div>
-            <div class="flex space-x-3">
+    <x-ui.page-header
+        :title="$patient->full_name"
+        :description="'ID: ' . $patient->id_card_number . ' - ' . $patient->phone"
+        icon="fa-user"
+        eyebrow="Patient profile"
+    >
+        <x-slot:actions>
                 <button id="aiSummaryBtn"
-                        class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                        class="btn-secondary px-4 py-2">
                     <i class="fas fa-brain"></i>
                     <span>{{ __('AI Summary') }}</span>
                 </button>
                 <a href="{{ route('appointments.create', ['patient_id' => $patient->id]) }}" 
-                   class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl"
+                   class="btn-primary px-4 py-2"
                    onclick="return confirmAppointment('{{ $patient->full_name }}', {{ $patient->allergies ? 'true' : 'false' }}, '{{ $patient->allergies }}')">
                     <i class="fas fa-calendar-plus"></i>
                     <span>{{ __('patients.book') }}</span>
                 </a>
                 <a href="{{ route('prescriptions.create', ['patient_id' => $patient->id]) }}" 
-                   class="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                   class="btn-secondary px-4 py-2">
                     <i class="fas fa-prescription-bottle"></i>
                     <span>{{ __('patients.new_prescription') }}</span>
                 </a>
                 <a href="{{ route('patients.edit', $patient) }}" 
-                   class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl"
+                   class="btn-secondary px-4 py-2"
                    onclick="return confirmEdit('{{ $patient->full_name }}')">
                     <i class="fas fa-edit"></i>
                     <span>{{ __('patients.edit') }}</span>
-</a>
+                </a>
                 <button onclick="history.back()" 
-                        class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                        class="btn-secondary px-4 py-2">
                     <i class="fas fa-arrow-left"></i>
                     <span>{{ __('common.back') }}</span>
                 </button>
-            </div>
-        </div>
+        </x-slot:actions>
+    </x-ui.page-header>
+
+    <div class="section-card flex flex-wrap items-center gap-3 px-5 py-4 text-sm">
+        <span class="rounded-full bg-[var(--clinic-primary-soft)] px-3 py-1 font-semibold text-[var(--clinic-primary-strong)]">
+            {{ $patient->age !== null ? $patient->age . ' years old' : 'Age unknown' }}
+        </span>
+        <span class="rounded-full bg-gray-100 px-3 py-1 font-semibold text-gray-700">
+            {{ $patient->gender ? ucfirst($patient->gender) : '—' }}
+        </span>
+        @if($patient->appointments->where('status', 'completed')->isNotEmpty())
+            <span class="text-gray-600">
+                <i class="fas fa-calendar-check mr-1 text-[var(--clinic-primary)]"></i>
+                Last visit: {{ $patient->appointments->where('status', 'completed')->sortByDesc('appointment_date')->first()->appointment_date->format('M d, Y') }}
+            </span>
+        @endif
     </div>
 
     <!-- Patient Statistics -->
@@ -118,11 +103,11 @@
         <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-3xl font-bold text-purple-600">{{ $patient->medicalRecords->count() }}</p>
+                    <p class="text-3xl font-bold text-emerald-700">{{ $patient->medicalRecords->count() }}</p>
                     <p class="text-gray-600 font-medium">Medical Records</p>
                 </div>
-                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-file-medical text-purple-600 text-xl"></i>
+                <div class="icon-tile w-12 h-12 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-file-medical text-xl"></i>
                 </div>
             </div>
         </div>
@@ -301,7 +286,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center space-x-3">
-                                    <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">Dr. {{ $appointment->doctor->name }}</span>
+                                    <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">{{ $appointment->doctor->professional_name }}</span>
                                     <a href="{{ route('appointments.show', $appointment) }}" 
                                        class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-colors">
                                         <i class="fas fa-eye"></i>
@@ -326,16 +311,16 @@
             <!-- Medical Records -->
             @if(auth()->user()->isDoctor())
             <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                <div class="bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-4 border-b border-purple-200">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-bold text-purple-800 flex items-center">
-                            <div class="w-8 h-8 bg-purple-200 rounded-lg flex items-center justify-center mr-3">
-                                <i class="fas fa-file-medical text-purple-700"></i>
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                            <div class="icon-tile w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-file-medical"></i>
                             </div>
                             {{ __('patients.medical_records') }}
                         </h3>
                         <a href="{{ route('medical-records.create', ['patient_id' => $patient->id]) }}" 
-                           class="bg-purple-200 hover:bg-purple-300 text-purple-800 px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                           class="btn-primary px-4 py-2">
                             <i class="fas fa-plus text-sm"></i>
                             <span>{{ __('patients.new_record') }}</span>
                         </a>
@@ -357,8 +342,8 @@
                                     </div>
                                     <p class="text-sm text-gray-600 mb-2 leading-relaxed">{{ Str::limit($record->chief_complaint, 60) }}</p>
                                     @if($record->diagnosis)
-                                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-2 inline-block">
-                                        <p class="text-sm text-purple-800 font-medium">{{ Str::limit($record->diagnosis, 50) }}</p>
+                                    <div class="soft-panel rounded-lg p-2 inline-block">
+                                        <p class="text-sm text-emerald-900 font-medium">{{ Str::limit($record->diagnosis, 50) }}</p>
                                     </div>
                                     @endif
                                 </div>
@@ -400,7 +385,7 @@
 <div id="aiSummaryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fade-in">
         <!-- Modal Header -->
-        <div class="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 p-6">
+        <div class="gradient-bg p-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
@@ -408,7 +393,7 @@
                     </div>
                     <div>
                         <h3 class="text-2xl font-bold text-white">AI Medical Summary</h3>
-                        <p class="text-purple-100 text-sm">Powered by Advanced AI</p>
+                        <p class="text-white/75 text-sm">Powered by Advanced AI</p>
                     </div>
                 </div>
                 <button id="closeAiModal" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">
@@ -422,7 +407,7 @@
             <!-- Loading State -->
             <div id="aiLoading" class="text-center py-12">
                 <div class="inline-block">
-                    <div class="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+                    <div class="w-16 h-16 border-4 border-emerald-100 border-t-emerald-700 rounded-full animate-spin mx-auto mb-4"></div>
                     <p class="text-gray-600 text-lg font-medium">Analyzing patient history...</p>
                     <p class="text-gray-400 text-sm mt-2">This may take a few seconds</p>
                 </div>
@@ -435,7 +420,7 @@
                 </div>
                 <h4 class="text-xl font-bold text-gray-800 mb-2">Failed to Generate Summary</h4>
                 <p class="text-gray-600 mb-6" id="aiErrorMessage"></p>
-                <button onclick="generateAISummary()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                <button onclick="generateAISummary()" class="btn-primary px-6 py-2">
                     <i class="fas fa-redo mr-2"></i>Try Again
                 </button>
             </div>
@@ -452,11 +437,11 @@
                         <span id="aiGeneratedTime"></span>
                     </div>
                     <div class="flex space-x-3">
-                        <button onclick="copyToClipboard()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                        <button onclick="copyToClipboard()" class="btn-secondary px-4 py-2">
                             <i class="fas fa-copy"></i>
                             <span>Copy</span>
                         </button>
-                        <button onclick="generateAISummary()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2">
+                        <button onclick="generateAISummary()" class="btn-primary px-4 py-2">
                             <i class="fas fa-sync-alt"></i>
                             <span>Regenerate</span>
                         </button>

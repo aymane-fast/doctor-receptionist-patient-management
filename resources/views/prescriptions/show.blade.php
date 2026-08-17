@@ -4,26 +4,30 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-6">
-    <!-- Header Actions -->
-    <div class="flex items-center justify-between mb-6 print:hidden">
-        <h1 class="text-3xl font-bold text-gray-900">{{ __('prescriptions.prescription_details') }}</h1>
-        <div class="flex space-x-3">
-            <button onclick="history.back()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+    <x-ui.page-header
+        :title="__('prescriptions.prescription_details')"
+        :description="'Prescription #' . $prescription->id . ' - ' . $prescription->prescribed_date->format('M d, Y')"
+        icon="fa-prescription"
+        eyebrow="Medication record"
+        class="mb-6 print:hidden"
+    >
+        <x-slot:actions>
+            <button onclick="history.back()" class="btn-secondary px-4 py-2">
                 <i class="fas fa-arrow-left mr-2"></i>{{ __('common.back') }}
             </button>
-            <a href="{{ route('prescriptions.edit', $prescription) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+            <a href="{{ route('prescriptions.edit', $prescription) }}" class="btn-secondary px-4 py-2">
                 <i class="fas fa-edit mr-2"></i>{{ __('common.edit') }}
             </a>
-            <a href="{{ route('prescriptions.print', $prescription) }}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+            <a href="{{ route('prescriptions.print', $prescription) }}" target="_blank" class="btn-primary px-4 py-2">
                 <i class="fas fa-print mr-2"></i>{{ __('common.print') }}
             </a>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Professional Prescription Layout -->
     <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden print:shadow-none print:max-w-none">
         <!-- Clinic Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8">
+        <div class="gradient-bg p-8 text-white">
             <div class="flex justify-between items-start">
                 <div>
                     <h1 class="text-3xl font-bold mb-2">{{ \App\Models\Setting::get('clinic_name', 'CLINIQUE MÉDICALE') }}</h1>
@@ -53,7 +57,7 @@
             <!-- Doctor and Date Info -->
             <div class="flex justify-between items-start mb-6 border-b pb-4">
                 <div>
-                    <h3 class="font-bold text-base text-gray-800 mb-1">Dr. {{ $prescription->doctor->name }}</h3>
+                    <h3 class="font-bold text-base text-gray-800 mb-1">{{ $prescription->doctor->professional_name }}</h3>
                     <p class="text-gray-600 text-sm">{{ $prescription->doctor->email }}</p>
                     @if($prescription->doctor->phone)
                         <p class="text-gray-600 text-sm">{{ $prescription->doctor->phone }}</p>
@@ -173,7 +177,7 @@
                     <div class="text-right">
                         <div class="border-t-2 border-gray-400 pt-1 mt-6" style="min-width: 180px;">
                             <p class="text-xs text-gray-600">Signature du médecin</p>
-                            <p class="font-semibold text-sm mt-1">Dr. {{ $prescription->doctor->name }}</p>
+                            <p class="font-semibold text-sm mt-1">{{ $prescription->doctor->professional_name }}</p>
                         </div>
                     </div>
                 </div>

@@ -4,26 +4,19 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Modern Header -->
-    <div class="glass-effect rounded-2xl p-6 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-prescription-bottle-alt text-purple-600 text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">
-                        <span class="text-gradient">{{ __('prescriptions.new_prescription') }}</span>
-                    </h1>
-                    <p class="text-gray-600 mt-1">{{ __('prescriptions.prescribe_medications_subtitle') }}</p>
-                </div>
-            </div>
-            <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+    <x-ui.page-header
+        :title="__('prescriptions.new_prescription')"
+        :description="__('prescriptions.prescribe_medications_subtitle')"
+        icon="fa-prescription-bottle-medical"
+        eyebrow="Medication plan"
+    >
+        <x-slot:actions>
+            <button onclick="history.back()" class="btn-secondary px-4 py-2">
                 <i class="fas fa-arrow-left text-sm"></i>
                 <span>{{ __('common.back') }}</span>
             </button>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
         <!-- Prescription Form -->
         <div class="glass-effect rounded-2xl modern-shadow overflow-hidden">
@@ -109,7 +102,7 @@
                 <!-- Medication Items -->
                 <div class="p-6">
                     <div class="flex items-center space-x-3 mb-4">
-                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                             <i class="fas fa-pills text-white text-sm"></i>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900">{{ __('prescriptions.medications') }}</h3>
@@ -121,19 +114,19 @@
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.medication_name') }} <span class="text-red-500">*</span></label>
                                     <input type="text" name="items[0][medication_name]" required 
-                                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" 
+                                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                            placeholder="{{ __('prescriptions.medication_placeholder') }}">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.dosage') }} <span class="text-red-500">*</span></label>
                                     <input type="text" name="items[0][dosage]" required 
-                                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" 
+                                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                            placeholder="{{ __('prescriptions.dosage_placeholder') }}">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.frequency') }} <span class="text-red-500">*</span></label>
                                     <select name="items[0][frequency]" required 
-                                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200">
+                                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200">
                                         <option value="">{{ __('prescriptions.select_frequency') }}</option>
                                         <option>{{ __('prescriptions.once_daily') }}</option>
                                         <option>{{ __('prescriptions.twice_daily') }}</option>
@@ -151,34 +144,34 @@
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.duration_days') }}</label>
                                     <input type="number" name="items[0][duration_days]" min="1" 
-                                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" 
+                                           class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                            placeholder="7">
                                 </div>
                             </div>
                             <div class="mt-3">
                                 <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.instructions') }}</label>
                                 <input type="text" name="items[0][instructions]" 
-                                       class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" 
+                                       class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                        placeholder="{{ __('prescriptions.instructions_placeholder') }}">
                             </div>
                         </div>
                     </div>
                     
-                    <button type="button" id="add-item" class="mt-4 bg-gradient-to-r from-purple-100 to-purple-50 hover:from-purple-200 hover:to-purple-100 text-purple-800 px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 border border-purple-200">
+                    <button type="button" id="add-item" class="btn-secondary mt-4 px-4 py-2">
                         <i class="fas fa-plus"></i>
                         <span>{{ __('prescriptions.add_another_medication') }}</span>
                     </button>
                 </div>
 
                 <!-- Form Actions -->
-                <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-b-2xl">
+                <div class="border-t border-gray-200 bg-gray-50 p-6">
                     <div class="flex flex-col sm:flex-row items-center justify-end space-y-3 sm:space-y-0 sm:space-x-3">
                         <button type="button" onclick="history.back()" 
-                                class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-3 rounded-xl font-medium transition-all duration-200 text-center">
+                                class="btn-secondary w-full sm:w-auto px-6 py-3">
                             {{ __('common.cancel') }}
                         </button>
                         <button type="submit" 
-                                class="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
+                                class="btn-primary w-full sm:w-auto px-6 py-3">
                             <i class="fas fa-save"></i>
                             <span>{{ __('prescriptions.create_prescription') }}</span>
                         </button>
@@ -291,20 +284,20 @@ document.addEventListener('DOMContentLoaded', function() {
 let itemIndex = 1;
 document.getElementById('add-item').addEventListener('click', () => {
   const wrapper = document.createElement('div');
-  wrapper.className = 'item bg-white border-2 border-gray-200 rounded-xl p-4';
+  wrapper.className = 'item soft-panel p-4';
   wrapper.innerHTML = `
     <div class="grid md:grid-cols-4 gap-4">
       <div>
         <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.medication_name') }} <span class="text-red-500">*</span></label>
-        <input type="text" name="items[${itemIndex}][medication_name]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" placeholder="{{ __('prescriptions.medication_placeholder') }}">
+        <input type="text" name="items[${itemIndex}][medication_name]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="{{ __('prescriptions.medication_placeholder') }}">
       </div>
       <div>
         <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.dosage') }} <span class="text-red-500">*</span></label>
-        <input type="text" name="items[${itemIndex}][dosage]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" placeholder="{{ __('prescriptions.dosage_placeholder') }}">
+        <input type="text" name="items[${itemIndex}][dosage]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="{{ __('prescriptions.dosage_placeholder') }}">
       </div>
       <div>
         <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.frequency') }} <span class="text-red-500">*</span></label>
-        <select name="items[${itemIndex}][frequency]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200">
+        <select name="items[${itemIndex}][frequency]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200">
           <option value="">{{ __('prescriptions.select_frequency') }}</option>
           <option>{{ __('prescriptions.once_daily') }}</option>
           <option>{{ __('prescriptions.twice_daily') }}</option>
@@ -321,12 +314,12 @@ document.getElementById('add-item').addEventListener('click', () => {
       </div>
       <div>
         <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.duration_days') }}</label>
-        <input type="number" name="items[${itemIndex}][duration_days]" min="1" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" placeholder="7">
+        <input type="number" name="items[${itemIndex}][duration_days]" min="1" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="7">
       </div>
     </div>
     <div class="mt-3">
       <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.instructions') }}</label>
-      <input type="text" name="items[${itemIndex}][instructions]" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-purple-500 transition-all duration-200" placeholder="{{ __('prescriptions.instructions_placeholder') }}">
+      <input type="text" name="items[${itemIndex}][instructions]" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="{{ __('prescriptions.instructions_placeholder') }}">
     </div>
   `;
   document.getElementById('items').appendChild(wrapper);

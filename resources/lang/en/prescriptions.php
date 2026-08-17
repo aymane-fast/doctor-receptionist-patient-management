@@ -125,6 +125,16 @@ return [
     
     // Print page specific
     'medical_management_system' => 'Medical Management System',
+    'print_title' => 'Medical Prescription',
+    'reference' => 'Reference',
+    'prescriber_details' => 'Prescriber details',
+    'patient_details' => 'Patient identification',
+    'treatment' => 'Prescribed treatment',
+    'medical_alerts' => 'Medical alerts',
+    'stamp_signature' => 'Prescriber stamp and signature',
+    'document_notice' => 'Confidential medical document issued for the named patient.',
+    'generated_on' => 'Generated on :date',
+    'no_medication' => 'No medication has been entered on this prescription.',
     'date' => 'Date',
     'notes' => 'Notes',
     
@@ -175,5 +185,7 @@ return [
     'no_prescriptions_for_date' => 'No prescriptions found for the selected date.',
     'no_prescriptions_found_desc' => 'No prescriptions found matching your search criteria.',
     'clear_search' => 'Clear Search',
+    'no_patients_found' => 'No patients found.',
+    'search_error' => 'Unable to search patients. Please try again.',
     'at_least_one_medication' => 'A prescription must contain at least one medication.',
 ];

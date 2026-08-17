@@ -125,6 +125,16 @@ return [
     
     // Print page specific
     'medical_management_system' => 'Système de gestion médicale',
+    'print_title' => 'Ordonnance médicale',
+    'reference' => 'Référence',
+    'prescriber_details' => 'Identification du prescripteur',
+    'patient_details' => 'Identification du patient',
+    'treatment' => 'Traitement prescrit',
+    'medical_alerts' => 'Alertes médicales',
+    'stamp_signature' => 'Cachet et signature du prescripteur',
+    'document_notice' => 'Document médical confidentiel remis au patient désigné.',
+    'generated_on' => 'Généré le :date',
+    'no_medication' => 'Aucun médicament n’est renseigné sur cette ordonnance.',
     'date' => 'Date',
     'notes' => 'Notes',
     
@@ -175,5 +185,7 @@ return [
     'no_prescriptions_for_date' => 'Aucune ordonnance trouvée pour la date sélectionnée.',
     'no_prescriptions_found_desc' => 'Aucune ordonnance trouvée correspondant à vos critères de recherche.',
     'clear_search' => 'Effacer la Recherche',
+    'no_patients_found' => 'Aucun patient trouvé.',
+    'search_error' => 'Impossible de rechercher les patients. Veuillez réessayer.',
     'at_least_one_medication' => 'Une ordonnance doit contenir au moins un médicament.',
 ];

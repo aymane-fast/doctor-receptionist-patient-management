@@ -43,7 +43,7 @@
                                             </p>
                                         @endif
                                         <p style="margin:8px 0 0; color:#0f766e; font-size:14px;">
-                                            {{ __('appointments.doctor') }}: Dr. {{ $appointment->doctor->name }}
+                                            {{ __('appointments.doctor') }}: {{ $appointment->doctor->professional_name }}
                                         </p>
                                     </td>
                                 </tr>

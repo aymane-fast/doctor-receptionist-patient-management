@@ -4,23 +4,18 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="glass-effect rounded-2xl p-6 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 icon-tile rounded-xl flex items-center justify-center">
-                    <i class="fas fa-hourglass-half text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">{{ __('appointments.waitlist') }}</h1>
-                    <p class="text-gray-600 mt-1">{{ __('appointments.waitlist_subtitle') }}</p>
-                </div>
-            </div>
+    <x-ui.page-header
+        :title="__('appointments.waitlist')"
+        :description="__('appointments.waitlist_subtitle')"
+        icon="fa-hourglass-half"
+        eyebrow="Scheduling support"
+    >
+        <x-slot:actions>
             <a href="{{ route('appointments.index') }}" class="btn-secondary px-4 py-2">
                 <i class="fas fa-calendar-alt text-sm mr-2"></i>{{ __('appointments.title') ?? 'Appointments' }}
             </a>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Add to waitlist -->
     <div class="section-card p-6">
@@ -50,7 +45,7 @@
                 <label for="doctor_id" class="block text-sm font-medium text-gray-700 mb-2">{{ __('appointments.doctor') }} <span class="text-red-500">*</span></label>
                 <select id="doctor_id" name="doctor_id" required class="form-control w-full px-3 py-2">
                     @foreach($doctors as $doctor)
-                        <option value="{{ $doctor->id }}">Dr. {{ $doctor->name }}</option>
+                        <option value="{{ $doctor->id }}">{{ $doctor->professional_name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -96,7 +91,7 @@
                                 <div class="font-semibold text-gray-900">{{ $entry->patient->full_name }}</div>
                                 <div class="text-sm text-gray-500">{{ $entry->patient->phone }}</div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-700">Dr. {{ $entry->doctor->name }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ $entry->doctor->professional_name }}</td>
                             <td class="px-6 py-4 text-sm text-gray-700">{{ $entry->preferred_date?->format('M j, Y') ?? '—' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-700">{{ $entry->reason ?: '—' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-500">{{ $entry->created_at->diffForHumans() }}</td>

@@ -23,26 +23,19 @@
         </div>
     @endif
 
-    <!-- Modern Header -->
-    <div class="glass-effect rounded-2xl p-6 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 icon-tile rounded-xl flex items-center justify-center">
-                    <i class="fas fa-calendar-plus text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">
-                        <span class="text-gradient">{{ __('appointments.schedule_new_appointment') }}</span>
-                    </h1>
-                    <p class="text-gray-600 mt-1">{{ __('appointments.create_appointment_description') }}</p>
-                </div>
-            </div>
+    <x-ui.page-header
+        :title="__('appointments.schedule_new_appointment')"
+        :description="__('appointments.create_appointment_description')"
+        icon="fa-calendar-plus"
+        eyebrow="New booking"
+    >
+        <x-slot:actions>
             <button onclick="history.back()" class="btn-secondary px-4 py-2">
                 <i class="fas fa-arrow-left text-sm"></i>
                 <span>{{ __('common.back') }}</span>
             </button>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Modern Appointment Form -->
     <div class="glass-effect rounded-2xl modern-shadow overflow-hidden">
@@ -115,7 +108,7 @@
                             <option value="">{{ __('appointments.select_doctor') }}</option>
                             @foreach($doctors as $doctor)
                                 <option value="{{ $doctor->id }}" data-mode="{{ $doctor->appointment_mode ?? 'scheduled' }}" {{ old('doctor_id', request('doctor_id')) == $doctor->id ? 'selected' : '' }}>
-                                    Dr. {{ $doctor->name }}
+                                    {{ $doctor->professional_name }}
                                 </option>
                             @endforeach
                         </select>
@@ -130,7 +123,7 @@
                             {{ __('appointments.assigned_doctor') }}
                         </label>
                         <div class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600">
-                            Dr. {{ auth()->user()->name }}
+                            {{ auth()->user()->professional_name }}
                         </div>
                         <input type="hidden" id="doctor_id" name="doctor_id" value="{{ auth()->id() }}" data-mode="{{ auth()->user()->appointment_mode ?? 'scheduled' }}">
                         @endif

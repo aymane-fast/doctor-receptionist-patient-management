@@ -5,18 +5,22 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="max-w-3xl mx-auto">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('prescriptions.edit_prescription') }}</h1>
-            <div class="flex space-x-3">
-                <button onclick="history.back()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+        <x-ui.page-header
+            :title="__('prescriptions.edit_prescription')"
+            description="Update medication details, dosage, and instructions."
+            icon="fa-prescription-bottle-medical"
+            eyebrow="Medication plan"
+            class="mb-6"
+        >
+            <x-slot:actions>
+                <button onclick="history.back()" class="btn-secondary px-4 py-2">
                     <i class="fas fa-arrow-left mr-2"></i>{{ __('common.back') }}
                 </button>
-            </div>
-        </div>
+            </x-slot:actions>
+        </x-ui.page-header>
 
         <!-- Edit Form -->
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="section-card p-6">
             <form action="{{ route('prescriptions.update', $prescription) }}" method="POST">
                 @csrf
                 @method('PUT')
@@ -208,13 +212,13 @@
                 </div>
 
                 <!-- Form Actions -->
-                <div class="flex justify-end space-x-3">
+                <div class="flex flex-col justify-end gap-3 sm:flex-row">
                     <button type="button" onclick="history.back()"
-                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg transition-colors">
+                            class="btn-secondary px-6 py-2">
                         {{ __('common.cancel') }}
                     </button>
                     <button type="submit"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                            class="btn-primary px-6 py-2">
                         <i class="fas fa-save mr-2"></i>{{ __('prescriptions.update_prescription') }}
                     </button>
                 </div>

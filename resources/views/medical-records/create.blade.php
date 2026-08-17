@@ -4,26 +4,19 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Modern Header -->
-    <div class="glass-effect rounded-2xl p-6 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-file-medical-alt text-emerald-600 text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">
-                        <span class="text-gradient">{{ __('medical_records.add_record') }}</span>
-                    </h1>
-                    <p class="text-gray-600 mt-1">{{ __('medical_records.document_visit') }}</p>
-                </div>
-            </div>
-            <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+    <x-ui.page-header
+        :title="__('medical_records.add_record')"
+        :description="__('medical_records.document_visit')"
+        icon="fa-file-circle-plus"
+        eyebrow="Clinical documentation"
+    >
+        <x-slot:actions>
+            <button onclick="history.back()" class="btn-secondary px-4 py-2">
                 <i class="fas fa-arrow-left text-sm"></i>
                 <span>{{ __('common.back') }}</span>
             </button>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
         <!-- Medical Record Form -->
         <div class="glass-effect rounded-2xl modern-shadow overflow-hidden">

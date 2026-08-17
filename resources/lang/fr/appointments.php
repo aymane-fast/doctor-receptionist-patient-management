@@ -199,6 +199,7 @@ return [
     'consultation_already_completed' => 'Cette consultation était déjà terminée — la page était peut-être obsolète.',
     'patient_locked_by_record' => 'Ce rendez-vous a un dossier médical ; le patient ne peut pas être modifié.',
     'cannot_delete_history' => "Les visites terminées ou en cours font partie de l'historique médical — annulez au lieu de supprimer.",
+    'confirm_delete' => 'Voulez-vous vraiment supprimer ce rendez-vous ?',
     'already_earliest_slot' => 'Ce rendez-vous est déjà au premier créneau disponible.',
     'cannot_move_in_progress' => "Une consultation en cours ne peut pas être déplacée à un autre jour. Terminez-la ou renvoyez le patient en salle d'attente.",
 ];

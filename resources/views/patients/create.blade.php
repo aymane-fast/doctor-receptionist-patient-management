@@ -4,26 +4,19 @@
 
 @section('content')
 <div class="space-y-8">
-    <!-- Modern Header -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-2xl flex items-center justify-center animate-float">
-                    <i class="fas fa-user-plus text-emerald-600 text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">
-                        <span class="text-gradient">{{ __('patients.add_new_patient') }}</span>
-                    </h1>
-                    <p class="text-gray-600 mt-2 text-lg">{{ __('patients.create_comprehensive_profile') }}</p>
-                </div>
-            </div>
-            <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+    <x-ui.page-header
+        :title="__('patients.add_new_patient')"
+        :description="__('patients.create_comprehensive_profile')"
+        icon="fa-user-plus"
+        eyebrow="Patient registry"
+    >
+        <x-slot:actions>
+            <button onclick="history.back()" class="btn-secondary px-6 py-3">
                 <i class="fas fa-arrow-left"></i>
                 <span>{{ __('common.back') }}</span>
             </button>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Walk-in Patient Quick Booking -->
     <div class="glass-effect rounded-3xl p-6 modern-shadow">
@@ -351,7 +344,7 @@
             <!-- Medical Information Section -->
             <div class="p-8 py-0">
                 <div class="flex items-center space-x-3 mb-8">
-                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                         <i class="fas fa-heartbeat text-white"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ __('patients.medical_information') }}</h3>

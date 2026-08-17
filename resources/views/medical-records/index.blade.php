@@ -4,28 +4,19 @@
 
 @section('content')
 <div class="space-y-8">
-    <!-- Modern Header -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center animate-float">
-                    <i class="fas fa-file-medical text-emerald-600 text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">
-                        <span class="text-gradient">{{ __('medical_records.title') }}</span>
-                    </h1>
-                    <p class="text-gray-600 mt-2 text-lg">{{ __('medical_records.complete_medical_history') }}</p>
-                </div>
-            </div>
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('medical-records.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 shadow-lg flex items-center space-x-2">
+    <x-ui.page-header
+        :title="__('medical_records.title')"
+        :description="__('medical_records.complete_medical_history')"
+        icon="fa-notes-medical"
+        eyebrow="Clinical history"
+    >
+        <x-slot:actions>
+                <a href="{{ route('medical-records.create') }}" class="btn-primary px-6 py-3">
                     <i class="fas fa-plus"></i>
                     <span>{{ __('medical_records.new_record') }}</span>
                 </a>
-            </div>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Modern Search and Filters -->
     <div class="glass-effect rounded-3xl p-8 modern-shadow relative z-[10001]">
@@ -70,12 +61,12 @@
                     </div>
                 </div>
                 <div class="flex space-x-3">
-                    <button type="submit" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                    <button type="submit" class="btn-primary px-6 py-3">
                         <i class="fas fa-search"></i>
                         <span>{{ __('medical_records.search') }}</span>
                     </button>
                     @if(request('search') || request('date'))
-                    <a href="{{ route('medical-records.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                    <a href="{{ route('medical-records.index') }}" class="btn-secondary px-6 py-3">
                         <i class="fas fa-times"></i>
                         <span>{{ __('medical_records.clear') }}</span>
                     </a>
@@ -132,11 +123,11 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
-                                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-user-md text-purple-600 text-xs"></i>
+                                    <div class="icon-tile w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-md text-xs"></i>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-gray-900">Dr. {{ $record->doctor->name }}</p>
+                                        <p class="font-medium text-gray-900">{{ $record->doctor->professional_name }}</p>
                                         <p class="text-xs text-gray-500">Doctor</p>
                                     </div>
                                 </div>
@@ -212,12 +203,12 @@
                                 </div>
                                 @endif
                                 @if($record->weight)
-                                <div class="bg-indigo-50 rounded-lg p-3 text-center border border-indigo-100">
-                                    <div class="w-6 h-6 bg-indigo-200 rounded-full flex items-center justify-center mx-auto mb-1">
-                                        <i class="fas fa-weight text-indigo-600 text-xs"></i>
+                                <div class="soft-panel rounded-lg p-3 text-center">
+                                    <div class="icon-tile w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1">
+                                        <i class="fas fa-weight text-xs"></i>
                                     </div>
-                                    <p class="text-xs text-indigo-600 font-medium">Weight</p>
-                                    <p class="text-sm font-bold text-indigo-800">{{ $record->weight }} kg</p>
+                                    <p class="text-xs text-emerald-700 font-medium">Weight</p>
+                                    <p class="text-sm font-bold text-gray-900">{{ $record->weight }} kg</p>
                                 </div>
                                 @endif
                             </div>

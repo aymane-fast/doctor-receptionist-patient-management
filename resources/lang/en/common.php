@@ -91,6 +91,8 @@ return [
     'closed' => 'Closed',
     'not_specified' => 'Not specified',
     'medical_management' => 'Medical Management',
+    'medical_management_system' => 'Medical Management System',
+    'optional' => 'Optional',
     'statistics' => 'Statistics',
     'minutes' => 'minutes',
     'save_changes' => 'Save Changes',

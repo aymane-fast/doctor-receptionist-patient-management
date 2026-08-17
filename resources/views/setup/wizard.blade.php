@@ -4,76 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinic Setup Wizard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --clinic-primary: #0f766e;
-            --clinic-accent: #0284c7;
-            --clinic-border: #dbe3ea;
-            --clinic-page: #eef4f5;
-            --clinic-ink: #1f2937;
-        }
-
-        body {
-            background:
-                radial-gradient(circle at top left, rgba(15, 118, 110, 0.14), transparent 26rem),
-                radial-gradient(circle at bottom right, rgba(2, 132, 199, 0.12), transparent 24rem),
-                linear-gradient(180deg, #f8fbfb 0%, var(--clinic-page) 100%);
-            color: var(--clinic-ink);
-        }
-
-        .brand-gradient {
-            background: linear-gradient(135deg, var(--clinic-primary), var(--clinic-accent));
-        }
-
-        .wizard-shell {
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(219, 227, 234, 0.9);
-            box-shadow: 0 20px 45px -28px rgba(15, 23, 42, 0.35);
-            backdrop-filter: blur(16px);
-        }
-
-        .form-control {
-            width: 100%;
-            border: 1px solid var(--clinic-border);
-            border-radius: 0.85rem;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 0.75rem 0.95rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--clinic-primary);
-            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
-        }
-
-        .choice-card {
-            border: 1px solid var(--clinic-border);
-            border-radius: 1rem;
-            padding: 1rem;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .choice-card.active {
-            border-color: var(--clinic-primary);
-            background: linear-gradient(135deg, rgba(204, 251, 241, 0.55), rgba(224, 242, 254, 0.65));
-            box-shadow: 0 14px 26px -20px rgba(15, 118, 110, 0.4);
-        }
-
-        .step-pill {
-            border: 1px solid var(--clinic-border);
-            color: #64748b;
-        }
-
-        .step-pill.active {
-            background: linear-gradient(135deg, var(--clinic-primary), var(--clinic-accent));
-            border-color: transparent;
-            color: white;
-        }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 @php
     $days = [

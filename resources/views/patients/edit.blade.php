@@ -4,32 +4,23 @@
 
 @section('content')
 <div class="space-y-8">
-    <!-- Modern Header -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center animate-float">
-                    <i class="fas fa-user-edit text-blue-600 text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">
-                        {{ __('patients.edit_patient_title') }} - <span class="text-gradient">{{ $patient->full_name }}</span>
-                    </h1>
-                    <p class="text-gray-600 mt-2 text-lg">{{ __('patients.update_patient_info') }}</p>
-                </div>
-            </div>
-            <div class="flex flex-wrap gap-3">
-                <a href="{{ route('patients.show', $patient) }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+    <x-ui.page-header
+        :title="__('patients.edit_patient_title') . ' - ' . $patient->full_name"
+        :description="__('patients.update_patient_info')"
+        icon="fa-user-pen"
+        eyebrow="Patient registry"
+    >
+        <x-slot:actions>
+                <a href="{{ route('patients.show', $patient) }}" class="btn-primary px-6 py-3">
                     <i class="fas fa-eye"></i>
                     <span>{{ __('patients.view_patient') }}</span>
                 </a>
-                <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                <button onclick="history.back()" class="btn-secondary px-6 py-3">
                     <i class="fas fa-arrow-left"></i>
                     <span>{{ __('common.back') }}</span>
                 </button>
-            </div>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Modern Patient Form -->
     <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
@@ -255,7 +246,7 @@
             <!-- Medical Information Section -->
             <div class="p-8 py-0">
                 <div class="flex items-center space-x-3 mb-8">
-                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                         <i class="fas fa-heartbeat text-white"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900">{{ __('patients.medical_information') }}</h3>

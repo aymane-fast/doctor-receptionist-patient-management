@@ -4,20 +4,12 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="section-card p-6">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 icon-tile rounded-xl flex items-center justify-center">
-                    <i class="fas fa-cog text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">{{ __('common.settings') }}</h1>
-                    <p class="text-gray-600">{{ __('common.configure_preferences') }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-ui.page-header
+        :title="__('common.settings')"
+        :description="__('common.configure_preferences')"
+        icon="fa-sliders"
+        eyebrow="Clinic configuration"
+    />
 
     <!-- Language Settings -->
     <div class="section-card p-6">

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Prescription;
 use App\Models\Patient;
 use App\Models\MedicalRecord;
+use App\Models\Setting;
 use App\Services\PatientSearchService;
 
 class PrescriptionController extends Controller
@@ -170,7 +171,9 @@ class PrescriptionController extends Controller
         }
 
         $prescription->load(['patient', 'doctor', 'items']);
-        return view('prescriptions.print', compact('prescription'));
+        $clinic = Setting::getClinicInfo();
+
+        return view('prescriptions.print', compact('prescription', 'clinic'));
     }
 
     public function edit(Prescription $prescription)

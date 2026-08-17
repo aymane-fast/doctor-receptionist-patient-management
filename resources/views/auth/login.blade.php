@@ -1,98 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d2d2a">
     <title>{{ __('auth.login') }} - {{ __('auth.medical_management_system') }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --clinic-primary: #0f766e;
-            --clinic-accent: #0284c7;
-            --clinic-border: #dbe3ea;
-        }
-
-        body {
-            background:
-                radial-gradient(circle at 15% 15%, rgba(15, 118, 110, 0.18), transparent 24rem),
-                radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.16), transparent 22rem),
-                linear-gradient(180deg, #f7fbfb 0%, #eef4f5 100%);
-        }
-
-        .brand-mark {
-            background: linear-gradient(135deg, var(--clinic-primary), var(--clinic-accent));
-        }
-
-        .form-control {
-            border: 1px solid var(--clinic-border);
-            border-radius: 0.75rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--clinic-primary);
-            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
-        }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen flex items-center justify-center px-4 py-10">
-    <div class="bg-white/95 border border-slate-200 p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        <div class="text-center mb-8">
-            <div class="brand-mark w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <i class="fas fa-heartbeat text-3xl text-white"></i>
-            </div>
-            <h1 class="text-2xl font-bold text-gray-800">{{ __('auth.medical_management_system') }}</h1>
-            <p class="text-gray-600 mt-2">{{ __('auth.sign_in_to_account') }}</p>
-        </div>
-
-        @if($errors->any())
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            @foreach($errors->all() as $error)
-            <p>{{ $error }}</p>
-            @endforeach
-        </div>
-        @endif
-
-        @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {{ session('success') }}
-        </div>
-        @endif
-
-        <form method="POST" action="{{ route('login') }}" class="space-y-6">
-            @csrf
-            
+<body class="auth-body">
+    <div class="auth-shell">
+        <section class="auth-story">
             <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-envelope mr-1"></i> {{ __('auth.email_address') }}
-                </label>
-                <input type="email" 
-                       id="email" 
-                       name="email" 
-                       value="{{ old('email') }}"
-                       required 
-                       class="form-control w-full px-3 py-2.5 shadow-sm">
+                <div class="auth-story-brand">
+                    <span class="brand-mark h-10 w-10 rounded-xl"><i class="fas fa-heartbeat"></i></span>
+                    <span>{{ __('auth.medical_management_system') }}</span>
+                </div>
+                <h1 class="auth-story-title">Care runs better when the day stays clear.</h1>
+                <p class="auth-story-copy">A focused workspace for appointments, queue flow, patient records, and the clinical decisions that matter.</p>
             </div>
 
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-lock mr-1"></i> {{ __('auth.password_label') }}
-                </label>
-                <input type="password" 
-                       id="password" 
-                       name="password" 
-                       required 
-                       class="form-control w-full px-3 py-2.5 shadow-sm">
+            <div class="auth-feature-list" aria-label="System capabilities">
+                <div class="auth-feature"><i class="fas fa-calendar-check"></i><span>Scheduled appointments and flexible queue mode</span></div>
+                <div class="auth-feature"><i class="fas fa-file-medical"></i><span>Patient history and clinical records in one place</span></div>
+                <div class="auth-feature"><i class="fas fa-user-shield"></i><span>Role-based access for doctors and reception staff</span></div>
             </div>
+        </section>
 
-            <button type="submit" 
-                    class="w-full text-white py-2.5 px-4 rounded-xl font-semibold transition duration-200 shadow-lg hover:shadow-xl"
-                    style="background: linear-gradient(135deg, var(--clinic-primary), var(--clinic-accent));">
-                <i class="fas fa-sign-in-alt mr-2"></i> {{ __('auth.sign_in') }}
-            </button>
-        </form>
+        <section class="auth-panel">
+            <span class="auth-kicker">Secure workspace</span>
+            <h2 class="auth-title">{{ __('auth.sign_in') }}</h2>
+            <p class="auth-subtitle">{{ __('auth.sign_in_to_account') }}</p>
+
+            @if($errors->any())
+                <div class="app-alert app-alert-danger mt-6" role="alert">
+                    <span class="app-alert-icon"><i class="fas fa-exclamation"></i></span>
+                    <div class="text-sm">
+                        @foreach($errors->all() as $error)
+                            <p>{{ $error }}</p>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            @if(session('success'))
+                <div class="app-alert app-alert-success mt-6" role="alert">
+                    <span class="app-alert-icon"><i class="fas fa-check"></i></span>
+                    <p class="text-sm font-semibold">{{ session('success') }}</p>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}" class="mt-8 space-y-5">
+                @csrf
+
+                <div>
+                    <label for="email" class="mb-2 block text-sm font-bold">
+                        {{ __('auth.email_address') }}
+                    </label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            required
+                            autofocus
+                            autocomplete="email"
+                            class="form-control w-full py-3 pl-11 pr-4"
+                        >
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="mb-2 block text-sm font-bold">
+                        {{ __('auth.password_label') }}
+                    </label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            required
+                            autocomplete="current-password"
+                            class="form-control w-full py-3 pl-11 pr-4"
+                        >
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary w-full px-5 py-3">
+                    <span>{{ __('auth.sign_in') }}</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+        </section>
     </div>
 </body>
 </html>

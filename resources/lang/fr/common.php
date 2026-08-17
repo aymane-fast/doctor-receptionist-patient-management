@@ -91,6 +91,8 @@ return [
     'closed' => 'Fermé',
     'not_specified' => 'Non spécifié',
     'medical_management' => 'Gestion Médicale',
+    'medical_management_system' => 'Système de gestion médicale',
+    'optional' => 'Facultatif',
     'statistics' => 'Statistiques',
     'minutes' => 'minutes',
     'save_changes' => 'Enregistrer les Modifications',

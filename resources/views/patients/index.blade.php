@@ -6,29 +6,19 @@
 
 @section('content')
 <div class="space-y-8">
-    <!-- Modern Header -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center animate-float">
-                    <i class="fas fa-users text-blue-600 text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">
-                        <span class="text-gradient">{{ __('patients.patient_management') }}</span>
-                    </h1>
-                    <p class="text-gray-600 mt-2 text-lg">{{ __('patients.manage_efficiently') }}</p>
-                </div>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-3">
-                <!-- Regular Add Patient Button -->
-                <a href="{{ route('patients.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 deep-shadow hover:shadow-xl flex items-center space-x-3">
+    <x-ui.page-header
+        :title="__('patients.patient_management')"
+        :description="__('patients.manage_efficiently')"
+        icon="fa-user-group"
+        eyebrow="Patient registry"
+    >
+        <x-slot:actions>
+                <a href="{{ route('patients.create') }}" class="btn-primary px-6 py-3">
                     <i class="fas fa-plus"></i>
                     <span>{{ __('patients.add_new_patient') }}</span>
                 </a>
-            </div>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Modern Search and Filters -->
     <div class="glass-effect rounded-3xl p-6 modern-shadow" style="overflow: visible; ">
@@ -67,12 +57,12 @@
                     </div>
                 </div>
                 <div class="flex space-x-3">
-                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                    <button type="submit" class="btn-primary px-6 py-3">
                         <i class="fas fa-search"></i>
                         <span>{{ __('patients.search') }}</span>
                     </button>
                     @if(request('search') || request('date'))
-                    <a href="{{ route('patients.index') }}" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2">
+                    <a href="{{ route('patients.index') }}" class="btn-secondary px-6 py-3">
                         <i class="fas fa-times"></i>
                         <span>{{ __('patients.clear') }}</span>
                     </a>
@@ -123,8 +113,8 @@
                                     <span class="font-medium">{{ $patient->age !== null ? $patient->age . ' ' . __('patients.years') : '—' }}</span>
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
-                                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                                        <i class="fas fa-venus-mars text-purple-600 text-xs"></i>
+                                    <div class="icon-tile w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-venus-mars text-xs"></i>
                                     </div>
                                     <span class="font-medium">{{ $patient->gender ? ucfirst($patient->gender) : '—' }}</span>
                                 </div>
@@ -401,7 +391,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <span>${patient.phone || 'N/A'}</span>
                                 </span>
                                 <span class="flex items-center space-x-1">
-                                    <i class="fas fa-id-card text-purple-500 text-xs"></i>
+                                    <i class="fas fa-id-card text-emerald-700 text-xs"></i>
                                     <span>${patient.id_card_number || 'N/A'}</span>
                                 </span>
                             </div>

@@ -22,6 +22,8 @@ return [
     'todays_schedule' => "Programme d'aujourd'hui",
     'appointments_today' => "Rendez-vous aujourd'hui",
     'scheduled' => 'Planifié',
+    'new_appointment' => 'Nouveau rendez-vous',
+    'medical_records' => 'Dossiers médicaux',
     'upcoming_appointments' => 'Rendez-vous à venir',
     'new_this_week' => 'Nouveaux cette semaine',
     'new_registrations' => 'Nouvelles inscriptions',

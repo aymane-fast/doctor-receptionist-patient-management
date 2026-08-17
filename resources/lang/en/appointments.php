@@ -199,6 +199,7 @@ return [
     'consultation_already_completed' => 'That consultation was already completed — the page may have been out of date.',
     'patient_locked_by_record' => 'This appointment has a medical record; the patient cannot be changed.',
     'cannot_delete_history' => 'Completed or in-progress visits are medical history — cancel instead of deleting.',
+    'confirm_delete' => 'Are you sure you want to delete this appointment?',
     'already_earliest_slot' => 'This appointment is already at the earliest available slot.',
     'cannot_move_in_progress' => 'A consultation in progress cannot be moved to another day. Complete it or send the patient back to the waiting list first.',
 ];

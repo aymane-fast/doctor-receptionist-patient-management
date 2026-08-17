@@ -78,6 +78,15 @@ class User extends Authenticatable
         return !$this->usesQueueMode();
     }
 
+    public function getProfessionalNameAttribute(): string
+    {
+        if (!$this->isDoctor() || preg_match('/^\s*dr\.?\s+/i', $this->name) === 1) {
+            return $this->name;
+        }
+
+        return 'Dr. '.$this->name;
+    }
+
     /**
      * Appointments as doctor
      */

@@ -4,26 +4,19 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Modern Header -->
-    <div class="glass-effect rounded-2xl p-6 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-download text-blue-600 text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">
-                        <span class="text-gradient">Export des Données</span>
-                    </h1>
-                    <p class="text-gray-600 mt-1">Exportez les données de la clinique dans des formats organisés et professionnels</p>
-                </div>
-            </div>
-            <button onclick="history.back()" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
+    <x-ui.page-header
+        title="Export des Données"
+        description="Exportez les données de la clinique dans des formats organisés et professionnels."
+        icon="fa-file-export"
+        eyebrow="Data management"
+    >
+        <x-slot:actions>
+            <button onclick="history.back()" class="btn-secondary px-4 py-2">
                 <i class="fas fa-arrow-left text-sm"></i>
                 <span>Retour</span>
             </button>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Export Form -->
     <div class="glass-effect rounded-2xl modern-shadow overflow-hidden">
@@ -33,7 +26,7 @@
             <!-- Data Selection -->
             <div class="p-6 pb-0">
                 <div class="flex items-center space-x-3 mb-4">
-                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                    <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                         <i class="fas fa-database text-white text-sm"></i>
                     </div>
                     <h3 class="text-lg font-bold text-gray-900">Sélectionner les Données à Exporter</h3>
@@ -44,10 +37,10 @@
                     <div class="relative">
                         <input type="checkbox" id="patients" name="data_types[]" value="patients" 
                                class="sr-only peer">
-                        <label for="patients" class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all duration-200">
+                        <label for="patients" class="export-choice">
                             <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-users text-purple-600"></i>
+                                <div class="icon-tile w-10 h-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users"></i>
                                 </div>
                                 <div>
                                     <div class="font-semibold text-gray-900">Patients</div>
@@ -55,8 +48,8 @@
                                 </div>
                             </div>
                             <div class="ml-auto">
-                                <div class="w-5 h-5 border-2 border-gray-300 rounded peer-checked:bg-blue-500 peer-checked:border-blue-500 flex items-center justify-center">
-                                    <i class="fas fa-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+                                <div class="export-choice-check">
+                                    <i class="fas fa-check text-xs"></i>
                                 </div>
                             </div>
                         </label>
@@ -66,10 +59,10 @@
                     <div class="relative">
                         <input type="checkbox" id="appointments" name="data_types[]" value="appointments" 
                                class="sr-only peer">
-                        <label for="appointments" class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all duration-200">
+                        <label for="appointments" class="export-choice">
                             <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-calendar-alt text-blue-600"></i>
+                                <div class="icon-tile w-10 h-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-calendar-alt"></i>
                                 </div>
                                 <div>
                                     <div class="font-semibold text-gray-900">Rendez-vous</div>
@@ -77,8 +70,8 @@
                                 </div>
                             </div>
                             <div class="ml-auto">
-                                <div class="w-5 h-5 border-2 border-gray-300 rounded peer-checked:bg-blue-500 peer-checked:border-blue-500 flex items-center justify-center">
-                                    <i class="fas fa-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+                                <div class="export-choice-check">
+                                    <i class="fas fa-check text-xs"></i>
                                 </div>
                             </div>
                         </label>
@@ -88,10 +81,10 @@
                     <div class="relative">
                         <input type="checkbox" id="medical_records" name="data_types[]" value="medical_records" 
                                class="sr-only peer">
-                        <label for="medical_records" class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all duration-200">
+                        <label for="medical_records" class="export-choice">
                             <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-file-medical text-emerald-600"></i>
+                                <div class="icon-tile w-10 h-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-file-medical"></i>
                                 </div>
                                 <div>
                                     <div class="font-semibold text-gray-900">Dossiers Médicaux</div>
@@ -99,8 +92,8 @@
                                 </div>
                             </div>
                             <div class="ml-auto">
-                                <div class="w-5 h-5 border-2 border-gray-300 rounded peer-checked:bg-blue-500 peer-checked:border-blue-500 flex items-center justify-center">
-                                    <i class="fas fa-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+                                <div class="export-choice-check">
+                                    <i class="fas fa-check text-xs"></i>
                                 </div>
                             </div>
                         </label>
@@ -110,10 +103,10 @@
                     <div class="relative">
                         <input type="checkbox" id="prescriptions" name="data_types[]" value="prescriptions" 
                                class="sr-only peer">
-                        <label for="prescriptions" class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all duration-200">
+                        <label for="prescriptions" class="export-choice">
                             <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-pink-100 to-pink-200 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-pills text-pink-600"></i>
+                                <div class="icon-tile w-10 h-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-pills"></i>
                                 </div>
                                 <div>
                                     <div class="font-semibold text-gray-900">Ordonnances</div>
@@ -121,8 +114,8 @@
                                 </div>
                             </div>
                             <div class="ml-auto">
-                                <div class="w-5 h-5 border-2 border-gray-300 rounded peer-checked:bg-blue-500 peer-checked:border-blue-500 flex items-center justify-center">
-                                    <i class="fas fa-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+                                <div class="export-choice-check">
+                                    <i class="fas fa-check text-xs"></i>
                                 </div>
                             </div>
                         </label>
@@ -134,10 +127,10 @@
                     <div class="relative">
                         <input type="checkbox" id="users" name="data_types[]" value="users" 
                                class="sr-only peer">
-                        <label for="users" class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all duration-200">
+                        <label for="users" class="export-choice">
                             <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-user-md text-indigo-600"></i>
+                                <div class="icon-tile w-10 h-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-user-md"></i>
                                 </div>
                                 <div>
                                     <div class="font-semibold text-gray-900">Personnel</div>
@@ -145,8 +138,8 @@
                                 </div>
                             </div>
                             <div class="ml-auto">
-                                <div class="w-5 h-5 border-2 border-gray-300 rounded peer-checked:bg-blue-500 peer-checked:border-blue-500 flex items-center justify-center">
-                                    <i class="fas fa-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
+                                <div class="export-choice-check">
+                                    <i class="fas fa-check text-xs"></i>
                                 </div>
                             </div>
                         </label>
@@ -166,7 +159,7 @@
             <!-- Date Range -->
             <div class="p-6">
                 <div class="flex items-center space-x-3 mb-4">
-                    <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                    <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                         <i class="fas fa-calendar-week text-white text-sm"></i>
                     </div>
                     <h3 class="text-lg font-bold text-gray-900">Période (Optionnelle)</h3>
@@ -206,28 +199,26 @@
                     </div>
                 </div>
 
-                <div class="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                    <div class="flex items-start space-x-2">
-                        <i class="fas fa-info-circle text-blue-600 mt-0.5"></i>
-                        <div class="text-sm text-blue-800">
+                <div class="app-alert app-alert-info mt-4 mb-0">
+                    <span class="app-alert-icon"><i class="fas fa-info-circle"></i></span>
+                        <div class="text-sm">
                             <strong>Note :</strong> Si aucune période n'est spécifiée, toutes les données disponibles seront exportées. 
                             Le filtrage par date s'applique aux dates de création pour la plupart des types de données (dates de rendez-vous pour les rendez-vous, dates de visite pour les dossiers médicaux, etc.).
                         </div>
                     </div>
-                </div>
             </div>
 
 
 
             <!-- Form Actions -->
-            <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-b-2xl">
+            <div class="border-t border-gray-200 bg-gray-50 p-6">
                 <div class="flex flex-col sm:flex-row items-center justify-end space-y-3 sm:space-y-0 sm:space-x-3">
                     <button type="button" onclick="history.back()" 
-                            class="w-full sm:w-auto bg-gradient-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-500 text-gray-800 px-6 py-3 rounded-xl font-medium transition-all duration-200 text-center">
+                            class="btn-secondary w-full sm:w-auto px-6 py-3">
                         Annuler
                     </button>
                     <button type="submit" id="exportBtn"
-                            class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2">
+                            class="btn-primary w-full sm:w-auto px-6 py-3">
                         <i class="fas fa-download"></i>
                         <span>Exporter les Données</span>
                     </button>
@@ -243,71 +234,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const exportBtn = document.getElementById('exportBtn');
     const startDateInput = document.getElementById('start_date');
     const endDateInput = document.getElementById('end_date');
-
-    // Handle card clicks and visual states
-    const dataTypeCards = document.querySelectorAll('input[name="data_types[]"]');
-    
-    dataTypeCards.forEach(function(checkbox) {
-        const label = checkbox.nextElementSibling;
-        
-        // Add click handler to the label (card)
-        label.addEventListener('click', function(e) {
-            // Prevent the default label click if needed
-            e.preventDefault();
-            
-            // Toggle the checkbox
-            checkbox.checked = !checkbox.checked;
-            
-            // Update visual appearance
-            updateCardAppearance(checkbox, label);
-        });
-        
-        // Also handle direct checkbox changes
-        checkbox.addEventListener('change', function() {
-            updateCardAppearance(checkbox, label);
-        });
-        
-        // Set initial state
-        updateCardAppearance(checkbox, label);
-    });
-    
-    function updateCardAppearance(checkbox, label) {
-        if (checkbox.checked) {
-            // Checked state - blue theme
-            label.classList.remove('bg-white', 'border-gray-200', 'hover:bg-blue-50');
-            label.classList.add('bg-blue-50', 'border-blue-500', 'hover:bg-blue-100');
-            
-            // Update the checkmark icon
-            const checkIcon = label.querySelector('.fa-check');
-            if (checkIcon) {
-                checkIcon.style.opacity = '1';
-            }
-            
-            // Update the checkbox container
-            const checkboxContainer = label.querySelector('.w-5.h-5');
-            if (checkboxContainer) {
-                checkboxContainer.classList.remove('border-gray-300');
-                checkboxContainer.classList.add('bg-blue-500', 'border-blue-500');
-            }
-        } else {
-            // Unchecked state - default theme
-            label.classList.remove('bg-blue-50', 'border-blue-500', 'hover:bg-blue-100');
-            label.classList.add('bg-white', 'border-gray-200', 'hover:bg-blue-50');
-            
-            // Hide the checkmark icon
-            const checkIcon = label.querySelector('.fa-check');
-            if (checkIcon) {
-                checkIcon.style.opacity = '0';
-            }
-            
-            // Reset the checkbox container
-            const checkboxContainer = label.querySelector('.w-5.h-5');
-            if (checkboxContainer) {
-                checkboxContainer.classList.remove('bg-blue-500', 'border-blue-500');
-                checkboxContainer.classList.add('border-gray-300');
-            }
-        }
-    }
 
     // Form validation
     form.addEventListener('submit', function(e) {

@@ -4,21 +4,13 @@
 
 @section('content')
 <div class="space-y-8">
-    <!-- Modern Header -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 icon-tile rounded-2xl flex items-center justify-center animate-float">
-                    <i class="fas fa-calendar text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900">
-                        <span class="text-gradient">{{ __('appointments.title') }}</span>
-                    </h1>
-                    <p class="text-gray-600 mt-2 text-lg">{{ __('appointments.manage_appointments_scheduling') }}</p>
-                </div>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-3">
+    <x-ui.page-header
+        :title="__('appointments.title')"
+        :description="__('appointments.manage_appointments_scheduling')"
+        icon="fa-calendar-check"
+        eyebrow="Scheduling"
+    >
+        <x-slot:actions>
                 <a href="{{ route('appointments.queue') }}" class="btn-secondary px-6 py-3 rounded-2xl">
                     <i class="fas fa-list-ol"></i>
                     <span>Queue</span>
@@ -31,9 +23,8 @@
                     <i class="fas fa-plus"></i>
                     <span>{{ __('appointments.schedule_appointment') }}</span>
                 </a>
-            </div>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Modern Filters -->
     <div class="glass-effect rounded-3xl p-8 modern-shadow relative z-[10001]">
@@ -109,7 +100,7 @@
                             <option value="">{{ __('appointments.all_doctors') }}</option>
                             @foreach($doctors as $doctor)
                             <option value="{{ $doctor->id }}" {{ request('doctor_id') == $doctor->id ? 'selected' : '' }}>
-                                {{ __('appointments.doctor_prefix') }} {{ $doctor->name }}
+                                {{ $doctor->professional_name }}
                             </option>
                             @endforeach
                         </select>
@@ -196,7 +187,7 @@
                                     <div class="w-10 h-10 bg-teal-50 text-teal-700 rounded-xl flex items-center justify-center">
                                         <i class="fas fa-user-md text-sm"></i>
                                     </div>
-                                    <span class="text-base font-medium text-gray-900">{{ __('appointments.doctor_prefix') }} {{ $appointment->doctor->name }}</span>
+                                    <span class="text-base font-medium text-gray-900">{{ $appointment->doctor->professional_name }}</span>
                                 </div>
                             </td>
                             <td class="px-8 py-6">

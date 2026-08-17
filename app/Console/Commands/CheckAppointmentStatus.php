@@ -43,7 +43,7 @@ class CheckAppointmentStatus extends Command
             if ($currentDoctor !== $appointment->doctor_id) {
                 $currentDoctor = $appointment->doctor_id;
                 $this->line('');
-                $this->info("👨‍⚕️ Dr. {$appointment->doctor->name} (ID: {$appointment->doctor_id}):");
+                $this->info("👨‍⚕️ {$appointment->doctor->professional_name} (ID: {$appointment->doctor_id}):");
             }
             
             $statusColor = match($appointment->status) {
@@ -63,7 +63,7 @@ class CheckAppointmentStatus extends Command
             $this->error("⚠️  WARNING: Found {$inProgressCount} appointments with 'in_progress' status!");
         } elseif ($inProgressCount === 1) {
             $current = $appointments->where('status', 'in_progress')->first();
-            $this->info("✅ Current patient: {$current->patient->full_name} with Dr. {$current->doctor->name}");
+            $this->info("✅ Current patient: {$current->patient->full_name} with {$current->doctor->professional_name}");
         } else {
             $this->warn("ℹ️  No current patient set (no 'in_progress' appointments)");
         }

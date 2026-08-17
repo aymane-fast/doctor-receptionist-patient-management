@@ -4,32 +4,25 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
-    <!-- Medical Record Header -->
-    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-6">
-                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <i class="fas fa-file-medical text-white text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('medical_records.full_record_details') }}</h1>
-                    <p class="text-gray-600">Medical Record #{{ $medicalRecord->id }} • {{ \Carbon\Carbon::parse($medicalRecord->visit_date)->format('M d, Y') }}</p>
-                </div>
-            </div>
-            <div class="flex space-x-3">
+    <x-ui.page-header
+        :title="__('medical_records.full_record_details')"
+        :description="'Medical record #' . $medicalRecord->id . ' - ' . \Carbon\Carbon::parse($medicalRecord->visit_date)->format('M d, Y')"
+        icon="fa-file-medical"
+        eyebrow="Clinical history"
+    >
+        <x-slot:actions>
                 <button onclick="history.back()" 
-                   class="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                   class="btn-secondary px-4 py-2">
                     <i class="fas fa-arrow-left"></i>
                     <span>{{ __('common.back') }}</span>
                 </button>
                 <a href="{{ route('medical-records.edit', $medicalRecord) }}" 
-                   class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                   class="btn-primary px-4 py-2">
                     <i class="fas fa-edit"></i>
                     <span>{{ __('common.edit') }}</span>
                 </a>
-            </div>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Main Content -->
@@ -56,7 +49,7 @@
                             <div class="flex items-center gap-4 mb-1">
                                 <h3 class="text-xl font-bold text-gray-900">{{ $medicalRecord->patient->first_name }} {{ $medicalRecord->patient->last_name }}</h3>
                                 <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-sm font-semibold">{{ $medicalRecord->patient->age !== null ? $medicalRecord->patient->age . 'y' : '—' }}</span>
-                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm font-semibold">{{ $medicalRecord->patient->gender ? ucfirst($medicalRecord->patient->gender) : '—' }}</span>
+                                <span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-full text-sm font-semibold">{{ $medicalRecord->patient->gender ? ucfirst($medicalRecord->patient->gender) : '—' }}</span>
                             </div>
                             <p class="text-gray-600">{{ $medicalRecord->patient->phone }} • {{ $medicalRecord->patient->email }}</p>
                         </div>
@@ -78,7 +71,7 @@
                                 <i class="fas fa-user-md text-gray-600 mr-2"></i>
                                 <label class="text-sm font-medium text-gray-600">{{ __('medical_records.doctor') }}</label>
                             </div>
-                            <p class="font-bold text-gray-900">Dr. {{ $medicalRecord->doctor->name }}</p>
+                            <p class="font-bold text-gray-900">{{ $medicalRecord->doctor->professional_name }}</p>
                         </div>
                         <div class="bg-gray-50 rounded-lg p-4">
                             <div class="flex items-center mb-2">
@@ -172,7 +165,7 @@
                     
                     @if($medicalRecord->oxygen_saturation)
                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                        <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <div class="w-8 h-8 bg-emerald-700 rounded-full flex items-center justify-center mx-auto mb-2">
                             <i class="fas fa-lungs text-white text-sm"></i>
                         </div>
                         <p class="text-xs font-medium text-gray-600 mb-1">{{ __('medical_records.oxygen_saturation') }}</p>
@@ -186,10 +179,10 @@
 
             <!-- Clinical Information -->
             <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                <div class="bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-4 border-b border-purple-200">
-                    <h2 class="text-lg font-bold text-purple-800 flex items-center">
-                        <div class="w-8 h-8 bg-purple-200 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-clipboard-list text-purple-700"></i>
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-bold text-gray-900 flex items-center">
+                        <div class="icon-tile w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-clipboard-list"></i>
                         </div>
                         {{ __('medical_records.clinical_information') }}
                     </h2>
@@ -229,8 +222,8 @@
                     @if($medicalRecord->physical_examination)
                     <div class="border border-gray-200 rounded-lg p-4">
                         <div class="flex items-center mb-3">
-                            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                                <i class="fas fa-search text-purple-600"></i>
+                            <div class="icon-tile w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-search"></i>
                             </div>
                             <label class="font-bold text-gray-900">{{ __('medical_records.physical_examination') }}</label>
                         </div>
@@ -302,12 +295,12 @@
                 <div class="p-6">
                 <div class="space-y-3">
                     <a href="{{ route('prescriptions.create', ['patient_id' => $medicalRecord->patient_id, 'medical_record_id' => $medicalRecord->id]) }}" 
-                       class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-4 py-3 rounded-lg transition-all duration-200 block text-center font-medium shadow-lg hover:shadow-xl">
+                       class="btn-primary w-full px-4 py-3">
                         <i class="fas fa-prescription-bottle mr-2"></i>{{ __('prescriptions.add_prescription') }}
                     </a>
                     
                     <a href="{{ route('appointments.create', ['patient_id' => $medicalRecord->patient_id]) }}" 
-                       class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-3 rounded-lg transition-all duration-200 block text-center font-medium shadow-lg hover:shadow-xl">
+                       class="btn-secondary w-full px-4 py-3">
                         <i class="fas fa-calendar-plus mr-2"></i>{{ __('medical_records.schedule_followup') }}
                     </a>
                 </div>
@@ -341,7 +334,7 @@
                     @if($medicalRecord->appointment)
                     <div class="pt-3 border-t">
                         <a href="{{ route('appointments.show', $medicalRecord->appointment) }}" 
-                           class="flex items-center justify-center bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-3 rounded-lg transition-colors font-medium">
+                           class="btn-ghost w-full px-4 py-3">
                             <i class="fas fa-calendar mr-2"></i>{{ __('medical_records.view_related_appointment') }}
                         </a>
                     </div>
@@ -371,7 +364,7 @@
                         <i class="fas fa-prescription-bottle mr-3"></i>{{ __('medical_records.patient_prescriptions') }}
                     </a>
                     <a href="{{ route('patients.show', $medicalRecord->patient) }}?tab=appointments" 
-                       class="flex items-center bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-3 rounded-lg transition-colors font-medium">
+                       class="flex items-center bg-emerald-50 hover:bg-emerald-100 text-emerald-800 px-4 py-3 rounded-lg transition-colors font-medium">
                         <i class="fas fa-calendar mr-3"></i>{{ __('medical_records.patient_appointments') }}
                     </a>
                 </div>

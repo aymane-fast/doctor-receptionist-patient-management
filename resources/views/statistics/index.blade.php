@@ -3,41 +3,30 @@
 @section('title', 'Analytics Dashboard')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-6">
-    <!-- Header Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div class="bg-white rounded-3xl shadow-2xl p-8 backdrop-blur-lg border border-white/20">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <div class="flex items-center space-x-4">
-                    <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-chart-line text-white text-2xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            {{ __('statistics.title') }}
-                        </h1>
-                        <p class="text-gray-600 text-lg mt-2">{{ __('statistics.comprehensive_insights') }}</p>
-                    </div>
-                </div>
-                <div class="mt-6 lg:mt-0 flex items-center space-x-4">
-                    <div class="bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-xl">
-                        <span class="text-green-800 font-semibold">{{ __('statistics.live_data') }}</span>
-                        <div class="w-2 h-2 bg-green-500 rounded-full inline-block ml-2 animate-pulse"></div>
-                    </div>
-                    <button onclick="refreshData()" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>{{ __('statistics.refresh') }}</span>
-                    </button>
-                </div>
+<div class="space-y-8">
+    <x-ui.page-header
+        :title="__('statistics.title')"
+        :description="__('statistics.comprehensive_insights')"
+        icon="fa-chart-line"
+        eyebrow="Clinic intelligence"
+    >
+        <x-slot:actions>
+            <div class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>{{ __('statistics.live_data') }}</span>
             </div>
-        </div>
-    </div>
+            <button onclick="refreshData()" class="btn-primary px-5 py-3">
+                <i class="fas fa-sync-alt"></i>
+                <span>{{ __('statistics.refresh') }}</span>
+            </button>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <!-- Quick Stats Grid -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+    <div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Total Patients -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="metric-card p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-600 text-sm font-medium">{{ __('statistics.total_patients') }}</p>
@@ -46,14 +35,14 @@
                             <span class="text-green-600 text-sm font-medium">+{{ $statistics['new_patients_this_month'] ?? 0 }} {{ __('statistics.this_month') }}</span>
                         </div>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-users text-white"></i>
+                    <div class="metric-card-icon">
+                        <i class="fas fa-users"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Total Appointments -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="metric-card p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-600 text-sm font-medium">{{ __('statistics.total_appointments') }}</p>
@@ -62,14 +51,14 @@
                             <span class="text-green-600 text-sm font-medium">+{{ $statistics['appointments_this_week'] ?? 0 }} {{ __('statistics.this_week') }}</span>
                         </div>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-calendar-check text-white"></i>
+                    <div class="metric-card-icon">
+                        <i class="fas fa-calendar-check"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Success Rate -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="metric-card p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-600 text-sm font-medium">{{ __('statistics.success_rate') }}</p>
@@ -78,14 +67,14 @@
                             <span class="text-green-600 text-sm font-medium">{{ __('statistics.completed_appointments') }}</span>
                         </div>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-trophy text-white"></i>
+                    <div class="metric-card-icon">
+                        <i class="fas fa-trophy"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Monthly Revenue -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <div class="metric-card p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-600 text-sm font-medium">{{ __('statistics.this_month_revenue') }}</p>
@@ -98,8 +87,8 @@
                             @endif
                         </div>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-dollar-sign text-white"></i>
+                    <div class="metric-card-icon">
+                        <i class="fas fa-dollar-sign"></i>
                     </div>
                 </div>
             </div>
@@ -107,16 +96,16 @@
     </div>
 
     <!-- Charts Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+    <div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Appointments Trend Chart -->
-            <div class="bg-white rounded-3xl shadow-2xl p-8 border border-white/20">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-2xl font-bold text-gray-900">{{ __('statistics.appointments_trend') }}</h3>
-                    <div class="flex space-x-2">
-                        <button onclick="changeTimeframe('week')" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors" id="week-btn">{{ __('statistics.week') }}</button>
-                        <button onclick="changeTimeframe('month')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors" id="month-btn">{{ __('statistics.month') }}</button>
-                        <button onclick="changeTimeframe('year')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors" id="year-btn">{{ __('statistics.year') }}</button>
+            <div class="analytics-card p-6 lg:p-8">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900">{{ __('statistics.appointments_trend') }}</h3>
+                    <div class="timeframe-switch" aria-label="Trend timeframe">
+                        <button onclick="changeTimeframe('week')" class="timeframe-button is-active" id="week-btn">{{ __('statistics.week') }}</button>
+                        <button onclick="changeTimeframe('month')" class="timeframe-button" id="month-btn">{{ __('statistics.month') }}</button>
+                        <button onclick="changeTimeframe('year')" class="timeframe-button" id="year-btn">{{ __('statistics.year') }}</button>
                     </div>
                 </div>
                 <div class="h-80">
@@ -125,8 +114,8 @@
             </div>
 
             <!-- Status Distribution Chart -->
-            <div class="bg-white rounded-3xl shadow-2xl p-8 border border-white/20">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">{{ __('statistics.appointment_status_distribution') }}</h3>
+            <div class="analytics-card p-6 lg:p-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">{{ __('statistics.appointment_status_distribution') }}</h3>
                 <div class="h-80">
                     <canvas id="statusChart"></canvas>
                 </div>
@@ -135,14 +124,14 @@
     </div>
 
     <!-- Detailed Analytics -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+    <div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Revenue Calculator & Monthly Revenue Chart -->
-            <div class="bg-white rounded-3xl shadow-2xl p-8 border border-white/20">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">{{ __('statistics.revenue_calculator') }}</h3>
+            <div class="analytics-card p-6 lg:p-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">{{ __('statistics.revenue_calculator') }}</h3>
                 
                 <!-- Calculator Section -->
-                <div class="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                <div class="soft-panel mb-6 p-4">
                     <div class="flex items-center justify-between mb-4">
                         <label class="text-sm font-semibold text-gray-700">{{ __('statistics.consultation_price') }}</label>
                         <input type="number" id="consultationPrice" value="{{ $statistics['consultation_price'] ?? 50 }}" 
@@ -152,7 +141,7 @@
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div class="text-center p-3 bg-white rounded-lg">
                             <p class="text-gray-600">{{ __('statistics.completed_this_month') }}</p>
-                            <p class="text-xl font-bold text-blue-600">{{ $statistics['completed_appointments'] ?? 0 }}</p>
+                            <p class="text-xl font-bold text-emerald-700">{{ $statistics['completed_appointments'] ?? 0 }}</p>
                         </div>
                         <div class="text-center p-3 bg-white rounded-lg">
                             <p class="text-gray-600">{{ __('statistics.estimated_revenue') }}</p>
@@ -169,23 +158,23 @@
             </div>
 
             <!-- Peak Hours -->
-            <div class="bg-white rounded-3xl shadow-2xl p-8 border border-white/20">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">{{ __('statistics.peak_hours_analysis') }}</h3>
+            <div class="analytics-card p-6 lg:p-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">{{ __('statistics.peak_hours_analysis') }}</h3>
                 <div class="h-64">
                     <canvas id="peakHoursChart"></canvas>
                 </div>
             </div>
 
             <!-- Patient Demographics -->
-            <div class="bg-white rounded-3xl shadow-2xl p-8 border border-white/20">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">{{ __('statistics.patient_demographics') }}</h3>
+            <div class="analytics-card p-6 lg:p-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">{{ __('statistics.patient_demographics') }}</h3>
                 <div class="space-y-4">
                     @foreach($statistics['age_groups'] ?? [] as $group)
                     <div class="flex items-center justify-between">
                         <span class="text-gray-700 font-medium">{{ $group['range'] }}</span>
                         <div class="flex items-center space-x-2">
                             <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500" style="width: {{ $group['percentage'] }}%"></div>
+                                <div class="h-full gradient-bg rounded-full transition-all duration-500" style="width: {{ $group['percentage'] }}%"></div>
                             </div>
                             <span class="text-sm font-semibold text-gray-900 w-8">{{ $group['count'] }}</span>
                         </div>
@@ -197,9 +186,9 @@
     </div>
 
     <!-- Doctor Performance -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div class="bg-white rounded-3xl shadow-2xl p-8 border border-white/20">
-            <h3 class="text-2xl font-bold text-gray-900 mb-6">
+    <div>
+        <div class="analytics-card p-6 lg:p-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">
                 <i class="fas fa-user-md text-teal-600 mr-2"></i>{{ __('statistics.doctor_performance') }}
             </h3>
             <div class="overflow-x-auto">
@@ -219,7 +208,7 @@
                     <tbody class="divide-y divide-gray-100">
                         @foreach($statistics['doctor_performance'] ?? [] as $doctor)
                         <tr class="{{ $loop->even ? 'bg-gray-50' : 'bg-white' }}">
-                            <td class="px-4 py-3 font-semibold text-gray-900">Dr. {{ $doctor['name'] }}</td>
+                            <td class="px-4 py-3 font-semibold text-gray-900">{{ $doctor['name'] }}</td>
                             <td class="px-4 py-3 text-sm text-gray-600">{{ ucfirst($doctor['mode']) }}</td>
                             <td class="px-4 py-3 text-sm text-gray-900">{{ $doctor['total'] }}</td>
                             <td class="px-4 py-3 text-sm text-emerald-700 font-semibold">{{ $doctor['completed'] }}</td>
@@ -236,15 +225,15 @@
     </div>
 
     <!-- Recent Activity & Top Patients -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+    <div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Recent Activity -->
-            <div class="bg-white rounded-3xl shadow-2xl p-8 border border-white/20">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">{{ __('statistics.recent_activity') }}</h3>
+            <div class="analytics-card p-6 lg:p-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">{{ __('statistics.recent_activity') }}</h3>
                 <div class="space-y-4 max-h-96 overflow-y-auto">
                     @foreach($statistics['recent_activities'] ?? [] as $activity)
                     <div class="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                        <div class="w-8 h-8 bg-gradient-to-r {{ $activity['color'] }} rounded-full flex items-center justify-center flex-shrink-0">
+                        <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
                             <i class="{{ $activity['icon'] }} text-white text-xs"></i>
                         </div>
                         <div class="flex-1">
@@ -258,13 +247,13 @@
             </div>
 
             <!-- Top Patients -->
-            <div class="bg-white rounded-3xl shadow-2xl p-8 border border-white/20">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">{{ __('statistics.most_active_patients') }}</h3>
+            <div class="analytics-card p-6 lg:p-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">{{ __('statistics.most_active_patients') }}</h3>
                 <div class="space-y-4">
                     @foreach($statistics['top_patients'] ?? [] as $index => $patient)
-                    <div class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-blue-50 hover:to-purple-50 transition-all duration-300">
+                    <div class="flex items-center justify-between p-4 soft-panel">
                         <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                            <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center">
                                 <span class="text-white font-bold text-xs">#{{ $index + 1 }}</span>
                             </div>
                             <div>
@@ -273,7 +262,7 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-lg font-bold text-blue-600">{{ $patient['visits'] }}</p>
+                            <p class="text-lg font-bold text-emerald-700">{{ $patient['visits'] }}</p>
                             <p class="text-xs text-gray-500">visits</p>
                         </div>
                     </div>
@@ -283,10 +272,6 @@
         </div>
     </div>
 </div>
-
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
 
 <script>
 // Chart configurations and initialization
@@ -306,12 +291,12 @@ function initializeCharts() {
             datasets: [{
                 label: 'Appointments',
                 data: {!! json_encode($statistics['trend_data'] ?? []) !!},
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderColor: '#126e64',
+                backgroundColor: 'rgba(18, 110, 100, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: 'rgb(59, 130, 246)',
+                pointBackgroundColor: '#126e64',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
                 pointRadius: 6
@@ -323,6 +308,13 @@ function initializeCharts() {
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Revenue: $' + context.parsed.y.toLocaleString();
+                        }
+                    }
                 }
             },
             scales: {
@@ -355,10 +347,10 @@ function initializeCharts() {
                     {{ $statistics['cancelled_appointments'] ?? 0 }}
                 ],
                 backgroundColor: [
-                    '#10B981',
-                    '#3B82F6', 
-                    '#F59E0B',
-                    '#EF4444'
+                    '#16805f',
+                    '#326b85',
+                    '#d89745',
+                    '#b74242'
                 ],
                 borderWidth: 0,
                 hoverOffset: 10
@@ -390,8 +382,8 @@ function initializeCharts() {
             datasets: [{
                 label: 'Appointments',
                 data: {!! json_encode($statistics['hourly_distribution'] ?? []) !!},
-                backgroundColor: 'rgba(139, 92, 246, 0.8)',
-                borderColor: 'rgb(139, 92, 246)',
+                backgroundColor: 'rgba(18, 110, 100, 0.78)',
+                borderColor: '#126e64',
                 borderWidth: 1,
                 borderRadius: 4
             }]
@@ -429,12 +421,12 @@ function initializeCharts() {
             datasets: [{
                 label: 'Revenue ($)',
                 data: {!! json_encode($statistics['monthly_revenue'] ?? []) !!},
-                borderColor: 'rgb(34, 197, 94)',
-                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                borderColor: '#16805f',
+                backgroundColor: 'rgba(22, 128, 95, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: 'rgb(34, 197, 94)',
+                pointBackgroundColor: '#16805f',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
                 pointRadius: 6
@@ -469,15 +461,6 @@ function initializeCharts() {
             interaction: {
                 intersect: false,
                 mode: 'index'
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return 'Revenue: $' + context.parsed.y.toLocaleString();
-                        }
-                    }
-                }
             }
         }
     });
@@ -492,18 +475,11 @@ function updateRevenue() {
 }
 
 function changeTimeframe(timeframe) {
-    // Remove active class from all buttons
     document.querySelectorAll('[id$="-btn"]').forEach(btn => {
-        btn.classList.remove('bg-blue-100', 'text-blue-700');
-        btn.classList.add('bg-gray-100', 'text-gray-700');
+        btn.classList.remove('is-active');
     });
-    
-    // Add active class to selected button
-    document.getElementById(timeframe + '-btn').classList.remove('bg-gray-100', 'text-gray-700');
-    document.getElementById(timeframe + '-btn').classList.add('bg-blue-100', 'text-blue-700');
-    
-    // Here you would typically make an AJAX call to get new data
-    // For demo purposes, we'll just update the chart with mock data
+
+    document.getElementById(timeframe + '-btn').classList.add('is-active');
     updateChartData(timeframe);
 }
 
@@ -530,35 +506,10 @@ function updateChartData(timeframe) {
 }
 
 function refreshData() {
-    // Add loading animation
-    document.querySelector('[onclick="refreshData()"] i').classList.add('animate-spin');
-    
-    // Simulate data refresh
-    setTimeout(() => {
-        document.querySelector('[onclick="refreshData()"] i').classList.remove('animate-spin');
-        
-        // Here you would typically make an AJAX call to refresh all data
-        // For demo, we'll just show a success message
-        showNotification('Data refreshed successfully!', 'success');
-    }, 1500);
+    const icon = document.querySelector('[onclick="refreshData()"] i');
+    icon?.classList.add('animate-spin');
+    window.location.reload();
 }
-
-function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
-        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-    }`;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-// Auto-refresh every 5 minutes
-setInterval(refreshData, 300000);
 </script>
 
 <style>

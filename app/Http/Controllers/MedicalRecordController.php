@@ -170,8 +170,13 @@ class MedicalRecordController extends Controller
         }
 
         $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
+        $appointments = Appointment::with('patient')
+            ->where('doctor_id', Auth::id())
+            ->where('patient_id', $medicalRecord->patient_id)
+            ->latest('appointment_date')
+            ->get();
 
-        return view('medical-records.edit', compact('medicalRecord', 'patients'));
+        return view('medical-records.edit', compact('medicalRecord', 'patients', 'appointments'));
     }
 
     /**

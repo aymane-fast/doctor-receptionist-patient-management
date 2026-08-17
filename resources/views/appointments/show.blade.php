@@ -4,32 +4,25 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
-    <!-- Appointment Header -->
-    <div class="section-card p-6">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-6">
-                <div class="w-20 h-20 brand-mark rounded-xl flex items-center justify-center shadow-lg">
-                    <i class="fas fa-calendar-check text-white text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ __('appointments.appointment_details') }}</h1>
-                    <p class="text-gray-600">Appointment #{{ $appointment->id }} • {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y') }}</p>
-                </div>
-            </div>
-            <div class="flex space-x-3">
+    <x-ui.page-header
+        :title="__('appointments.appointment_details')"
+        :description="'Appointment #' . $appointment->id . ' - ' . \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y')"
+        icon="fa-calendar-check"
+        eyebrow="Booking record"
+    >
+        <x-slot:actions>
                 <button onclick="history.back()" 
-                   class="btn-secondary px-4 py-2 shadow-lg hover:shadow-xl">
+                   class="btn-secondary px-4 py-2">
                     <i class="fas fa-arrow-left"></i>
                     <span>{{ __('common.back') }}</span>
                 </button>
                 <a href="{{ route('appointments.edit', $appointment) }}" 
-                   class="btn-primary px-4 py-2 shadow-lg hover:shadow-xl">
+                   class="btn-primary px-4 py-2">
                     <i class="fas fa-edit"></i>
                     <span>{{ __('appointments.edit') }}</span>
                 </a>
-            </div>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-ui.page-header>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Appointment Info -->
@@ -92,7 +85,7 @@
                             <i class="fas fa-user-md text-white"></i>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-xl font-bold text-gray-900 mb-1">Dr. {{ $appointment->doctor->name }}</h3>
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">{{ $appointment->doctor->professional_name }}</h3>
                             <div class="flex items-center space-x-1 text-gray-600">
                                 <i class="fas fa-envelope text-sm"></i>
                                 <span>{{ $appointment->doctor->email }}</span>

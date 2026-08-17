@@ -5,19 +5,23 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">{{ __('medical_records.edit_record') }}</h1>
-            <div class="flex space-x-3">
-                <button onclick="history.back()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+        <x-ui.page-header
+            :title="__('medical_records.edit_record')"
+            description="Review and update the clinical information for this visit."
+            icon="fa-file-pen"
+            eyebrow="Clinical documentation"
+            class="mb-6"
+        >
+            <x-slot:actions>
+                <button onclick="history.back()" class="btn-secondary px-4 py-2">
                     <i class="fas fa-arrow-left mr-2"></i>{{ __('common.back') }}
                 </button>
-            </div>
-        </div>
+            </x-slot:actions>
+        </x-ui.page-header>
 
         <!-- Edit Form -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <form action="{{ route('medical-records.update', $medicalRecord) }}" method="POST">
+        <div class="section-card p-6">
+            <form id="medical-record-edit-form" action="{{ route('medical-records.update', $medicalRecord) }}" method="POST">
                 @csrf
                 @method('PUT')
                 
@@ -264,30 +268,31 @@
                 </div>
 
                 <!-- Form Actions -->
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <form action="{{ route('medical-records.destroy', $medicalRecord) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" 
-                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-                                    onclick="return confirm('{{ __('medical_records.confirm_delete_record') }}')">
-                                <i class="fas fa-trash mr-2"></i>{{ __('common.delete') }}
-                            </button>
-                        </form>
+                        <button type="submit"
+                                form="delete-medical-record-form"
+                                class="btn-danger px-4 py-2"
+                                onclick="return confirm('{{ __('medical_records.confirm_delete_record') }}')">
+                            <i class="fas fa-trash mr-2"></i>{{ __('common.delete') }}
+                        </button>
                     </div>
                     
-                    <div class="flex items-center space-x-3">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                         <button type="button" onclick="history.back()" 
-                                class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg transition-colors">
+                                class="btn-secondary px-6 py-2">
                             {{ __('common.cancel') }}
                         </button>
                         <button type="submit" 
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                                class="btn-primary px-6 py-2">
                             <i class="fas fa-save mr-2"></i>{{ __('medical_records.update_record') }}
                         </button>
                     </div>
                 </div>
+            </form>
+            <form id="delete-medical-record-form" action="{{ route('medical-records.destroy', $medicalRecord) }}" method="POST" class="hidden">
+                @csrf
+                @method('DELETE')
             </form>
         </div>
     </div>

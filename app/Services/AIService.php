@@ -77,7 +77,7 @@ class AIService
                     'date' => $apt->appointment_date->format('Y-m-d'),
                     'reason' => $apt->reason,
                     'status' => $apt->status,
-                    'doctor' => $apt->doctor->name ?? 'N/A',
+                    'doctor' => $apt->doctor->professional_name ?? 'N/A',
                     'notes' => $apt->notes
                 ];
             }),
@@ -89,7 +89,7 @@ class AIService
                                $item->dosage . ' - ' . 
                                $item->instructions;
                     })->join('; '),
-                    'doctor' => $rx->doctor->name ?? 'N/A',
+                    'doctor' => $rx->doctor->professional_name ?? 'N/A',
                     'notes' => $rx->notes
                 ];
             }),
@@ -105,7 +105,7 @@ class AIService
                         'oxygen_saturation' => $record->oxygen_saturation,
                         'weight' => $record->weight
                     ],
-                    'doctor' => $record->doctor->name ?? 'N/A',
+                    'doctor' => $record->doctor->professional_name ?? 'N/A',
                     'treatment' => $record->treatment
                 ];
             })
@@ -142,7 +142,7 @@ class AIService
         if ($data['medical_records']->isNotEmpty()) {
             $prompt .= "=== MEDICAL RECORDS ===\n";
             foreach ($data['medical_records'] as $record) {
-                $prompt .= "• {$record['date']} - Dr. {$record['doctor']}\n";
+                $prompt .= "• {$record['date']} - {$record['doctor']}\n";
                 if ($record['diagnosis']) {
                     $prompt .= "  Diagnosis: {$record['diagnosis']}\n";
                 }

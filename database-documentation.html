@@ -283,6 +283,7 @@
             border-radius: 22px;
             padding: 22px;
             background: var(--panel);
+            min-width: 0;
         }
 
         .table-card-header {
@@ -305,6 +306,12 @@
             margin-top: 10px;
         }
 
+        .table-meta .badge {
+            max-width: 100%;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
         .table-stats {
             min-width: 150px;
             text-align: right;
@@ -316,6 +323,15 @@
         .table-scroll {
             overflow-x: auto;
             margin-top: 10px;
+            max-width: 100%;
+        }
+
+        .table-scroll .overview-table {
+            min-width: 720px;
+        }
+
+        .table-scroll .data-table {
+            min-width: 760px;
         }
 
         .constraint-list {
@@ -417,6 +433,18 @@
                 grid-template-columns: 1fr;
             }
 
+            .section,
+            .subtle-box,
+            details,
+            .metadata-grid > *,
+            .relation-grid > * {
+                min-width: 0;
+            }
+
+            .section {
+                overflow: hidden;
+            }
+
             .table-card-header {
                 flex-direction: column;
             }
@@ -497,7 +525,9 @@
                 </div>
                 <details>
                     <summary>Afficher la liste des migrations analysees</summary>
-                    <table class="overview-table" id="migrations-table"></table>
+                    <div class="table-scroll">
+                        <table class="overview-table" id="migrations-table"></table>
+                    </div>
                 </details>
             </div>
         </section>
@@ -508,7 +538,9 @@
                 Chaque table ci-dessous est documentee avec ses colonnes, son type de donnees, les contraintes
                 detectees dans les migrations et une courte description fonctionnelle.
             </p>
-            <table class="overview-table" id="overview-table"></table>
+            <div class="table-scroll">
+                <table class="overview-table" id="overview-table"></table>
+            </div>
             <div class="table-list" id="tables-container"></div>
         </section>
 
@@ -530,7 +562,9 @@
                 </div>
                 <div class="subtle-box">
                     <h3>Matrice technique des relations</h3>
-                    <table class="overview-table" id="relations-table"></table>
+                    <div class="table-scroll">
+                        <table class="overview-table" id="relations-table"></table>
+                    </div>
                 </div>
             </div>
         </section>
@@ -546,7 +580,7 @@
 erDiagram
     USERS {
         BIGINT id PK
-        STRING email UQ
+        STRING email UK
         ENUM role
         ENUM appointment_mode
         UINT queue_daily_limit
@@ -586,7 +620,7 @@ erDiagram
     }
     FAILED_JOBS {
         BIGINT id PK
-        STRING uuid UQ
+        STRING uuid UK
         LONGTEXT exception
         TIMESTAMP failed_at
     }
@@ -595,7 +629,7 @@ erDiagram
         STRING first_name
         STRING last_name
         DATE birth_date
-        STRING id_card_number UQ
+        STRING id_card_number UK
     }
     APPOINTMENTS {
         BIGINT id PK
@@ -604,11 +638,12 @@ erDiagram
         ENUM appointment_mode
         DATE appointment_date
         TIME appointment_time
-        BOOLEAN is_current
         UINT queue_number
         UINT queue_position
         TIME estimated_time
-        ENUM status
+        STRING status
+        TIMESTAMP checked_in_at
+        TIMESTAMP reminder_sent_at
     }
     MEDICAL_RECORDS {
         BIGINT id PK
@@ -647,10 +682,29 @@ erDiagram
     }
     SETTINGS {
         BIGINT id PK
-        STRING key UQ
+        STRING key UK
         TEXT value
         STRING clinic_name
         STRING type
+    }
+    APPOINTMENT_STATUS_LOGS {
+        BIGINT id PK
+        BIGINT appointment_id FK
+        BIGINT changed_by FK
+        STRING from_status
+        STRING to_status
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    WAITLIST_ENTRIES {
+        BIGINT id PK
+        BIGINT patient_id FK
+        BIGINT doctor_id FK
+        DATE preferred_date
+        STRING reason
+        STRING status
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
 
     PATIENTS ||--o{ APPOINTMENTS : "patient_id"
@@ -665,6 +719,10 @@ erDiagram
     PATIENTS ||--o{ ORDERS : "patient_id"
     USERS ||--o{ ORDERS : "doctor_id"
     MEDICAL_RECORDS o|--o{ ORDERS : "medical_record_id"
+    APPOINTMENTS ||--o{ APPOINTMENT_STATUS_LOGS : "appointment_id"
+    USERS o|--o{ APPOINTMENT_STATUS_LOGS : "changed_by"
+    PATIENTS ||--o{ WAITLIST_ENTRIES : "patient_id"
+    USERS ||--o{ WAITLIST_ENTRIES : "doctor_id"
                 </pre>
             </div>
         </section>
@@ -705,7 +763,12 @@ classDiagram
         +appointment_mode : enum
         +appointment_date : date
         +appointment_time : time
-        +status : enum
+        +queue_number : unsignedInteger?
+        +queue_position : unsignedInteger?
+        +estimated_time : time?
+        +status : string
+        +checked_in_at : timestamp?
+        +reminder_sent_at : timestamp?
     }
 
     class MedicalRecord {
@@ -752,6 +815,23 @@ classDiagram
         +clinic_name : string?
     }
 
+    class AppointmentStatusLog {
+        +id : bigint
+        +appointment_id : bigint
+        +changed_by : bigint?
+        +from_status : string?
+        +to_status : string
+    }
+
+    class WaitlistEntry {
+        +id : bigint
+        +patient_id : bigint
+        +doctor_id : bigint
+        +preferred_date : date?
+        +reason : string?
+        +status : string
+    }
+
     User "1" --> "0..*" Appointment : doctor_id
     Patient "1" --> "0..*" Appointment : patient_id
     User "1" --> "0..*" MedicalRecord : doctor_id
@@ -764,6 +844,10 @@ classDiagram
     User "1" --> "0..*" Order : doctor_id
     Patient "1" --> "0..*" Order : patient_id
     MedicalRecord "0..1" --> "0..*" Order : medical_record_id
+    Appointment "1" --> "0..*" AppointmentStatusLog : appointment_id
+    User "0..1" --> "0..*" AppointmentStatusLog : changed_by
+    User "1" --> "0..*" WaitlistEntry : doctor_id
+    Patient "1" --> "0..*" WaitlistEntry : patient_id
                 </pre>
             </div>
         </section>
@@ -789,7 +873,12 @@ classDiagram
             "2025_08_13_205308_create_settings_table.php",
             "2025_10_13_204003_add_clinic_information_to_settings_table.php",
             "2026_06_08_000001_add_missing_clinical_fields.php",
-            "2026_06_08_000002_add_appointment_modes_and_queue_fields.php"
+            "2026_06_08_000002_add_appointment_modes_and_queue_fields.php",
+            "2026_07_08_000001_fix_schema_consistency_and_add_indexes.php",
+            "2026_07_08_100000_add_check_in_and_no_show_to_appointments.php",
+            "2026_07_09_000001_create_appointment_status_logs_table.php",
+            "2026_07_09_000002_add_reminder_sent_at_to_appointments.php",
+            "2026_07_09_000003_create_waitlist_entries_table.php"
         ];
 
         const schemaTables = [
@@ -916,13 +1005,16 @@ classDiagram
                 name: "patients",
                 category: "metier",
                 description: "Dossier administratif de base du patient, avec ses informations personnelles, ses alertes et ses contacts.",
-                sources: ["2025_07_08_221234_create_patients_table.php"],
+                sources: [
+                    "2025_07_08_221234_create_patients_table.php",
+                    "2026_07_08_000001_fix_schema_consistency_and_add_indexes.php"
+                ],
                 columns: [
                     { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique du patient." },
                     { name: "first_name", type: "VARCHAR(255)", constraints: ["required"], description: "Prenom du patient." },
                     { name: "last_name", type: "VARCHAR(255)", constraints: ["required"], description: "Nom du patient." },
-                    { name: "birth_date", type: "DATE", constraints: ["required"], description: "Date de naissance." },
-                    { name: "gender", type: "ENUM('male','female')", constraints: ["required"], description: "Sexe renseigne dans le dossier." },
+                    { name: "birth_date", type: "DATE", constraints: ["nullable"], description: "Date de naissance, facultative dans le schema final." },
+                    { name: "gender", type: "ENUM('male','female')", constraints: ["nullable"], description: "Sexe renseigne dans le dossier, facultatif dans le schema final." },
                     { name: "phone", type: "VARCHAR(255)", constraints: ["required"], description: "Numero principal de contact." },
                     { name: "email", type: "VARCHAR(255)", constraints: ["nullable"], description: "Adresse e-mail du patient." },
                     { name: "address", type: "TEXT", constraints: ["nullable"], description: "Adresse postale." },
@@ -942,25 +1034,30 @@ classDiagram
                 sources: [
                     "2025_07_08_221240_create_appointments_table.php",
                     "2025_08_09_000001_add_is_current_to_appointments_table.php",
-                    "2026_06_08_000002_add_appointment_modes_and_queue_fields.php"
+                    "2026_06_08_000002_add_appointment_modes_and_queue_fields.php",
+                    "2026_07_08_000001_fix_schema_consistency_and_add_indexes.php",
+                    "2026_07_08_100000_add_check_in_and_no_show_to_appointments.php",
+                    "2026_07_09_000002_add_reminder_sent_at_to_appointments.php"
                 ],
                 columns: [
                     { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique du rendez-vous." },
                     { name: "patient_id", type: "BIGINT UNSIGNED", constraints: ["FK -> patients.id", "required", "on delete: cascade"], description: "Patient concerne par le rendez-vous." },
-                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade"], description: "Utilisateur reference comme medecin pour le rendez-vous." },
+                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade", "index composite: doctor_id + appointment_date"], description: "Utilisateur reference comme medecin pour le rendez-vous." },
                     { name: "appointment_mode", type: "ENUM('scheduled','queue')", constraints: ["required", "default: scheduled"], description: "Mode de prise en charge : horaire fixe ou file d'attente." },
-                    { name: "appointment_date", type: "DATE", constraints: ["required"], description: "Jour du rendez-vous ou du passage en file." },
+                    { name: "appointment_date", type: "DATE", constraints: ["required", "index composite: appointment_date + status"], description: "Jour du rendez-vous ou du passage en file." },
                     { name: "appointment_time", type: "TIME", constraints: ["required"], description: "Heure de rendez-vous ou heure calculee de passage." },
                     { name: "queue_number", type: "UNSIGNED INTEGER", constraints: ["nullable"], description: "Numero attribue au patient en mode file d'attente." },
                     { name: "queue_position", type: "UNSIGNED INTEGER", constraints: ["nullable"], description: "Position courante dans la file." },
                     { name: "estimated_time", type: "TIME", constraints: ["nullable"], description: "Heure estimee de passage en mode queue." },
-                    { name: "is_current", type: "BOOLEAN", constraints: ["required", "default: false"], description: "Indique si ce rendez-vous est actuellement en cours de traitement." },
-                    { name: "status", type: "ENUM('scheduled','in_progress','completed','cancelled')", constraints: ["required", "default: scheduled"], description: "Etat du rendez-vous." },
+                    { name: "status", type: "VARCHAR(20)", constraints: ["required", "default: scheduled", "index composite: appointment_date + status"], description: "Etat du rendez-vous. La migration finale permet notamment scheduled, in_progress, completed, cancelled et no_show au niveau applicatif." },
+                    { name: "checked_in_at", type: "TIMESTAMP", constraints: ["nullable"], description: "Date et heure d'arrivee du patient a la clinique." },
+                    { name: "reminder_sent_at", type: "TIMESTAMP", constraints: ["nullable"], description: "Date et heure d'envoi du rappel de rendez-vous." },
                     { name: "reason", type: "TEXT", constraints: ["nullable"], description: "Motif de consultation." },
                     { name: "notes", type: "TEXT", constraints: ["nullable"], description: "Notes libres associees au rendez-vous." },
                     { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de creation." },
                     { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de derniere mise a jour." }
-                ]
+                ],
+                extraNote: "La colonne is_current a ete ajoutee en 2025 puis explicitement supprimee par la migration de coherence du 8 juillet 2026. Elle ne fait donc pas partie du schema final."
             },
             {
                 name: "medical_records",
@@ -968,12 +1065,13 @@ classDiagram
                 description: "Compte-rendu clinique d'une consultation, relie a un patient, a un medecin et eventuellement a un rendez-vous.",
                 sources: [
                     "2025_07_08_221247_create_medical_records_table.php",
-                    "2026_06_08_000001_add_missing_clinical_fields.php"
+                    "2026_06_08_000001_add_missing_clinical_fields.php",
+                    "2026_07_08_000001_fix_schema_consistency_and_add_indexes.php"
                 ],
                 columns: [
                     { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique du dossier medical." },
                     { name: "patient_id", type: "BIGINT UNSIGNED", constraints: ["FK -> patients.id", "required", "on delete: cascade"], description: "Patient auquel appartient ce dossier medical." },
-                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade"], description: "Medecin ayant saisi ou valide l'enregistrement." },
+                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade", "index composite: doctor_id + visit_date"], description: "Medecin ayant saisi ou valide l'enregistrement." },
                     { name: "appointment_id", type: "BIGINT UNSIGNED", constraints: ["FK -> appointments.id", "nullable", "on delete: set null"], description: "Rendez-vous source si un lien existe." },
                     { name: "visit_date", type: "DATE", constraints: ["required"], description: "Date de la visite clinique." },
                     { name: "symptoms", type: "TEXT", constraints: ["nullable"], description: "Symptomes rapportes." },
@@ -996,17 +1094,18 @@ classDiagram
                 description: "Ordonnances associees a un patient et, si besoin, a un dossier medical.",
                 sources: [
                     "2025_07_08_221254_create_prescriptions_table.php",
-                    "2026_06_08_000001_add_missing_clinical_fields.php"
+                    "2026_06_08_000001_add_missing_clinical_fields.php",
+                    "2026_07_08_000001_fix_schema_consistency_and_add_indexes.php"
                 ],
                 columns: [
                     { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique de l'ordonnance." },
                     { name: "patient_id", type: "BIGINT UNSIGNED", constraints: ["FK -> patients.id", "required", "on delete: cascade"], description: "Patient concerne par la prescription." },
-                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade"], description: "Medecin prescripteur." },
+                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade", "index composite: doctor_id + prescribed_date"], description: "Medecin prescripteur." },
                     { name: "medical_record_id", type: "BIGINT UNSIGNED", constraints: ["FK -> medical_records.id", "nullable", "on delete: set null"], description: "Dossier medical d'origine, si present." },
-                    { name: "medication_name", type: "VARCHAR(255)", constraints: ["required"], description: "Nom du medicament ou traitement principal." },
-                    { name: "dosage", type: "VARCHAR(255)", constraints: ["required"], description: "Dosage prescrit." },
-                    { name: "frequency", type: "VARCHAR(255)", constraints: ["required"], description: "Frequence de prise." },
-                    { name: "duration_days", type: "INTEGER", constraints: ["required"], description: "Duree du traitement en jours." },
+                    { name: "medication_name", type: "VARCHAR(255)", constraints: ["nullable"], description: "Ancien champ pour le medicament principal ; les nouvelles ordonnances utilisent prescription_items." },
+                    { name: "dosage", type: "VARCHAR(255)", constraints: ["nullable"], description: "Ancien champ de dosage, conserve pour compatibilite." },
+                    { name: "frequency", type: "VARCHAR(255)", constraints: ["nullable"], description: "Ancien champ de frequence, conserve pour compatibilite." },
+                    { name: "duration_days", type: "INTEGER", constraints: ["nullable"], description: "Ancien champ de duree, conserve pour compatibilite." },
                     { name: "instructions", type: "TEXT", constraints: ["nullable"], description: "Consignes complementaires." },
                     { name: "prescribed_date", type: "DATE", constraints: ["required"], description: "Date de prescription." },
                     { name: "notes", type: "TEXT", constraints: ["nullable"], description: "Notes ajoutees a l'ordonnance." },
@@ -1073,6 +1172,37 @@ classDiagram
                     { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de mise a jour." }
                 ],
                 extraNote: "La migration de creation insere aussi deux reglages par defaut : app_language = en et appointment_duration = 30."
+            },
+            {
+                name: "appointment_status_logs",
+                category: "metier",
+                description: "Journal d'audit des changements d'etat d'un rendez-vous, avec l'auteur du changement lorsqu'il est connu.",
+                sources: ["2026_07_09_000001_create_appointment_status_logs_table.php"],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique de l'evenement d'audit." },
+                    { name: "appointment_id", type: "BIGINT UNSIGNED", constraints: ["FK -> appointments.id", "required", "on delete: cascade"], description: "Rendez-vous dont le statut a change." },
+                    { name: "changed_by", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "nullable", "on delete: set null"], description: "Utilisateur ayant effectue le changement ; null pour une action systeme." },
+                    { name: "from_status", type: "VARCHAR(20)", constraints: ["nullable"], description: "Statut precedent, absent lors de la creation initiale du journal." },
+                    { name: "to_status", type: "VARCHAR(20)", constraints: ["required"], description: "Nouveau statut applique au rendez-vous." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de creation de l'evenement." },
+                    { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de derniere mise a jour de l'evenement." }
+                ]
+            },
+            {
+                name: "waitlist_entries",
+                category: "metier",
+                description: "Liste d'attente des patients souhaitant obtenir un creneau libere chez un medecin.",
+                sources: ["2026_07_09_000003_create_waitlist_entries_table.php"],
+                columns: [
+                    { name: "id", type: "BIGINT UNSIGNED", constraints: ["PK", "auto-increment"], description: "Identifiant unique de l'inscription en liste d'attente." },
+                    { name: "patient_id", type: "BIGINT UNSIGNED", constraints: ["FK -> patients.id", "required", "on delete: cascade"], description: "Patient inscrit sur la liste d'attente." },
+                    { name: "doctor_id", type: "BIGINT UNSIGNED", constraints: ["FK -> users.id", "required", "on delete: cascade", "index composite: doctor_id + status"], description: "Utilisateur reference comme medecin souhaite." },
+                    { name: "preferred_date", type: "DATE", constraints: ["nullable"], description: "Date de rendez-vous souhaitee, si le patient en a indique une." },
+                    { name: "reason", type: "VARCHAR(500)", constraints: ["nullable"], description: "Motif de la demande de rendez-vous." },
+                    { name: "status", type: "VARCHAR(20)", constraints: ["required", "default: waiting", "index composite: doctor_id + status"], description: "Etat de l'inscription : waiting, booked ou cancelled selon la migration." },
+                    { name: "created_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date d'inscription sur la liste d'attente." },
+                    { name: "updated_at", type: "TIMESTAMP", constraints: ["timestamps", "nullable"], description: "Date de derniere mise a jour de l'inscription." }
+                ]
             }
         ];
 
@@ -1184,6 +1314,42 @@ classDiagram
                 nullable: "non",
                 onDelete: "cascade",
                 sentence: "Une ordonnance peut contenir plusieurs lignes de prescription. Chaque ligne appartient a une seule ordonnance."
+            },
+            {
+                from: "appointment_status_logs",
+                fromColumn: "appointment_id",
+                to: "appointments",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un rendez-vous peut avoir plusieurs entrees dans son historique de statuts. Chaque entree appartient a un seul rendez-vous."
+            },
+            {
+                from: "appointment_status_logs",
+                fromColumn: "changed_by",
+                to: "users",
+                toColumn: "id",
+                nullable: "oui",
+                onDelete: "set null",
+                sentence: "Un utilisateur peut etre l'auteur de plusieurs changements de statut. L'auteur peut rester vide pour les actions automatiques du systeme."
+            },
+            {
+                from: "waitlist_entries",
+                fromColumn: "patient_id",
+                to: "patients",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un patient peut avoir plusieurs inscriptions en liste d'attente. Chaque inscription appartient a un seul patient."
+            },
+            {
+                from: "waitlist_entries",
+                fromColumn: "doctor_id",
+                to: "users",
+                toColumn: "id",
+                nullable: "non",
+                onDelete: "cascade",
+                sentence: "Un utilisateur reference comme medecin peut avoir plusieurs patients en liste d'attente. Chaque inscription vise un seul medecin."
             }
         ];
 

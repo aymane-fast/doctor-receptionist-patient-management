@@ -4,42 +4,60 @@
 
 @section('content')
 <div class="space-y-8">
+    <x-ui.page-header
+        :title="__('dashboard.reception_dashboard')"
+        description="Coordinate patient arrivals, appointments, and the clinic queue from one workspace."
+        icon="fa-headset"
+        eyebrow="Front desk"
+    >
+        <x-slot:actions>
+            <a href="{{ route('appointments.queue') }}" class="btn-secondary px-5 py-3">
+                <i class="fas fa-list-ol"></i>
+                <span>Open queue</span>
+            </a>
+            <a href="{{ route('patients.create') }}" class="btn-primary px-5 py-3">
+                <i class="fas fa-user-plus"></i>
+                <span>{{ __('dashboard.register_patient') }}</span>
+            </a>
+        </x-slot:actions>
+    </x-ui.page-header>
+
     <!-- Modern Quick Actions - Moved to Top -->
     <div class="glass-effect rounded-3xl p-8 modern-shadow">
         <div class="flex items-center space-x-3 mb-6">
-            <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
+            <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                 <i class="fas fa-bolt text-white"></i>
             </div>
             <h2 class="text-xl font-bold text-gray-900">{{ __('dashboard.quick_actions') }}</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <a href="{{ route('patients.create') }}" class="group bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 border-2 border-gray-100 hover:border-blue-200 rounded-2xl p-6 transition-all duration-300 card-hover">
-                <div class="w-12 h-12 bg-blue-100 group-hover:bg-blue-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
-                    <i class="fas fa-user-plus text-blue-600 text-xl"></i>
+        <div class="dashboard-quick-actions grid grid-cols-1 md:grid-cols-4 gap-6">
+            <a href="{{ route('patients.create') }}" class="quick-action-card group p-6 card-hover">
+                <div class="icon-tile w-12 h-12 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                    <i class="fas fa-user-plus text-xl"></i>
                 </div>
                 <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.register_patient') }}</span>
                 <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.add_new_patient') }}</span>
             </a>
             
-            <a href="{{ route('appointments.create') }}" class="group bg-white hover:bg-gradient-to-br hover:from-emerald-50 hover:to-emerald-100 border-2 border-gray-100 hover:border-emerald-200 rounded-2xl p-6 transition-all duration-300 card-hover">
-                <div class="w-12 h-12 bg-emerald-100 group-hover:bg-emerald-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
-                    <i class="fas fa-calendar-plus text-emerald-600 text-xl"></i>
+            <a href="{{ route('appointments.create') }}" class="quick-action-card group p-6 card-hover">
+                <div class="icon-tile w-12 h-12 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                    <i class="fas fa-calendar-plus text-xl"></i>
                 </div>
                 <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.book_appointment_action') }}</span>
                 <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.schedule_visit') }}</span>
             </a>
             
-            <a href="{{ route('patients.index') }}" class="group bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-purple-100 border-2 border-gray-100 hover:border-purple-200 rounded-2xl p-6 transition-all duration-300 card-hover">
-                <div class="w-12 h-12 bg-purple-100 group-hover:bg-purple-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
-                    <i class="fas fa-search text-purple-600 text-xl"></i>
+            <a href="{{ route('patients.index') }}" class="quick-action-card group p-6 card-hover">
+                <div class="icon-tile w-12 h-12 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                    <i class="fas fa-search text-xl"></i>
                 </div>
                 <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.search_patients') }}</span>
                 <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.find_patient_records') }}</span>
             </a>
             
-            <a href="{{ route('appointments.index') }}" class="group bg-white hover:bg-gradient-to-br hover:from-orange-50 hover:to-orange-100 border-2 border-gray-100 hover:border-orange-200 rounded-2xl p-6 transition-all duration-300 card-hover">
-                <div class="w-12 h-12 bg-orange-100 group-hover:bg-orange-200 rounded-xl flex items-center justify-center mb-4 mx-auto transition-colors">
-                    <i class="fas fa-calendar-alt text-orange-600 text-xl"></i>
+            <a href="{{ route('appointments.index') }}" class="quick-action-card group p-6 card-hover">
+                <div class="icon-tile w-12 h-12 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                    <i class="fas fa-calendar-alt text-xl"></i>
                 </div>
                 <span class="block text-center text-sm font-semibold text-gray-900">{{ __('dashboard.all_appointments') }}</span>
                 <span class="block text-center text-xs text-gray-500 mt-1">{{ __('dashboard.view_schedule') }}</span>
@@ -52,7 +70,7 @@
     <div class="glass-effect rounded-3xl p-8 modern-shadow">
         <div class="flex items-center justify-between mb-8">
             <div class="flex items-center space-x-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <div class="gradient-bg w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg">
                     <i class="fas fa-user-clock text-white text-xl"></i>
                 </div>
                 <div>
@@ -61,15 +79,15 @@
                 </div>
             </div>
             <div class="flex items-center space-x-2">
-                <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                <span class="text-sm font-medium text-blue-600">{{ $currentByDoctor->count() }} Active</span>
+                <div class="w-3 h-3 bg-emerald-600 rounded-full animate-pulse"></div>
+                <span class="text-sm font-medium text-emerald-700">{{ $currentByDoctor->count() }} Active</span>
             </div>
         </div>
 
         @foreach($currentByDoctor as $docId => $curr)
         <div class="bg-white border border-gray-200 hover:border-blue-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 card-hover mb-6">
             <!-- Status Bar -->
-            <div class="h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+            <div class="h-1 gradient-bg"></div>
             
             <!-- Main Content -->
             <div class="p-8">
@@ -88,7 +106,7 @@
                         <div class="flex-1">
                             <div class="text-xs font-medium text-blue-600 uppercase tracking-wide mb-2">
                                 <i class="fas fa-stethoscope mr-1"></i>
-                                Dr. {{ $curr->doctor->name }}
+                                {{ $curr->doctor->professional_name }}
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 leading-tight mb-3">
                                 {{ $curr->patient->full_name }}
@@ -207,99 +225,27 @@
     </div>
     @endif
 
-    {{-- Modern Statistics Cards - Commented out since we have dedicated statistics page
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Total Patients -->
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 card-hover modern-shadow">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-users text-white text-lg"></i>
-                </div>
-                <div class="text-blue-600">
-                    <i class="fas fa-arrow-up text-sm"></i>
-                </div>
-            </div>
-            <div>
-                <h3 class="text-sm font-medium text-blue-700 mb-1">{{ __('dashboard.total_patients') }}</h3>
-                <p class="text-3xl font-bold text-blue-900 mb-1">{{ $stats['total_patients'] }}</p>
-                <p class="text-xs text-blue-600">{{ __('dashboard.registered_patients') }}</p>
-            </div>
-        </div>
-
-        <!-- Today's Appointments -->
-        <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 card-hover modern-shadow">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-calendar-day text-white text-lg"></i>
-                </div>
-                <div class="text-emerald-600">
-                    <i class="fas fa-arrow-up text-sm"></i>
-                </div>
-            </div>
-            <div>
-                <h3 class="text-sm font-medium text-emerald-700 mb-1">{{ __('dashboard.todays_schedule') }}</h3>
-                <p class="text-3xl font-bold text-emerald-900 mb-1">{{ $stats['today_appointments'] }}</p>
-                <p class="text-xs text-emerald-600">{{ __('dashboard.appointments_today') }}</p>
-            </div>
-        </div>
-
-        <!-- Scheduled Appointments -->
-        <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6 card-hover modern-shadow">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-clock text-white text-lg"></i>
-                </div>
-                <div class="text-amber-600">
-                    <i class="fas fa-minus text-sm"></i>
-                </div>
-            </div>
-            <div>
-                <h3 class="text-sm font-medium text-amber-700 mb-1">{{ __('dashboard.scheduled') }}</h3>
-                <p class="text-3xl font-bold text-amber-900 mb-1">{{ $stats['scheduled_appointments'] }}</p>
-                <p class="text-xs text-amber-600">{{ __('dashboard.upcoming_appointments') }}</p>
-            </div>
-        </div>
-
-        <!-- New Patients This Week -->
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 card-hover modern-shadow">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-user-plus text-white text-lg"></i>
-                </div>
-                <div class="text-purple-600">
-                    <i class="fas fa-arrow-up text-sm"></i>
-                </div>
-            </div>
-            <div>
-                <h3 class="text-sm font-medium text-purple-700 mb-1">{{ __('dashboard.new_this_week') }}</h3>
-                <p class="text-3xl font-bold text-purple-900 mb-1">{{ $stats['new_patients_this_week'] }}</p>
-                <p class="text-xs text-purple-600">{{ __('dashboard.new_registrations') }}</p>
-            </div>
-        </div>
-    </div>
-    --}}
-
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Today's Appointments -->
         <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
             <div class="p-6 border-b border-gray-100">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <div class="gradient-bg w-10 h-10 rounded-xl flex flex-none items-center justify-center">
                             <i class="fas fa-calendar-day text-white"></i>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900">{{ __('dashboard.todays_appointments') }}</h2>
+                            <h2 class="text-xl font-bold text-gray-900">{{ __('appointments.today_appointments') }}</h2>
                             <p class="text-sm text-gray-500">{{ $stats['today_appointments'] }} {{ __('dashboard.scheduled_today') }}</p>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-3">
+                    <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                         <button onclick="openReceptionAppointmentFilters()" class="filter-btn">
                             <i class="fas fa-filter"></i>
                             <span>{{ __('dashboard.filter') }}</span>
                         </button>
-                        <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
+                        <a href="{{ route('appointments.create') }}" class="btn-primary whitespace-nowrap">
                             <i class="fas fa-plus"></i>
                             <span>{{ __('dashboard.book_appointment_btn') }}</span>
                         </a>
@@ -311,7 +257,7 @@
                     <div class="space-y-2">
                         @foreach($todayAppointments as $index => $appointment)
                         <div class="dashboard-card zebra-stripe rounded-2xl p-4 hover:shadow-lg transition-all duration-200 card-hover border border-gray-200 {{ $loop->even ? 'bg-gray-100' : 'bg-white' }}">
-                            <div class="flex items-center justify-between">
+                            <div class="appointment-summary-row flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
                                     <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
                                         <i class="fas fa-clock text-blue-600"></i>
@@ -330,7 +276,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                <div class="flex items-center space-x-2">
+                                <div class="appointment-summary-actions flex items-center space-x-2">
                                     @if($appointment->isCheckedIn() && $appointment->status === 'scheduled')
                                         <span class="text-xs px-2 py-1 rounded-full bg-teal-100 text-teal-700" title="{{ __('appointments.arrived_at', ['time' => $appointment->checked_in_at->format('g:i A')]) }}">
                                             <i class="fas fa-user-check mr-1"></i>{{ __('appointments.checked_in') }}
@@ -339,7 +285,7 @@
                                     <span class="text-xs px-2 py-1 rounded-full {{ \App\Models\Appointment::statusBadgeClasses($appointment->status) }}">
                                         {{ \App\Models\Appointment::statusLabel($appointment->status) }}
                                     </span>
-                                    <div class="flex items-center space-x-1">
+                                    <div class="appointment-action-buttons flex items-center space-x-1">
                                         <a href="{{ route('appointments.show', $appointment) }}" class="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors" title="View Details">
                                             <i class="fas fa-eye text-blue-600 text-sm"></i>
                                         </a>
@@ -352,8 +298,8 @@
                                             <button onclick="setAsCurrent({{ $appointment->id }})" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="Set as Current Patient">
                                                 <i class="fas fa-play text-green-600 text-sm"></i>
                                             </button>
-                                            <a href="{{ route('appointments.reschedule', $appointment) }}" class="w-8 h-8 bg-purple-100 hover:bg-purple-200 rounded-lg flex items-center justify-center transition-colors" title="Reschedule Appointment">
-                                                <i class="fas fa-clock text-purple-600 text-sm"></i>
+                                            <a href="{{ route('appointments.reschedule', $appointment) }}" class="btn-ghost w-8 h-8 p-0" title="Reschedule Appointment">
+                                                <i class="fas fa-clock text-sm"></i>
                                             </a>
                                             <button onclick="submitAction('{{ route('appointments.no-show', $appointment) }}', '{{ __('appointments.mark_no_show') }}?')" class="w-8 h-8 bg-orange-100 hover:bg-orange-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('appointments.mark_no_show') }}">
                                                 <i class="fas fa-user-slash text-orange-600 text-sm"></i>
@@ -490,7 +436,7 @@
     <div class="glass-effect rounded-3xl modern-shadow overflow-hidden">
         <div class="p-6 border-b border-gray-100">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                     <i class="fas fa-calendar-alt text-white"></i>
                 </div>
                 <h2 class="text-xl font-bold text-gray-900">{{ __('dashboard.upcoming_appointments_title') }}</h2>
@@ -524,7 +470,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                                    Dr. {{ $appointment->doctor->name }}
+                                    {{ $appointment->doctor->professional_name }}
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-medium text-gray-900">{{ $appointment->appointment_date->format('M j, Y') }}</div>
@@ -590,7 +536,7 @@
                         <select name="doctor_filter" class="modal-input focus:ring-blue-500">
                             <option value="">All Doctors</option>
                             @foreach(\App\Models\User::where('role', 'doctor')->get() as $doctor)
-                            <option value="{{ $doctor->id }}" {{ request('doctor_filter') == $doctor->id ? 'selected' : '' }}>Dr. {{ $doctor->name }}</option>
+                            <option value="{{ $doctor->id }}" {{ request('doctor_filter') == $doctor->id ? 'selected' : '' }}>{{ $doctor->professional_name }}</option>
                             @endforeach
                         </select>
                     </div>
