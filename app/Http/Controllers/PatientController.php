@@ -6,6 +6,8 @@ use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Setting;
 use App\Services\AppointmentSchedulingService;
+use App\Services\PatientProfileService;
+use App\Services\SpecialtyService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -16,6 +18,7 @@ class PatientController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate(['search' => 'nullable|string|max:255', 'date' => 'nullable|date']);
         $patients = collect(); // Empty collection by default
         $hasSearchQuery = false;
 
@@ -52,18 +55,14 @@ class PatientController extends Controller
     /**
      * Store a newly created patient
      */
-    public function store(Request $request)
+    public function store(Request $request, SpecialtyService $specialties)
     {
-        // More flexible validation - only name fields are required
-        $validated = $request->validate([
+        // Shared identity/clinical fields plus practice-specific contact rules.
+        $validated = $request->validate(array_merge([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'birth_date' => 'nullable|date|before:today',
             'gender' => 'nullable|in:male,female',
-            'phone' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
-            'id_card_number' => 'required|string|max:255|unique:patients,id_card_number',
             'allergies' => 'nullable|string',
             'chronic_conditions' => 'nullable|string',
             'emergency_contact_name' => 'nullable|string|max:255',
@@ -75,32 +74,50 @@ class PatientController extends Controller
             'appointment_time' => 'nullable|date_format:H:i',
             'appointment_reason' => 'nullable|string|max:500',
             'appointment_priority' => 'nullable|in:normal,urgent,emergency',
-        ]);
+        ], $specialties->validationRules('patient'), app(PatientProfileService::class)->rules()));
 
-        $patient = Patient::create($validated);
-
-        // Handle automatic appointment booking for today
-        if ($request->has('book_today') && $request->book_today) {
-            // Check if we're within working hours for appointments
-            if (! Setting::isWithinWorkingHours()) {
-                $nextWorking = Setting::getNextWorkingTime();
-                $errorMessage = 'Cannot book appointment outside working hours. ';
-                if ($nextWorking) {
-                    $errorMessage .= 'Next available time is '.$nextWorking->locale(app()->getLocale())->isoFormat('dddd, D MMM HH:mm').'.';
-                }
-
-                return back()->withErrors(['book_today' => $errorMessage])->withInput();
-            }
-
-            $appointmentResult = $this->createTodayAppointment($patient, $request);
-            if (! $appointmentResult['success']) {
-                return back()->withErrors(['book_today' => $appointmentResult['message']])->withInput();
-            }
-
-            // For walk-in patients, redirect to dashboard after successful booking
-            return redirect()->route('dashboard')
-                ->with('success', 'Patient created successfully and appointment booked for today!');
+        if ($request->has('specialty_data')) {
+            $validated['specialty_data'] = $specialties->mergeSubmittedData(
+                [],
+                $validated['specialty_data'] ?? [],
+                'patient'
+            );
         }
+
+        // A walk-in registration and its appointment are one user action. Keep
+        // them atomic so a full queue, unavailable slot, or closed clinic does
+        // not leave an unexpected patient record behind after a failed submit.
+        if ($request->boolean('book_today')) {
+            $patient = null;
+
+            try {
+                \DB::transaction(function () use (&$patient, $validated, $request, $specialties) {
+                    $patient = app(PatientProfileService::class)->save($validated);
+
+                    if (Carbon::parse($request->appointment_date)->isToday() && ! Setting::isWithinWorkingHours()) {
+                        $nextWorking = Setting::getNextWorkingTime();
+                        $message = 'Cannot book appointment outside working hours. ';
+                        if ($nextWorking) {
+                            $message .= 'Next available time is '.$nextWorking->locale(app()->getLocale())->isoFormat('dddd, D MMM HH:mm').'.';
+                        }
+
+                        throw new \DomainException($message);
+                    }
+
+                    $appointmentResult = $this->createTodayAppointment($patient, $request, $specialties);
+                    if (! $appointmentResult['success']) {
+                        throw new \DomainException($appointmentResult['message']);
+                    }
+                });
+            } catch (\DomainException $e) {
+                return back()->withErrors(['book_today' => $e->getMessage()])->withInput();
+            }
+
+            return redirect()->route('dashboard')
+                ->with('success', 'Patient created successfully and appointment booked!');
+        }
+
+        $patient = app(PatientProfileService::class)->save($validated);
 
         // For regular patient creation, redirect to the patient's profile
         return redirect()->route('patients.show', $patient)
@@ -110,7 +127,7 @@ class PatientController extends Controller
     /**
      * Create an appointment for today for a new patient
      */
-    private function createTodayAppointment($patient, $request)
+    private function createTodayAppointment(Patient $patient, Request $request, SpecialtyService $specialties): array
     {
         // Get the authenticated user - if not a doctor, get the first available doctor
         $user = auth()->user();
@@ -164,6 +181,10 @@ class PatientController extends Controller
 
             $appointmentTime = $slot['time'];
         } else {
+            if (Carbon::parse($appointmentDate.' '.$appointmentTime)->isPast()) {
+                return ['success' => false, 'message' => 'Appointment time has already passed. Please choose a future time.'];
+            }
+
             $workingHoursError = $scheduler->validateScheduledTime($appointmentDate, $appointmentTime);
             if ($workingHoursError) {
                 return [
@@ -189,7 +210,7 @@ class PatientController extends Controller
         // Create inside a per-doctor/day lock so a simultaneous booking at
         // the front desk cannot land in the same slot.
         try {
-            \DB::transaction(function () use ($patient, $doctor, $appointmentDate, $appointmentTime, $scheduler, $request, $notes) {
+            \DB::transaction(function () use ($patient, $doctor, $appointmentDate, $appointmentTime, $scheduler, $request, $notes, $specialties) {
                 Appointment::where('doctor_id', $doctor->id)
                     ->whereDate('appointment_date', $appointmentDate)
                     ->lockForUpdate()
@@ -204,9 +225,9 @@ class PatientController extends Controller
                     'doctor_id' => $doctor->id,
                     'appointment_date' => $appointmentDate,
                     'appointment_time' => $appointmentTime,
-                    'reason' => $request->appointment_reason ?: __('appointments.walk_in_consultation'),
+                    'reason' => $request->appointment_reason ?: $specialties->defaultAppointmentReason(),
                     'status' => 'scheduled',
-                    'checked_in_at' => now(), // the walk-in patient is at the desk
+                    'checked_in_at' => Carbon::parse($appointmentDate)->isToday() ? now() : null,
                     'notes' => $notes,
                 ]);
             });
@@ -256,24 +277,28 @@ class PatientController extends Controller
     /**
      * Update the specified patient
      */
-    public function update(Request $request, Patient $patient)
+    public function update(Request $request, Patient $patient, SpecialtyService $specialties)
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'birth_date' => 'required|date|before:today',
-            'gender' => 'required|in:male,female',
-            'phone' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
+            'gender' => 'nullable|in:male,female',
             'address' => 'nullable|string',
-            'id_card_number' => 'required|string|max:255|unique:patients,id_card_number,'.$patient->id,
             'allergies' => 'nullable|string',
             'chronic_conditions' => 'nullable|string',
             'emergency_contact_name' => 'nullable|string|max:255',
             'emergency_contact_phone' => 'nullable|string|max:255',
-        ]);
+        ], $specialties->validationRules('patient'), app(PatientProfileService::class)->rules($patient)));
 
-        $patient->update($validated);
+        if ($request->has('specialty_data')) {
+            $validated['specialty_data'] = $specialties->mergeSubmittedData(
+                $patient->specialty_data ?? [],
+                $validated['specialty_data'] ?? [],
+                'patient'
+            );
+        }
+
+        app(PatientProfileService::class)->save($validated, $patient);
 
         return redirect()->route('patients.show', $patient)
             ->with('success', 'Patient updated successfully!');
@@ -301,6 +326,7 @@ class PatientController extends Controller
      */
     public function aiSummary(Patient $patient)
     {
+        abort_unless(auth()->user()->isDoctor(), 403, 'Clinical summaries are available to doctors only.');
         $summary = \App\Services\AIService::generatePatientSummary($patient);
 
         return response()->json($summary);

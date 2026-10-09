@@ -62,6 +62,14 @@ it('initializes the first patient of the day once', function () {
         ->assertSessionHas('error');
 });
 
+it('does not accept a receptionist as the target doctor when starting a consultation', function () {
+    $receptionist = User::factory()->receptionist()->create();
+
+    $this->actingAs($receptionist)->from('/dashboard')->post('/dashboard/initialize-first-patient', [
+        'doctor_id' => $receptionist->id,
+    ])->assertSessionHasErrors('doctor_id');
+});
+
 it('blocks receptionists from statistics', function () {
     $receptionist = User::factory()->receptionist()->create();
 

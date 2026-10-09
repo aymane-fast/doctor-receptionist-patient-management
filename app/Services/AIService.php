@@ -47,6 +47,8 @@ class AIService
      */
     private static function gatherPatientData(Patient $patient): array
     {
+        $specialties = app(SpecialtyService::class);
+
         // Load relationships
         $patient->load([
             'appointments' => function($query) {
@@ -65,12 +67,14 @@ class AIService
         ]);
         
         return [
+            'clinic_specialty' => $specialties->current()['label'],
             'patient' => [
                 'name' => $patient->full_name,
-                'age' => $patient->age ?? 'N/A',
+                'age' => $patient->age_display,
                 'gender' => $patient->gender,
                 'allergies' => $patient->allergies,
                 'chronic_conditions' => $patient->chronic_conditions,
+                'specialty_details' => $specialties->formatData('patient', $patient->specialty_data),
             ],
             'appointments' => $patient->appointments->map(function($apt) {
                 return [
@@ -106,7 +110,8 @@ class AIService
                         'weight' => $record->weight
                     ],
                     'doctor' => $record->doctor->professional_name ?? 'N/A',
-                    'treatment' => $record->treatment
+                    'treatment' => $record->treatment,
+                    'specialty_details' => $specialties->formatData('record', $record->specialty_data),
                 ];
             })
         ];
@@ -120,11 +125,16 @@ class AIService
         $patient = $data['patient'];
         
         $prompt = "You are a professional medical AI assistant. Generate a clear, concise clinical summary.\n\n";
+        $prompt .= "Clinic specialty: {$data['clinic_specialty']}\n\n";
         $prompt .= "=== PATIENT INFORMATION ===\n";
         $prompt .= "Name: {$patient['name']}\n";
         $prompt .= "Age: {$patient['age']} | Gender: {$patient['gender']}\n";
         $prompt .= "Allergies: " . ($patient['allergies'] ?: 'None reported') . "\n";
-        $prompt .= "Chronic Conditions: " . ($patient['chronic_conditions'] ?: 'None reported') . "\n\n";
+        $prompt .= "Chronic Conditions: " . ($patient['chronic_conditions'] ?: 'None reported') . "\n";
+        if ($patient['specialty_details']) {
+            $prompt .= "Specialty details: {$patient['specialty_details']}\n";
+        }
+        $prompt .= "\n";
         
         // Appointments
         if ($data['appointments']->isNotEmpty()) {
@@ -157,6 +167,9 @@ class AIService
                 }
                 if ($record['treatment']) {
                     $prompt .= "  Treatment: {$record['treatment']}\n";
+                }
+                if ($record['specialty_details']) {
+                    $prompt .= "  Specialty details: {$record['specialty_details']}\n";
                 }
             }
             $prompt .= "\n";

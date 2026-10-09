@@ -23,6 +23,7 @@
             </a>
         </x-slot:actions>
     </x-ui.page-header>
+    <x-patients.guardian-summary :patient="$prescription->patient" :compact="true" />
 
     <!-- Professional Prescription Layout -->
     <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden print:shadow-none print:max-w-none">

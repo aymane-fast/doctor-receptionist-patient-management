@@ -249,7 +249,7 @@ it('reports per-doctor performance in statistics', function () {
     $response->assertOk();
 
     $performance = collect($response->json('doctor_performance'))
-        ->firstWhere('name', 'Perf Doctor');
+        ->firstWhere('name', $doctor->professional_name);
 
     expect($performance)->not->toBeNull()
         ->and($performance['completed'])->toBe(2)

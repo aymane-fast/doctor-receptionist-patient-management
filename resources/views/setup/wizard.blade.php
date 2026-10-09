@@ -51,7 +51,7 @@
                         </div>
                         <h1 class="text-4xl font-bold tracking-tight">Welcome to your clinic setup</h1>
                         <p class="mt-3 text-white/85 text-lg">
-                            We will configure your clinic profile, working hours, appointment workflow, and staff accounts in one guided pass.
+                            Launch a ready-to-show demo instantly, or configure a production clinic in one guided pass.
                         </p>
                     </div>
                     <div class="bg-white/10 rounded-2xl px-5 py-4 min-w-[18rem]">
@@ -60,7 +60,7 @@
                             {{ old('environment_mode', 'production') === 'demo' ? 'Demo clinic' : 'Production clinic' }}
                         </p>
                         <p class="mt-2 text-sm text-white/75">
-                            Demo mode seeds sample patients and appointments. Production starts clean.
+                            Demo mode includes staff accounts, patients, and appointments. Production starts clean.
                         </p>
                     </div>
                 </div>
@@ -69,9 +69,9 @@
             <div class="px-6 lg:px-8 py-6 border-b border-slate-200 bg-white/70">
                 <div class="flex flex-wrap gap-3">
                     <button type="button" class="step-pill active rounded-full px-4 py-2 text-sm font-semibold" data-step-nav="1">1. Mode</button>
-                    <button type="button" class="step-pill rounded-full px-4 py-2 text-sm font-semibold" data-step-nav="2">2. Clinic</button>
-                    <button type="button" class="step-pill rounded-full px-4 py-2 text-sm font-semibold" data-step-nav="3">3. Workflow</button>
-                    <button type="button" class="step-pill rounded-full px-4 py-2 text-sm font-semibold" data-step-nav="4">4. Team</button>
+                    <button type="button" class="step-pill rounded-full px-4 py-2 text-sm font-semibold" data-step-nav="2" data-production-only>2. Clinic</button>
+                    <button type="button" class="step-pill rounded-full px-4 py-2 text-sm font-semibold" data-step-nav="3" data-production-only>3. Workflow</button>
+                    <button type="button" class="step-pill rounded-full px-4 py-2 text-sm font-semibold" data-step-nav="4" data-production-only>4. Team</button>
                 </div>
             </div>
 
@@ -100,7 +100,7 @@
                 <section data-step="1" class="step-panel space-y-6">
                     <div>
                         <h2 class="text-2xl font-bold text-slate-900">Choose how this clinic starts</h2>
-                        <p class="mt-2 text-slate-600">Use demo mode when you want sample patients and schedules to explore the app safely.</p>
+                        <p class="mt-2 text-slate-600">Demo mode is ready to present immediately. Production lets you configure your own clinic.</p>
                     </div>
 
                     <div class="grid lg:grid-cols-2 gap-5">
@@ -118,26 +118,44 @@
                             <div class="flex items-start justify-between gap-4">
                                 <div>
                                     <p class="text-lg font-semibold text-slate-900">Demo</p>
-                                    <p class="mt-2 text-sm text-slate-600">Seed realistic sample patients and appointments based on the workflow you choose.</p>
+                                    <p class="mt-2 text-sm text-slate-600">Open a ready-made clinic with default staff, patients, and appointments. No details required.</p>
                                 </div>
                                 <span class="rounded-full bg-teal-100 text-teal-800 text-xs font-semibold px-3 py-1">Sample data</span>
                             </div>
                         </button>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-6">
+                    @include('setup.practice-type')
+                    <div id="demo-details" class="hidden rounded-2xl border border-teal-200 bg-teal-50 p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="icon-tile flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"><i class="fas fa-circle-play"></i></div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900">Your showcase clinic is ready</h3>
+                                <p class="mt-1 text-sm text-slate-700">We will create the default doctor and receptionist, sample patients, and appointments, then sign you in as the doctor.</p>
+                                <div class="mt-4 grid gap-3 sm:grid-cols-2 text-sm">
+                                    <div class="rounded-xl bg-white p-3 text-slate-700"><strong>Doctor:</strong> doctor@example.com<br><strong>Password:</strong> password</div>
+                                    <div class="rounded-xl bg-white p-3 text-slate-700"><strong>Receptionist:</strong> receptionist@example.com<br><strong>Password:</strong> password</div>
+                                </div>
+                                <button type="submit" id="launch-demo-btn" name="launch_demo" value="1" formnovalidate class="mt-5 brand-gradient rounded-full px-6 py-3 font-semibold text-white shadow-lg shadow-teal-900/10">
+                                    Launch demo <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6" data-production-only>
                         <div class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
                             <label for="appointment_duration" class="block text-sm font-semibold text-slate-700 mb-2">Default consultation duration</label>
                             <select name="appointment_duration" id="appointment_duration" class="form-control">
                                 @foreach([15, 20, 30, 45, 60] as $minutes)
-                                    <option value="{{ $minutes }}" {{ (int) old('appointment_duration', 30) === $minutes ? 'selected' : '' }}>{{ $minutes }} minutes</option>
+                                    <option value="{{ $minutes }}" {{ (int) old('appointment_duration', $specialties['general_practice']['defaults']['appointment_duration']) === $minutes ? 'selected' : '' }}>{{ $minutes }} minutes</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
                 </section>
 
-                <section data-step="2" class="step-panel hidden space-y-6">
+                <section data-step="2" class="step-panel hidden space-y-6" data-production-only>
                     <div>
                         <h2 class="text-2xl font-bold text-slate-900">Add your clinic identity</h2>
                         <p class="mt-2 text-slate-600">These details will power prescriptions, records, and the rest of the clinic UI.</p>
@@ -165,9 +183,10 @@
                             <input type="url" name="clinic_website" value="{{ old('clinic_website') }}" class="form-control" placeholder="https://">
                         </div>
                     </div>
+
                 </section>
 
-                <section data-step="3" class="step-panel hidden space-y-6">
+                <section data-step="3" class="step-panel hidden space-y-6" data-production-only>
                     <div>
                         <h2 class="text-2xl font-bold text-slate-900">Choose the workflow your clinic uses</h2>
                         <p class="mt-2 text-slate-600">You can keep fixed time slots or run a simple queue-number system with estimated turn times.</p>
@@ -230,7 +249,7 @@
                     </div>
                 </section>
 
-                <section data-step="4" class="step-panel hidden space-y-8">
+                <section data-step="4" class="step-panel hidden space-y-8" data-production-only>
                     <div>
                         <h2 class="text-2xl font-bold text-slate-900">Create your clinic team</h2>
                         <p class="mt-2 text-slate-600">We will sign you in as the first doctor after setup, and you can add more doctors or receptionists right here.</p>
@@ -334,7 +353,7 @@
                     </div>
                 </section>
 
-                <div class="flex items-center justify-between gap-4 border-t border-slate-200 pt-6">
+                <div class="flex items-center justify-between gap-4 border-t border-slate-200 pt-6" data-production-only>
                     <button type="button" id="back-btn" class="hidden rounded-full border border-slate-300 px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50">
                         <i class="fas fa-arrow-left mr-2"></i>Back
                     </button>
@@ -390,8 +409,11 @@
         const submitBtn = document.getElementById('submit-btn');
         const environmentInput = document.getElementById('environment_mode');
         const appointmentModeInput = document.getElementById('appointment_mode');
+        const specialtyInput = document.getElementById('clinic_specialty');
         const queueLimitWrapper = document.getElementById('queue-limit-wrapper');
         const environmentLabel = document.getElementById('environment-label');
+        const demoDetails = document.getElementById('demo-details');
+        const specialtyDescription = document.getElementById('specialty-description');
         let currentStep = {{ $initialStep }};
         let doctorIndex = {{ count($oldDoctors) }};
         let receptionistIndex = {{ count($oldReceptionists) }};
@@ -414,10 +436,17 @@
 
         function syncEnvironmentCards() {
             const mode = environmentInput.value;
+            const isDemo = mode === 'demo';
             document.querySelectorAll('[data-environment-option]').forEach((button) => {
                 button.classList.toggle('active', button.dataset.environmentOption === mode);
             });
-            environmentLabel.textContent = mode === 'demo' ? 'Demo clinic' : 'Production clinic';
+            document.querySelectorAll('[data-production-only]').forEach((element) => {
+                element.classList.toggle('hidden', isDemo);
+            });
+            demoDetails.classList.toggle('hidden', !isDemo);
+            environmentLabel.textContent = isDemo ? 'Demo clinic' : 'Production clinic';
+
+            showStep(1);
         }
 
         function syncAppointmentCards() {
@@ -426,6 +455,19 @@
                 button.classList.toggle('active', button.dataset.appointmentOption === mode);
             });
             queueLimitWrapper.classList.toggle('hidden', mode !== 'queue');
+        }
+
+        function syncSpecialtyDetails(applyDefaults = false) {
+            const option = specialtyInput.options[specialtyInput.selectedIndex];
+            specialtyDescription.textContent = option.dataset.description;
+
+            if (!applyDefaults) {
+                return;
+            }
+
+            document.getElementById('appointment_duration').value = option.dataset.duration;
+            appointmentModeInput.value = option.dataset.mode;
+            syncAppointmentCards();
         }
 
         function syncWorkingHoursState(day) {
@@ -466,6 +508,8 @@
             });
         });
 
+        specialtyInput.addEventListener('change', () => syncSpecialtyDetails(true));
+
         document.querySelectorAll('[data-working-toggle]').forEach((checkbox) => {
             checkbox.addEventListener('change', () => syncWorkingHoursState(checkbox.dataset.workingToggle));
             syncWorkingHoursState(checkbox.dataset.workingToggle);
@@ -476,7 +520,28 @@
         });
 
         backBtn.addEventListener('click', () => showStep(Math.max(1, currentStep - 1)));
-        nextBtn.addEventListener('click', () => showStep(Math.min(panels.length, currentStep + 1)));
+        nextBtn.addEventListener('click', () => {
+            const panel = panels.find(panel => Number(panel.dataset.step) === currentStep);
+            const invalid = [...panel.querySelectorAll('input, select, textarea')].find(input => !input.checkValidity());
+            if (invalid) {
+                invalid.reportValidity();
+                return;
+            }
+            showStep(Math.min(panels.length, currentStep + 1));
+        });
+        // Native validation must reveal hidden wizard panels before focusing
+        // their fields; otherwise submission appears stuck on the final step.
+        const setupForm = document.getElementById('setup-form');
+        setupForm.noValidate = true;
+        setupForm.addEventListener('submit', event => {
+            if (event.submitter?.formNoValidate || environmentInput.value === 'demo') return;
+            const invalid = [...setupForm.elements].find(input => input.willValidate && !input.validity.valid);
+            if (!invalid) return;
+            event.preventDefault();
+            const panel = invalid.closest('[data-step]');
+            if (panel) showStep(Number(panel.dataset.step));
+            invalid.reportValidity();
+        });
 
         document.getElementById('add-doctor-btn').addEventListener('click', () => {
             addStaffCard('doctor-template', 'doctors-list', 'doctors', doctorIndex);
@@ -497,9 +562,11 @@
             removeButton.closest('.staff-card')?.remove();
         });
 
+        const restoredStep = currentStep;
         syncEnvironmentCards();
         syncAppointmentCards();
-        showStep(currentStep);
+        syncSpecialtyDetails();
+        showStep(environmentInput.value === 'demo' ? 1 : restoredStep);
     </script>
 </body>
 </html>

@@ -85,3 +85,20 @@ it('completes demo setup, creates staff, and seeds queue appointments', function
         ->and(Appointment::count())->toBeGreaterThan(0)
         ->and(Appointment::where('appointment_mode', 'queue')->count())->toBe(Appointment::count());
 });
+
+it('launches the ready-made demo without production wizard fields', function () {
+    Setting::setSetupComplete(false);
+
+    $this->post(route('setup.store'), ['environment_mode' => 'demo'])
+        ->assertRedirect(route('dashboard'));
+
+    $this->assertAuthenticated();
+
+    expect(Setting::isSetupComplete())->toBeTrue()
+        ->and(Setting::getDeploymentMode())->toBe('demo')
+        ->and(Setting::get('clinic_name'))->toBe('Demo Medical Clinic')
+        ->and(User::where('email', 'doctor@example.com')->where('role', 'doctor')->exists())->toBeTrue()
+        ->and(User::where('email', 'receptionist@example.com')->where('role', 'receptionist')->exists())->toBeTrue()
+        ->and(Patient::count())->toBeGreaterThan(0)
+        ->and(Appointment::count())->toBeGreaterThan(0);
+});

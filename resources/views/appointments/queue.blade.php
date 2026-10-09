@@ -77,7 +77,8 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="font-semibold text-gray-900">{{ $appointment->patient->full_name }}</div>
-                                <div class="text-sm text-gray-500">{{ $appointment->patient->phone }}</div>
+                                <div class="text-sm text-gray-500">{{ $appointment->patient->contact_label }}</div>
+                                @if($appointment->patient->is_pediatric)<div class="text-sm text-gray-500">{{ $appointment->patient->age_display }} · {{ $appointment->patient->birth_date?->format('Y-m-d') }}</div>@endif
                             </td>
                             <td class="px-6 py-4">
                                 <div class="font-semibold text-gray-900">{{ $appointment->displayTime() }}</div>

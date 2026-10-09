@@ -23,6 +23,7 @@
                 </a>
         </x-slot:actions>
     </x-ui.page-header>
+    <x-patients.guardian-summary :patient="$appointment->patient" />
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Appointment Info -->
@@ -61,7 +62,7 @@
                                 @endif
                                 <span class="flex items-center space-x-1">
                                     <i class="fas fa-birthday-cake text-sm"></i>
-                                    <span>{{ $appointment->patient->age !== null ? $appointment->patient->age . ' years old' : 'Age unknown' }}</span>
+                                    <span>{{ $appointment->patient->age_display }}</span>
                                 </span>
                             </div>
                         </div>
@@ -118,7 +119,7 @@
                             <label class="block text-sm font-medium text-gray-600">{{ $appointment->isQueueMode() ? 'Estimated Time' : __('appointments.time') }}</label>
                             <p class="font-bold text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center space-x-2">
                                 <i class="fas fa-clock text-gray-400"></i>
-                                <span>{{ \Carbon\Carbon::parse($appointment->appointment_time)->format('g:i A') }}</span>
+                                <span>{{ $appointment->displayTime() }}</span>
                             </p>
                         </div>
 

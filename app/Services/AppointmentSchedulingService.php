@@ -89,10 +89,18 @@ class AppointmentSchedulingService
         }
 
         $slots = [];
+        // Load the day's blockers once, not once for every candidate slot.
+        $blocking = $this->blockingAppointments($doctorId, $appointmentDate, $excludeId);
         $current = $start->copy();
 
         while ($current->copy()->addMinutes($this->duration())->lte($window['end'])) {
-            if (! $this->hasScheduledConflict($doctorId, $appointmentDate->toDateString(), $current->format('H:i'), $excludeId)) {
+            $slotEnd = $current->copy()->addMinutes($this->duration());
+            $conflict = $blocking->contains(function (Appointment $appointment) use ($current, $slotEnd) {
+                $existingStart = Carbon::parse($appointment->appointment_date->toDateString().' '.$appointment->appointment_time->format('H:i:s'));
+
+                return $current->lt($existingStart->copy()->addMinutes($this->duration())) && $slotEnd->gt($existingStart);
+            });
+            if (! $conflict) {
                 $slots[] = [
                     'time' => $current->format('H:i'),
                     'formatted' => $current->format('H:i'),
@@ -139,6 +147,11 @@ class AppointmentSchedulingService
         }
 
         return DB::transaction(function () use ($data) {
+            // Lock a row that exists even before the day's first appointment.
+            \App\Models\User::whereKey($data['doctor_id'])->lockForUpdate()->firstOrFail();
+            if ($this->hasActiveSameDayAppointment($data['patient_id'], $data['doctor_id'], $data['appointment_date'])) {
+                throw new \InvalidArgumentException(__('appointments.already_has_appointment_today'));
+            }
             // Serialize concurrent queue joins for the same doctor/day so two
             // requests cannot be handed the same queue number.
             Appointment::where('doctor_id', $data['doctor_id'])

@@ -18,6 +18,7 @@ class PrescriptionController extends Controller
             abort(403);
         }
 
+        $request->validate(['search' => 'nullable|string|max:255', 'date' => 'nullable|date']);
         $prescriptions = collect(); // Empty collection by default
         $hasSearchQuery = false;
 
@@ -69,6 +70,7 @@ class PrescriptionController extends Controller
      */
     public function searchPatients(Request $request)
     {
+        $request->validate(['q' => 'nullable|string|max:255']);
         $query = $request->get('q', '');
         
         if (empty($query) || strlen($query) < 2) {

@@ -117,6 +117,41 @@
     </div>
     @endif
 
+    @if(auth()->user()->isDoctor())
+    <!-- Practice Specialty -->
+    <div class="section-card p-6">
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
+                <i class="fas {{ $currentSpecialty['icon'] }} text-teal-700 mr-2"></i>
+                Practice Specialty
+            </h3>
+            <p class="text-gray-600 text-sm">Choose the optional patient details, clinical fields, appointment suggestions, and demo data that fit your practice.</p>
+            <p class="mt-2 text-sm text-teal-900"><strong>{{ $currentSpecialty['label'] }}:</strong> {{ $currentSpecialty['description'] }} Suggested consultation duration: {{ $currentSpecialty['defaults']['appointment_duration'] }} minutes; suggested workflow: {{ $currentSpecialty['defaults']['appointment_mode'] }}.</p>
+        </div>
+
+        <form action="{{ route('settings.specialty') }}" method="POST" class="space-y-4">
+            @csrf
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
+                <div class="md:col-span-2">
+                    <label for="clinic_specialty" class="block text-sm font-medium text-gray-700 mb-2">Clinic specialty</label>
+                    <select name="clinic_specialty" id="clinic_specialty" class="form-control w-full px-3 py-2 bg-white" required>
+                        @foreach($specialtyProfiles as $key => $profile)
+                            <option value="{{ $key }}" @selected(old('clinic_specialty', $currentSpecialty['key']) === $key)>
+                                {{ $profile['label'] }} ({{ $profile['defaults']['appointment_duration'] }} min, {{ $profile['defaults']['appointment_mode'] }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary px-6 py-2"><i class="fas fa-save text-sm"></i><span>Save Specialty</span></button>
+            </div>
+            <label class="flex items-start gap-3 rounded-lg bg-teal-50 p-4 text-sm text-teal-950">
+                <input type="checkbox" name="apply_specialty_defaults" value="1" class="mt-1 rounded border-teal-300 text-teal-700 focus:ring-teal-600">
+                <span>Also apply this specialty's suggested consultation duration and appointment mode to my account. Existing appointments, patients, and clinical records are never changed.</span>
+            </label>
+        </form>
+    </div>
+    @endif
+
     <!-- Appointment Settings -->
     <div class="section-card p-6">
         <div class="mb-6">

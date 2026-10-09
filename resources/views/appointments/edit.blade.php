@@ -45,7 +45,7 @@
                                 @foreach($patients as $patient)
                                     <option value="{{ $patient->id }}" 
                                             {{ (old('patient_id', $appointment->patient_id) == $patient->id) ? 'selected' : '' }}>
-                                        {{ $patient->first_name }} {{ $patient->last_name }} - {{ $patient->phone }}
+                                        {{ $patient->selection_label }}
                                     </option>
                                 @endforeach
                             </select>
@@ -169,19 +169,27 @@
                     <div class="grid md:grid-cols-2 gap-4 mt-4">
                         <!-- Purpose -->
                         <div>
-                            <label for="reason" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                Purpose/Reason for Visit
+                        <label for="reason" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                                {{ $clinicSpecialty['label'] }} visit reason
                             </label>
                             <textarea id="reason" name="reason" rows="3" 
                                       placeholder="Brief description of the reason for this appointment..."
                                       class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white resize-none @error('reason') border-red-500 @enderror">{{ old('reason', $appointment->reason) }}</textarea>
-                            @error('reason')
-                            <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
+                        @error('reason')
+                        <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <span>{{ $message }}</span>
-                            </p>
-                            @enderror
-                        </div>
+                        </p>
+                        @enderror
+                        @if(! empty($clinicSpecialty['appointment_reasons']))
+                            <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $clinicSpecialty['label'] }} suggestions</p>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                @foreach($clinicSpecialty['appointment_reasons'] as $suggestion)
+                                    <button type="button" data-reason-suggestion="{{ $suggestion }}" class="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100">{{ $suggestion }}</button>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
 
                         <!-- Notes -->
                         <div>
@@ -234,4 +242,13 @@
         </div>
     </div>
 </div>
+<script>
+document.querySelectorAll('[data-reason-suggestion]').forEach((button) => {
+    button.addEventListener('click', () => {
+        const reasonInput = document.getElementById('reason');
+        reasonInput.value = button.dataset.reasonSuggestion;
+        reasonInput.focus();
+    });
+});
+</script>
 @endsection

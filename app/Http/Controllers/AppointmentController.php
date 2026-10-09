@@ -28,6 +28,12 @@ class AppointmentController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'search' => 'nullable|string|max:255', 'date' => 'nullable|date',
+            'doctor_id' => 'nullable|integer',
+            'status' => 'nullable|in:scheduled,in_progress,completed,cancelled,no_show',
+            'appointment_mode' => 'nullable|in:scheduled,queue',
+        ]);
         // Check if there's a search query or show_today request
         $hasSearchQuery = $request->filled('search') || $request->filled('date') || $request->filled('status') || $request->filled('doctor_id') || $request->has('show_today');
 
@@ -115,6 +121,7 @@ class AppointmentController extends Controller
      */
     public function searchPatients(Request $request)
     {
+        $request->validate(['q' => 'nullable|string|max:255']);
         $query = $request->get('q', '');
 
         return response()->json(PatientSearchService::search($query));
@@ -755,7 +762,7 @@ class AppointmentController extends Controller
     public function markCurrentDone(Request $request)
     {
         $request->validate([
-            'doctor_id' => 'nullable|exists:users,id',
+            'doctor_id' => ['nullable', Rule::exists('users', 'id')->where('role', 'doctor')],
             'appointment_id' => 'nullable|exists:appointments,id',
         ]);
 
@@ -856,7 +863,7 @@ class AppointmentController extends Controller
             return back()->with('error', 'No working day was found near the requested follow-up date.');
         }
 
-        $reason = $validated['follow_up_reason'] ?: __('appointments.follow_up_appointment');
+        $reason = $validated['follow_up_reason'] ?: app(\App\Services\SpecialtyService::class)->defaultFollowUpReason();
         $notes = 'Follow-up from appointment on '.Carbon::parse($currentAppointment->appointment_date)->format('M j, Y');
 
         if ($this->scheduler()->hasActiveSameDayAppointment($patient->id, Auth::id(), $targetDate->toDateString())) {

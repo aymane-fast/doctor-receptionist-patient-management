@@ -64,7 +64,7 @@
                                    placeholder="{{ __('appointments.search_patients_placeholder') }}" 
                                    class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('patient_id') border-red-500 @enderror"
                                    autocomplete="off"
-                                   value="{{ $selectedPatient ? $selectedPatient->first_name . ' ' . $selectedPatient->last_name . ' - ' . $selectedPatient->phone : '' }}">
+                                   value="{{ $selectedPatient?->selection_label ?? '' }}">
                             
                             <!-- Hidden input for patient_id -->
                             <input type="hidden" 
@@ -206,7 +206,7 @@
                     <!-- Purpose -->
                     <div>
                         <label for="reason" class="block text-sm font-semibold text-gray-700 mb-2">
-                            {{ __('appointments.reason') }}
+                            {{ $clinicSpecialty['label'] }} visit reason
                         </label>
                         <textarea id="reason" name="reason" rows="3" 
                                   placeholder="{{ __('appointments.reason_placeholder') }}"
@@ -217,6 +217,14 @@
                             <span>{{ $message }}</span>
                         </p>
                         @enderror
+                        @if(! empty($clinicSpecialty['appointment_reasons']))
+                            <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $clinicSpecialty['label'] }} suggestions</p>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                @foreach($clinicSpecialty['appointment_reasons'] as $suggestion)
+                                    <button type="button" data-reason-suggestion="{{ $suggestion }}" class="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100">{{ $suggestion }}</button>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Notes -->
@@ -267,9 +275,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const bookNowBtn = document.getElementById('book_now_btn');
     const queueNotice = document.getElementById('queue_mode_notice');
     const queueEstimate = document.getElementById('queue_mode_estimate');
+    const reasonInput = document.getElementById('reason');
     let searchTimeout;
     let selectedPatientId = patientIdInput.value;
     const doctorModes = @json($doctorModes);
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+        })[character]);
+    }
 
     // Patient Search Autocomplete
     searchInput.addEventListener('input', function() {
@@ -325,9 +340,9 @@ document.addEventListener('DOMContentLoaded', function() {
             resultsContainer.innerHTML = patients.map(patient => `
                 <div class="patient-result p-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
                      data-id="${patient.id}" 
-                     data-display="${patient.display}">
-                    <div class="font-medium text-gray-900">${patient.name}</div>
-                    <div class="text-sm text-gray-600">${patient.phone} • ${patient.email}</div>
+                     data-display="${escapeHtml(patient.display)}">
+                    <div class="font-medium text-gray-900">${escapeHtml(patient.name)}</div>
+                    <div class="text-sm text-gray-600">${escapeHtml(patient.phone)} • ${escapeHtml(patient.email)}</div>
                 </div>
             `).join('');
 
@@ -418,6 +433,13 @@ document.addEventListener('DOMContentLoaded', function() {
         appointmentDateInput.addEventListener('change', refreshAppointmentMode);
     }
 
+    document.querySelectorAll('[data-reason-suggestion]').forEach((button) => {
+        button.addEventListener('click', () => {
+            reasonInput.value = button.dataset.reasonSuggestion;
+            reasonInput.focus();
+        });
+    });
+
     refreshAppointmentMode();
 
     // Book Now functionality
@@ -445,7 +467,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set reason if empty
         const reasonInput = document.querySelector('textarea[name="reason"]');
         if (reasonInput && !reasonInput.value.trim()) {
-            reasonInput.value = 'Walk-in / Immediate consultation';
+            reasonInput.value = @json($clinicSpecialty['appointment_reasons'][0] ?? __('appointments.walk_in_consultation'));
         }
         
         // Find next available time slot and set it

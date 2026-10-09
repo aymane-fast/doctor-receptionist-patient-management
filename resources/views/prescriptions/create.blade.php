@@ -3,6 +3,11 @@
 @section('title', __('prescriptions.new_prescription'))
 
 @section('content')
+<datalist id="specialty-medication-suggestions">
+    @foreach(app(\App\Services\SpecialtyService::class)->medicationSuggestions() as $medication)
+        <option value="{{ $medication['name'] }}"></option>
+    @endforeach
+</datalist>
 <div class="space-y-6">
     <x-ui.page-header
         :title="__('prescriptions.new_prescription')"
@@ -45,7 +50,7 @@
                                        placeholder="Search patients by name, phone, or email..." 
                                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror"
                                        autocomplete="off"
-                                       value="{{ $selectedPatient ? $selectedPatient->first_name . ' ' . $selectedPatient->last_name . ' - ' . $selectedPatient->phone : '' }}">
+                                       value="{{ $selectedPatient?->selection_label ?? '' }}">
                                 
                                 <!-- Hidden input for patient_id -->
                                 <input type="hidden" 
@@ -113,7 +118,7 @@
                             <div class="grid md:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.medication_name') }} <span class="text-red-500">*</span></label>
-                                    <input type="text" name="items[0][medication_name]" required 
+                                    <input type="text" name="items[0][medication_name]" list="specialty-medication-suggestions" required
                                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                            placeholder="{{ __('prescriptions.medication_placeholder') }}">
                                 </div>
@@ -188,6 +193,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultsContainer = document.getElementById('patient_results');
     let searchTimeout;
 
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+        })[character]);
+    }
+
     // Patient Search Autocomplete
     searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
@@ -238,9 +249,9 @@ document.addEventListener('DOMContentLoaded', function() {
             resultsContainer.innerHTML = patients.map(patient => `
                 <div class="patient-result p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
                      data-id="${patient.id}" 
-                     data-display="${patient.display}">
-                    <div class="font-medium text-gray-900">${patient.name}</div>
-                    <div class="text-sm text-gray-600">${patient.phone} • ${patient.email}</div>
+                     data-display="${escapeHtml(patient.display)}">
+                    <div class="font-medium text-gray-900">${escapeHtml(patient.name)}</div>
+                    <div class="text-sm text-gray-600">${escapeHtml(patient.phone)} • ${escapeHtml(patient.email)}</div>
                 </div>
             `).join('');
 
@@ -322,6 +333,7 @@ document.getElementById('add-item').addEventListener('click', () => {
       <input type="text" name="items[${itemIndex}][instructions]" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="{{ __('prescriptions.instructions_placeholder') }}">
     </div>
   `;
+  wrapper.querySelector('input[name$="[medication_name]"]')?.setAttribute('list', 'specialty-medication-suggestions');
   document.getElementById('items').appendChild(wrapper);
   itemIndex++;
 });

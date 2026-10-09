@@ -23,6 +23,7 @@
                 </a>
         </x-slot:actions>
     </x-ui.page-header>
+    <x-patients.guardian-summary :patient="$medicalRecord->patient" />
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Main Content -->
@@ -48,7 +49,7 @@
                         <div class="flex-1">
                             <div class="flex items-center gap-4 mb-1">
                                 <h3 class="text-xl font-bold text-gray-900">{{ $medicalRecord->patient->first_name }} {{ $medicalRecord->patient->last_name }}</h3>
-                                <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-sm font-semibold">{{ $medicalRecord->patient->age !== null ? $medicalRecord->patient->age . 'y' : '—' }}</span>
+                                <span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-sm font-semibold">{{ $medicalRecord->patient->age_display }}</span>
                                 <span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-full text-sm font-semibold">{{ $medicalRecord->patient->gender ? ucfirst($medicalRecord->patient->gender) : '—' }}</span>
                             </div>
                             <p class="text-gray-600">{{ $medicalRecord->patient->phone }} • {{ $medicalRecord->patient->email }}</p>
@@ -275,6 +276,13 @@
                         </div>
                     </div>
                     @endif
+
+                    <x-specialty.summary
+                        :fields="$specialtyFieldCatalog['record']"
+                        :values="$medicalRecord->specialty_data ?? []"
+                        title="Specialty clinical details"
+                        :icon="$clinicSpecialty['icon']"
+                    />
                 </div>
                 </div>
             </div>

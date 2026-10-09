@@ -14,7 +14,12 @@
         ]]);
     }
 
-    $reference = sprintf('RX-%s-%06d', $prescription->prescribed_date->format('Y'), $prescription->id);
+    $reference = sprintf('ORD-%s-%06d', $prescription->prescribed_date->format('Y'), $prescription->id);
+    $medicationPages = $medications->chunk(4);
+
+    if ($medicationPages->isEmpty()) {
+        $medicationPages = collect([collect()]);
+    }
     $doctorContacts = collect([$doctor->phone, $doctor->email])
         ->filter(fn ($value) => filled($value))
         ->implode('  |  ');
@@ -45,8 +50,6 @@
             --line: #c9dcda;
             --paper: #ffffff;
             --canvas: #e8f0ef;
-            --alert: #b87524;
-            --alert-soft: #fff8e9;
         }
 
         * {
@@ -314,58 +317,24 @@
             font-weight: 700;
         }
 
-        .medical-alerts {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 5mm;
-            margin-top: 4mm;
-            padding: 3mm 4mm;
-            color: #674412;
-            background: var(--alert-soft);
-            border-left: 3px solid var(--alert);
-        }
-
-        .alert-title {
-            font-size: 7pt;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .alert-content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2mm 8mm;
-            font-size: 8pt;
-        }
-
         .prescription-body {
             margin-top: 6mm;
         }
 
-        .rx-heading {
+        .treatment-heading {
             display: flex;
             align-items: center;
-            gap: 4mm;
             margin-bottom: 2mm;
         }
 
-        .rx-symbol {
-            color: var(--teal-800);
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 32pt;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        .rx-title h2 {
+        .treatment-heading h2 {
             margin: 0;
             color: var(--teal-950);
             font-family: Georgia, "Times New Roman", serif;
             font-size: 15pt;
         }
 
-        .rx-title p {
+        .treatment-heading p {
             margin: 0.5mm 0 0;
             color: var(--muted);
             font-size: 7.5pt;
@@ -381,7 +350,7 @@
             gap: 4mm;
             padding: 4mm 0;
             border-bottom: 1px solid var(--line);
-            break-inside: avoid;
+            break-inside: avoid-page;
             page-break-inside: avoid;
         }
 
@@ -562,9 +531,27 @@
 
             .sheet {
                 width: 210mm;
+                height: 297mm;
                 min-height: 297mm;
                 margin: 0;
+                overflow: hidden;
                 box-shadow: none;
+                break-after: page;
+                page-break-after: always;
+            }
+
+            .sheet:last-of-type {
+                break-after: auto;
+                page-break-after: auto;
+            }
+
+            .document-header,
+            .document-heading,
+            .patient-panel,
+            .document-closing,
+            .document-footer {
+                break-inside: avoid-page;
+                page-break-inside: avoid;
             }
         }
 
@@ -634,11 +621,6 @@
                 gap: 12px;
             }
 
-            .medical-alerts {
-                grid-template-columns: 1fr;
-                gap: 4px;
-            }
-
             .signature {
                 width: min(100%, 280px);
                 margin-left: auto;
@@ -668,10 +650,12 @@
         </div>
     </div>
 
+    @foreach($medicationPages as $pageIndex => $pageMedications)
+        @php($isLastPage = $pageIndex === $medicationPages->count() - 1)
     <main class="sheet">
         <header class="document-header">
             <div>
-                <p class="clinic-kicker">{{ $clinicName }}</p>
+                <p class="clinic-kicker">{{ $clinicName }} · {{ $clinicSpecialty['label'] }}</p>
                 <h2 class="doctor-name">{{ $doctor->professional_name }}</h2>
                 @if($doctorContacts)
                     <p class="doctor-contact">{{ $doctorContacts }}</p>
@@ -687,11 +671,17 @@
                 <h1>{{ __('prescriptions.print_title') }}</h1>
                 <div class="document-reference">
                     <strong>{{ $reference }}</strong>
-                    <span>{{ $prescription->prescribed_date->locale(app()->getLocale())->isoFormat('D MMMM YYYY') }}</span>
+                    <span>
+                        {{ $prescription->prescribed_date->locale(app()->getLocale())->isoFormat('D MMMM YYYY') }}
+                        @if($medicationPages->count() > 1)
+                            | {{ $pageIndex + 1 }}/{{ $medicationPages->count() }}
+                        @endif
+                    </span>
                 </div>
             </div>
 
-            <section class="patient-panel" aria-label="{{ __('prescriptions.patient_details') }}">
+            @if($pageIndex === 0)
+                <section class="patient-panel" aria-label="{{ __('prescriptions.patient_details') }}">
                 <div class="field">
                     <span class="field-label">{{ __('patients.full_name') }}</span>
                     <span class="field-value">{{ $patient->full_name }}</span>
@@ -706,7 +696,7 @@
                         @if($patient->birth_date)
                             {{ $patient->birth_date->locale(app()->getLocale())->isoFormat('D MMMM YYYY') }}
                             @if($patient->age !== null)
-                                ({{ $patient->age }} {{ __('patients.years') }})
+                                ({{ $patient->age_display }})
                             @endif
                         @else
                             -
@@ -720,7 +710,7 @@
                 @if(filled($patient->phone))
                     <div class="field">
                         <span class="field-label">{{ __('common.phone') }}</span>
-                        <span class="field-value">{{ $patient->phone }}</span>
+                        <span class="field-value">{{ $patient->contact_label }}</span>
                     </div>
                 @endif
                 @if(filled($patient->id_card_number))
@@ -729,36 +719,22 @@
                         <span class="field-value">{{ $patient->id_card_number }}</span>
                     </div>
                 @endif
-            </section>
-
-            @if(filled($patient->allergies) || filled($patient->chronic_conditions))
-                <section class="medical-alerts">
-                    <div class="alert-title">{{ __('prescriptions.medical_alerts') }}</div>
-                    <div class="alert-content">
-                        @if(filled($patient->allergies))
-                            <span><strong>{{ __('patients.allergies') }}:</strong> {{ $patient->allergies }}</span>
-                        @endif
-                        @if(filled($patient->chronic_conditions))
-                            <span><strong>{{ __('patients.chronic_conditions') }}:</strong> {{ $patient->chronic_conditions }}</span>
-                        @endif
-                    </div>
                 </section>
             @endif
 
             <section class="prescription-body">
-                <div class="rx-heading">
-                    <span class="rx-symbol" aria-hidden="true">Rx</span>
-                    <div class="rx-title">
+                <div class="treatment-heading">
+                    <div>
                         <h2>{{ __('prescriptions.treatment') }}</h2>
                         <p>{{ $medications->count() }} {{ $medications->count() === 1 ? __('prescriptions.medication') : __('prescriptions.medications') }}</p>
                     </div>
                 </div>
 
-                @if($medications->isNotEmpty())
+                @if($pageMedications->isNotEmpty())
                     <div class="medication-list">
-                        @foreach($medications as $index => $item)
+                        @foreach($pageMedications as $index => $item)
                             <article class="medication-item">
-                                <div class="medication-number">{{ $index + 1 }}</div>
+                                <div class="medication-number">{{ ($pageIndex * 4) + $loop->iteration }}</div>
                                 <div>
                                     <h3 class="medication-name">{{ $item->medication_name }}</h3>
                                     <div class="regimen">
@@ -792,7 +768,7 @@
                     <div class="empty-state">{{ __('prescriptions.no_medication') }}</div>
                 @endif
 
-                @if(filled($prescription->notes))
+                @if($isLastPage && filled($prescription->notes))
                     <div class="notes-section">
                         <strong>{{ __('prescriptions.notes') }}</strong>
                         <p>{{ $prescription->notes }}</p>
@@ -800,18 +776,20 @@
                 @endif
             </section>
 
-            <section class="document-closing">
-                <p class="document-notice">
-                    <strong>{{ __('prescriptions.document_notice') }}</strong>
-                    {{ __('prescriptions.generated_on', ['date' => $generatedDate]) }}
-                </p>
-                <div class="signature">
-                    <div class="signature-line">
-                        <div class="signature-label">{{ __('prescriptions.stamp_signature') }}</div>
-                        <div class="signature-name">{{ $doctor->professional_name }}</div>
+            @if($isLastPage)
+                <section class="document-closing">
+                    <p class="document-notice">
+                        <strong>{{ __('prescriptions.document_notice') }}</strong>
+                        {{ __('prescriptions.generated_on', ['date' => $generatedDate]) }}
+                    </p>
+                    <div class="signature">
+                        <div class="signature-line">
+                            <div class="signature-label">{{ __('prescriptions.stamp_signature') }}</div>
+                            <div class="signature-name">{{ $doctor->professional_name }}</div>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            @endif
         </section>
 
         <footer class="document-footer">
@@ -821,5 +799,6 @@
             </span>
         </footer>
     </main>
+    @endforeach
 </body>
 </html>

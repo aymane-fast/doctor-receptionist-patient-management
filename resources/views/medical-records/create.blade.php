@@ -48,7 +48,7 @@
                                        placeholder="Search patients by name, phone, or email..." 
                                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror"
                                        autocomplete="off"
-                                       value="{{ $selectedPatient ? $selectedPatient->first_name . ' ' . $selectedPatient->last_name . ' - ' . $selectedPatient->phone : '' }}">
+                                       value="{{ $selectedPatient?->selection_label ?? '' }}">
                                 
                                 <!-- Hidden input for patient_id -->
                                 <input type="hidden" 
@@ -255,6 +255,15 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="mt-5">
+                        <x-specialty.fields
+                            :fields="$clinicSpecialty['record_fields']"
+                            :title="$clinicSpecialty['label'].' clinical details'"
+                            :description="'Optional clinical observations used by this practice profile.'"
+                            :icon="$clinicSpecialty['icon']"
+                        />
+                    </div>
                 </div>
 
                 <!-- Form Actions -->
@@ -282,6 +291,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const patientIdInput = document.getElementById('patient_id');
     const resultsContainer = document.getElementById('patient_results');
     let searchTimeout;
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+        })[character]);
+    }
 
     // Patient Search Autocomplete
     searchInput.addEventListener('input', function() {
@@ -333,9 +348,9 @@ document.addEventListener('DOMContentLoaded', function() {
             resultsContainer.innerHTML = patients.map(patient => `
                 <div class="patient-result p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
                      data-id="${patient.id}" 
-                     data-display="${patient.display}">
-                    <div class="font-medium text-gray-900">${patient.name}</div>
-                    <div class="text-sm text-gray-600">${patient.phone} • ${patient.email}</div>
+                     data-display="${escapeHtml(patient.display)}">
+                    <div class="font-medium text-gray-900">${escapeHtml(patient.name)}</div>
+                    <div class="text-sm text-gray-600">${escapeHtml(patient.phone)} • ${escapeHtml(patient.email)}</div>
                 </div>
             `).join('');
 

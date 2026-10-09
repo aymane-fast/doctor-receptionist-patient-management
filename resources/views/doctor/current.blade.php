@@ -56,6 +56,7 @@
                     <div>
                         <div class="text-sm text-gray-500 mb-1">{{ __('current_patient.current_patient') }}</div>
                         <div class="text-xl font-bold text-gray-900">{{ $patient->full_name }}</div>
+                        <x-patients.guardian-summary :patient="$patient" :compact="true" />
                         <div class="text-emerald-600 font-medium">{{ $patient->id_card_number }}</div>
                     </div>
                 </div>
@@ -64,7 +65,7 @@
                     <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
                         <div class="flex items-center space-x-2">
                             <i class="fas fa-birthday-cake text-amber-600 text-sm"></i>
-                            <span class="text-amber-800 font-medium text-sm">{{ $patient->age !== null ? $patient->age . ' ' . __('current_patient.years') : '—' }}</span>
+                            <span class="text-amber-800 font-medium text-sm">{{ $patient->age_display }}</span>
                         </div>
                     </div>
                     <div class="soft-panel rounded-xl p-3">
@@ -78,7 +79,7 @@
                 <div class="soft-panel rounded-xl p-3 mb-4">
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-clock text-emerald-700"></i>
-                        <span class="text-emerald-900 font-medium">{{ __('current_patient.appointment') }}: {{ $currentAppointment->appointment_time->format('g:i A') }}</span>
+                        <span class="text-emerald-900 font-medium">{{ __('current_patient.appointment') }}: {{ $currentAppointment->displayTime() }}</span>
                     </div>
                 </div>
 
@@ -156,7 +157,7 @@
                                             <i class="fas fa-calendar"></i>
                                         </div>
                                         <div>
-                                            <div class="font-semibold text-gray-900">{{ $ap->appointment_date->format('M j, Y') }} at {{ $ap->appointment_time->format('g:i A') }}</div>
+                                            <div class="font-semibold text-gray-900">{{ $ap->appointment_date->format('M j, Y') }} at {{ $ap->displayTime() }}</div>
                                             <div class="text-sm text-gray-600">{{ $ap->doctor->professional_name }}</div>
                                             <div class="flex items-center space-x-2 mt-1">
                                                 @if($ap->status === 'completed')
@@ -312,7 +313,7 @@
                     </div>
                     <div>
                         <div class="font-semibold text-gray-900">{{ $patient->full_name }}</div>
-                        <div class="text-sm text-emerald-700">{{ $patient->id_card_number }}</div>
+                        <div class="text-sm text-emerald-700">{{ $patient->is_pediatric ? $patient->contact_label : $patient->id_card_number }}</div>
                     </div>
                 </div>
             </div>
@@ -354,7 +355,7 @@
                           name="follow_up_reason" 
                           rows="3"
                           placeholder="{{ __('current_patient.follow_up_reason_placeholder') }}"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"></textarea>
+                          class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">{{ old('follow_up_reason', app(\App\Services\SpecialtyService::class)->defaultFollowUpReason()) }}</textarea>
             </div>
 
             <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">

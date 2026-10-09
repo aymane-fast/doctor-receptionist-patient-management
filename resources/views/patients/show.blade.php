@@ -22,31 +22,36 @@
     @endif
 
     <x-ui.page-header
+        class="flex-wrap"
         :title="$patient->full_name"
-        :description="'ID: ' . $patient->id_card_number . ' - ' . $patient->phone"
+        :description="'Patient #' . $patient->id . ' — ' . $patient->contact_label"
         icon="fa-user"
         eyebrow="Patient profile"
     >
         <x-slot:actions>
+                @if(auth()->user()->isDoctor())
                 <button id="aiSummaryBtn"
                         class="btn-secondary px-4 py-2">
                     <i class="fas fa-brain"></i>
                     <span>{{ __('AI Summary') }}</span>
                 </button>
+                @endif
                 <a href="{{ route('appointments.create', ['patient_id' => $patient->id]) }}" 
                    class="btn-primary px-4 py-2"
-                   onclick="return confirmAppointment('{{ $patient->full_name }}', {{ $patient->allergies ? 'true' : 'false' }}, '{{ $patient->allergies }}')">
+                   onclick="return confirmAppointment({{ Js::from($patient->full_name) }}, {{ $patient->allergies ? 'true' : 'false' }}, {{ Js::from($patient->allergies ?? '') }})">
                     <i class="fas fa-calendar-plus"></i>
                     <span>{{ __('patients.book') }}</span>
                 </a>
+                @if(auth()->user()->isDoctor())
                 <a href="{{ route('prescriptions.create', ['patient_id' => $patient->id]) }}" 
                    class="btn-secondary px-4 py-2">
                     <i class="fas fa-prescription-bottle"></i>
                     <span>{{ __('patients.new_prescription') }}</span>
                 </a>
+                @endif
                 <a href="{{ route('patients.edit', $patient) }}" 
                    class="btn-secondary px-4 py-2"
-                   onclick="return confirmEdit('{{ $patient->full_name }}')">
+                   onclick="return confirmEdit({{ Js::from($patient->full_name) }})">
                     <i class="fas fa-edit"></i>
                     <span>{{ __('patients.edit') }}</span>
                 </a>
@@ -58,9 +63,10 @@
         </x-slot:actions>
     </x-ui.page-header>
 
+    <x-patients.guardian-summary :patient="$patient" />
     <div class="section-card flex flex-wrap items-center gap-3 px-5 py-4 text-sm">
         <span class="rounded-full bg-[var(--clinic-primary-soft)] px-3 py-1 font-semibold text-[var(--clinic-primary-strong)]">
-            {{ $patient->age !== null ? $patient->age . ' years old' : 'Age unknown' }}
+            {{ $patient->age_display }}
         </span>
         <span class="rounded-full bg-gray-100 px-3 py-1 font-semibold text-gray-700">
             {{ $patient->gender ? ucfirst($patient->gender) : '—' }}
@@ -167,11 +173,11 @@
                 <div class="p-6">
                 <div class="space-y-4">
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
-                        <span class="text-gray-600 font-medium">{{ __('patients.phone') }}</span>
+                        <span class="text-gray-600 font-medium">{{ $patient->is_pediatric ? __('Primary guardian phone') : __('patients.phone') }}</span>
                         <span class="font-semibold text-gray-900">{{ $patient->phone }}</span>
                     </div>
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
-                        <span class="text-gray-600 font-medium">{{ __('patients.email') }}</span>
+                        <span class="text-gray-600 font-medium">{{ $patient->is_pediatric ? __('Primary guardian email') : __('patients.email') }}</span>
                         <span class="font-semibold text-gray-900">{{ $patient->email ?: 'Not provided' }}</span>
                     </div>
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
@@ -225,6 +231,13 @@
                 </div>
                 </div>
             </div>
+
+            <x-specialty.summary
+                :fields="$patient->is_pediatric ? array_filter($specialtyFieldCatalog['patient'], fn ($field) => !in_array($field['key'], ['guardian_name', 'guardian_relationship'])) : $specialtyFieldCatalog['patient']"
+                :values="$patient->specialty_data ?? []"
+                title="Specialty patient details"
+                :icon="$clinicSpecialty['icon']"
+            />
 
             <!-- Emergency Contact -->
             <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
@@ -437,7 +450,7 @@
                         <span id="aiGeneratedTime"></span>
                     </div>
                     <div class="flex space-x-3">
-                        <button onclick="copyToClipboard()" class="btn-secondary px-4 py-2">
+                        <button onclick="copyToClipboard(this)" class="btn-secondary px-4 py-2">
                             <i class="fas fa-copy"></i>
                             <span>Copy</span>
                         </button>
@@ -483,7 +496,7 @@ const aiGeneratedTime = document.getElementById('aiGeneratedTime');
 const aiErrorMessage = document.getElementById('aiErrorMessage');
 
 // Open modal and generate summary
-aiSummaryBtn.addEventListener('click', function() {
+aiSummaryBtn?.addEventListener('click', function() {
     aiSummaryModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     generateAISummary();
@@ -535,8 +548,13 @@ function showError(message) {
 }
 
 function formatSummary(text) {
-    // Format the AI summary for better readability
-    return text
+    // The model output is not trusted HTML. Escape it before applying the
+    // small, explicit Markdown subset used for presentation.
+    const escaped = String(text ?? '').replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+    })[character]);
+
+    return escaped
         .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900">$1</strong>')
         .replace(/### (.*?)$/gm, '<h3 class="text-xl font-bold text-gray-900 mt-6 mb-3">$1</h3>')
         .replace(/## (.*?)$/gm, '<h2 class="text-2xl font-bold text-gray-900 mt-8 mb-4">$1</h2>')
@@ -547,11 +565,14 @@ function formatSummary(text) {
         .replace(/^(?!<[h|l|p])(.+)$/gm, '<p class="mb-4">$1</p>');
 }
 
-function copyToClipboard() {
+function copyToClipboard(btn) {
     const text = aiSummaryText.innerText;
+    if (!navigator.clipboard?.writeText) {
+        showError('Clipboard access is unavailable. Select and copy the summary manually.');
+        return;
+    }
     navigator.clipboard.writeText(text).then(() => {
         // Show success feedback
-        const btn = event.target.closest('button');
         const originalHTML = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-check"></i><span>Copied!</span>';
         btn.classList.add('bg-green-600', 'hover:bg-green-700');
@@ -562,7 +583,7 @@ function copyToClipboard() {
             btn.classList.remove('bg-green-600', 'hover:bg-green-700');
             btn.classList.add('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
         }, 2000);
-    });
+    }).catch(() => showError('Clipboard access was denied. Select and copy the summary manually.'));
 }
 
 // Close modal with ESC key

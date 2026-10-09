@@ -35,7 +35,7 @@
                                id="search" 
                                name="search" 
                                value="{{ request('search') }}"
-                               placeholder="{{ __('patients.search_placeholder') }}"
+                               placeholder="{{ $usesGuardians ? __('Search by child or guardian name, phone or email') : __('patients.search_placeholder') }}"
                                class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200"
                                autocomplete="off">
                         
@@ -87,9 +87,10 @@
                                 </div>
                                 <div>
                                     <h3 class="text-lg font-bold text-gray-900">{{ $patient->full_name }}</h3>
+                                    <x-patients.guardian-summary :patient="$patient" :compact="true" />
                                     <p class="text-sm text-gray-500 flex items-center space-x-2">
                                         <i class="fas fa-id-card w-3"></i>
-                                        <span>{{ $patient->id_card_number }}</span>
+                                        <span>{{ $patient->id_card_number ?: '#'.$patient->id }}</span>
                                     </p>
                                 </div>
                             </div>
@@ -97,7 +98,7 @@
                                 <a href="{{ route('patients.show', $patient) }}" class="w-9 h-9 bg-blue-100 hover:bg-blue-200 rounded-xl flex items-center justify-center transition-colors group/btn">
                                     <i class="fas fa-eye text-blue-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                 </a>
-                                <a href="{{ route('patients.edit', $patient) }}" class="w-9 h-9 bg-emerald-100 hover:bg-emerald-200 rounded-xl flex items-center justify-center transition-colors group/btn" onclick="return confirmEdit('{{ $patient->full_name }}')">
+                                <a href="{{ route('patients.edit', $patient) }}" class="w-9 h-9 bg-emerald-100 hover:bg-emerald-200 rounded-xl flex items-center justify-center transition-colors group/btn" onclick="return confirmEdit({{ Js::from($patient->full_name) }})">
                                     <i class="fas fa-edit text-emerald-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                 </a>
                             </div>
@@ -110,7 +111,7 @@
                                     <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
                                         <i class="fas fa-birthday-cake text-amber-600 text-xs"></i>
                                     </div>
-                                    <span class="font-medium">{{ $patient->age !== null ? $patient->age . ' ' . __('patients.years') : '—' }}</span>
+                                    <span class="font-medium">{{ $patient->age_display }}</span>
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
                                     <div class="icon-tile w-8 h-8 rounded-lg flex items-center justify-center mr-3">
@@ -139,7 +140,7 @@
                                 </div>
                                 <a href="{{ route('appointments.create', ['patient_id' => $patient->id]) }}" 
                                    class="bg-gradient-to-r from-emerald-100 to-emerald-50 hover:from-emerald-200 hover:to-emerald-100 text-emerald-800 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center space-x-2 border border-emerald-200"
-                                   onclick="return confirmAppointment('{{ $patient->full_name }}', {{ $patient->allergies ? 'true' : 'false' }}, '{{ $patient->allergies }}')">
+                                   onclick="return confirmAppointment({{ Js::from($patient->full_name) }}, {{ $patient->allergies ? 'true' : 'false' }}, {{ Js::from($patient->allergies ?? '') }})">
                                     <i class="fas fa-calendar-plus"></i>
                                     <span>{{ __('patients.book_appointment') }}</span>
                                 </a>
@@ -302,6 +303,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let searchTimeout;
     let currentFocus = -1;
 
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+        })[character]);
+    }
+
     if (!searchInput || !resultsContainer) return;
 
     // Patient Search
@@ -378,27 +385,27 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             resultsContainer.innerHTML = patients.map((patient, index) => `
                 <div class="patient-result p-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-200" 
-                     data-name="${patient.first_name} ${patient.last_name}">
+                     data-name="${escapeHtml(patient.first_name)} ${escapeHtml(patient.last_name)}">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-user text-blue-600 text-sm"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="font-semibold text-gray-900 truncate">${patient.first_name} ${patient.last_name}</div>
+                            <div class="font-semibold text-gray-900 truncate">${escapeHtml(patient.first_name)} ${escapeHtml(patient.last_name)}</div>
                             <div class="text-sm text-gray-600 flex items-center space-x-3 mt-1">
                                 <span class="flex items-center space-x-1">
                                     <i class="fas fa-phone text-emerald-500 text-xs"></i>
-                                    <span>${patient.phone || 'N/A'}</span>
+                                    <span>${escapeHtml(patient.phone || 'N/A')}</span>
                                 </span>
                                 <span class="flex items-center space-x-1">
                                     <i class="fas fa-id-card text-emerald-700 text-xs"></i>
-                                    <span>${patient.id_card_number || 'N/A'}</span>
+                                    <span>${escapeHtml(patient.id_card_number || 'N/A')}</span>
                                 </span>
                             </div>
                         </div>
                         <div class="text-right flex-shrink-0">
-                            <div class="text-sm font-medium text-gray-600">${patient.age || 'N/A'} {{ __('patients.years') }}</div>
-                            <div class="text-xs text-gray-500 capitalize">${patient.gender || 'N/A'}</div>
+                            <div class="text-sm font-medium text-gray-600">${escapeHtml(patient.age || 'N/A')} {{ __('patients.years') }}</div>
+                            <div class="text-xs text-gray-500 capitalize">${escapeHtml(patient.gender || 'N/A')}</div>
                         </div>
                     </div>
                 </div>

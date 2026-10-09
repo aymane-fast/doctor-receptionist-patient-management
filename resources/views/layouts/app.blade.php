@@ -33,6 +33,7 @@
                     <span class="app-brand-copy">
                         <span class="app-brand-kicker">Clinic workspace</span>
                         <span class="app-brand-title">{{ $clinicName }}</span>
+                        <span class="text-xs text-white/65">{{ $clinicSpecialty['label'] }}</span>
                     </span>
                 </a>
 
@@ -53,6 +54,10 @@
                     <a href="{{ route('appointments.queue') }}" class="app-nav-link {{ request()->routeIs('appointments.queue') ? 'is-active' : '' }}">
                         <i class="fas fa-list-ol"></i>
                         <span>Queue</span>
+                    </a>
+                    <a href="{{ route('waitlist.index') }}" class="app-nav-link {{ request()->routeIs('waitlist.*') ? 'is-active' : '' }}">
+                        <i class="fas fa-hourglass-half"></i>
+                        <span>{{ __('appointments.waitlist') }}</span>
                     </a>
 
                     @if(auth()->user()->isDoctor())
@@ -116,7 +121,7 @@
                             <i class="fas fa-bars"></i>
                         </button>
                         <div class="topbar-context">
-                            <span class="topbar-eyebrow">{{ now()->translatedFormat('l, j F') }}</span>
+                            <span class="topbar-eyebrow">{{ now()->translatedFormat('l, j F') }} · {{ $clinicSpecialty['label'] }}</span>
                             <h1 class="topbar-title">@yield('title', __('common.medical_management_system'))</h1>
                         </div>
                     </div>

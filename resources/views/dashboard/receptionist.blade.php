@@ -110,11 +110,12 @@
                             </div>
                             <h3 class="text-3xl font-bold text-gray-900 leading-tight mb-3">
                                 {{ $curr->patient->full_name }}
+                                @if($curr->patient->is_pediatric)<small class="block">{{ $curr->patient->age_display }} · {{ $curr->patient->contact_label }}</small>@endif
                             </h3>
                             <div class="flex items-center space-x-4 text-sm text-gray-600">
                                 <div class="flex items-center space-x-2">
                                     <i class="fas fa-clock text-blue-500"></i>
-                                    <span class="font-medium">Started: {{ $curr->appointment_time->format('g:i A') }}</span>
+                                    <span class="font-medium">Started: {{ $curr->displayTime() }}</span>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <i class="fas fa-id-card text-blue-500"></i>
@@ -185,9 +186,10 @@
                                 <div>
                                     <div class="text-lg font-semibold text-amber-900 mb-1">
                                         {{ $nextByDoctor[$docId]->patient->full_name }}
+                                        @if($nextByDoctor[$docId]->patient->is_pediatric)<small class="block">{{ $nextByDoctor[$docId]->patient->age_display }} · {{ $nextByDoctor[$docId]->patient->contact_label }}</small>@endif
                                     </div>
                                     <div class="text-sm text-amber-700 flex items-center space-x-3">
-                                        <span><i class="fas fa-clock mr-1"></i>{{ $nextByDoctor[$docId]->appointment_time->format('g:i A') }}</span>
+                                        <span><i class="fas fa-clock mr-1"></i>{{ $nextByDoctor[$docId]->displayTime() }}</span>
                                         <span><i class="fas fa-id-card mr-1"></i>{{ $nextByDoctor[$docId]->patient->id_card_number }}</span>
                                     </div>
                                 </div>
@@ -267,7 +269,7 @@
                                         <p class="text-sm text-gray-500 flex items-center space-x-3">
                                             <span class="flex items-center space-x-1">
                                                 <i class="fas fa-clock w-3"></i>
-                                                <span>{{ $appointment->appointment_time->format('H:i') }}</span>
+                                                <span>{{ $appointment->displayTime() }}</span>
                                             </span>
                                             <span class="flex items-center space-x-1">
                                                 <i class="fas fa-stethoscope w-3"></i>
@@ -382,7 +384,7 @@
                                         <p class="text-sm text-gray-500 flex items-center space-x-3">
                                             <span>{{ $patient->id_card_number }}</span>
                                             <span>•</span>
-                                            <span>{{ __('dashboard.age') }}: {{ $patient->age ?? '—' }}</span>
+                                            <span>{{ __('dashboard.age') }}: {{ $patient->age_display }}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -474,7 +476,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-medium text-gray-900">{{ $appointment->appointment_date->format('M j, Y') }}</div>
-                                    <div class="text-xs text-gray-500">{{ $appointment->appointment_time->format('g:i A') }}</div>
+                                    <div class="text-xs text-gray-500">{{ $appointment->displayTime() }}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="px-3 py-1 text-xs font-medium rounded-full

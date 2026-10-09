@@ -8,7 +8,7 @@
         :title="__('statistics.title')"
         :description="__('statistics.comprehensive_insights')"
         icon="fa-chart-line"
-        eyebrow="Clinic intelligence"
+        :eyebrow="$clinicSpecialty['label'].' intelligence'"
     >
         <x-slot:actions>
             <div class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">

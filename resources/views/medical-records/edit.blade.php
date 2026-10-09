@@ -265,6 +265,16 @@
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    <div class="mt-6">
+                        <x-specialty.fields
+                            :fields="$clinicSpecialty['record_fields']"
+                            :values="$medicalRecord->specialty_data ?? []"
+                            :title="$clinicSpecialty['label'].' clinical details'"
+                            :description="'Optional clinical observations used by this practice profile.'"
+                            :icon="$clinicSpecialty['icon']"
+                        />
+                    </div>
                 </div>
 
                 <!-- Form Actions -->

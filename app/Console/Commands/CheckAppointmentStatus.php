@@ -54,7 +54,7 @@ class CheckAppointmentStatus extends Command
                 default => '<fg=white>'
             };
             
-            $this->line("  {$statusColor}{$appointment->appointment_time->format('H:i')} - {$appointment->patient->full_name} ({$appointment->status})</>");
+            $this->line("  {$statusColor}{$appointment->displayTime()} - {$appointment->patient->full_name} ({$appointment->status})</>");
         }
         
         // Check for multiple in_progress

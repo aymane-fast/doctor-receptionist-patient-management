@@ -11,6 +11,8 @@ use Carbon\Carbon;
 
 class DataExportService
 {
+    public function __construct(private SpecialtyService $specialties) {}
+
     /**
      * Format date safely
      */
@@ -34,6 +36,7 @@ class DataExportService
         $exportData = [];
         $exportInfo = [
             'generated_at' => Carbon::now(),
+            'clinic_specialty' => $this->specialties->current()['label'],
             'date_range' => [
                 'start' => $startDate ? Carbon::parse($startDate) : null,
                 'end' => $endDate ? Carbon::parse($endDate) : null,
@@ -104,9 +107,11 @@ class DataExportService
                 'Téléphone d\'urgence',
                 'Allergies',
                 'Conditions chroniques',
+                'Détails de spécialité',
                 'Total rendez-vous',
                 'Dernière visite',
                 'Date d\'inscription',
+                'Contacts parent / responsable',
             ],
             'data' => $patients->map(function ($patient) {
                 $lastAppointment = $patient->appointments->first();
@@ -126,9 +131,11 @@ class DataExportService
                     $patient->emergency_contact_phone ?? '',
                     $patient->allergies ?? '',
                     $patient->chronic_conditions ?? '',
+                    $this->specialties->formatData('patient', $patient->specialty_data),
                     $patient->appointments->count(),
                     $lastAppointment ? $this->formatDate($lastAppointment->appointment_date) : '',
                     $patient->created_at->format('Y-m-d H:i:s'),
+                    $patient->guardians->map(fn ($guardian) => ($guardian->is_primary ? 'Primary: ' : '').$guardian->name.' ('.$guardian->relationship.') '.$guardian->phone.' '.($guardian->email ?? ''))->implode('; '),
                 ];
             })->toArray(),
             'summary' => [
@@ -179,7 +186,7 @@ class DataExportService
                     $appointment->patient->first_name.' '.$appointment->patient->last_name,
                     $appointment->doctor->name ?? 'Not assigned',
                     $this->formatDate($appointment->appointment_date),
-                    $appointment->appointment_time ? $appointment->appointment_time->format('H:i') : '',
+                    $appointment->displayTime(),
                     match ($appointment->status) {
                         'completed' => 'Terminé',
                         'scheduled' => 'Planifié',
@@ -237,6 +244,7 @@ class DataExportService
                 'Temperature',
                 'Heart Rate',
                 'Oxygen Saturation',
+                'Détails de spécialité',
                 'Notes',
                 'Created Date',
             ],
@@ -256,6 +264,7 @@ class DataExportService
                     $record->temperature ?? '',
                     $record->heart_rate ?? '',
                     $record->oxygen_saturation ?? '',
+                    $this->specialties->formatData('record', $record->specialty_data),
                     $record->notes ?? '',
                     $record->created_at->format('Y-m-d H:i:s'),
                 ];
@@ -310,7 +319,7 @@ class DataExportService
                 // Single prescription (legacy)
                 $prescriptionData[] = [
                     $prescription->id,
-                    $prescription->patient->patient_id,
+                    $prescription->patient->id,
                     $prescription->patient->first_name.' '.$prescription->patient->last_name,
                     $prescription->doctor->name ?? 'Not specified',
                     $this->formatDate($prescription->prescribed_date),
@@ -407,6 +416,7 @@ class DataExportService
         // Export info
         fputcsv($output, ['Export des Données de la Clinique']);
         fputcsv($output, ['Généré le:', $exportResult['info']['generated_at']->format('d/m/Y H:i:s')]);
+        fputcsv($output, ['Spécialité de la clinique:', $exportResult['info']['clinic_specialty']]);
         $rangeStart = $exportResult['info']['date_range']['start'];
         $rangeEnd = $exportResult['info']['date_range']['end'];
         if ($rangeStart || $rangeEnd) {
@@ -421,7 +431,14 @@ class DataExportService
             fputcsv($output, $data['headers']);
 
             foreach ($data['data'] as $row) {
-                fputcsv($output, $row);
+                // CSV quoting does not prevent spreadsheet formula execution.
+                fputcsv($output, array_map(function ($value) {
+                    if (is_string($value) && preg_match('/^[\s\x00-\x1f]*[=+@-]/u', $value)) {
+                        return "'".$value;
+                    }
+
+                    return $value;
+                }, $row));
             }
 
             fputcsv($output, []);

@@ -6,9 +6,9 @@
 <div class="space-y-8">
     <x-ui.page-header
         :title="__('dashboard.doctor_dashboard')"
-        description="Your daily consultations, patient flow, and clinical work in one focused workspace."
+        :description="$clinicSpecialty['description']"
         icon="fa-stethoscope"
-        eyebrow="Clinical overview"
+        :eyebrow="$clinicSpecialty['label'].' workspace'"
     >
         <x-slot:actions>
             <a href="{{ route('appointments.queue') }}" class="btn-secondary px-5 py-3">
@@ -87,8 +87,9 @@
                 <div>
                     <div class="text-sm text-blue-100 mb-1">{{ __('dashboard.current_patient') }}</div>
                     <div class="text-3xl font-bold text-white mb-2">{{ $currentAppointment->patient->full_name }}</div>
+                    @if($currentAppointment->patient->is_pediatric)<p class="text-white">{{ $currentAppointment->patient->age_display }} · {{ $currentAppointment->patient->contact_label }}</p>@endif
                     <div class="flex items-center space-x-4 text-blue-100">
-                        <span><i class="fas fa-clock mr-2"></i>{{ $currentAppointment->appointment_time->format('g:i A') }}</span>
+                        <span><i class="fas fa-clock mr-2"></i>{{ $currentAppointment->displayTime() }}</span>
                         <span><i class="fas fa-calendar mr-2"></i>{{ $currentAppointment->appointment_date->format('M j, Y') }}</span>
                     </div>
                 </div>
@@ -114,9 +115,10 @@
                 <div>
                     <div class="text-sm text-emerald-700 mb-1 font-medium">{{ __('dashboard.next_up') }}</div>
                     <div class="text-xl font-bold text-gray-900 mb-1">{{ $nextAppointment->patient->full_name }}</div>
+                    <x-patients.guardian-summary :patient="$nextAppointment->patient" :compact="true" />
                     <div class="flex items-center space-x-3 text-gray-600">
-                        <span><i class="fas fa-clock mr-1"></i>{{ $nextAppointment->appointment_time->format('g:i A') }}</span>
-                        <span><i class="fas fa-stethoscope mr-1"></i>{{ Str::limit($nextAppointment->reason ?? 'General consultation', 30) }}</span>
+                        <span><i class="fas fa-clock mr-1"></i>{{ $nextAppointment->displayTime() }}</span>
+                        <span><i class="fas fa-stethoscope mr-1"></i>{{ Str::limit($nextAppointment->reason ?? $clinicSpecialty['appointment_reasons'][0], 30) }}</span>
                     </div>
                 </div>
             </div>
@@ -171,7 +173,7 @@
                                         <h3 class="font-semibold text-gray-900">{{ $appointment->patient->full_name }}</h3>
                                         <p class="text-sm text-gray-500 flex items-center space-x-2">
                                             <i class="fas fa-clock w-3"></i>
-                                            <span>{{ $appointment->appointment_time->format('g:i A') }}</span>
+                                            <span>{{ $appointment->displayTime() }}</span>
                                         </p>
                                     </div>
                                 </div>

@@ -106,6 +106,7 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     // Doctor-only settings
     Route::post('/settings/working-hours', [SettingsController::class, 'updateWorkingHours'])->name('settings.working-hours');
     Route::post('/settings/clinic-info', [SettingsController::class, 'updateClinicInfo'])->name('settings.clinic-info');
+    Route::post('/settings/specialty', [SettingsController::class, 'updateSpecialty'])->name('settings.specialty');
 
     // Modern export system for doctors
     Route::get('/exports', [App\Http\Controllers\ExportController::class, 'index'])->name('exports.index');

@@ -96,7 +96,7 @@
                                         <i class="fas fa-id-card w-3"></i>
                                         <span>{{ $record->patient->id_card_number }}</span>
                                         <span class="text-gray-400">•</span>
-                                        <span>{{ $record->patient->age !== null ? $record->patient->age . ' years' : '—' }}</span>
+                                        <span>{{ $record->patient->age_display }}</span>
                                     </p>
                                 </div>
                             </div>
@@ -305,6 +305,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultsContainer = document.getElementById('patient_results');
     let searchTimeout;
 
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+        })[character]);
+    }
+
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
@@ -353,9 +359,9 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 resultsContainer.innerHTML = patients.map(patient => `
                     <div class="patient-result p-3 hover:bg-emerald-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
-                         data-search="${patient.display}">
-                        <div class="font-medium text-gray-900">${patient.name}</div>
-                        <div class="text-sm text-gray-600">${patient.phone} • ${patient.email}</div>
+                         data-search="${escapeHtml(patient.display)}">
+                        <div class="font-medium text-gray-900">${escapeHtml(patient.name)}</div>
+                        <div class="text-sm text-gray-600">${escapeHtml(patient.phone)} • ${escapeHtml(patient.email)}</div>
                     </div>
                 `).join('');
 

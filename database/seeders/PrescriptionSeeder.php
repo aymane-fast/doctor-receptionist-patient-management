@@ -8,10 +8,15 @@ use App\Models\PrescriptionItem;
 use App\Models\MedicalRecord;
 use App\Models\Patient;
 use App\Models\User;
+use App\Services\SpecialtyService;
 use Carbon\Carbon;
 
 class PrescriptionSeeder extends Seeder
 {
+    public function __construct(private SpecialtyService $specialties)
+    {
+    }
+
     /**
      * Run the database seeds.
      */
@@ -49,6 +54,8 @@ class PrescriptionSeeder extends Seeder
             ['name' => 'Pantoprazole', 'dosage' => '40mg', 'frequency' => 'Once daily', 'duration' => 30, 'instructions' => 'Acid reflux management. Take before first meal of the day.'],
             ['name' => 'Warfarin', 'dosage' => '5mg', 'frequency' => 'Once daily', 'duration' => 90, 'instructions' => 'Blood thinner. Take at same time daily. Regular INR monitoring required.'],
         ];
+
+        $medications = $this->specialties->seed('medications', default: $medications);
 
         $prescriptionsCreated = 0;
 

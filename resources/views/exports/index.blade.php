@@ -8,7 +8,7 @@
         title="Export des Données"
         description="Exportez les données de la clinique dans des formats organisés et professionnels."
         icon="fa-file-export"
-        eyebrow="Data management"
+        :eyebrow="$clinicSpecialty['label'].' data'"
     >
         <x-slot:actions>
             <button onclick="history.back()" class="btn-secondary px-4 py-2">

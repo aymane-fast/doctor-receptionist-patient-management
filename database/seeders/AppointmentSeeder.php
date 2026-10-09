@@ -6,12 +6,16 @@ use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
 use App\Services\AppointmentSchedulingService;
+use App\Services\SpecialtyService;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class AppointmentSeeder extends Seeder
 {
-    public function __construct(private AppointmentSchedulingService $scheduler)
+    public function __construct(
+        private AppointmentSchedulingService $scheduler,
+        private SpecialtyService $specialties,
+    )
     {
     }
 
@@ -25,12 +29,7 @@ class AppointmentSeeder extends Seeder
             return;
         }
 
-        $appointmentReasons = [
-            'Routine check-up', 'Annual physical exam', 'Follow-up appointment', 'Blood pressure monitoring',
-            'Diabetes management', 'Vaccination', 'Lab results review', 'Medication review',
-            'Chest pain evaluation', 'Headache consultation', 'Skin condition examination', 'Joint pain assessment',
-            'Respiratory issues', 'Digestive problems', 'Mental health consultation', 'Preventive care',
-        ];
+        $appointmentReasons = $this->specialties->appointmentReasons();
 
         $appointmentNotes = [
             'Patient reports feeling well overall.',

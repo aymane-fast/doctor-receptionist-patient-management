@@ -32,7 +32,7 @@ class PatientSearchService
                 $score += 1000;
             }
             // Exact ID match gets very high score
-            elseif (strcasecmp($patient->id_card_number, $query) === 0) {
+            elseif (strcasecmp((string) $patient->id_card_number, $query) === 0) {
                 $score += 900;
             }
             // Full name starts with query gets high score
@@ -77,7 +77,7 @@ class PatientSearchService
             }
 
             // Email matches
-            if (stripos($patient->email, $query) !== false) {
+            if (stripos((string) $patient->email, $query) !== false) {
                 $score += stripos($patient->email, $query) === 0 ? 400 : 200;
             }
 
@@ -85,13 +85,14 @@ class PatientSearchService
                 'id' => $patient->id,
                 'first_name' => $patient->first_name,
                 'last_name' => $patient->last_name,
-                'name' => $fullName,
+                'name' => $patient->is_pediatric ? $patient->selection_label : $fullName,
+                'patient_name' => $fullName,
                 'phone' => $patient->phone,
                 'email' => $patient->email,
                 'id_card_number' => $patient->id_card_number,
                 'age' => $patient->age,
                 'gender' => $patient->gender,
-                'display' => $fullName . ' - ' . $patient->phone,
+                'display' => $patient->selection_label,
                 'score' => $score
             ];
         })
@@ -109,10 +110,10 @@ class PatientSearchService
             'id' => $patient->id,
             'first_name' => $patient->first_name,
             'last_name' => $patient->last_name,
-            'name' => $patient->first_name . ' ' . $patient->last_name,
+            'name' => $patient->is_pediatric ? $patient->selection_label : $patient->full_name,
             'phone' => $patient->phone,
             'email' => $patient->email,
-            'display' => $patient->first_name . ' ' . $patient->last_name . ' - ' . $patient->phone
+            'display' => $patient->selection_label
         ];
     }
 

@@ -34,6 +34,44 @@ it('renders profile and edit pages for a patient without birth date or gender', 
     $this->actingAs($receptionist)->get(route('patients.edit', $patient))->assertOk();
 });
 
+it('allows a patient with unknown birth date and gender to be updated', function () {
+    $receptionist = User::factory()->receptionist()->create();
+    $patient = Patient::factory()->create([
+        'birth_date' => null,
+        'gender' => null,
+    ]);
+
+    $this->actingAs($receptionist)->put(route('patients.update', $patient), [
+        'first_name' => 'Updated',
+        'last_name' => $patient->last_name,
+        'phone' => $patient->phone,
+        'id_card_number' => $patient->id_card_number,
+    ])->assertRedirect(route('patients.show', $patient));
+
+    expect($patient->fresh()->first_name)->toBe('Updated')
+        ->and($patient->fresh()->birth_date)->toBeNull()
+        ->and($patient->fresh()->gender)->toBeNull();
+});
+
+it('does not create a patient when a walk-in booking cannot be made', function () {
+    $receptionist = User::factory()->receptionist()->create();
+
+    foreach (['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as $day) {
+        \App\Models\Setting::set("{$day}_working", false, 'boolean');
+    }
+
+    $this->actingAs($receptionist)->from('/patients/create')->post('/patients', [
+        'first_name' => 'No',
+        'last_name' => 'Booking',
+        'phone' => '+212600000099',
+        'id_card_number' => 'NOBOOK001',
+        'book_today' => '1',
+        'appointment_date' => today()->toDateString(),
+    ])->assertSessionHasErrors('book_today');
+
+    expect(Patient::where('id_card_number', 'NOBOOK001')->exists())->toBeFalse();
+});
+
 it('rejects duplicate ID card numbers', function () {
     $receptionist = User::factory()->receptionist()->create();
     Patient::factory()->create(['id_card_number' => 'DUP001']);

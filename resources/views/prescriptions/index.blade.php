@@ -316,6 +316,12 @@
         const resultsDiv = document.getElementById('patient_results');
         let searchTimeout;
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>'"]/g, character => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+            })[character]);
+        }
+
         if (!patientSearchInput) return;
 
         patientSearchInput.addEventListener('input', function() {
@@ -353,13 +359,13 @@
                                             </div>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-gray-900 truncate">${patient.name}</p>
+                                            <p class="text-sm font-medium text-gray-900 truncate">${escapeHtml(patient.name)}</p>
                                             <p class="text-sm text-gray-500 truncate">
-                                                ${patient.phone ? `📞 ${patient.phone}` : ''}
+                                                ${patient.phone ? `📞 ${escapeHtml(patient.phone)}` : ''}
                                                 ${patient.phone && patient.email ? ' • ' : ''}
-                                                ${patient.email ? `📧 ${patient.email}` : ''}
+                                                ${patient.email ? `📧 ${escapeHtml(patient.email)}` : ''}
                                             </p>
-                                            ${patient.id_card ? `<p class="text-xs text-gray-400">ID: ${patient.id_card}</p>` : ''}
+                                            ${patient.id_card ? `<p class="text-xs text-gray-400">ID: ${escapeHtml(patient.id_card)}</p>` : ''}
                                         </div>
                                     </div>
                                 `;

@@ -28,13 +28,16 @@
             @csrf
             @method('PUT')
             
+            @if($usesGuardians)
+                <p class="px-8 text-sm text-teal-800">{{ __('Enter the child’s details below. National ID is optional; do not enter the guardian’s ID.') }}</p>
+            @endif
             <!-- Personal Information Section -->
             <div class="p-8 pb-0">
                 <div class="flex items-center space-x-3 mb-8">
                     <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-user text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900">{{ __('patients.personal_information') }}</h3>
+                    <h3 class="text-2xl font-bold text-gray-900">{{ $usesGuardians ? __('Child information') : __('patients.personal_information') }}</h3>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-2">
@@ -75,13 +78,13 @@
 
                     <div class="space-y-2">
                         <label for="birth_date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            {{ __('patients.date_of_birth') }} <span class="text-red-500">{{ __('patients.required') }}</span>
+{{ __('patients.date_of_birth') }} @if($usesGuardians)<span class="text-red-500">*</span>@endif
                         </label>
                         <input type="date" 
                                id="birth_date" 
                                name="birth_date" 
                                value="{{ old('birth_date', $patient->birth_date?->format('Y-m-d')) }}"
-                               required 
+                               max="{{ today()->toDateString() }}" @required($usesGuardians)
                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('birth_date') border-red-500 @enderror">
                         @error('birth_date')
                         <p class="mt-2 text-sm text-red-600 flex items-center space-x-2">
@@ -93,11 +96,10 @@
 
                     <div class="space-y-2">
                         <label for="gender" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            {{ __('patients.gender') }} <span class="text-red-500">{{ __('patients.required') }}</span>
+{{ __('patients.gender') }}
                         </label>
                         <select id="gender" 
-                                name="gender" 
-                                required 
+                                name="gender"
                                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('gender') border-red-500 @enderror">
                             <option value="">{{ __('patients.select_gender') }}</option>
                             <option value="male" {{ old('gender', $patient->gender) == 'male' ? 'selected' : '' }}>{{ __('patients.male') }}</option>
@@ -113,12 +115,12 @@
 
                     <div class="space-y-2 md:col-span-2">
                         <label for="id_card_number" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            {{ __('patients.id_card_number') }}
+                            {{ $usesGuardians ? __('Child national ID (optional)') : __('National ID (required)') }}
                         </label>
                         <input type="text" 
                                id="id_card_number" 
                                name="id_card_number" 
-                               value="{{ old('id_card_number', $patient->id_card_number) }}"
+                               value="{{ old('id_card_number', $patient->id_card_number) }}" @required(!$usesGuardians)
                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('id_card_number') border-red-500 @enderror">
                         @error('id_card_number')
                         <p class="mt-2 text-sm text-red-600 flex items-center space-x-2">
@@ -133,14 +135,18 @@
             <div class="border-t border-gray-200"></div>
 
             <!-- Contact Information Section -->
+            @if($usesGuardians)
+                <x-patients.guardian-form :patient="$patient" />
+            @endif
             <div class="p-8 py-0">
                 <div class="flex items-center space-x-3 mb-8">
                     <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
                         <i class="fas fa-phone text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900">{{ __('patients.contact_information') }}</h3>
+                    <h3 class="text-2xl font-bold text-gray-900">{{ $usesGuardians ? __('Home address') : __('patients.contact_information') }}</h3>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    @if(!$usesGuardians)
                     <div class="space-y-2">
                         <label for="phone" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
                             {{ __('patients.phone_number') }} <span class="text-red-500">{{ __('patients.required') }}</span>
@@ -176,6 +182,7 @@
                         @enderror
                     </div>
 
+                    @endif
                     <div class="space-y-2 md:col-span-2">
                         <label for="address" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">
                             {{ __('patients.address') }}
@@ -286,6 +293,16 @@
                         @enderror
                     </div>
                 </div>
+            </div>
+
+            <div class="p-8 pt-6">
+                <x-specialty.fields
+                    :fields="$clinicSpecialty['patient_fields']"
+                    :values="$patient->specialty_data ?? []"
+                    :title="$clinicSpecialty['label'].' patient details'"
+                    :description="'Optional information tailored to '.$clinicSpecialty['label'].' care.'"
+                    :icon="$clinicSpecialty['icon']"
+                />
             </div>
 
             <!-- Submit Section -->

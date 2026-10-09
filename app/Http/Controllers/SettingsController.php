@@ -4,16 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Setting;
+use App\Services\SpecialtyService;
+use Illuminate\Validation\Rule;
 
 class SettingsController extends Controller
 {
     /**
      * Display the settings page
      */
-    public function index()
+    public function index(SpecialtyService $specialties)
     {
         $workingHours = Setting::getAllWorkingHours();
-        return view('settings.index', compact('workingHours'));
+        $specialtyProfiles = $specialties->all();
+        $currentSpecialty = $specialties->current();
+
+        return view('settings.index', compact('workingHours', 'specialtyProfiles', 'currentSpecialty'));
     }
 
     /**
@@ -145,5 +150,34 @@ class SettingsController extends Controller
 
         return redirect()->route('settings.index')
             ->with('success', 'Appointment mode updated successfully.');
+    }
+
+    /** Change the practice profile without modifying any existing records. */
+    public function updateSpecialty(Request $request, SpecialtyService $specialties)
+    {
+        if (! auth()->user()->isDoctor()) {
+            abort(403, 'Only doctors can modify the clinic specialty.');
+        }
+
+        $validated = $request->validate([
+            'clinic_specialty' => ['required', Rule::in($specialties->keys())],
+            'apply_specialty_defaults' => ['nullable', 'boolean'],
+        ]);
+
+        $specialties->setCurrent($validated['clinic_specialty']);
+
+        if ($request->boolean('apply_specialty_defaults')) {
+            $defaults = $specialties->suggestedDefaults($validated['clinic_specialty']);
+            Setting::setAppointmentDuration($defaults['appointment_duration']);
+            Setting::set('default_appointment_mode', $defaults['appointment_mode'], 'string');
+
+            auth()->user()->update([
+                'appointment_mode' => $defaults['appointment_mode'],
+                'queue_daily_limit' => null,
+            ]);
+        }
+
+        return redirect()->route('settings.index')
+            ->with('success', 'Clinic specialty updated successfully.');
     }
 }

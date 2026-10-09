@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Setting;
+use App\Services\SpecialtyService;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,6 +16,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->command->info('🏥 Starting comprehensive medical clinic data seeding...');
+
+        if (! Setting::get('clinic_specialty')) {
+            Setting::set('clinic_specialty', SpecialtyService::DEFAULT_SPECIALTY, 'string');
+        }
         
         $this->call([
             UserSeeder::class,          // Creates 1 doctor and 1 receptionist

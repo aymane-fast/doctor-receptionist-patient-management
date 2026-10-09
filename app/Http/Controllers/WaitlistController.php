@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\User;
 use App\Models\WaitlistEntry;
 use App\Services\AppointmentSchedulingService;
+use App\Services\SpecialtyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,10 @@ use Illuminate\Validation\Rule;
 
 class WaitlistController extends Controller
 {
-    public function __construct(private AppointmentSchedulingService $scheduler) {}
+    public function __construct(
+        private AppointmentSchedulingService $scheduler,
+        private SpecialtyService $specialties,
+    ) {}
 
     /**
      * The list of patients waiting for an opening.
@@ -88,7 +92,7 @@ class WaitlistController extends Controller
                     'patient_id' => $entry->patient_id,
                     'doctor_id' => $entry->doctor_id,
                     'appointment_date' => $startDate->toDateString(),
-                    'reason' => $entry->reason ?: __('appointments.from_waitlist'),
+                    'reason' => $entry->reason ?: $this->specialties->defaultAppointmentReason(),
                     'notes' => 'Booked from waitlist',
                 ]);
             } catch (\InvalidArgumentException $e) {
@@ -132,7 +136,7 @@ class WaitlistController extends Controller
                     'appointment_date' => $candidate->toDateString(),
                     'appointment_time' => $slot['time'],
                     'status' => 'scheduled',
-                    'reason' => $entry->reason ?: __('appointments.from_waitlist'),
+                    'reason' => $entry->reason ?: $this->specialties->defaultAppointmentReason(),
                     'notes' => 'Booked from waitlist',
                 ]);
 

@@ -15,6 +15,16 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        request()->validate([
+            'patient_search' => 'nullable|string|max:255',
+            'record_patient_search' => 'nullable|string|max:255',
+            'patient_name_search' => 'nullable|string|max:255',
+            'doctor_filter' => 'nullable|integer',
+            'status_filter' => 'nullable|in:scheduled,in_progress,completed,cancelled,no_show',
+            'record_date_from' => 'nullable|date', 'record_date_to' => 'nullable|date',
+            'reg_date_from' => 'nullable|date', 'reg_date_to' => 'nullable|date',
+            'age_from' => 'nullable|integer|min:0|max:150', 'age_to' => 'nullable|integer|min:0|max:150',
+        ]);
         $user = Auth::user();
 
         if ($user->isDoctor()) {
@@ -218,7 +228,7 @@ class DashboardController extends Controller
     public function initializeFirstPatient(Request $request)
     {
         $request->validate([
-            'doctor_id' => 'nullable|exists:users,id',
+            'doctor_id' => ['nullable', \Illuminate\Validation\Rule::exists('users', 'id')->where('role', 'doctor')],
         ]);
 
         $doctorId = $request->doctor_id ?: Auth::id();

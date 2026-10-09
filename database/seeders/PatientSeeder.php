@@ -4,9 +4,14 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Services\SpecialtyService;
 
 class PatientSeeder extends Seeder
 {
+    public function __construct(private SpecialtyService $specialties)
+    {
+    }
+
     /**
      * Run the database seeds.
      */
@@ -34,8 +39,10 @@ class PatientSeeder extends Seeder
             '369 Willow St, Meadowbrook', '741 Aspen Ct, Forest Hill', '852 Poplar Ave, Garden City', '963 Sycamore Rd, Greenwood'
         ];
 
-        $allergies = [null, 'Peanuts', 'Shellfish', 'Dairy', 'Eggs', 'Penicillin', 'Latex', 'Dust mites'];
-        $chronicConditions = [null, 'Hypertension', 'Diabetes Type II', 'Asthma', 'COPD', 'Heart disease', 'Arthritis'];
+        $seed = $this->specialties->profile()['seed'];
+        [$minimumAge, $maximumAge] = $seed['age_range'];
+        $allergies = array_merge([null], $seed['allergies']);
+        $chronicConditions = array_merge([null], $seed['conditions']);
         $genders = ['male', 'female'];
 
         // Generate 150 patients
@@ -44,7 +51,7 @@ class PatientSeeder extends Seeder
             $firstName = $firstNames[array_rand($firstNames)];
             $lastName = $lastNames[array_rand($lastNames)];
             
-            $birthDate = now()->subYears(rand(18, 85))->subDays(rand(0, 365));
+            $birthDate = now()->subYears(rand($minimumAge, $maximumAge))->subDays(rand(0, 365));
             $phone = '+1555' . str_pad($i, 6, '0', STR_PAD_LEFT);
             $email = rand(1, 10) <= 7 ? strtolower($firstName . '.' . $lastName . $i . '@example.com') : null;
             $idCardNumber = 'ID' . str_pad($i, 6, '0', STR_PAD_LEFT);
@@ -56,7 +63,7 @@ class PatientSeeder extends Seeder
             $emergencyLastName = rand(1, 2) === 1 ? $lastName : $lastNames[array_rand($lastNames)];
             $emergencyPhone = '+1555' . str_pad(($i + 50000), 6, '0', STR_PAD_LEFT);
 
-            \App\Models\Patient::create([
+            $patient = \App\Models\Patient::create([
                 'first_name' => $firstName,
                 'last_name' => $lastName,
                 'birth_date' => $birthDate->format('Y-m-d'),
@@ -69,9 +76,29 @@ class PatientSeeder extends Seeder
                 'chronic_conditions' => $selectedChronicConditions,
                 'emergency_contact_name' => $emergencyFirstName . ' ' . $emergencyLastName,
                 'emergency_contact_phone' => $emergencyPhone,
+                'specialty_data' => $this->randomSpecialtyData($seed['patient_data']),
+                'is_pediatric' => $this->specialties->supports('guardians'),
             ]);
+            if ($patient->is_pediatric) {
+                $patient->guardians()->create([
+                    'name' => $patient->specialty_data['guardian_name'],
+                    'relationship' => $patient->specialty_data['guardian_relationship'],
+                    'phone' => $patient->phone, 'email' => $patient->email, 'is_primary' => true,
+                ]);
+            }
         }
 
         $this->command->info('150 patients seeded successfully!');
+    }
+
+    private function randomSpecialtyData(array $definitions): array
+    {
+        return collect($definitions)
+            ->mapWithKeys(function (array $values, string $key) {
+                $value = $values[array_rand($values)];
+
+                return filled($value) ? [$key => $value] : [];
+            })
+            ->all();
     }
 }

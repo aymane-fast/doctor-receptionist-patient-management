@@ -63,8 +63,13 @@
             </div>
 
             <div class="md:col-span-5">
-                <label for="reason" class="block text-sm font-medium text-gray-700 mb-2">{{ __('appointments.reason') }}</label>
-                <input type="text" id="reason" name="reason" maxlength="500" value="{{ old('reason') }}" class="form-control w-full px-3 py-2">
+                <label for="reason" class="block text-sm font-medium text-gray-700 mb-2">{{ $clinicSpecialty['label'] }} {{ strtolower(__('appointments.reason')) }}</label>
+                <input type="text" id="reason" name="reason" maxlength="500" list="specialty-appointment-reasons" value="{{ old('reason') }}" class="form-control w-full px-3 py-2">
+                <datalist id="specialty-appointment-reasons">
+                    @foreach($clinicSpecialty['appointment_reasons'] as $reason)
+                        <option value="{{ $reason }}"></option>
+                    @endforeach
+                </datalist>
             </div>
         </form>
     </div>
@@ -134,6 +139,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const resultsContainer = document.getElementById('patient_results');
     let searchTimeout;
 
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
+        })[character]);
+    }
+
     searchInput.addEventListener('input', function () {
         clearTimeout(searchTimeout);
         const query = this.value.trim();
@@ -153,9 +164,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
                         resultsContainer.innerHTML = patients.map(patient => `
                             <div class="patient-result p-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                                 data-id="${patient.id}" data-display="${patient.display}">
-                                <div class="font-medium text-gray-900">${patient.name}</div>
-                                <div class="text-sm text-gray-600">${patient.phone ?? ''}</div>
+                                 data-id="${patient.id}" data-display="${escapeHtml(patient.display)}">
+                                <div class="font-medium text-gray-900">${escapeHtml(patient.name)}</div>
+                                <div class="text-sm text-gray-600">${escapeHtml(patient.phone)}</div>
                             </div>
                         `).join('');
 

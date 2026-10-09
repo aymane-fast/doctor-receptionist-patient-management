@@ -38,9 +38,35 @@ npm install && npm run build
 php artisan serve
 ```
 
-Open the app and the **first-run setup wizard** walks you through clinic
-information, working hours, appointment mode, and staff accounts. Choosing
-*demo* mode seeds realistic sample data.
+Open the app and choose a launch mode. **Demo** starts immediately with the
+default doctor, receptionist, patients, and appointments — no form fields to
+complete. It signs you in as `doctor@example.com` (password `password`); log
+out and use `receptionist@example.com` with the same password to show the
+front-desk experience. **Production** opens the full wizard for clinic
+information, working hours, appointment mode, and staff accounts.
+
+### Practice type (variations branch)
+
+Choose **General Practice**, **Pediatrics**, **Dentistry**, or **Cardiology**
+on the first setup screen. General practice is the default; choosing a specialty
+also works with the one-click demo. Dentistry and cardiology keep the standard
+workflow and existing optional clinical notes.
+
+Pediatrics registers the **child as the patient**, with a required birth date
+(newborns supported), optional national ID, and up to five parent/guardian
+contacts. Select one primary contact for calls and reminder emails. Siblings
+can share contact details. Search by child or guardian; the child remains the
+owner of appointments, consultations, and prescriptions. Existing allergies,
+conditions, weight/height, development and feeding notes remain shared.
+
+For an existing installation, back up the database, switch to this branch, and
+run `php artisan migrate` and `npm run build`. The additive migration imports
+legacy guardian notes without removing clinical history. Guardian details stay
+available if the practice later switches specialty. Do not use `migrate:fresh`
+on a clinic database. The migration rollback removes the guardian table, so
+back up before rolling back as well.
+
+See [practice decisions and verification checklist](docs/PRACTICE_VARIATIONS.md).
 
 Alternatively, seed everything from the command line (creates
 `doctor@example.com` / `receptionist@example.com`, password `password`):

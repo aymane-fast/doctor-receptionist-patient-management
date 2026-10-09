@@ -8,6 +8,7 @@ use App\Models\MedicalRecord;
 use App\Models\Patient;
 use App\Models\Appointment;
 use App\Services\PatientSearchService;
+use App\Services\SpecialtyService;
 
 class MedicalRecordController extends Controller
 {
@@ -21,6 +22,7 @@ class MedicalRecordController extends Controller
             abort(403, 'Unauthorized access to medical records.');
         }
 
+        $request->validate(['search' => 'nullable|string|max:255', 'date' => 'nullable|date']);
         $medicalRecords = collect(); // Empty collection by default
         $hasSearchQuery = false;
 
@@ -77,6 +79,7 @@ class MedicalRecordController extends Controller
      */
     public function searchPatients(Request $request)
     {
+        $request->validate(['q' => 'nullable|string|max:255', 'query' => 'nullable|string|max:255']);
         // Accept both 'q' and 'query' parameters for compatibility
         $query = $request->get('q', $request->get('query', ''));
         
@@ -103,13 +106,13 @@ class MedicalRecordController extends Controller
     /**
      * Store a newly created medical record
      */
-    public function store(Request $request)
+    public function store(Request $request, SpecialtyService $specialties)
     {
         if (!Auth::user()->isDoctor()) {
             abort(403, 'Unauthorized access to medical records.');
         }
 
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge([
             'patient_id' => 'required|exists:patients,id',
             'appointment_id' => 'nullable|exists:appointments,id',
             'visit_date' => 'required|date|before_or_equal:today',
@@ -123,7 +126,15 @@ class MedicalRecordController extends Controller
             'temperature' => 'nullable|numeric|min:0',
             'heart_rate' => 'nullable|integer|min:0',
             'oxygen_saturation' => 'nullable|integer|min:0|max:100',
-        ]);
+        ], $specialties->validationRules('record')));
+
+        if ($request->has('specialty_data')) {
+            $validated['specialty_data'] = $specialties->mergeSubmittedData(
+                [],
+                $validated['specialty_data'] ?? [],
+                'record'
+            );
+        }
 
         $validated['doctor_id'] = Auth::id();
 
@@ -182,13 +193,13 @@ class MedicalRecordController extends Controller
     /**
      * Update the specified medical record
      */
-    public function update(Request $request, MedicalRecord $medicalRecord)
+    public function update(Request $request, MedicalRecord $medicalRecord, SpecialtyService $specialties)
     {
         if (!Auth::user()->isDoctor() || $medicalRecord->doctor_id !== Auth::id()) {
             abort(403, 'Unauthorized access to this medical record.');
         }
 
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge([
             'patient_id' => 'required|exists:patients,id',
             'appointment_id' => 'nullable|exists:appointments,id',
             'visit_date' => 'required|date|before_or_equal:today',
@@ -202,7 +213,15 @@ class MedicalRecordController extends Controller
             'temperature' => 'nullable|numeric|min:0',
             'heart_rate' => 'nullable|integer|min:0',
             'oxygen_saturation' => 'nullable|integer|min:0|max:100',
-        ]);
+        ], $specialties->validationRules('record')));
+
+        if ($request->has('specialty_data')) {
+            $validated['specialty_data'] = $specialties->mergeSubmittedData(
+                $medicalRecord->specialty_data ?? [],
+                $validated['specialty_data'] ?? [],
+                'record'
+            );
+        }
 
         if (!empty($validated['appointment_id'])) {
             $appointment = Appointment::where('id', $validated['appointment_id'])

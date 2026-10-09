@@ -7,10 +7,15 @@ use App\Models\MedicalRecord;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
+use App\Services\SpecialtyService;
 use Carbon\Carbon;
 
 class MedicalRecordSeeder extends Seeder
 {
+    public function __construct(private SpecialtyService $specialties)
+    {
+    }
+
     /**
      * Run the database seeds.
      */
@@ -24,26 +29,10 @@ class MedicalRecordSeeder extends Seeder
             return;
         }
 
-        $symptoms = [
-            'Headache and fatigue', 'Chest pain', 'Shortness of breath', 'Back pain', 'Joint pain',
-            'Fever and chills', 'Nausea and vomiting', 'Dizziness', 'Muscle weakness', 'Skin rash',
-            'Abdominal pain', 'Cough and congestion', 'Vision problems', 'Hearing loss', 'Sleep disturbances',
-            'Anxiety and stress', 'Depression symptoms', 'Memory issues', 'Weight loss', 'Weight gain'
-        ];
-
-        $diagnoses = [
-            'Hypertension', 'Diabetes Type 2', 'Asthma', 'Arthritis', 'COPD', 'Heart disease',
-            'Migraine', 'Depression', 'Anxiety disorder', 'Sleep apnea', 'Allergic rhinitis',
-            'Gastroesophageal reflux', 'Osteoporosis', 'Thyroid disorder', 'Chronic pain syndrome',
-            'Viral infection', 'Bacterial infection', 'Muscle strain', 'Skin condition', 'Vitamin deficiency'
-        ];
-
-        $treatments = [
-            'Medication therapy', 'Physical therapy', 'Lifestyle modifications', 'Surgery recommended',
-            'Follow-up in 2 weeks', 'Blood work ordered', 'Imaging studies required', 'Specialist referral',
-            'Home monitoring', 'Diet and exercise plan', 'Stress management techniques', 'Pain management',
-            'Breathing exercises', 'Wound care', 'Vaccination schedule', 'Regular check-ups'
-        ];
+        $seed = $this->specialties->profile()['seed'];
+        $symptoms = $seed['symptoms'];
+        $diagnoses = $seed['diagnoses'];
+        $treatments = $seed['treatments'];
 
         // Generate 200+ medical records over the past 6 months
         $recordCount = 0;
@@ -79,11 +68,27 @@ class MedicalRecordSeeder extends Seeder
                 'blood_pressure' => "$systolic/$diastolic",
                 'temperature' => $temperature,
                 'heart_rate' => $heartRate,
+                'specialty_data' => $this->sampleRecordData(),
             ]);
 
             $recordCount++;
         }
 
         $this->command->info("$recordCount medical records seeded successfully spanning 6 months!");
+    }
+
+    private function sampleRecordData(): array
+    {
+        return collect($this->specialties->fields('record'))
+            ->mapWithKeys(function (array $field) {
+                $value = match ($field['type'] ?? 'text') {
+                    'select' => $field['options'][0] ?? null,
+                    'date' => now()->subDays(rand(1, 90))->toDateString(),
+                    default => 'Demo '.$field['label'].' recorded during consultation.',
+                };
+
+                return filled($value) ? [$field['key'] => $value] : [];
+            })
+            ->all();
     }
 }

@@ -24,11 +24,56 @@ class Patient extends Model
         'chronic_conditions',
         'emergency_contact_name',
         'emergency_contact_phone',
+        'specialty_data',
+        'is_pediatric',
     ];
 
     protected $casts = [
         'birth_date' => 'datetime',
+        'specialty_data' => 'array',
+        'is_pediatric' => 'boolean',
     ];
+
+    protected $with = ['guardians'];
+
+    public function guardians()
+    {
+        return $this->hasMany(PatientGuardian::class)->orderByDesc('is_primary')->orderBy('id');
+    }
+
+    public function getPrimaryGuardianAttribute(): ?PatientGuardian
+    {
+        return $this->guardians->firstWhere('is_primary', true);
+    }
+
+    public function getAgeDisplayAttribute(): string
+    {
+        if (! $this->birth_date) {
+            return __('Age unknown');
+        }
+        $months = (int) $this->birth_date->diffInMonths(today());
+        if ($this->is_pediatric && $months < 24) {
+            return $months < 1
+                ? (int) $this->birth_date->diffInDays(today()).' '.__('days old')
+                : $months.' '.__('months old');
+        }
+
+        return $this->age.' '.__('years old');
+    }
+
+    public function getContactLabelAttribute(): string
+    {
+        return $this->primary_guardian
+            ? $this->primary_guardian->name.' ('.$this->primary_guardian->relationship.') — '.$this->phone
+            : $this->phone;
+    }
+
+    public function getSelectionLabelAttribute(): string
+    {
+        return $this->is_pediatric
+            ? $this->full_name.' · '.$this->birth_date?->format('Y-m-d').' · '.$this->contact_label
+            : $this->full_name.' - '.$this->phone;
+    }
 
     /**
      * Get full name
@@ -74,7 +119,11 @@ class Patient extends Model
               ->orWhere('last_name', 'like', "%{$search}%")
               ->orWhere('phone', 'like', "%{$search}%")
               ->orWhere('id_card_number', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%");
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhereHas('guardians', fn ($guardian) => $guardian
+                  ->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%"));
 
             // Match multi-term queries as first/last name in any order.
             if (count($terms) >= 2) {
