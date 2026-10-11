@@ -74,6 +74,9 @@ class MedicalRecordController extends Controller
                 ->where('doctor_id', Auth::id())
                 ->findOrFail($request->appointment_id);
             $selectedPatient = $appointment->patient;
+            if ($record = $appointment->medicalRecord) {
+                return redirect()->route('medical-records.edit', $record);
+            }
         } elseif ($request->has('patient_id')) {
             $selectedPatient = Patient::find($request->patient_id);
         }
@@ -136,9 +139,10 @@ class MedicalRecordController extends Controller
             'weight' => 'nullable|numeric|min:0|max:999.99',
             'height' => 'nullable|numeric|min:0|max:999.99',
             'blood_pressure' => 'nullable|string|max:255',
-            'temperature' => 'nullable|numeric|min:0|max:999.9',
+            'temperature' => 'nullable|numeric|min:0|max:60',
             'heart_rate' => 'nullable|integer|min:0|max:2147483647',
             'oxygen_saturation' => 'nullable|integer|min:0|max:100',
+            'return_to_workspace' => 'nullable|boolean',
         ], $specialties->validationRules('record')));
 
         if ($request->has('specialty_data')) {
@@ -150,6 +154,8 @@ class MedicalRecordController extends Controller
         }
 
         $validated['doctor_id'] = Auth::id();
+        $validated['temperature_unit'] = 'C';
+        unset($validated['return_to_workspace']);
         $appointment = null;
 
         if (!empty($validated['appointment_id'])) {
@@ -157,7 +163,9 @@ class MedicalRecordController extends Controller
                 ->where('doctor_id', Auth::id())
                 ->firstOrFail();
 
-            $validated['patient_id'] = $appointment->patient_id;
+            if ((int) $validated['patient_id'] !== $appointment->patient_id) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['patient_id' => __('workflow.context_mismatch')]);
+            }
         }
 
         $record = \DB::transaction(function () use ($validated, $appointment) {
@@ -171,21 +179,14 @@ class MedicalRecordController extends Controller
                 }
             }
             $record = MedicalRecord::create($validated);
-            if ($appointment) {
-                $wasCurrent = $appointment->status === 'in_progress';
-                $appointment->update(['status' => 'completed']);
-                if ($wasCurrent && $appointment->appointment_date->isToday()) {
-                    app(\App\Services\AppointmentSchedulingService::class)->promoteNextPatient($appointment->doctor_id);
-                }
-                if ($appointment->isQueueMode()) {
-                    app(\App\Services\AppointmentSchedulingService::class)->recalculateQueue($appointment->doctor_id, $appointment->appointment_date);
-                }
-            }
+            // Saving observations is not finishing the visit. The doctor may
+            // still need to prescribe, order tests or attach results.
 
             return $record;
         });
 
-        return redirect()->route('medical-records.show', $record)
+        return redirect()->route($request->boolean('return_to_workspace') && $appointment?->fresh()->status === 'in_progress'
+            ? 'doctor.current' : 'medical-records.show', $request->boolean('return_to_workspace') && $appointment?->fresh()->status === 'in_progress' ? [] : [$record])
                         ->with('success', __('Medical record created successfully!'));
     }
 
@@ -245,9 +246,11 @@ class MedicalRecordController extends Controller
             'weight' => 'nullable|numeric|min:0|max:999.99',
             'height' => 'nullable|numeric|min:0|max:999.99',
             'blood_pressure' => 'nullable|string|max:255',
-            'temperature' => 'nullable|numeric|min:0|max:999.9',
+            'temperature' => 'nullable|numeric|min:0|max:'.match ($request->input('temperature_unit', $medicalRecord->temperature_unit)) { 'C' => 60, 'F' => 150, default => 999.9 },
             'heart_rate' => 'nullable|integer|min:0|max:2147483647',
             'oxygen_saturation' => 'nullable|integer|min:0|max:100',
+            'temperature_unit' => 'nullable|in:C,F',
+            'return_to_workspace' => 'nullable|boolean',
         ], $specialties->validationRules('record')));
 
         if ($request->has('specialty_data')) {
@@ -263,18 +266,24 @@ class MedicalRecordController extends Controller
                 ->where('doctor_id', Auth::id())
                 ->firstOrFail();
 
-            $validated['patient_id'] = $appointment->patient_id;
+            if ((int) $validated['patient_id'] !== $appointment->patient_id) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['patient_id' => __('workflow.context_mismatch')]);
+            }
         }
 
-        if ((int) $validated['patient_id'] !== $medicalRecord->patient_id && $medicalRecord->prescriptions()->exists()) {
+        if (((int) $validated['patient_id'] !== $medicalRecord->patient_id
+            || ($request->has('appointment_id') && (int) ($validated['appointment_id'] ?? 0) !== (int) $medicalRecord->appointment_id))
+            && ($medicalRecord->prescriptions()->exists() || $medicalRecord->orders()->exists() || $medicalRecord->documents()->exists())) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'patient_id' => __('A record with prescriptions cannot be moved to another patient.'),
+                'patient_id' => __('workflow.context_mismatch'),
             ]);
         }
 
+        unset($validated['return_to_workspace']);
         $medicalRecord->update($validated);
 
-        return redirect()->route('medical-records.show', $medicalRecord)
+        return redirect()->route($request->boolean('return_to_workspace') && $medicalRecord->appointment?->status === 'in_progress'
+            ? 'doctor.current' : 'medical-records.show', $request->boolean('return_to_workspace') && $medicalRecord->appointment?->status === 'in_progress' ? [] : [$medicalRecord])
                         ->with('success', __('Medical record updated successfully!'));
     }
 

@@ -16,7 +16,7 @@ it('persists the clinic language when a staff member switches', function () {
     Setting::setLanguage('en');
     $doctor = User::factory()->doctor()->create();
 
-    $this->actingAs($doctor)->get('/lang/fr')->assertRedirect();
+    $this->actingAs($doctor)->get('/lang/fr')->assertRedirect()->assertSessionHas('success', 'La langue a été modifiée.');
 
     expect(Setting::getLanguage())->toBe('fr');
 });

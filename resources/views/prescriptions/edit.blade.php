@@ -4,9 +4,6 @@
 
 @section('content')
 <datalist id="specialty-medication-suggestions">
-    @foreach(app(\App\Services\SpecialtyService::class)->medicationSuggestions() as $medication)
-        <option value="{{ $medication['name'] }}"></option>
-    @endforeach
 </datalist>
 <div class="container mx-auto px-4 py-6">
     <div class="max-w-3xl mx-auto">

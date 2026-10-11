@@ -3,6 +3,9 @@
 @section('title', __('appointments.appointment_details'))
 
 @section('content')
+@if($appointment->scheduling_override)
+    <p class="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm">{{ __('workflow.overridden') }} · {{ $appointment->override_reason }}</p>
+@endif
 <div class="max-w-7xl mx-auto space-y-6">
     <x-ui.page-header
         :title="__('appointments.appointment_details')"
@@ -192,6 +195,7 @@
                     @if($appointment->status == 'scheduled')
                         <form action="{{ route('appointments.set-current', $appointment) }}" method="POST" class="w-full">
                             @csrf
+                            @if(auth()->user()->isDoctor())<input type="hidden" name="return_to_workspace" value="1">@endif
                             <button type="submit" class="btn-ghost w-full px-4 py-3">
                                 <i class="fas fa-play-circle"></i>
                                 <span>{{ __('appointments.start_consultation') }}</span>

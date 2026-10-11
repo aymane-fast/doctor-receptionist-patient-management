@@ -8,12 +8,12 @@
     @stack('styles')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body>
+<body class="compact-page">
     @auth
         @php
             $clinicName = \App\Models\Setting::get('clinic_name', __('common.medical_management'));
             $todayQuery = \App\Models\Appointment::whereDate('appointment_date', today());
-            $pendingQuery = \App\Models\Appointment::whereDate('appointment_date', today())->where('status', 'scheduled');
+            $pendingQuery = \App\Models\Appointment::whereDate('appointment_date', today())->where('status', 'scheduled')->whereNotNull('checked_in_at');
 
             if (auth()->user()->isDoctor()) {
                 $todayQuery->where('doctor_id', auth()->id());
@@ -100,7 +100,7 @@
                         <span class="sidebar-avatar">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
                         <span class="min-w-0 flex-1">
                             <span class="sidebar-user-name block">{{ auth()->user()->name }}</span>
-                            <span class="sidebar-user-role block">{{ auth()->user()->role }}</span>
+                            <span class="sidebar-user-role block">{{ __('auth.'.auth()->user()->role) }}</span>
                         </span>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -133,9 +133,9 @@
                             <strong>{{ $todayCount }}</strong>
                         </a>
                         @if($pendingCount > 0)
-                            <a href="{{ route('appointments.index', ['show_today' => '1', 'status' => 'scheduled']) }}" class="topbar-chip">
+                            <a href="{{ route('appointments.queue') }}" class="topbar-chip">
                                 <i class="fas fa-clock text-[var(--clinic-warning)]"></i>
-                                <span class="topbar-chip-label">{{ __('common.waiting') }}</span>
+                                <span class="topbar-chip-label">{{ __('workflow.waiting_room') }}</span>
                                 <strong>{{ $pendingCount }}</strong>
                             </a>
                         @endif
@@ -208,6 +208,16 @@
                         </div>
                     @endif
 
+                    @if($errors->any())
+                        <div class="app-alert app-alert-danger" role="alert">
+                            <div><strong>{{ __('workflow.review_errors') }}</strong>
+                                <ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+                            </div>
+                        </div>
+                    @endif
+                    @if(auth()->user()->isDoctor() && request()->routeIs('medical-records.*', 'prescriptions.*', 'patients.show'))
+                        @include('clinical.context-bar')
+                    @endif
                     @yield('content')
                 </main>
             </div>

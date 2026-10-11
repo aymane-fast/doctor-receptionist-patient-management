@@ -281,6 +281,8 @@ class AppointmentController extends Controller
                 Rule::exists('users', 'id')->where('role', 'doctor'),
             ],
             'appointment_date' => 'required|date|after_or_equal:today',
+            'scheduling_override' => 'nullable|boolean',
+            'override_reason' => 'nullable|string|max:255',
             'appointment_time' => 'nullable|date_format:H:i',
             'reason' => 'nullable|string',
             'notes' => 'nullable|string',
@@ -289,6 +291,8 @@ class AppointmentController extends Controller
         $doctor = User::findOrFail($validated['doctor_id']);
         $validated['appointment_mode'] = $doctor->appointment_mode ?? 'scheduled';
         $validated['status'] = 'scheduled';
+        $validated['scheduling_override'] = $validated['appointment_mode'] === 'scheduled' && $request->boolean('scheduling_override');
+        $validated['override_by'] = $validated['scheduling_override'] ? Auth::id() : null;
 
         // A patient should not hold two active appointments with the same doctor on one day
         if ($this->scheduler()->hasActiveSameDayAppointment($validated['patient_id'], $validated['doctor_id'], $validated['appointment_date'])) {
@@ -311,13 +315,13 @@ class AppointmentController extends Controller
         }
 
         // Reject times that have already passed today
-        if (Carbon::parse($validated['appointment_date'].' '.$validated['appointment_time'])->isPast()) {
+        if (!$validated['scheduling_override'] && Carbon::parse($validated['appointment_date'].' '.$validated['appointment_time'])->isPast()) {
             return back()->withErrors(['appointment_time' => 'Appointment time has already passed. Please choose a future time.'])->withInput();
         }
 
         // Validate working hours
         $workingHoursError = $this->validateWorkingHours($validated['appointment_date'], $validated['appointment_time']);
-        if ($workingHoursError) {
+        if ($workingHoursError && !$validated['scheduling_override']) {
             return back()->withErrors(['appointment_time' => $workingHoursError])->withInput();
         }
 
@@ -382,11 +386,16 @@ class AppointmentController extends Controller
                 Rule::exists('users', 'id')->where('role', 'doctor'),
             ],
             'appointment_date' => 'required|date',
+            'scheduling_override' => 'nullable|boolean',
+            'override_reason' => 'nullable|string|max:255',
             'appointment_time' => 'nullable|date_format:H:i',
             'status' => 'required|in:scheduled,in_progress,completed,cancelled,no_show',
             'reason' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
+
+        $validated['scheduling_override'] = $appointment->isScheduledMode() && $request->boolean('scheduling_override');
+        $validated['override_by'] = $validated['scheduling_override'] ? Auth::id() : null;
 
         // The edit form must obey the same status rules as every other path.
         if ($validated['status'] !== $appointment->status && ! $appointment->canTransitionTo($validated['status'])) {
@@ -408,6 +417,9 @@ class AppointmentController extends Controller
         // repointing the appointment would detach the record's history.
         if ((int) $validated['patient_id'] !== $appointment->patient_id && $appointment->medicalRecord()->exists()) {
             return back()->withErrors(['patient_id' => __('appointments.patient_locked_by_record')])->withInput();
+        }
+        if ((int) $validated['doctor_id'] !== $appointment->doctor_id && $appointment->medicalRecord()->exists()) {
+            return back()->withErrors(['doctor_id' => __('workflow.context_mismatch')])->withInput();
         }
 
         // Moving the appointment must not double-book the patient elsewhere.
@@ -450,16 +462,20 @@ class AppointmentController extends Controller
             if (in_array($validated['status'], Appointment::ACTIVE_STATUSES, true)) {
                 $timeChanged = Carbon::parse($validated['appointment_date'])->toDateString() !== $previousDate
                     || $validated['appointment_time'] !== $appointment->appointment_time->format('H:i');
-                if ($timeChanged && Carbon::parse($validated['appointment_date'].' '.$validated['appointment_time'])->isPast()) {
+                if ($timeChanged && Carbon::parse($validated['appointment_date'])->startOfDay()->lt(today())) {
+                    return back()->withErrors(['appointment_date' => __('workflow.no_past_booking')])->withInput();
+                }
+                if ($timeChanged && !$validated['scheduling_override'] && Carbon::parse($validated['appointment_date'].' '.$validated['appointment_time'])->isPast()) {
                     return back()->withErrors(['appointment_time' => __('Appointment time has already passed. Please choose a future time.')])->withInput();
                 }
                 $workingHoursError = $this->validateWorkingHours($validated['appointment_date'], $validated['appointment_time']);
-                if ($workingHoursError) {
+                if ($workingHoursError && !$validated['scheduling_override']) {
                     return back()->withErrors(['appointment_time' => $workingHoursError])->withInput();
                 }
             }
 
             if (in_array($validated['status'], Appointment::ACTIVE_STATUSES, true)
+                && !$validated['scheduling_override']
                 && $this->hasAppointmentConflict($validated['doctor_id'], $validated['appointment_date'], $validated['appointment_time'], $appointment->id)) {
                 return back()->withErrors(['appointment_time' => __('Doctor already has an appointment at this time.')])->withInput();
             }
@@ -485,6 +501,8 @@ class AppointmentController extends Controller
             || Carbon::parse($validated['appointment_date'])->toDateString() !== $previousDate;
         if ($moved) {
             $validated['reminder_sent_at'] = null;
+            $validated['checked_in_at'] = null;
+            if ($appointment->isScheduledMode()) $validated['queue_position'] = null;
         }
 
         \DB::transaction(function () use ($appointment, $validated) {
@@ -499,11 +517,15 @@ class AppointmentController extends Controller
             }
             $moved = (int) $validated['doctor_id'] !== $appointment->doctor_id
                 || Carbon::parse($validated['appointment_date'])->toDateString() !== $appointment->appointment_date->toDateString();
+            if (((int) $validated['doctor_id'] !== $appointment->doctor_id || (int) $validated['patient_id'] !== $appointment->patient_id)
+                && $appointment->medicalRecord()->exists()) {
+                $fail('patient_id', __('workflow.context_mismatch'));
+            }
             if (in_array($validated['status'], Appointment::ACTIVE_STATUSES, true)) {
                 if ($this->scheduler()->hasActiveSameDayAppointment((int) $validated['patient_id'], (int) $validated['doctor_id'], $validated['appointment_date'], $appointment->id)) {
                     $fail('patient_id', __('appointments.already_has_appointment_today'));
                 }
-                if ($appointment->isScheduledMode() && $this->hasAppointmentConflict($validated['doctor_id'], $validated['appointment_date'], $validated['appointment_time'], $appointment->id)) {
+                if ($appointment->isScheduledMode() && !$validated['scheduling_override'] && $this->hasAppointmentConflict($validated['doctor_id'], $validated['appointment_date'], $validated['appointment_time'], $appointment->id)) {
                     $fail('appointment_time', __('Doctor already has an appointment at this time.'));
                 }
                 if ($appointment->isQueueMode() && ($moved || !in_array($appointment->status, Appointment::ACTIVE_STATUSES, true))) {
@@ -742,7 +764,12 @@ class AppointmentController extends Controller
                 abort(403);
             }
 
-            $queueAppointments = $this->scheduler()->queueAppointments($selectedDoctor->id, $date);
+            $queueAppointments = $selectedDoctor->usesQueueMode()
+                ? $this->scheduler()->queueAppointments($selectedDoctor->id, $date)
+                : Appointment::with('patient', 'doctor')->where('doctor_id', $selectedDoctor->id)
+                    ->whereDate('appointment_date', $date)->whereIn('status', Appointment::ACTIVE_STATUSES)
+                    ->orderByRaw("CASE WHEN status = 'in_progress' THEN 0 ELSE 1 END")
+                    ->inOperationalOrder()->get();
         }
 
         return view('appointments.queue', compact('queueAppointments', 'doctors', 'selectedDoctor', 'date'));
@@ -773,7 +800,7 @@ class AppointmentController extends Controller
     /**
      * Set the current patient for the doctor's queue
      */
-    public function confirmCurrentSwitch(Appointment $appointment)
+    public function confirmCurrentSwitch(Request $request, Appointment $appointment)
     {
         if (! $this->canManageAppointment($appointment)) {
             abort(403);
@@ -789,6 +816,7 @@ class AppointmentController extends Controller
         }
         return view('appointments.switch-current', [
             'appointment' => $appointment->load('patient'), 'current' => $current,
+            'returnToWorkspace' => Auth::user()->isDoctor() && $request->boolean('return_to_workspace'),
         ]);
     }
 
@@ -800,7 +828,8 @@ class AppointmentController extends Controller
 
         // Already current: nothing to do (double-click safe).
         if ($appointment->status === 'in_progress') {
-            return back()->with('success', __('Patient session started successfully.'));
+            return (Auth::user()->isDoctor() && $request->boolean('return_to_workspace') ? redirect()->route('doctor.current') : back())
+                ->with('success', __('Patient session started successfully.'));
         }
 
         // Allow starting from scheduled, or reopening an accidentally
@@ -816,6 +845,7 @@ class AppointmentController extends Controller
         }
 
         $request->validate([
+            'return_to_workspace' => 'nullable|boolean',
             'previous_action' => 'nullable|in:completed,waiting,reschedule,no_show,cancelled',
             'previous_appointment_id' => 'required_with:previous_action|integer',
             'reschedule_date' => 'required_if:previous_action,reschedule|nullable|date_format:Y-m-d|after_or_equal:today',
@@ -847,7 +877,8 @@ class AppointmentController extends Controller
                 // must never apply to a different patient's consultation.
                 if ($current && (!$request->filled('previous_action')
                     || (int) $request->previous_appointment_id !== $current->id)) {
-                    return redirect()->route('appointments.switch-current', $appointment);
+                    return redirect()->route('appointments.switch-current', Auth::user()->isDoctor() && $request->boolean('return_to_workspace')
+                        ? ['appointment' => $appointment, 'return_to_workspace' => 1] : [$appointment]);
                 }
 
                 if ($current) {
@@ -887,6 +918,7 @@ class AppointmentController extends Controller
                             }
                         }
                         $changes += ['appointment_date' => $date, 'appointment_time' => $time, 'reminder_sent_at' => null];
+                        if ($current->isScheduledMode()) $changes['queue_position'] = null;
                     }
                     // Model update, not a bulk query, preserves the status log.
                     $current->update($changes);
@@ -903,7 +935,9 @@ class AppointmentController extends Controller
                 return null;
             }, 3);
         } catch (\InvalidArgumentException $e) {
-            return redirect()->route('appointments.switch-current', $appointment)->with('error', $e->getMessage());
+            // A refused start must retain the original business error, not
+            // invoke the confirmation route and mask it with a second error.
+            return redirect()->route('appointments.show', $appointment)->with('error', $e->getMessage());
         }
 
         if ($confirmation) {
@@ -914,7 +948,8 @@ class AppointmentController extends Controller
             $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
         }
 
-        return ($request->filled('previous_action') ? redirect()->route('appointments.show', $appointment) : back())
+        return (Auth::user()->isDoctor() && $request->boolean('return_to_workspace') ? redirect()->route('doctor.current')
+            : ($request->filled('previous_action') ? redirect()->route('appointments.show', $appointment) : back()))
             ->with('success', __('Patient session started successfully.'));
     }
 
@@ -1201,6 +1236,8 @@ class AppointmentController extends Controller
             'appointment_date' => $newDate->toDateString(),
             'appointment_time' => $newSlot['time'],
             'reminder_sent_at' => null,
+            'queue_position' => null,
+            'checked_in_at' => $newDate->isSameDay($appointment->appointment_date) ? $appointment->checked_in_at : null,
             'notes' => ($appointment->notes ? $appointment->notes."\n" : '')
                 ."Rebooked from {$previous} on ".now()->format('Y-m-d H:i'),
         ]);

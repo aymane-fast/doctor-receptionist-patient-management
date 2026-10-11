@@ -13,7 +13,7 @@ it('blocks receptionists from medical records', function () {
     $this->actingAs($receptionist)->post('/medical-records', [])->assertForbidden();
 });
 
-it('creates a medical record and completes the linked appointment', function () {
+it('saves a medical record without prematurely completing the linked appointment', function () {
     $doctor = User::factory()->doctor()->create();
     $appointment = Appointment::factory()->create([
         'doctor_id' => $doctor->id,
@@ -34,7 +34,7 @@ it('creates a medical record and completes the linked appointment', function () 
     expect($record)->not->toBeNull()
         ->and($record->doctor_id)->toBe($doctor->id)
         ->and($record->patient_id)->toBe($appointment->patient_id)
-        ->and($appointment->fresh()->status)->toBe('completed');
+        ->and($appointment->fresh()->status)->toBe('in_progress');
 });
 
 it('rejects a future visit date', function () {

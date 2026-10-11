@@ -140,9 +140,9 @@
                         <!-- Symptoms -->
                         <div>
                             <label for="symptoms" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                {{ __('medical_records.chief_complaint') }} <span class="text-red-500">*</span>
+                                {{ __('medical_records.chief_complaint') }}
                             </label>
-                            <textarea id="symptoms" name="symptoms" rows="3" required
+                            <textarea id="symptoms" name="symptoms" rows="2"
                                       placeholder="{{ __('medical_records.primary_reason_visit') }}"
                                       class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('symptoms') border-red-500 @enderror">{{ old('symptoms') }}</textarea>
                             @error('symptoms')
@@ -156,9 +156,9 @@
                         <!-- Assessment/Diagnosis -->
                         <div>
                             <label for="diagnosis" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                {{ __('medical_records.assessment_diagnosis') }} <span class="text-red-500">*</span>
+                                {{ __('medical_records.assessment_diagnosis') }}
                             </label>
-                            <textarea id="diagnosis" name="diagnosis" rows="3" required
+                            <textarea id="diagnosis" name="diagnosis" rows="2"
                                       placeholder="{{ __('medical_records.medical_diagnosis_placeholder') }}"
                                       class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 resize-none @error('diagnosis') border-red-500 @enderror">{{ old('diagnosis') }}</textarea>
                             @error('diagnosis')
@@ -216,11 +216,11 @@
 
                             <div>
                                 <label for="temperature" class="block text-xs font-medium text-blue-700 mb-1">
-                                    {{ __('medical_records.temperature') }} (°F)
+                                    {{ __('medical_records.temperature') }} (°C)
                                 </label>
                                 <input type="number" id="temperature" name="temperature" 
                                        value="{{ old('temperature') }}" 
-                                       step="0.1" min="90" max="110" placeholder="98.6"
+                                       step="0.1" min="0" max="60" placeholder="37.0"
                                        class="w-full px-2 py-1 text-sm border border-blue-200 rounded-lg bg-white/80 focus:outline-none focus:border-blue-400 transition-colors">
                             </div>
 

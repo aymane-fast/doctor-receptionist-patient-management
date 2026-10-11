@@ -111,16 +111,12 @@ class DashboardController extends Controller
         ];
 
         // Get next appointment for this doctor
-        $nextAppointment = null;
-        if ($currentAppointment) {
-            $nextAppointment = Appointment::with('patient')
+        $nextAppointment = Appointment::with('patient')
                 ->where('doctor_id', Auth::id())
                 ->today()
                 ->where('status', 'scheduled')
-                ->whereTime('appointment_time', '>', $currentAppointment->appointment_time)
-                ->orderBy('appointment_time')
+                ->inOperationalOrder()
                 ->first();
-        }
 
         return view('dashboard.doctor', compact('todayAppointments', 'currentAppointment', 'nextAppointment', 'upcomingAppointments', 'recentRecords', 'stats'));
     }
@@ -207,15 +203,11 @@ class DashboardController extends Controller
         $doctorIdsToday = Appointment::today()->pluck('doctor_id')->unique();
         $nextByDoctor = [];
         foreach ($doctorIdsToday as $docId) {
-            $current = $currentByDoctor->get($docId);
             $nextQuery = Appointment::with(['patient', 'doctor'])
                 ->where('doctor_id', $docId)
                 ->today()
                 ->where('status', 'scheduled')
-                ->orderBy('appointment_time');
-            if ($current) {
-                $nextQuery->whereTime('appointment_time', '>', $current->appointment_time);
-            }
+                ->inOperationalOrder();
             $nextByDoctor[$docId] = $nextQuery->first();
         }
 

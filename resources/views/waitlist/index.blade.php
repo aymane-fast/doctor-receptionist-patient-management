@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', __('appointments.waitlist'))
+@section('title', __('workflow.appointment_openings'))
 
 @section('content')
 <div class="space-y-6">
     <x-ui.page-header
-        :title="__('appointments.waitlist')"
-        :description="__('appointments.waitlist_subtitle')"
+        :title="__('workflow.appointment_openings')"
+        :description="__('workflow.appointment_openings_help')"
         icon="fa-hourglass-half"
         :eyebrow="__('Scheduling support')"
     >
@@ -32,10 +32,10 @@
             <div class="md:col-span-2">
                 <label for="patient_search" class="block text-sm font-medium text-gray-700 mb-2">{{ __('appointments.patient') }} <span class="text-red-500">*</span></label>
                 <div class="relative">
-                    <input type="text" id="patient_search" autocomplete="off"
+                    <input type="text" id="patient_search" autocomplete="off" value="{{ $selectedPatient?->full_name }}"
                            placeholder="{{ __('appointments.search_patients_placeholder') }}"
                            class="form-control w-full px-3 py-2">
-                    <input type="hidden" id="patient_id" name="patient_id" required>
+                    <input type="hidden" id="patient_id" name="patient_id" value="{{ $selectedPatient?->id }}" required>
                     <div id="patient_results" class="absolute z-50 w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-auto hidden"></div>
                 </div>
             </div>
@@ -45,7 +45,7 @@
                 <label for="doctor_id" class="block text-sm font-medium text-gray-700 mb-2">{{ __('appointments.doctor') }} <span class="text-red-500">*</span></label>
                 <select id="doctor_id" name="doctor_id" required class="form-control w-full px-3 py-2">
                     @foreach($doctors as $doctor)
-                        <option value="{{ $doctor->id }}">{{ $doctor->professional_name }}</option>
+                        <option value="{{ $doctor->id }}" @selected((int) old('doctor_id') === $doctor->id)>{{ $doctor->professional_name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -53,7 +53,7 @@
 
             <div>
                 <label for="preferred_date" class="block text-sm font-medium text-gray-700 mb-2">{{ __('appointments.preferred_date') }}</label>
-                <input type="date" id="preferred_date" name="preferred_date" min="{{ date('Y-m-d') }}" class="form-control w-full px-3 py-2">
+                <input type="date" id="preferred_date" name="preferred_date" value="{{ old('preferred_date') }}" min="{{ today()->toDateString() }}" class="form-control w-full px-3 py-2">
             </div>
 
             <div>
@@ -126,7 +126,7 @@
                 <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-hourglass-half text-gray-400 text-2xl"></i>
                 </div>
-                <h3 class="text-lg font-bold text-gray-900">{{ __('appointments.waitlist_empty') }}</h3>
+                <h3 class="text-lg font-bold text-gray-900">{{ __('workflow.no_openings_waitlist') }}</h3>
             </div>
         @endif
     </div>

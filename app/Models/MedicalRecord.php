@@ -10,6 +10,7 @@ class MedicalRecord extends Model
     use HasFactory;
 
     protected $fillable = [
+        'temperature_unit',
         'patient_id',
         'doctor_id',
         'appointment_id',
@@ -70,4 +71,7 @@ class MedicalRecord extends Model
     {
         return $this->hasMany(Prescription::class);
     }
+
+    public function orders() { return $this->hasMany(Order::class); }
+    public function documents() { return $this->hasMany(MedicalDocument::class); }
 }

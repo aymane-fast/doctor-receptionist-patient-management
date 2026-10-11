@@ -55,7 +55,7 @@ class PrescriptionController extends Controller
             abort(403);
         }
 
-        $request->validate(['patient_id' => 'nullable|integer|exists:patients,id']);
+        $request->validate(['patient_id' => 'nullable|integer|exists:patients,id', 'medical_record_id' => 'nullable|integer|exists:medical_records,id']);
 
         $selectedPatient = null;
         
@@ -66,11 +66,17 @@ class PrescriptionController extends Controller
             $selectedPatient = Patient::find((int) $request->old('patient_id'));
         }
 
-        $medicalRecords = MedicalRecord::with('patient')
-            ->where('doctor_id', Auth::id())
-            ->latest('visit_date')->get();
+        $selectedRecord = null;
+        $recordId = $request->old('medical_record_id', $request->medical_record_id);
+        if ($recordId && is_scalar($recordId)) {
+            $selectedRecord = MedicalRecord::where('doctor_id', Auth::id())->findOrFail($recordId);
+            $selectedPatient = $selectedRecord->patient;
+        }
+        $medicalRecords = MedicalRecord::where('doctor_id', Auth::id())
+            ->when($selectedPatient, fn ($q) => $q->where('patient_id', $selectedPatient->id))
+            ->latest('visit_date')->limit(100)->get();
 
-        return view('prescriptions.create', compact('selectedPatient', 'medicalRecords'));
+        return view('prescriptions.create', compact('selectedPatient', 'selectedRecord', 'medicalRecords'));
     }
 
     /**
@@ -118,6 +124,7 @@ class PrescriptionController extends Controller
             'items.*.duration_days' => 'nullable|integer|min:1|max:2147483647',
             'items.*.instructions' => 'nullable|string',
             'notes' => 'nullable|string',
+            'return_to_workspace' => 'nullable|boolean',
         ]);
 
         if (!empty($validated['medical_record_id'])) {
@@ -125,7 +132,9 @@ class PrescriptionController extends Controller
                 ->where('doctor_id', Auth::id())
                 ->firstOrFail();
 
-            $validated['patient_id'] = $medicalRecord->patient_id;
+            if ((int) $validated['patient_id'] !== $medicalRecord->patient_id) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['patient_id' => __('workflow.context_mismatch')]);
+            }
         }
 
         $prescription = \DB::transaction(function () use ($validated) {
@@ -142,7 +151,9 @@ class PrescriptionController extends Controller
             return $prescription;
         });
 
-        return redirect()->route('prescriptions.show', $prescription)
+        $inWorkspace = $request->boolean('return_to_workspace') && !empty($validated['medical_record_id'])
+            && $medicalRecord->appointment?->status === 'in_progress';
+        return redirect()->route($inWorkspace ? 'doctor.current' : 'prescriptions.show', $inWorkspace ? [] : [$prescription])
             ->with('success', __('Prescription created successfully!'));
     }
 
@@ -225,7 +236,9 @@ class PrescriptionController extends Controller
                 ->where('doctor_id', Auth::id())
                 ->firstOrFail();
 
-            $validated['patient_id'] = $medicalRecord->patient_id;
+            if ((int) $validated['patient_id'] !== $medicalRecord->patient_id) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['patient_id' => __('workflow.context_mismatch')]);
+            }
         }
 
         \DB::transaction(function () use ($prescription, $validated) {

@@ -19,6 +19,7 @@
         <p id="switch-description" class="mb-6 text-slate-600">{{ __('appointments.switch_description', ['current' => $current->patient->full_name, 'next' => $appointment->patient->full_name]) }}</p>
         <form method="POST" action="{{ route('appointments.set-current', $appointment) }}">
             @csrf
+            @if($returnToWorkspace)<input type="hidden" name="return_to_workspace" value="1">@endif
             <input type="hidden" name="previous_appointment_id" value="{{ $current->id }}">
             <label for="previous_action" class="mb-2 block font-semibold">{{ __('appointments.switch_question', ['name' => $current->patient->full_name]) }}</label>
             <select id="previous_action" name="previous_action" required autofocus class="form-control w-full">
@@ -48,7 +49,7 @@
             </fieldset>
             <div class="mt-6 flex flex-wrap gap-3">
                 <button type="submit" class="rounded-xl bg-teal-700 px-5 py-3 font-semibold text-white">{{ __('appointments.switch_confirm', ['name' => $appointment->patient->full_name]) }}</button>
-                <a href="{{ route('appointments.show', $current) }}" class="rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700">{{ __('appointments.switch_do_nothing') }}</a>
+                <a href="{{ $returnToWorkspace ? route('doctor.current') : route('appointments.show', $current) }}" class="rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700">{{ __('appointments.switch_do_nothing') }}</a>
             </div>
         </form>
     </dialog>
@@ -64,7 +65,7 @@
     }
     dialog.addEventListener('cancel', event => {
         event.preventDefault();
-        window.location.href = @json(route('appointments.show', $current));
+        window.location.href = @json($returnToWorkspace ? route('doctor.current') : route('appointments.show', $current));
     });
     const choice = document.getElementById('previous_action');
     const fields = document.getElementById('reschedule-fields');

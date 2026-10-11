@@ -97,7 +97,7 @@ return [
     'search' => 'Rechercher',
     'find_patients' => 'Trouver des patients',
     'currently_outside_hours' => 'Actuellement en dehors des heures de travail',
-    'scheduling_limited' => 'La prise de rendez-vous est limitée. Vous pouvez consulter les dossiers et configurer les paramètres.',
+    'scheduling_limited' => 'Les suggestions automatiques respectent les horaires. Le personnel autorisé peut confirmer une exception de planification.',
     'currently_in_consultation' => 'Actuellement en consultation',
     'start_session' => 'Commencer la session',
     'no_next_patient_scheduled' => 'Aucun prochain patient planifié',

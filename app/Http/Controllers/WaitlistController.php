@@ -34,7 +34,8 @@ class WaitlistController extends Controller
             ? User::where('id', Auth::id())->get()
             : User::where('role', 'doctor')->orderBy('name')->get();
 
-        return view('waitlist.index', compact('entries', 'doctors'));
+        $selectedPatient = is_scalar(old('patient_id')) ? \App\Models\Patient::find((int) old('patient_id')) : null;
+        return view('waitlist.index', compact('entries', 'doctors', 'selectedPatient'));
     }
 
     /**

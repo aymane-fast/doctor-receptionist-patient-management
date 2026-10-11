@@ -3,7 +3,7 @@
 @section('title', __('dashboard.doctor_dashboard'))
 
 @section('content')
-<div class="space-y-8">
+<div class="dashboard-layout space-y-4">
     <x-ui.page-header
         :title="__('dashboard.doctor_dashboard')"
         :description="__($clinicSpecialty['description'])"
@@ -23,7 +23,7 @@
     </x-ui.page-header>
 
     <!-- Modern Quick Actions - Moved to Top -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow">
+    <div class="dashboard-quick-panel glass-effect rounded-3xl p-8 modern-shadow">
         <div class="flex items-center space-x-3 mb-6">
             <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                 <i class="fas fa-bolt text-white"></i>
@@ -75,7 +75,7 @@
 
     @if(isset($currentAppointment))
     <!-- Current Patient - Hero Section -->
-    <div class="gradient-bg relative rounded-3xl p-6 lg:p-8 text-white overflow-hidden">
+    <div class="dashboard-current-panel gradient-bg relative rounded-xl p-4 text-white overflow-hidden">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
         <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
         
@@ -106,7 +106,7 @@
 
     <!-- Next Up Patient - Enhanced -->
     @if(isset($nextAppointment) && $nextAppointment)
-    <div class="glass-effect rounded-2xl p-6 modern-shadow border-l-4 border-emerald-600">
+    <div class="dashboard-next glass-effect rounded-2xl p-6 modern-shadow border-l-4 border-emerald-600">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center space-x-4">
                 <div class="gradient-bg w-12 h-12 rounded-xl flex items-center justify-center">
@@ -123,7 +123,7 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <button onclick="setAsCurrent({{ $nextAppointment->id }})" class="btn-primary px-4 py-2" title="{{ __('Set as Current Patient') }}">
+                <button onclick="setAsCurrent({{ $nextAppointment->id }}, this)" class="btn-primary px-4 py-2" title="{{ __('Set as Current Patient') }}">
                     <i class="fas fa-play text-sm"></i>
                     <span>{{ __('Set as Current') }}</span>
                 </button>
@@ -196,7 +196,7 @@
                                                     <i class="fas fa-user-check text-teal-600 text-sm"></i>
                                                 </button>
                                             @endif
-                                            <button onclick="setAsCurrent({{ $appointment->id }})" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('Set as Current Patient') }}" aria-label="{{ __('Set as Current Patient') }}">
+                                            <button onclick="setAsCurrent({{ $appointment->id }}, this)" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('Set as Current Patient') }}" aria-label="{{ __('Set as Current Patient') }}">
                                                 <i class="fas fa-play text-green-600 text-sm"></i>
                                             </button>
                                             <a href="{{ route('appointments.reschedule', $appointment) }}" class="btn-ghost w-8 h-8 p-0" title="{{ __('Reschedule Appointment') }}" aria-label="{{ __('Reschedule Appointment') }}">
@@ -205,7 +205,7 @@
                                             <button onclick="submitAction('{{ route('appointments.no-show', $appointment) }}', '{{ __('appointments.mark_no_show') }}?')" class="w-8 h-8 bg-orange-100 hover:bg-orange-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('appointments.mark_no_show') }}">
                                                 <i class="fas fa-user-slash text-orange-600 text-sm"></i>
                                             </button>
-                                            <button onclick="cancelAppointment({{ $appointment->id }})" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('Cancel Appointment') }}" aria-label="{{ __('Cancel Appointment') }}">
+                                            <button onclick="cancelAppointment({{ $appointment->id }}, this)" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('Cancel Appointment') }}" aria-label="{{ __('Cancel Appointment') }}">
                                                 <i class="fas fa-times text-red-600 text-sm"></i>
                                             </button>
                                         @endif
@@ -457,53 +457,17 @@ function submitAction(url, confirmMessage = null) {
     form.submit();
 }
 
-// Quick action functions
-function setAsCurrent(appointmentId) {
-    if (confirm(@json(__('Set this appointment as the current patient?')))) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/appointments/${appointmentId}/set-current`;
-
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = '{{ csrf_token() }}';
-
-        form.appendChild(csrfToken);
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-function cancelAppointment(appointmentId) {
-    if (confirm(@json(__('Are you sure you want to cancel this appointment? This action cannot be undone.')))) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/appointments/${appointmentId}/cancel`;
-        
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = '{{ csrf_token() }}';
-        
-        form.appendChild(csrfToken);
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
 function rescheduleAppointment(appointmentId) {
     // Simple redirect to reschedule (edit) page
     window.location.href = `/appointments/${appointmentId}/reschedule`;
 }
 
-// Action functions
-function setAsCurrent(appointmentId) {
+// Explicit button references also work in browsers without window.event.
+function setAsCurrent(appointmentId, button) {
     if (confirm(@json(__('Set this appointment as the current patient?')))) {
         // Show loading state
-        const button = event.target.closest('button');
         if (button) {
-            const originalContent = button.innerHTML;
+            button.dataset.originalContent = button.innerHTML;
             button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>' + @json(__('Starting...'));
             button.disabled = true;
         }
@@ -511,6 +475,12 @@ function setAsCurrent(appointmentId) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/appointments/${appointmentId}/set-current`;
+
+        const workspaceReturn = document.createElement('input');
+        workspaceReturn.type = 'hidden';
+        workspaceReturn.name = 'return_to_workspace';
+        workspaceReturn.value = '1';
+        form.appendChild(workspaceReturn);
         
         const csrfToken = document.createElement('input');
         csrfToken.type = 'hidden';
@@ -524,12 +494,11 @@ function setAsCurrent(appointmentId) {
     }
 }
 
-function cancelAppointment(appointmentId) {
+function cancelAppointment(appointmentId, button) {
     if (confirm(@json(__('Are you sure you want to cancel this appointment? This action cannot be undone.')))) {
         // Show loading state
-        const button = event.target.closest('button');
         if (button) {
-            const originalContent = button.innerHTML;
+            button.dataset.originalContent = button.innerHTML;
             button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>' + @json(__('Cancelling...'));
             button.disabled = true;
         }

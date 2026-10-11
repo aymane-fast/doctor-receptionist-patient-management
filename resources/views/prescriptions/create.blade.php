@@ -4,9 +4,6 @@
 
 @section('content')
 <datalist id="specialty-medication-suggestions">
-    @foreach(app(\App\Services\SpecialtyService::class)->medicationSuggestions() as $medication)
-        <option value="{{ $medication['name'] }}"></option>
-    @endforeach
 </datalist>
 <div class="space-y-6">
     <x-ui.page-header
@@ -27,6 +24,18 @@
         <div class="glass-effect rounded-2xl modern-shadow overflow-hidden">
             <form action="{{ route('prescriptions.store') }}" method="POST" class="space-y-6">
                 @csrf
+                <div class="workflow-panel m-4">
+                    <strong>{{ __('workflow.record_context') }}</strong>
+                    <p class="text-sm">{{ $selectedPatient?->full_name }}</p>
+                    <label for="medical_record_id">{{ __('workflow.consultation') }}</label>
+                    <select id="medical_record_id" name="medical_record_id">
+                        <option value="">{{ __('workflow.no_record') }}</option>
+                        @foreach($medicalRecords as $consultation)
+                            <option value="{{ $consultation->id }}" @selected(old('medical_record_id', $selectedRecord?->id) == $consultation->id)>#{{ $consultation->id }} · {{ $consultation->visit_date->format('d/m/Y') }} · {{ $consultation->patient->full_name }}</option>
+                        @endforeach
+                    </select>
+                    <p class="mt-2 text-xs text-slate-500">{{ __('workflow.medication_help') }}</p>
+                </div>
                 
                 <!-- Patient and Basic Info -->
                 <div class="p-6 pb-0">

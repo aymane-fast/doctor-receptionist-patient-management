@@ -24,6 +24,7 @@ class LanguageController extends Controller
 
         // Update session
         session(['locale' => $language]);
+        app()->setLocale($language);
 
         return redirect()->back()->with('success', __('Language changed successfully'));
     }

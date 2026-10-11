@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'clinic_information' => 'Clinic information',
+    'remove' => 'Remove',
+    'add_user' => 'Add team member',
     'dashboard' => 'Dashboard',
     'appointments' => 'Appointments',
     'patients' => 'Patients',

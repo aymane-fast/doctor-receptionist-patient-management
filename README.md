@@ -98,6 +98,44 @@ the setup wizard.
 
 ## Configuration notes
 
+### Updating an existing clinic
+
+Back up the database **and** `storage/app/private` (uploaded documents), then run:
+
+```bash
+php artisan optimize:clear
+php artisan migrate --force
+npm run build
+```
+
+Clearing old route caches is important after updating workflow routes. Recreate
+production caches only after the update succeeds. Never use `migrate:fresh` on
+a clinic installation. Keep `APP_DEBUG=false` outside local development.
+
+The current-patient workspace saves observations without finishing the visit.
+Use **Complete Visit & Next Patient** explicitly when ready. Prescriptions,
+examination requests and private documents can be added after saving the
+consultation. Historical temperature values without a known unit stay unchanged
+until a doctor confirms their unit; changing that label does not convert them.
+
+Manual scheduled-booking exceptions require the confirmation checkbox. They
+retain the chosen date/time and record the authorizing staff member. Queue
+priority can be reordered without changing scheduled booking times or queue
+ticket identities. Each patient still has at most one active booking per
+doctor/day; reschedule that booking instead of creating an accidental duplicate.
+
+Medication autocomplete reuses the signed-in doctor's previous prescription
+names, not a verified Moroccan medication catalogue. Manual names, strengths,
+forms, dosage and frequency remain editable. A verified catalogue requires an
+approved reference dataset and its reuse conditions.
+
+Documents accept PDF/JPEG/PNG up to 10 MB and are served only through
+doctor-authorized routes, never public storage URLs. Configure PHP/web-server
+upload limits above 10 MB (for example `upload_max_filesize=12M`,
+`post_max_size=16M`). Back up private files with the database and keep production
+storage outside the public web root. This is document storage, not malware
+scanning or advanced medical imaging.
+
 - `APP_TIMEZONE` — working hours and "today" comparisons use this timezone;
   set it to the clinic's local zone in production.
 - Working hours, clinic info, appointment duration, and language live in the

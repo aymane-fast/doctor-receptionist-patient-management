@@ -6,7 +6,7 @@
 <div class="space-y-6">
     <x-ui.page-header
         :title="__('Appointment Queue')"
-        :description="__('Manage queue order and estimated consultation times.')"
+        :description="__('workflow.priority_help')"
         icon="fa-list-ol"
         :eyebrow="__('Daily flow')"
     >
@@ -61,7 +61,7 @@
                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Queue') }}</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Patient') }}</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Estimated Time') }}</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ $selectedDoctor?->usesQueueMode() ? __('Estimated Time') : __('appointments.time') }}</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Status') }}</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Reason') }}</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Actions') }}</th>
@@ -72,7 +72,7 @@
                         <tr class="{{ $appointment->status === 'in_progress' ? 'bg-sky-50' : 'bg-white' }}">
                             <td class="px-6 py-4">
                                 <span class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-100 text-teal-800 font-bold">
-                                    #{{ $appointment->queue_number }}
+                                    {{ $appointment->queue_number ? '#'.$appointment->queue_number : ($appointment->queue_position ?? '—') }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
@@ -82,7 +82,8 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="font-semibold text-gray-900">{{ $appointment->displayTime() }}</div>
-                                <div class="text-xs text-gray-500">{{ __('Approximate') }}</div>
+                                <div class="text-xs text-gray-500">{{ $appointment->isQueueMode() ? __('Approximate') : __('Scheduled') }}</div>
+                                @if($appointment->scheduling_override)<span class="text-xs text-amber-700">{{ __('workflow.overridden') }}</span>@endif
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-col gap-1">
@@ -122,6 +123,7 @@
                                         @endif
                                         <form method="POST" action="{{ route('appointments.set-current', $appointment) }}">
                                             @csrf
+                                            @if(auth()->user()->isDoctor())<input type="hidden" name="return_to_workspace" value="1">@endif
                                             <button class="btn-ghost px-3 py-2 text-sm">
                                                 {{ __('Start') }}
                                             </button>

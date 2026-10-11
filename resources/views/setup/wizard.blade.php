@@ -37,20 +37,20 @@
         $initialStep = 4;
     }
 
-    $oldDoctors = old('doctors', []);
-    $oldReceptionists = old('receptionists', []);
+    $oldDoctors = collect(is_array(old('doctors')) ? old('doctors') : [])->filter(fn($row) => is_array($row))->take(50)->values()->all();
+    $oldReceptionists = collect(is_array(old('receptionists')) ? old('receptionists') : [])->filter(fn($row) => is_array($row))->take(50)->values()->all();
 @endphp
-<body class="min-h-screen py-8 px-4">
+<body class="compact-page min-h-screen py-4 px-4">
     <div class="max-w-6xl mx-auto flex justify-end pb-3">@include('components.language-switcher')</div>
     <div class="max-w-6xl mx-auto">
         <div class="wizard-shell rounded-[2rem] overflow-hidden">
-            <div class="brand-gradient px-8 py-10 text-white">
+            <div id="setup-intro" class="brand-gradient px-6 py-5 text-white">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                     <div class="max-w-2xl">
-                        <div class="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center mb-5">
+                        <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center mb-3">
                             <i class="fas fa-stethoscope text-3xl"></i>
                         </div>
-                        <h1 class="text-4xl font-bold tracking-tight">{{ __('Welcome to your clinic setup') }}</h1>
+                        <h1 class="text-2xl font-bold tracking-tight">{{ __('Welcome to your clinic setup') }}</h1>
                         <p class="mt-3 text-white/85 text-lg">
                             {{ __('Launch a ready-to-show demo instantly, or configure a production clinic in one guided pass.') }}
                         </p>
@@ -164,24 +164,24 @@
 
                     <div class="grid md:grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Clinic name') }}</label>
-                            <input type="text" name="clinic_name" value="{{ old('clinic_name') }}" class="form-control" required>
+                            <label for="setup_clinic_name" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Clinic name') }}</label>
+                            <input id="setup_clinic_name" type="text" name="clinic_name" value="{{ old('clinic_name') }}" class="form-control" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Clinic phone') }}</label>
-                            <input type="text" name="clinic_phone" value="{{ old('clinic_phone') }}" class="form-control" required>
+                            <label for="setup_clinic_phone" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Clinic phone') }}</label>
+                            <input id="setup_clinic_phone" type="text" name="clinic_phone" value="{{ old('clinic_phone') }}" class="form-control" required>
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Clinic address') }}</label>
-                            <textarea name="clinic_address" rows="3" class="form-control" required>{{ old('clinic_address') }}</textarea>
+                            <label for="setup_clinic_address" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Clinic address') }}</label>
+                            <textarea id="setup_clinic_address" name="clinic_address" rows="3" class="form-control" required>{{ old('clinic_address') }}</textarea>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Clinic email') }}</label>
-                            <input type="email" name="clinic_email" value="{{ old('clinic_email') }}" class="form-control">
+                            <label for="setup_clinic_email" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Clinic email') }}</label>
+                            <input id="setup_clinic_email" type="email" name="clinic_email" value="{{ old('clinic_email') }}" class="form-control">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Clinic website') }}</label>
-                            <input type="url" name="clinic_website" value="{{ old('clinic_website') }}" class="form-control" placeholder="https://">
+                            <label for="setup_clinic_website" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Clinic website') }}</label>
+                            <input id="setup_clinic_website" type="url" name="clinic_website" value="{{ old('clinic_website') }}" class="form-control" placeholder="https://">
                         </div>
                     </div>
 
@@ -206,8 +206,8 @@
                     </div>
 
                     <div id="queue-limit-wrapper" class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 hidden">
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Daily queue limit per doctor') }}</label>
-                        <input type="number" name="queue_daily_limit" min="1" max="500" value="{{ old('queue_daily_limit') }}" class="form-control" placeholder="{{ __('Optional') }}">
+                        <label for="setup_queue_daily_limit" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Daily queue limit per doctor') }}</label>
+                        <input id="setup_queue_daily_limit" type="number" name="queue_daily_limit" min="1" max="500" value="{{ old('queue_daily_limit') }}" class="form-control" placeholder="{{ __('Optional') }}">
                         <p class="mt-2 text-sm text-slate-500">{{ __('Leave empty if each doctor can accept as many queue entries as needed.') }}</p>
                     </div>
 
@@ -236,12 +236,12 @@
 
                                     <div class="mt-4 grid grid-cols-2 gap-3" data-working-fields="{{ $day }}">
                                         <div>
-                                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">{{ __('Start') }}</label>
-                                            <input type="time" name="{{ $day }}_start" value="{{ old("{$day}_start", $defaults['start']) }}" class="form-control">
+                                            <label for="setup_{{ $day }}_start" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">{{ __('Start') }}</label>
+                                            <input id="setup_{{ $day }}_start" type="time" name="{{ $day }}_start" value="{{ old("{$day}_start", $defaults['start']) }}" class="form-control">
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">{{ __('End') }}</label>
-                                            <input type="time" name="{{ $day }}_end" value="{{ old("{$day}_end", $defaults['end']) }}" class="form-control">
+                                            <label for="setup_{{ $day }}_end" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">{{ __('End') }}</label>
+                                            <input id="setup_{{ $day }}_end" type="time" name="{{ $day }}_end" value="{{ old("{$day}_end", $defaults['end']) }}" class="form-control">
                                         </div>
                                     </div>
                                 </div>
@@ -269,28 +269,28 @@
 
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Full name') }}</label>
-                                <input type="text" name="owner_doctor[name]" value="{{ old('owner_doctor.name') }}" class="form-control" required>
+                                <label for="setup_owner_doctor_name" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Full name') }}</label>
+                                <input id="setup_owner_doctor_name" type="text" name="owner_doctor[name]" value="{{ old('owner_doctor.name') }}" class="form-control" required>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Email') }}</label>
-                                <input type="email" name="owner_doctor[email]" value="{{ old('owner_doctor.email') }}" class="form-control" required>
+                                <label for="setup_owner_doctor_email" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Email') }}</label>
+                                <input id="setup_owner_doctor_email" type="email" name="owner_doctor[email]" value="{{ old('owner_doctor.email') }}" class="form-control" required>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Password') }}</label>
-                                <input type="password" name="owner_doctor[password]" class="form-control" required>
+                                <label for="setup_owner_doctor_password" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Password') }}</label>
+                                <input id="setup_owner_doctor_password" type="password" name="owner_doctor[password]" class="form-control" required>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Confirm password') }}</label>
-                                <input type="password" name="owner_doctor[password_confirmation]" class="form-control" required>
+                                <label for="setup_owner_doctor_password_confirmation" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Confirm password') }}</label>
+                                <input id="setup_owner_doctor_password_confirmation" type="password" name="owner_doctor[password_confirmation]" class="form-control" required>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Phone') }}</label>
-                                <input type="text" name="owner_doctor[phone]" value="{{ old('owner_doctor.phone') }}" class="form-control">
+                                <label for="setup_owner_doctor_phone" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Phone') }}</label>
+                                <input id="setup_owner_doctor_phone" type="text" name="owner_doctor[phone]" value="{{ old('owner_doctor.phone') }}" class="form-control">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Address') }}</label>
-                                <input type="text" name="owner_doctor[address]" value="{{ old('owner_doctor.address') }}" class="form-control">
+                                <label for="setup_owner_doctor_address" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Address') }}</label>
+                                <input id="setup_owner_doctor_address" type="text" name="owner_doctor[address]" value="{{ old('owner_doctor.address') }}" class="form-control">
                             </div>
                         </div>
                     </div>
@@ -310,11 +310,11 @@
                             @foreach($oldDoctors as $index => $doctor)
                                 <div class="staff-card rounded-2xl border border-slate-200 p-4">
                                     <div class="grid md:grid-cols-2 gap-4">
-                                        <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Name') }}</label><input type="text" name="doctors[{{ $index }}][name]" value="{{ $doctor['name'] ?? '' }}" class="form-control"></div>
-                                        <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Email') }}</label><input type="email" name="doctors[{{ $index }}][email]" value="{{ $doctor['email'] ?? '' }}" class="form-control"></div>
-                                        <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Password') }}</label><input type="password" name="doctors[{{ $index }}][password]" class="form-control"></div>
-                                        <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Phone') }}</label><input type="text" name="doctors[{{ $index }}][phone]" value="{{ $doctor['phone'] ?? '' }}" class="form-control"></div>
-                                        <div class="md:col-span-2"><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Address') }}</label><input type="text" name="doctors[{{ $index }}][address]" value="{{ $doctor['address'] ?? '' }}" class="form-control"></div>
+                                        <div><label for="setup_doctors_{{ $index }}_name" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Name') }}</label><input id="setup_doctors_{{ $index }}_name" type="text" name="doctors[{{ $index }}][name]" value="{{ $doctor['name'] ?? '' }}" class="form-control"></div>
+                                        <div><label for="setup_doctors_{{ $index }}_email" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Email') }}</label><input id="setup_doctors_{{ $index }}_email" type="email" name="doctors[{{ $index }}][email]" value="{{ $doctor['email'] ?? '' }}" class="form-control"></div>
+                                        <div><label for="setup_doctors_{{ $index }}_password" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Password') }}</label><input id="setup_doctors_{{ $index }}_password" type="password" name="doctors[{{ $index }}][password]" class="form-control"></div>
+                                        <div><label for="setup_doctors_{{ $index }}_phone" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Phone') }}</label><input id="setup_doctors_{{ $index }}_phone" type="text" name="doctors[{{ $index }}][phone]" value="{{ $doctor['phone'] ?? '' }}" class="form-control"></div>
+                                        <div class="md:col-span-2"><label for="setup_doctors_{{ $index }}_address" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Address') }}</label><input id="setup_doctors_{{ $index }}_address" type="text" name="doctors[{{ $index }}][address]" value="{{ $doctor['address'] ?? '' }}" class="form-control"></div>
                                     </div>
                                     <div class="mt-4 text-right">
                                         <button type="button" class="text-sm font-semibold text-red-600 hover:text-red-700" data-remove-staff>{{ __('Remove') }}</button>
@@ -339,11 +339,11 @@
                             @foreach($oldReceptionists as $index => $receptionist)
                                 <div class="staff-card rounded-2xl border border-slate-200 p-4">
                                     <div class="grid md:grid-cols-2 gap-4">
-                                        <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Name') }}</label><input type="text" name="receptionists[{{ $index }}][name]" value="{{ $receptionist['name'] ?? '' }}" class="form-control"></div>
-                                        <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Email') }}</label><input type="email" name="receptionists[{{ $index }}][email]" value="{{ $receptionist['email'] ?? '' }}" class="form-control"></div>
-                                        <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Password') }}</label><input type="password" name="receptionists[{{ $index }}][password]" class="form-control"></div>
-                                        <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Phone') }}</label><input type="text" name="receptionists[{{ $index }}][phone]" value="{{ $receptionist['phone'] ?? '' }}" class="form-control"></div>
-                                        <div class="md:col-span-2"><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Address') }}</label><input type="text" name="receptionists[{{ $index }}][address]" value="{{ $receptionist['address'] ?? '' }}" class="form-control"></div>
+                                        <div><label for="setup_receptionists_{{ $index }}_name" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Name') }}</label><input id="setup_receptionists_{{ $index }}_name" type="text" name="receptionists[{{ $index }}][name]" value="{{ $receptionist['name'] ?? '' }}" class="form-control"></div>
+                                        <div><label for="setup_receptionists_{{ $index }}_email" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Email') }}</label><input id="setup_receptionists_{{ $index }}_email" type="email" name="receptionists[{{ $index }}][email]" value="{{ $receptionist['email'] ?? '' }}" class="form-control"></div>
+                                        <div><label for="setup_receptionists_{{ $index }}_password" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Password') }}</label><input id="setup_receptionists_{{ $index }}_password" type="password" name="receptionists[{{ $index }}][password]" class="form-control"></div>
+                                        <div><label for="setup_receptionists_{{ $index }}_phone" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Phone') }}</label><input id="setup_receptionists_{{ $index }}_phone" type="text" name="receptionists[{{ $index }}][phone]" value="{{ $receptionist['phone'] ?? '' }}" class="form-control"></div>
+                                        <div class="md:col-span-2"><label for="setup_receptionists_{{ $index }}_address" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Address') }}</label><input id="setup_receptionists_{{ $index }}_address" type="text" name="receptionists[{{ $index }}][address]" value="{{ $receptionist['address'] ?? '' }}" class="form-control"></div>
                                     </div>
                                     <div class="mt-4 text-right">
                                         <button type="button" class="text-sm font-semibold text-red-600 hover:text-red-700" data-remove-staff>{{ __('Remove') }}</button>
@@ -375,11 +375,11 @@
     <template id="doctor-template">
         <div class="staff-card rounded-2xl border border-slate-200 p-4">
             <div class="grid md:grid-cols-2 gap-4">
-                <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Name') }}</label><input type="text" data-name="name" class="form-control"></div>
-                <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Email') }}</label><input type="email" data-name="email" class="form-control"></div>
-                <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Password') }}</label><input type="password" data-name="password" class="form-control"></div>
-                <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Phone') }}</label><input type="text" data-name="phone" class="form-control"></div>
-                <div class="md:col-span-2"><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Address') }}</label><input type="text" data-name="address" class="form-control"></div>
+                <div><label for="setup_name" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Name') }}</label><input id="setup_name" type="text" data-name="name" class="form-control"></div>
+                <div><label for="setup_email" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Email') }}</label><input id="setup_email" type="email" data-name="email" class="form-control"></div>
+                <div><label for="setup_password" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Password') }}</label><input id="setup_password" type="password" data-name="password" class="form-control"></div>
+                <div><label for="setup_phone" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Phone') }}</label><input id="setup_phone" type="text" data-name="phone" class="form-control"></div>
+                <div class="md:col-span-2"><label for="setup_address" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Address') }}</label><input id="setup_address" type="text" data-name="address" class="form-control"></div>
             </div>
             <div class="mt-4 text-right">
                 <button type="button" class="text-sm font-semibold text-red-600 hover:text-red-700" data-remove-staff>{{ __('Remove') }}</button>
@@ -390,11 +390,11 @@
     <template id="receptionist-template">
         <div class="staff-card rounded-2xl border border-slate-200 p-4">
             <div class="grid md:grid-cols-2 gap-4">
-                <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Name') }}</label><input type="text" data-name="name" class="form-control"></div>
-                <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Email') }}</label><input type="email" data-name="email" class="form-control"></div>
-                <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Password') }}</label><input type="password" data-name="password" class="form-control"></div>
-                <div><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Phone') }}</label><input type="text" data-name="phone" class="form-control"></div>
-                <div class="md:col-span-2"><label class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Address') }}</label><input type="text" data-name="address" class="form-control"></div>
+                <div><label for="setup_name" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Name') }}</label><input id="setup_name" type="text" data-name="name" class="form-control"></div>
+                <div><label for="setup_email" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Email') }}</label><input id="setup_email" type="email" data-name="email" class="form-control"></div>
+                <div><label for="setup_password" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Password') }}</label><input id="setup_password" type="password" data-name="password" class="form-control"></div>
+                <div><label for="setup_phone" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Phone') }}</label><input id="setup_phone" type="text" data-name="phone" class="form-control"></div>
+                <div class="md:col-span-2"><label for="setup_address" class="block text-sm font-semibold text-slate-700 mb-2">{{ __('Address') }}</label><input id="setup_address" type="text" data-name="address" class="form-control"></div>
             </div>
             <div class="mt-4 text-right">
                 <button type="button" class="text-sm font-semibold text-red-600 hover:text-red-700" data-remove-staff>{{ __('Remove') }}</button>
@@ -421,6 +421,7 @@
 
         function showStep(step) {
             currentStep = step;
+            document.getElementById('setup-intro').classList.toggle('hidden', step > 1);
 
             panels.forEach((panel) => {
                 panel.classList.toggle('hidden', Number(panel.dataset.step) !== step);
@@ -490,6 +491,9 @@
 
             fragment.querySelectorAll('[data-name]').forEach((input) => {
                 input.name = `${prefix}[${index}][${input.dataset.name}]`;
+                const label = input.parentElement.querySelector('label');
+                input.id = `setup_${prefix}_${index}_${input.dataset.name}`;
+                if (label) label.htmlFor = input.id;
             });
 
             list.appendChild(fragment);

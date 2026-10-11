@@ -132,15 +132,21 @@
 
                         <div>
                             <label for="temperature" class="block text-sm font-medium text-gray-700 mb-2">
-                                {{ __('medical_records.temperature') }} (°F)
+                                {{ __('medical_records.temperature') }} ({{ $medicalRecord->temperature_unit ? '°'.$medicalRecord->temperature_unit : __('workflow.legacy_unit') }})
                             </label>
                             <input type="number" id="temperature" name="temperature" 
                                    value="{{ old('temperature', $medicalRecord->temperature) }}" 
-                                   step="0.1" min="90" max="110"
+                                   step="0.1" min="0" max="150"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             @error('temperature')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
+                            <label for="temperature_unit">{{ __('workflow.temperature_unit') }}</label>
+                            <select id="temperature_unit" name="temperature_unit">
+                                <option value="" @selected(!$medicalRecord->temperature_unit)>{{ __('workflow.legacy_unit') }}</option>
+                                <option value="C" @selected($medicalRecord->temperature_unit === 'C')>°C</option>
+                                <option value="F" @selected($medicalRecord->temperature_unit === 'F')>°F</option>
+                            </select>
                         </div>
 
                         <div>

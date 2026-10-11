@@ -27,14 +27,14 @@
                     $value = old($errorKey, data_get($values, $key));
                     $isWide = ($field['type'] ?? 'text') === 'textarea';
                 @endphp
-                <div class="{{ $isWide ? 'md:col-span-2' : '' }}">
+                <div>
                     <label for="specialty_{{ $key }}" class="mb-2 block text-sm font-semibold text-slate-700">
                         {{ __($field['label']) }}
                         <span class="font-normal text-slate-400">({{ __('common.optional') }})</span>
                     </label>
 
                     @if(($field['type'] ?? 'text') === 'textarea')
-                        <textarea id="specialty_{{ $key }}" name="specialty_data[{{ $key }}]" rows="3"
+                        <textarea id="specialty_{{ $key }}" name="specialty_data[{{ $key }}]" rows="2"
                             class="form-control w-full @error($errorKey) border-red-500 @enderror">{{ $value }}</textarea>
                     @elseif(($field['type'] ?? 'text') === 'select')
                         <select id="specialty_{{ $key }}" name="specialty_data[{{ $key }}]"

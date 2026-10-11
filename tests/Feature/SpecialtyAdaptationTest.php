@@ -147,7 +147,8 @@ it('uses the specialty in secondary workflows and clinical exports', function ()
 
     $this->actingAs($doctor)->get(route('prescriptions.create'))
         ->assertOk()
-        ->assertSee('Ibuprofen');
+        ->assertSee('specialty-medication-suggestions')
+        ->assertDontSee('value="Ibuprofen"', false);
 
     $specialties = app(SpecialtyService::class);
     $export = app(DataExportService::class)->exportData(['patients', 'medical_records']);

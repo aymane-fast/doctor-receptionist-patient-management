@@ -24,6 +24,10 @@
         </x-slot:actions>
     </x-ui.page-header>
     <x-patients.guardian-summary :patient="$medicalRecord->patient" />
+    <p class="text-sm text-slate-500">{{ $medicalRecord->appointment?->status === 'in_progress' ? __('workflow.this_consultation') : __('workflow.historical') }} · {{ $medicalRecord->patient->full_name }} · #{{ $medicalRecord->id }}</p>
+    <details class="workflow-panel"><summary class="cursor-pointer font-semibold">{{ __('workflow.examinations') }} · {{ __('workflow.documents') }}</summary>
+        <div class="mt-3 space-y-4">@include('clinical.tools', ['patient' => $medicalRecord->patient])</div>
+    </details>
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Main Content -->
@@ -140,7 +144,7 @@
                             <i class="fas fa-thermometer-half text-white text-sm"></i>
                         </div>
                         <p class="text-xs font-medium text-gray-600 mb-1">{{ __('medical_records.temperature') }}</p>
-                        <p class="text-lg font-bold text-gray-900">{{ $medicalRecord->temperature }}°C</p>
+                        <p class="text-lg font-bold text-gray-900">{{ $medicalRecord->temperature }} {{ $medicalRecord->temperature_unit ? '°'.$medicalRecord->temperature_unit : __('workflow.legacy_unit') }}</p>
                     </div>
                     @endif
                     

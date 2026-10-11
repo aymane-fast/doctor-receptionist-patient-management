@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'clinic_information' => 'Informations du cabinet',
+    'remove' => 'Retirer',
+    'add_user' => 'Ajouter un membre',
     'dashboard' => 'Tableau de bord',
     'appointments' => 'Rendez-vous',
     'patients' => 'Patients',

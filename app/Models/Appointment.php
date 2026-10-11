@@ -20,7 +20,17 @@ class Appointment extends Model
      */
     public const ACTIVE_STATUSES = ['scheduled', 'in_progress'];
 
+    /** Manual scheduled priority wins; otherwise arrived patients come first. */
+    public function scopeInOperationalOrder($query)
+    {
+        return $query->orderByRaw("CASE WHEN appointment_mode = 'scheduled' THEN COALESCE(queue_position, 2147483647) ELSE 2147483647 END")
+            ->orderByRaw('CASE WHEN checked_in_at IS NULL THEN 1 ELSE 0 END')
+            ->orderByRaw('CASE WHEN queue_position IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('queue_position')->orderBy('appointment_time')->orderBy('id');
+    }
+
     protected $fillable = [
+        'scheduling_override', 'override_by', 'override_reason',
         'patient_id',
         'doctor_id',
         'appointment_mode',
@@ -37,6 +47,7 @@ class Appointment extends Model
     ];
 
     protected $casts = [
+        'scheduling_override' => 'boolean',
         'appointment_date' => 'date',
         'appointment_time' => 'datetime:H:i',
         'estimated_time' => 'datetime:H:i',

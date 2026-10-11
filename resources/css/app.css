@@ -44,9 +44,9 @@
     --clinic-radius: 1rem;
     --clinic-radius-lg: 1.35rem;
     --clinic-shadow-sm: 0 1px 2px rgba(23, 41, 37, 0.04), 0 5px 18px rgba(23, 41, 37, 0.04);
-    --clinic-shadow: 0 18px 50px -32px rgba(17, 56, 49, 0.42), 0 2px 10px rgba(23, 41, 37, 0.04);
+    --clinic-shadow: 0 2px 8px rgba(23, 41, 37, 0.04);
     --clinic-shadow-lg: 0 28px 70px -38px rgba(17, 56, 49, 0.5);
-    --sidebar-width: 17.25rem;
+    --sidebar-width: 15rem;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -57,14 +57,44 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Practical work surfaces: compact groups, not miniature text. */
+.workflow-form { padding: 1.1rem; }
+.dashboard-layout { display: flex; flex-direction: column; gap: 1rem; }
+.dashboard-layout > * { order: 4; margin: 0 !important; }
+.dashboard-layout > .page-header { order: 0; }
+.dashboard-layout > .dashboard-current-panel { order: 1; }
+.dashboard-layout > .dashboard-next { order: 2; }
+.dashboard-layout > .dashboard-quick-panel { order: 10; }
+.workflow-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+.workflow-grid .full-width { grid-column: 1 / -1; }
+.workflow-panel { padding: 1rem; border: 1px solid var(--clinic-border); border-radius: .85rem; background: #fff; }
+.workflow-panel h2, .workflow-panel h3 { font-size: 1.05rem; font-weight: 750; margin-bottom: .65rem; }
+.workflow-panel label { display: block; font-size: .8rem; font-weight: 650; margin-bottom: .3rem; }
+.workflow-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+.workflow-actions > a, .workflow-actions > button, .workflow-actions button { padding: .55rem .85rem; }
+.workspace-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr); gap: 1rem; align-items: start; }
+.workspace-tabs { display: flex; gap: .5rem; flex-wrap: wrap; margin: .75rem 0; }
+.workspace-tabs a { padding: .5rem .8rem; border: 1px solid var(--clinic-border); border-radius: .6rem; background: #fff; font-weight: 650; }
+.clinical-row { padding: .65rem 0; border-bottom: 1px solid var(--clinic-border); }
+.compact-page .p-6, .compact-page .p-8 { padding: 1.1rem; }
+.compact-page .space-y-6 > :not(:last-child), .compact-page .space-y-8 > :not(:last-child) { margin-bottom: 1rem; }
+.compact-page .gap-6 { gap: 1rem; }
+.compact-page .py-16 { padding-block: 2rem; }
+.compact-page .py-10 { padding-block: 1.5rem; }
+.compact-page textarea { min-height: 4.5rem; }
+.settings-layout > .section-card { padding: 1rem; }
+.settings-navigation { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 0; }
+.settings-navigation a { padding: .4rem .7rem; border: 1px solid var(--clinic-border); border-radius: .5rem; background: white; }
+.wizard-shell input:not([type='radio']):not([type='checkbox']):not([type='hidden']), .wizard-shell select, .wizard-shell textarea { width: 100%; }
+@media (max-width: 850px) { .workspace-layout { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .workflow-grid { grid-template-columns: 1fr; } }
+
 body {
     min-height: 100vh;
     margin: 0;
     color: var(--clinic-ink);
     background-color: var(--clinic-page);
-    background-image:
-        radial-gradient(circle at 1px 1px, rgba(18, 110, 100, 0.055) 1px, transparent 0),
-        linear-gradient(135deg, rgba(227, 243, 239, 0.52), transparent 34rem);
+    background-image: none;
     background-size: 24px 24px, 100% 100%;
     font-family: 'Manrope', 'Segoe UI Variable', 'Segoe UI', sans-serif;
     font-size: 0.9375rem;
@@ -591,16 +621,15 @@ button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: no
     justify-content: space-between;
     gap: 1.5rem;
     overflow: hidden;
-    padding: clamp(1.25rem, 2.3vw, 2rem);
-    background:
-        linear-gradient(110deg, rgba(227, 243, 239, 0.75), transparent 48%),
-        rgba(255, 255, 255, 0.97);
+    padding: 1rem 1.25rem;
+    background: var(--clinic-surface);
     border: 1px solid var(--clinic-border);
     border-radius: var(--clinic-radius-lg);
     box-shadow: var(--clinic-shadow);
 }
 
 .page-header::after {
+    display: none;
     position: absolute;
     top: -5.5rem;
     right: -3.5rem;
@@ -648,7 +677,7 @@ button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: no
 .page-header-title {
     color: var(--clinic-ink);
     font-family: 'Newsreader', Georgia, serif;
-    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
     font-weight: 650;
     line-height: 1.05;
     letter-spacing: -0.025em;
@@ -888,7 +917,7 @@ input[type='checkbox']:checked + .export-choice .export-choice-check {
 
 .btn-secondary { color: #425650 !important; background: #fff !important; border-color: var(--clinic-border-strong) !important; }
 .btn-secondary:hover { color: var(--clinic-primary-strong) !important; background: var(--clinic-primary-wash) !important; border-color: #a9c9c2 !important; }
-.btn-ghost { color: var(--clinic-primary-strong) !important; background: var(--clinic-primary-soft) !important; border-color: rgba(18, 110, 100, 0.12) !important; }
+.btn-ghost { color: #425650 !important; background: #f6f8f7 !important; border-color: var(--clinic-border) !important; }
 .btn-ghost:hover { background: #d4ebe5 !important; }
 .btn-danger { color: #943434 !important; background: var(--clinic-danger-soft) !important; border-color: #f4cecb !important; }
 .btn-danger:hover { background: #f8dcda !important; border-color: #eeb9b5 !important; }
@@ -897,9 +926,13 @@ input[type='checkbox']:checked + .export-choice .export-choice-check {
 .form-control, .modal-input,
 input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
 select, textarea {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid #aebfba;
+    padding: .55rem .7rem;
     color: var(--clinic-ink);
     background-color: #fff;
-    border-color: var(--clinic-border-strong) !important;
+    border-color: #aebfba !important;
     border-radius: 0.75rem !important;
     box-shadow: 0 1px 2px rgba(23, 41, 37, 0.025);
     transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;

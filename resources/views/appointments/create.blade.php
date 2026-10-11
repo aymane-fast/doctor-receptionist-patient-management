@@ -201,6 +201,8 @@
                     <input type="hidden" name="status" value="scheduled">
                 </div>
 
+                @include('appointments.override-fields', ['appointment' => null])
+
                 <!-- Purpose & Notes in 2 columns -->
                 <div class="grid md:grid-cols-2 gap-4">
                     <!-- Purpose -->
@@ -391,6 +393,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         timeWrapper.classList.toggle('hidden', isQueue);
         queueNotice.classList.toggle('hidden', !isQueue);
+        const overrideFields = document.getElementById('scheduling_override_fields');
+        overrideFields.classList.toggle('hidden', isQueue);
+        overrideFields.querySelectorAll('input').forEach(input => { input.disabled = isQueue; });
         timeInput.required = !isQueue;
         if (bookNowBtn) {
             bookNowBtn.classList.toggle('hidden', isQueue);
@@ -600,13 +605,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     bookNowMessage.innerHTML = `<i class="fas fa-info-circle text-teal-600 mr-1"></i>${data.message}`;
                     bookNowMessage.classList.remove('hidden');
                 } else if (data.available) {
-                    timeInput.value = data.next_slot.time;
+                    if (!timeInput.value || confirm(@json(__('workflow.replace_time')) + ' ' + data.next_slot.time)) {
+                        timeInput.value = data.next_slot.time;
+                    }
                     bookNowMessage.innerHTML = `<i class="fas fa-info-circle text-teal-600 mr-1"></i>${data.message}`;
                     bookNowMessage.classList.remove('hidden');
                 } else {
                     if (data.next_available_date && data.next_available_time) {
-                        dateInput.value = data.next_available_date;
-                        timeInput.value = data.next_available_time;
+                        if (confirm(@json(__('workflow.use_next_suggestion')) + ' ' + data.next_available_date + ' ' + data.next_available_time)) {
+                            dateInput.value = data.next_available_date;
+                            timeInput.value = data.next_available_time;
+                        }
                     }
                     bookNowMessage.innerHTML = `<i class="fas fa-exclamation-triangle text-orange-500 mr-1"></i>${data.message}`;
                     bookNowMessage.classList.remove('hidden');

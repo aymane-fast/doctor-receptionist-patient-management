@@ -150,7 +150,7 @@ class AppointmentSchedulingService
             if ($this->hasActiveSameDayAppointment($data['patient_id'], $data['doctor_id'], $data['appointment_date'])) {
                 throw new \InvalidArgumentException(__('appointments.already_has_appointment_today'));
             }
-            if ($this->hasScheduledConflict($data['doctor_id'], $data['appointment_date'], $data['appointment_time'])) {
+            if (empty($data['scheduling_override']) && $this->hasScheduledConflict($data['doctor_id'], $data['appointment_date'], $data['appointment_time'])) {
                 throw new \InvalidArgumentException(__('Doctor already has an appointment at this time.'));
             }
 
@@ -203,7 +203,7 @@ class AppointmentSchedulingService
     public function validateReopeningAppointment(Appointment $appointment): ?string
     {
         $date = $appointment->appointment_date->toDateString();
-        if ($appointment->appointment_date->lt(today()) || !$this->workingWindow($date)) {
+        if ($appointment->appointment_date->lt(today()) || ! $this->workingWindow($date)) {
             return __('Choose a future working day for this appointment.');
         }
         if ($this->hasActiveSameDayAppointment($appointment->patient_id, $appointment->doctor_id, $date, $appointment->id)) {
@@ -216,6 +216,7 @@ class AppointmentSchedulingService
         if (Carbon::parse($date.' '.$time)->isPast()) {
             return __('Appointment time has already passed. Please choose a future time.');
         }
+
         return $this->validateScheduledTime($date, $time)
             ?? ($this->hasScheduledConflict($appointment->doctor_id, $date, $time, $appointment->id)
                 ? __('appointments.slot_taken_reschedule') : null);
@@ -255,32 +256,60 @@ class AppointmentSchedulingService
 
     public function moveQueueAppointment(Appointment $appointment, string $direction): bool
     {
-        if (! $appointment->isQueueMode() || $appointment->status !== 'scheduled') {
+        if ($appointment->status !== 'scheduled') {
             return false;
         }
 
-        $operator = $direction === 'up' ? '<' : '>';
-        $order = $direction === 'up' ? 'desc' : 'asc';
+        return DB::transaction(function () use ($appointment, $direction) {
+            \App\Models\User::whereKey($appointment->doctor_id)->lockForUpdate()->firstOrFail();
+            $appointment->refresh();
+            if ($appointment->status !== 'scheduled') {
+                return false;
+            }
+            if ($appointment->isScheduledMode()) {
+                // Reorder operational priority, never the booked date/time.
+                $waiting = Appointment::where('doctor_id', $appointment->doctor_id)
+                    ->whereDate('appointment_date', $appointment->appointment_date)->where('status', 'scheduled')
+                    ->where('appointment_mode', 'scheduled')
+                    ->inOperationalOrder()->get();
+                $index = $waiting->search(fn ($row) => $row->id === $appointment->id);
+                $other = $direction === 'up' ? $index - 1 : $index + 1;
+                if ($index === false || ! isset($waiting[$other])) {
+                    return false;
+                }
+                $swapped = $waiting[$index];
+                $waiting[$index] = $waiting[$other];
+                $waiting[$other] = $swapped;
+                foreach ($waiting as $position => $row) {
+                    $row->updateQuietly(['queue_position' => $position + 1]);
+                }
 
-        $swapWith = Appointment::where('doctor_id', $appointment->doctor_id)
-            ->whereDate('appointment_date', $appointment->appointment_date)
-            ->where('appointment_mode', 'queue')
-            ->where('status', 'scheduled')
-            ->where('queue_position', $operator, $appointment->queue_position)
-            ->orderBy('queue_position', $order)
-            ->first();
+                return true;
+            }
 
-        if (! $swapWith) {
-            return false;
-        }
+            $operator = $direction === 'up' ? '<' : '>';
+            $order = $direction === 'up' ? 'desc' : 'asc';
 
-        $currentPosition = $appointment->queue_position;
-        $appointment->update(['queue_position' => $swapWith->queue_position]);
-        $swapWith->update(['queue_position' => $currentPosition]);
+            $swapWith = Appointment::where('doctor_id', $appointment->doctor_id)
+                ->whereDate('appointment_date', $appointment->appointment_date)
+                ->where('appointment_mode', 'queue')
+                ->where('status', 'scheduled')
+                ->where('queue_position', $operator, $appointment->queue_position)
+                ->orderBy('queue_position', $order)
+                ->first();
 
-        $this->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
+            if (! $swapWith) {
+                return false;
+            }
 
-        return true;
+            $currentPosition = $appointment->queue_position;
+            $appointment->update(['queue_position' => $swapWith->queue_position]);
+            $swapWith->update(['queue_position' => $currentPosition]);
+
+            $this->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
+
+            return true;
+        }, 3);
     }
 
     public function validateQueueCapacity(int $doctorId, string|Carbon $date): ?string
@@ -369,8 +398,8 @@ class AppointmentSchedulingService
 
     /**
      * Promote today's next patient to "in consultation" for this doctor.
-     * Patients who have checked in (arrived) always come first; if nobody
-     * has arrived yet, fall back to the planned order.
+     * Arrived patients come first by default. Explicit scheduled priority
+     * is respected, using the same order as both dashboards and workspace.
      */
     public function promoteNextPatient(int $doctorId): ?Appointment
     {
@@ -378,15 +407,7 @@ class AppointmentSchedulingService
             ->whereDate('appointment_date', today())
             ->where('status', 'scheduled');
 
-        $next = (clone $waiting)
-            ->whereNotNull('checked_in_at')
-            ->orderBy('appointment_time')
-            ->orderBy('queue_position')
-            ->first()
-            ?? $waiting
-                ->orderBy('appointment_time')
-                ->orderBy('queue_position')
-                ->first();
+        $next = $waiting->inOperationalOrder()->first();
 
         $next?->update([
             'status' => 'in_progress',

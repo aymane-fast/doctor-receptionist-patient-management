@@ -4,6 +4,11 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
+    @if(auth()->user()->isDoctor())
+        <details class="workflow-panel"><summary class="cursor-pointer font-semibold">{{ __('workflow.examinations') }} · {{ __('workflow.documents') }}</summary>
+            <div class="mt-3 space-y-4">@include('clinical.tools', ['medicalRecord' => null])</div>
+        </details>
+    @endif
     <!-- Critical Allergy Alert -->
     @if($patient->allergies)
     <div class="bg-red-50 border-l-4 border-red-500 rounded-xl p-6 shadow-lg">

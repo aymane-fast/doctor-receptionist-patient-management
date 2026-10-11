@@ -165,6 +165,8 @@
                         </div>
                     </div>
 
+                    @if($appointment->isScheduledMode()) @include('appointments.override-fields', ['appointment' => $appointment]) @endif
+
                     <!-- Purpose & Notes in 2 columns -->
                     <div class="grid md:grid-cols-2 gap-4 mt-4">
                         <!-- Purpose -->

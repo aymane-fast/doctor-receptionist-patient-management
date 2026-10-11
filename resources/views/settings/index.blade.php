@@ -3,7 +3,11 @@
 @section('title', __('common.settings'))
 
 @section('content')
-<div class="space-y-6">
+<div class="settings-layout space-y-4">
+    <nav class="settings-navigation" aria-label="{{ __('common.settings') }}">
+        <a href="#clinic-settings">{{ __('common.clinic_information') }}</a><a href="#workflow-settings">{{ __('appointments.title') }}</a>
+        @if(auth()->user()->isDoctor())<a href="#hours-settings">{{ __('common.working_hours') }}</a><a href="{{ route('register') }}">{{ __('common.add_user') }}</a>@endif
+    </nav>
     <x-ui.page-header
         :title="__('common.settings')"
         :description="__('common.configure_preferences')"
@@ -65,45 +69,45 @@
             </p>
         </div>
 
-        <form action="{{ route('settings.clinic-info') }}" method="POST" class="space-y-4">
+        <form id="clinic-settings" action="{{ route('settings.clinic-info') }}" method="POST" class="space-y-4">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="settings_clinic_name" class="block text-sm font-medium text-gray-700 mb-2">
                         {{ __('Clinic name') }} <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="clinic_name" value="{{ \App\Models\Setting::get('clinic_name', '') }}" 
+                    <input id="settings_clinic_name" type="text" name="clinic_name" value="{{ \App\Models\Setting::get('clinic_name', '') }}"
                            required
                            class="form-control w-full px-3 py-2">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="settings_clinic_phone" class="block text-sm font-medium text-gray-700 mb-2">
                         {{ __('Phone') }} <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="clinic_phone" value="{{ \App\Models\Setting::get('clinic_phone', '') }}" 
+                    <input id="settings_clinic_phone" type="text" name="clinic_phone" value="{{ \App\Models\Setting::get('clinic_phone', '') }}"
                            required
                            class="form-control w-full px-3 py-2">
                 </div>
             </div>
             
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="settings_clinic_address" class="block text-sm font-medium text-gray-700 mb-2">
                     {{ __('Full address') }} <span class="text-red-500">*</span>
                 </label>
-                <textarea name="clinic_address" rows="3" 
+                <textarea id="settings_clinic_address" name="clinic_address" rows="3"
                           required
                           class="form-control w-full px-3 py-2">{{ \App\Models\Setting::get('clinic_address', '') }}</textarea>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Email') }}</label>
-                    <input type="email" name="clinic_email" value="{{ \App\Models\Setting::get('clinic_email', '') }}" 
+                    <label for="settings_clinic_email" class="block text-sm font-medium text-gray-700 mb-2">{{ __('Email') }}</label>
+                    <input id="settings_clinic_email" type="email" name="clinic_email" value="{{ \App\Models\Setting::get('clinic_email', '') }}"
                            class="form-control w-full px-3 py-2">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Website') }}</label>
-                    <input type="url" name="clinic_website" value="{{ \App\Models\Setting::get('clinic_website', '') }}" 
+                    <label for="settings_clinic_website" class="block text-sm font-medium text-gray-700 mb-2">{{ __('Website') }}</label>
+                    <input id="settings_clinic_website" type="url" name="clinic_website" value="{{ \App\Models\Setting::get('clinic_website', '') }}"
                            class="form-control w-full px-3 py-2">
                 </div>
             </div>
@@ -162,17 +166,17 @@
             <p class="text-gray-600 text-sm">{{ __('appointments.appointment_settings_description') }}</p>
         </div>
 
-        <form action="{{ route('settings.appointment-duration') }}" method="POST" class="space-y-4">
+        <form id="workflow-settings" action="{{ route('settings.appointment-duration') }}" method="POST" class="space-y-4">
             @csrf
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="settings_appointment_duration" class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-hourglass-half text-teal-600 mr-1"></i>
                         {{ __('appointments.appointment_duration') }}
                     </label>
                     <div class="relative">
-                        <select name="appointment_duration" 
+                        <select id="settings_appointment_duration" name="appointment_duration"
                                 class="form-control w-full px-3 py-2 appearance-none bg-white">
                             @php $currentDuration = \App\Models\Setting::getAppointmentDuration(); @endphp
                             <option value="15" {{ $currentDuration == 15 ? 'selected' : '' }}>15 {{ __('common.minutes') }}</option>
@@ -202,7 +206,7 @@
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="appointment_mode" class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-list-ol text-teal-600 mr-1"></i>
                         {{ __('Appointment Mode') }}
                     </label>
@@ -217,11 +221,11 @@
                 </div>
 
                 <div id="queue_limit_wrapper">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="settings_queue_daily_limit" class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-users text-teal-600 mr-1"></i>
                         {{ __('Daily Queue Limit') }}
                     </label>
-                    <input type="number"
+                    <input id="settings_queue_daily_limit" type="number"
                            name="queue_daily_limit"
                            min="1"
                            max="500"
@@ -250,10 +254,10 @@
                 <i class="fas fa-clock text-teal-700 mr-2"></i>
                 {{ __('common.working_hours') }}
             </h3>
-            <p class="text-gray-600 text-sm">{{ __('common.working_hours_description') }}</p>
+            <p class="text-gray-600 text-sm">{{ __('workflow.hours_help') }}</p>
         </div>
 
-        <form action="{{ route('settings.working-hours') }}" method="POST" class="space-y-6">
+        <form id="hours-settings" action="{{ route('settings.working-hours') }}" method="POST" class="space-y-4">
             @csrf
             <input type="hidden" name="working_hours_form" value="1">
             
@@ -280,6 +284,7 @@
                         <h4 class="font-semibold text-gray-900">{{ $dayName }}</h4>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" 
+                                   aria-label="{{ $dayName }} — {{ __('Working day') }}"
                                    name="{{ $day }}_working" 
                                    value="1"
                                    class="sr-only peer"
@@ -291,8 +296,8 @@
                     
                     <div id="{{ $day }}_hours" class="space-y-3 {{ $dayWorking ? '' : 'opacity-50 pointer-events-none' }}">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.start_time') }}</label>
-                            <input type="time" 
+                            <label for="settings_{{ $day }}_start" class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.start_time') }}</label>
+                            <input id="settings_{{ $day }}_start" type="time"
                                    name="{{ $day }}_start" 
                                    value="{{ old($day.'_start', $workingHours[$day]['start_time']) }}"
                                    class="form-control w-full px-3 py-2"
@@ -300,8 +305,8 @@
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.end_time') }}</label>
-                            <input type="time" 
+                            <label for="settings_{{ $day }}_end" class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.end_time') }}</label>
+                            <input id="settings_{{ $day }}_end" type="time"
                                    name="{{ $day }}_end" 
                                    value="{{ old($day.'_end', $workingHours[$day]['end_time']) }}"
                                    class="form-control w-full px-3 py-2"

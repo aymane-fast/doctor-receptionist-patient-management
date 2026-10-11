@@ -67,6 +67,7 @@ class MedicalRecordSeeder extends Seeder
                 'height' => $height,
                 'blood_pressure' => "$systolic/$diastolic",
                 'temperature' => $temperature,
+                'temperature_unit' => 'C',
                 'heart_rate' => $heartRate,
                 'specialty_data' => $this->sampleRecordData(),
             ]);

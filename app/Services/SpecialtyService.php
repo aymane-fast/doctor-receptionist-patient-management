@@ -130,7 +130,7 @@ class SpecialtyService
      */
     public function defaultAppointmentReason(?string $specialty = null): string
     {
-        return $this->appointmentReasons($specialty)[0] ?? __('appointments.walk_in_consultation');
+        return __($this->appointmentReasons($specialty)[0] ?? 'appointments.walk_in_consultation');
     }
 
     public function defaultFollowUpReason(?string $specialty = null): string
@@ -139,7 +139,7 @@ class SpecialtyService
 
         foreach ($reasons as $reason) {
             if (str_contains(strtolower($reason), 'follow')) {
-                return $reason;
+                return __($reason);
             }
         }
 

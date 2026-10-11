@@ -52,6 +52,8 @@ it('finishes the current consultation and promotes an arrived patient when savin
     $this->actingAs($doctor)->post('/medical-records', ['patient_id' => $current->patient_id,
         'appointment_id' => $current->id, 'visit_date' => today()->toDateString(), 'diagnosis' => 'Audit'])
         ->assertSessionHasNoErrors();
+    expect($current->fresh()->status)->toBe('in_progress')->and($next->fresh()->status)->toBe('scheduled');
+    $this->post(route('appointments.mark-current-done'), ['appointment_id' => $current->id])->assertSessionHasNoErrors();
     expect($current->fresh()->status)->toBe('completed')->and($next->fresh()->status)->toBe('in_progress');
 });
 

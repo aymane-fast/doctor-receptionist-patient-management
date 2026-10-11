@@ -96,7 +96,7 @@ return [
     'search' => 'Search',
     'find_patients' => 'Find patients',
     'currently_outside_hours' => 'Currently Outside Working Hours',
-    'scheduling_limited' => 'Appointment scheduling is limited. You can view records and configure settings.',
+    'scheduling_limited' => 'Automatic suggestions use opening hours. Authorized staff can confirm a manual scheduling exception.',
     'currently_in_consultation' => 'Currently in consultation',
     'start_session' => 'Start Session',
     'no_next_patient_scheduled' => 'No next patient scheduled',

@@ -93,6 +93,13 @@ Route::middleware('auth')->group(function () {
 
 // Doctor-only routes
 Route::middleware(['auth', 'role:doctor'])->group(function () {
+    Route::get('/patients/{patient}/clinical-tools', [App\Http\Controllers\ClinicalToolsController::class, 'history'])->name('clinical.history');
+    Route::post('/patients/{patient}/examinations', [App\Http\Controllers\ClinicalToolsController::class, 'storeOrder'])->name('clinical.orders.store');
+    Route::patch('/examinations/{order}', [App\Http\Controllers\ClinicalToolsController::class, 'updateOrder'])->name('clinical.orders.update');
+    Route::get('/examinations/{order}/print', [App\Http\Controllers\ClinicalToolsController::class, 'printOrder'])->name('clinical.orders.print');
+    Route::post('/patients/{patient}/documents', [App\Http\Controllers\ClinicalToolsController::class, 'storeDocument'])->name('clinical.documents.store');
+    Route::get('/medical-documents/{document}', [App\Http\Controllers\ClinicalToolsController::class, 'viewDocument'])->name('clinical.documents.view');
+    Route::get('/api/medications/search', [App\Http\Controllers\ClinicalToolsController::class, 'medications'])->name('clinical.medications.search');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 
