@@ -26,6 +26,14 @@ Thumbs.db
 /output
 /database-schema.html
 
+# Consolidated local deliverables, captures, temporary databases and backups
+/workspace-artifacts/outputs/
+/workspace-artifacts/output/
+/workspace-artifacts/tmp/
+/workspace-artifacts/diagrams/database-schema.html
+/workspace-artifacts/move-manifest.csv
+/workspace-artifacts/empty-original-folders/
+
 # Presentation decks (generated assets are covered by /outputs and /output)
 *.pptx
 *.ppt

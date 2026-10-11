@@ -66,7 +66,9 @@ available if the practice later switches specialty. Do not use `migrate:fresh`
 on a clinic database. The migration rollback removes the guardian table, so
 back up before rolling back as well.
 
-See [practice decisions and verification checklist](docs/PRACTICE_VARIATIONS.md).
+See [practice decisions and verification checklist](workspace-artifacts/docs/PRACTICE_VARIATIONS.md).
+
+Generated presentations, diagrams, audit reports, captures and temporary files are consolidated in [workspace-artifacts](workspace-artifacts/README.md). This folder is separate from application/runtime files.
 
 Alternatively, seed everything from the command line (creates
 `doctor@example.com` / `receptionist@example.com`, password `password`):
