@@ -43,7 +43,10 @@ class MarkNoShowAppointments extends Command
         };
 
         // Still "scheduled" on a past day → the patient never came.
-        $noShows = Appointment::where('status', 'scheduled')->tap($dateFilter)->get();
+        // Arrived-but-unseen patients require staff review, not an absence
+        // label. This also protects consultations returned to waiting.
+        $noShows = Appointment::where('status', 'scheduled')->whereNull('checked_in_at')
+            ->whereDoesntHave('medicalRecord')->tap($dateFilter)->get();
 
         // Left "in_progress" on a past day → the visit happened but was
         // never closed (doctor forgot to complete it before leaving).

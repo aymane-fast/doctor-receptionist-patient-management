@@ -112,7 +112,11 @@ it('reopening a completed visit to in-progress goes through the current-patient 
     ]);
 
     $this->actingAs($doctor)
-        ->patch(route('appointments.update-status', $completed), ['status' => 'in_progress']);
+        ->patch(route('appointments.update-status', $completed), [
+            'status' => 'in_progress',
+            'previous_action' => 'waiting',
+            'previous_appointment_id' => $current->id,
+        ]);
 
     // Reopened one becomes current, the previous current returns to waiting
     expect($completed->fresh()->status)->toBe('in_progress')

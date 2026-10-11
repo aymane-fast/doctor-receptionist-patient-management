@@ -518,11 +518,14 @@ class AppointmentController extends Controller
             }
             $wasCurrent = $appointment->status === 'in_progress';
             if ($validated['status'] === 'in_progress' && $appointment->status !== 'in_progress') {
-                Appointment::where('doctor_id', $validated['doctor_id'])
+                $otherCurrent = Appointment::where('doctor_id', $validated['doctor_id'])
                     ->whereDate('appointment_date', today())
                     ->where('status', 'in_progress')
                     ->where('id', '!=', $appointment->id)
-                    ->update(['status' => 'scheduled']);
+                    ->exists();
+                if ($otherCurrent) {
+                    $fail('status', __('appointments.switch_use_start'));
+                }
             }
 
             $appointment->update($validated);
@@ -770,6 +773,25 @@ class AppointmentController extends Controller
     /**
      * Set the current patient for the doctor's queue
      */
+    public function confirmCurrentSwitch(Appointment $appointment)
+    {
+        if (! $this->canManageAppointment($appointment)) {
+            abort(403);
+        }
+        if (!$appointment->appointment_date->isToday() || !$appointment->canTransitionTo('in_progress')) {
+            return redirect()->route('appointments.show', $appointment)->with('error', __('appointments.cannot_start_finished'));
+        }
+        $current = Appointment::with('patient')->where('doctor_id', $appointment->doctor_id)
+            ->whereDate('appointment_date', today())->where('status', 'in_progress')
+            ->where('id', '!=', $appointment->id)->first();
+        if (!$current) {
+            return redirect()->route('appointments.show', $appointment);
+        }
+        return view('appointments.switch-current', [
+            'appointment' => $appointment->load('patient'), 'current' => $current,
+        ]);
+    }
+
     public function setCurrent(Request $request, Appointment $appointment)
     {
         if (! $this->canManageAppointment($appointment)) {
@@ -793,39 +815,107 @@ class AppointmentController extends Controller
             return back()->with('error', __('appointments.start_only_today'));
         }
 
+        $request->validate([
+            'previous_action' => 'nullable|in:completed,waiting,reschedule,no_show,cancelled',
+            'previous_appointment_id' => 'required_with:previous_action|integer',
+            'reschedule_date' => 'required_if:previous_action,reschedule|nullable|date_format:Y-m-d|after_or_equal:today',
+            'reschedule_time' => 'required_if:previous_action,reschedule|nullable|date_format:H:i',
+        ]);
+
         // Use database transaction to ensure atomicity
         try {
-            \DB::transaction(function () use ($appointment) {
+            $confirmation = \DB::transaction(function () use ($appointment, $request) {
                 // Serialize against another staff member starting a patient at
                 // the same moment (two "current" patients otherwise).
                 User::whereKey($appointment->doctor_id)->lockForUpdate()->firstOrFail();
                 $appointment->refresh();
+                if ($appointment->status === 'in_progress') {
+                    return null;
+                }
                 if (!$appointment->canTransitionTo('in_progress') || !$appointment->appointment_date->isToday()) {
                     throw new \InvalidArgumentException(__('appointments.cannot_start_finished'));
                 }
 
-                // Return the previous current patient to the waiting list
-                Appointment::where('doctor_id', $appointment->doctor_id)
+                $current = Appointment::with('patient')->where('doctor_id', $appointment->doctor_id)
                     ->whereDate('appointment_date', today())
                     ->where('status', 'in_progress')
                     ->where('id', '!=', $appointment->id)
-                    ->update(['status' => 'scheduled']);
+                    ->lockForUpdate()->first();
+
+                // Ask on the server, covering dashboard, queue and status-menu
+                // entry points even when JavaScript is unavailable. Stale choices
+                // must never apply to a different patient's consultation.
+                if ($current && (!$request->filled('previous_action')
+                    || (int) $request->previous_appointment_id !== $current->id)) {
+                    return redirect()->route('appointments.switch-current', $appointment);
+                }
+
+                if ($current) {
+                    $action = $request->previous_action;
+                    if ($action === 'no_show' && $current->medicalRecord()->exists()) {
+                        throw new \InvalidArgumentException(__('appointments.switch_no_show_record'));
+                    }
+                    $changes = ['status' => in_array($action, ['waiting', 'reschedule'], true) ? 'scheduled' : $action];
+                    if (in_array($action, ['cancelled', 'no_show', 'reschedule'], true)) {
+                        $changes['checked_in_at'] = null;
+                    }
+                    if ($action === 'reschedule') {
+                        $date = $request->reschedule_date;
+                        $time = $request->reschedule_time;
+                        if (Carbon::parse($date.' '.$time)->lte(now())) {
+                            throw new \InvalidArgumentException(__('appointments.switch_future_time'));
+                        }
+                        if ($this->scheduler()->hasActiveSameDayAppointment($current->patient_id, $current->doctor_id, $date, $current->id)) {
+                            throw new \InvalidArgumentException(__('appointments.already_has_appointment_today'));
+                        }
+                        if ($current->isQueueMode()) {
+                            if (!$this->scheduler()->workingWindow($date)) {
+                                throw new \InvalidArgumentException(__('Choose a future working day for this appointment.'));
+                            }
+                            if ($date !== $current->appointment_date->toDateString()
+                                && ($error = $this->scheduler()->validateQueueCapacity($current->doctor_id, $date))) {
+                                throw new \InvalidArgumentException($error);
+                            }
+                            $changes['queue_number'] = $this->scheduler()->nextQueueNumber($current->doctor_id, $date);
+                            $changes['queue_position'] = $this->scheduler()->nextQueuePosition($current->doctor_id, $date);
+                        } else {
+                            if ($error = $this->scheduler()->validateScheduledTime($date, $time)) {
+                                throw new \InvalidArgumentException($error);
+                            }
+                            if ($this->scheduler()->hasScheduledConflict($current->doctor_id, $date, $time, $current->id)) {
+                                throw new \InvalidArgumentException(__('Doctor already has an appointment at this time.'));
+                            }
+                        }
+                        $changes += ['appointment_date' => $date, 'appointment_time' => $time, 'reminder_sent_at' => null];
+                    }
+                    // Model update, not a bulk query, preserves the status log.
+                    $current->update($changes);
+                    if ($current->isQueueMode() && $action === 'reschedule') {
+                        $this->scheduler()->recalculateQueue($current->doctor_id, $current->appointment_date);
+                    }
+                }
 
                 // The patient is in the room, so they have arrived
                 $appointment->update([
                     'status' => 'in_progress',
                     'checked_in_at' => $appointment->checked_in_at ?? now(),
                 ]);
+                return null;
             }, 3);
         } catch (\InvalidArgumentException $e) {
-            return back()->with('error', $e->getMessage());
+            return redirect()->route('appointments.switch-current', $appointment)->with('error', $e->getMessage());
+        }
+
+        if ($confirmation) {
+            return $confirmation;
         }
 
         if ($appointment->isQueueMode()) {
             $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
         }
 
-        return back()->with('success', __('Patient session started successfully.'));
+        return ($request->filled('previous_action') ? redirect()->route('appointments.show', $appointment) : back())
+            ->with('success', __('Patient session started successfully.'));
     }
 
     /**
