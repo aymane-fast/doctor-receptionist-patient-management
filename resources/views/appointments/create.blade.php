@@ -15,7 +15,7 @@
                     <p class="text-orange-700 text-sm">
                         {{ __('appointments.clinic_closed_message') }}
                         @if($nextWorking)
-                            <br><strong>{{ __('appointments.next_available') }}:</strong> {{ $nextWorking->format('l, M j \a\t g:i A') }}
+                            <br><strong>{{ __('appointments.next_available') }}:</strong> {{ $nextWorking->translatedFormat('l, M j \a\t g:i A') }}
                         @endif
                     </p>
                 </div>
@@ -27,7 +27,7 @@
         :title="__('appointments.schedule_new_appointment')"
         :description="__('appointments.create_appointment_description')"
         icon="fa-calendar-plus"
-        eyebrow="New booking"
+        :eyebrow="__('New booking')"
     >
         <x-slot:actions>
             <button onclick="history.back()" class="btn-secondary px-4 py-2">
@@ -190,8 +190,8 @@
                         <div class="flex items-start space-x-3">
                             <i class="fas fa-list-ol text-teal-700 mt-1"></i>
                             <div>
-                                <h4 class="font-semibold text-teal-900">Queue mode</h4>
-                                <p class="text-sm text-teal-800 mt-1">This doctor uses queue mode. The patient will receive the next queue number and an estimated consultation time automatically.</p>
+                                <h4 class="font-semibold text-teal-900">{{ __('Queue mode') }}</h4>
+                                <p class="text-sm text-teal-800 mt-1">{{ __('This doctor uses queue mode. The patient will receive the next queue number and an estimated consultation time automatically.') }}</p>
                                 <p id="queue_mode_estimate" class="text-sm text-teal-900 font-semibold mt-2 hidden"></p>
                             </div>
                         </div>
@@ -206,7 +206,7 @@
                     <!-- Purpose -->
                     <div>
                         <label for="reason" class="block text-sm font-semibold text-gray-700 mb-2">
-                            {{ $clinicSpecialty['label'] }} visit reason
+                            {{ __($clinicSpecialty['label']) }} {{ __('visit reason') }}
                         </label>
                         <textarea id="reason" name="reason" rows="3" 
                                   placeholder="{{ __('appointments.reason_placeholder') }}"
@@ -218,10 +218,10 @@
                         </p>
                         @enderror
                         @if(! empty($clinicSpecialty['appointment_reasons']))
-                            <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $clinicSpecialty['label'] }} suggestions</p>
+                            <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __($clinicSpecialty['label']) }} {{ __('suggestions') }}</p>
                             <div class="mt-2 flex flex-wrap gap-2">
                                 @foreach($clinicSpecialty['appointment_reasons'] as $suggestion)
-                                    <button type="button" data-reason-suggestion="{{ $suggestion }}" class="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100">{{ $suggestion }}</button>
+                                    <button type="button" data-reason-suggestion="{{ __($suggestion) }}" class="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100">{{ __($suggestion) }}</button>
                                 @endforeach
                             </div>
                         @endif
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
             resultsContainer.innerHTML = `
                 <div class="p-3 text-gray-500 text-center">
                     <i class="fas fa-search mr-2"></i>
-                    No patients found
+                    {{ __('No patients found') }}
                 </div>
             `;
         } else {
@@ -416,7 +416,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch(`{{ route('api.appointments.next-available-slot') }}?date=${dateInput.value}&doctor_id=${doctorId}`);
             const data = await response.json();
             if (data.mode === 'queue') {
-                queueEstimate.textContent = `Next queue number: #${data.queue_number}. Estimated time: ${data.estimated_time}.`;
+                queueEstimate.textContent = @json(__('Next queue number: #:number. Estimated time: :time.', ['number' => ':number', 'time' => ':time']))
+                    .replace(':number', data.queue_number).replace(':time', data.estimated_time);
                 queueEstimate.classList.remove('hidden');
             }
         } catch (error) {
@@ -446,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.bookNow = function() {
         // Validate that a patient is selected
         if (!patientIdInput.value) {
-            alert('Please select a patient first.');
+            alert(@json(__('Please select a patient first.')));
             searchInput.focus();
             return;
         }
@@ -467,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set reason if empty
         const reasonInput = document.querySelector('textarea[name="reason"]');
         if (reasonInput && !reasonInput.value.trim()) {
-            reasonInput.value = @json($clinicSpecialty['appointment_reasons'][0] ?? __('appointments.walk_in_consultation'));
+            reasonInput.value = @json(isset($clinicSpecialty['appointment_reasons'][0]) ? __($clinicSpecialty['appointment_reasons'][0]) : __('appointments.walk_in_consultation'));
         }
         
         // Find next available time slot and set it
@@ -587,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const originalText = bookNowBtn.innerHTML;
-            bookNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Finding best time...';
+            bookNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>' + @json(__('Finding best time...'));
             bookNowBtn.disabled = true;
             
             try {
@@ -612,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 console.error('Error:', error);
-                bookNowMessage.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-1"></i>Error finding available slots. Please select manually.`;
+                bookNowMessage.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-1"></i>${@json(__('Error finding available slots. Please select manually.'))}`;
                 bookNowMessage.classList.remove('hidden');
             }
             
@@ -628,7 +629,7 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         if (!patientIdInput.value) {
             e.preventDefault();
-            alert('Please select a patient.');
+            alert(@json(__('Please select a patient.')));
             searchInput.focus();
             return false;
         }

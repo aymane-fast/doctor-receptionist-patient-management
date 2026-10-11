@@ -6,9 +6,9 @@
 <div class="max-w-7xl mx-auto space-y-6">
     <x-ui.page-header
         :title="__('medical_records.full_record_details')"
-        :description="'Medical record #' . $medicalRecord->id . ' - ' . \Carbon\Carbon::parse($medicalRecord->visit_date)->format('M d, Y')"
+        :description="__('Medical record #:id - :date', ['id' => $medicalRecord->id, 'date' => \Carbon\Carbon::parse($medicalRecord->visit_date)->translatedFormat('M d, Y')])"
         icon="fa-file-medical"
-        eyebrow="Clinical history"
+        :eyebrow="__('Clinical history')"
     >
         <x-slot:actions>
                 <button onclick="history.back()" 
@@ -65,7 +65,7 @@
                                 <i class="far fa-calendar text-gray-600 mr-2"></i>
                                 <label class="text-sm font-medium text-gray-600">{{ __('medical_records.visit_date') }}</label>
                             </div>
-                            <p class="font-bold text-gray-900">{{ \Carbon\Carbon::parse($medicalRecord->visit_date)->format('M d, Y') }}</p>
+                            <p class="font-bold text-gray-900">{{ \Carbon\Carbon::parse($medicalRecord->visit_date)->translatedFormat('M d, Y') }}</p>
                         </div>
                         <div class="bg-gray-50 rounded-lg p-4">
                             <div class="flex items-center mb-2">
@@ -85,11 +85,13 @@
                                 @elseif($medicalRecord->visit_type == 'emergency') bg-red-100 text-red-800
                                 @else bg-gray-100 text-gray-800
                                 @endif">
-                                @if($medicalRecord->visit_type == 'consultation') Consultation
-                                @elseif($medicalRecord->visit_type == 'follow-up') Follow-up
-                                @elseif($medicalRecord->visit_type == 'emergency') Emergency
-                                @else {{ ucfirst($medicalRecord->visit_type) }}
-                                @endif
+                                {{ match ($medicalRecord->visit_type) {
+                                    'consultation' => __('medical_records.visit_types.consultation'),
+                                    'follow-up' => __('medical_records.visit_types.follow-up'),
+                                    'emergency' => __('medical_records.visit_types.emergency'),
+                                    'routine-checkup' => __('medical_records.visit_types.routine'),
+                                    default => __('Not specified'),
+                                } }}
                             </span>
                         </div>
                     </div>
@@ -280,7 +282,7 @@
                     <x-specialty.summary
                         :fields="$specialtyFieldCatalog['record']"
                         :values="$medicalRecord->specialty_data ?? []"
-                        title="Specialty clinical details"
+                        title="{{ __('Specialty clinical details') }}"
                         :icon="$clinicSpecialty['icon']"
                     />
                 </div>
@@ -332,12 +334,12 @@
                         <span class="text-gray-900 font-bold">#{{ $medicalRecord->id }}</span>
                     </div>
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span class="text-gray-600 font-medium">Created:</span>
-                        <span class="text-gray-900 font-bold text-sm">{{ $medicalRecord->created_at->format('M d, Y') }}</span>
+                        <span class="text-gray-600 font-medium">{{ __('Created:') }}</span>
+                        <span class="text-gray-900 font-bold text-sm">{{ $medicalRecord->created_at->translatedFormat('M d, Y') }}</span>
                     </div>
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                        <span class="text-gray-600 font-medium">Updated:</span>
-                        <span class="text-gray-900 font-bold text-sm">{{ $medicalRecord->updated_at->format('M d, Y') }}</span>
+                        <span class="text-gray-600 font-medium">{{ __('Updated:') }}</span>
+                        <span class="text-gray-900 font-bold text-sm">{{ $medicalRecord->updated_at->translatedFormat('M d, Y') }}</span>
                     </div>
                     @if($medicalRecord->appointment)
                     <div class="pt-3 border-t">

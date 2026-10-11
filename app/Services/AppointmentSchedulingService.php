@@ -45,13 +45,15 @@ class AppointmentSchedulingService
         $appointmentEnd = $appointmentStart->copy()->addMinutes($this->duration());
 
         if (! $window) {
-            return 'We are closed on '.$appointmentStart->format('l').'.';
+            return __('We are closed on :day.', ['day' => $appointmentStart->translatedFormat('l')]);
         }
 
         if ($appointmentStart->lt($window['start']) || $appointmentEnd->gt($window['end'])) {
-            return 'Appointment time is outside working hours. Working hours for '.
-                $appointmentStart->format('l').' are '.
-                $window['raw']['start_time'].' - '.$window['raw']['end_time'].'.';
+            return __('Appointment time is outside working hours. Working hours for :day are :start - :end.', [
+                'day' => $appointmentStart->translatedFormat('l'),
+                'start' => $window['raw']['start_time'],
+                'end' => $window['raw']['end_time'],
+            ]);
         }
 
         return null;
@@ -258,7 +260,7 @@ class AppointmentSchedulingService
             ->count();
 
         if ($count >= $doctor->queue_daily_limit) {
-            return 'This doctor has reached the queue limit for this day.';
+            return __('This doctor has reached the queue limit for this day.');
         }
 
         return null;

@@ -13,7 +13,7 @@
         :title="__('prescriptions.new_prescription')"
         :description="__('prescriptions.prescribe_medications_subtitle')"
         icon="fa-prescription-bottle-medical"
-        eyebrow="Medication plan"
+        :eyebrow="__('Medication plan')"
     >
         <x-slot:actions>
             <button onclick="history.back()" class="btn-secondary px-4 py-2">
@@ -47,7 +47,7 @@
                                 <!-- Patient Search Input with Autocomplete -->
                                 <input type="text" 
                                        id="patient_search" 
-                                       placeholder="Search patients by name, phone, or email..." 
+                                       placeholder="{{ __('Search patients by name, phone, or email...') }}"
                                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror"
                                        autocomplete="off"
                                        value="{{ $selectedPatient?->selection_label ?? '' }}">
@@ -71,7 +71,7 @@
                                        target="_blank"
                                        class="text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200 flex items-center space-x-1">
                                         <i class="fas fa-plus text-xs"></i>
-                                        <span>Create New Patient</span>
+                                        <span>{{ __('Create New Patient') }}</span>
                                     </a>
                                 </div>
                             </div>
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
             resultsContainer.innerHTML = `
                 <div class="p-3 text-gray-500 text-center">
                     <i class="fas fa-search mr-2"></i>
-                    No patients found
+                    {{ __('No patients found') }}
                 </div>
             `;
         } else {
@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         if (!patientIdInput.value) {
             e.preventDefault();
-            alert('Please select a patient.');
+            alert(@json(__('Please select a patient.')));
             searchInput.focus();
             return false;
         }

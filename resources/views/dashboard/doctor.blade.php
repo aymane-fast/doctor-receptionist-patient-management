@@ -6,14 +6,14 @@
 <div class="space-y-8">
     <x-ui.page-header
         :title="__('dashboard.doctor_dashboard')"
-        :description="$clinicSpecialty['description']"
+        :description="__($clinicSpecialty['description'])"
         icon="fa-stethoscope"
-        :eyebrow="$clinicSpecialty['label'].' workspace'"
+        :eyebrow="__($clinicSpecialty['label']).' '. __('workspace')"
     >
         <x-slot:actions>
             <a href="{{ route('appointments.queue') }}" class="btn-secondary px-5 py-3">
                 <i class="fas fa-list-ol"></i>
-                <span>Open queue</span>
+                <span>{{ __('Open queue') }}</span>
             </a>
             <a href="{{ route('appointments.create') }}" class="btn-primary px-5 py-3">
                 <i class="fas fa-plus"></i>
@@ -90,7 +90,7 @@
                     @if($currentAppointment->patient->is_pediatric)<p class="text-white">{{ $currentAppointment->patient->age_display }} · {{ $currentAppointment->patient->contact_label }}</p>@endif
                     <div class="flex items-center space-x-4 text-blue-100">
                         <span><i class="fas fa-clock mr-2"></i>{{ $currentAppointment->displayTime() }}</span>
-                        <span><i class="fas fa-calendar mr-2"></i>{{ $currentAppointment->appointment_date->format('M j, Y') }}</span>
+                        <span><i class="fas fa-calendar mr-2"></i>{{ $currentAppointment->appointment_date->translatedFormat('M j, Y') }}</span>
                     </div>
                 </div>
             </div>
@@ -123,11 +123,11 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <button onclick="setAsCurrent({{ $nextAppointment->id }})" class="btn-primary px-4 py-2" title="Set as Current Patient">
+                <button onclick="setAsCurrent({{ $nextAppointment->id }})" class="btn-primary px-4 py-2" title="{{ __('Set as Current Patient') }}">
                     <i class="fas fa-play text-sm"></i>
-                    <span>Set as Current</span>
+                    <span>{{ __('Set as Current') }}</span>
                 </button>
-                <a href="{{ route('appointments.reschedule', $nextAppointment) }}" class="btn-ghost" title="Reschedule">
+                <a href="{{ route('appointments.reschedule', $nextAppointment) }}" class="btn-ghost" title="{{ __('Reschedule') }}">
                     <i class="fas fa-clock text-sm"></i>
                 </a>
             </div>
@@ -150,7 +150,7 @@
                     <div class="flex items-center space-x-3">
                         <button onclick="openAppointmentFilters()" class="filter-btn">
                             <i class="fas fa-filter"></i>
-                            <span>Filter</span>
+                            <span>{{ __('Filter') }}</span>
                         </button>
                         <a href="{{ route('appointments.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
                             <i class="fas fa-plus"></i>
@@ -187,7 +187,7 @@
                                         {{ \App\Models\Appointment::statusLabel($appointment->status) }}
                                     </span>
                                     <div class="appointment-action-buttons flex items-center space-x-2">
-                                        <a href="{{ route('appointments.show', $appointment) }}" class="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors" title="View Details">
+                                        <a href="{{ route('appointments.show', $appointment) }}" class="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('View Details') }}" aria-label="{{ __('View Details') }}">
                                             <i class="fas fa-eye text-blue-600 text-sm"></i>
                                         </a>
                                         @if($appointment->status === 'scheduled')
@@ -196,16 +196,16 @@
                                                     <i class="fas fa-user-check text-teal-600 text-sm"></i>
                                                 </button>
                                             @endif
-                                            <button onclick="setAsCurrent({{ $appointment->id }})" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="Set as Current Patient">
+                                            <button onclick="setAsCurrent({{ $appointment->id }})" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('Set as Current Patient') }}" aria-label="{{ __('Set as Current Patient') }}">
                                                 <i class="fas fa-play text-green-600 text-sm"></i>
                                             </button>
-                                            <a href="{{ route('appointments.reschedule', $appointment) }}" class="btn-ghost w-8 h-8 p-0" title="Reschedule Appointment">
+                                            <a href="{{ route('appointments.reschedule', $appointment) }}" class="btn-ghost w-8 h-8 p-0" title="{{ __('Reschedule Appointment') }}" aria-label="{{ __('Reschedule Appointment') }}">
                                                 <i class="fas fa-clock text-sm"></i>
                                             </a>
                                             <button onclick="submitAction('{{ route('appointments.no-show', $appointment) }}', '{{ __('appointments.mark_no_show') }}?')" class="w-8 h-8 bg-orange-100 hover:bg-orange-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('appointments.mark_no_show') }}">
                                                 <i class="fas fa-user-slash text-orange-600 text-sm"></i>
                                             </button>
-                                            <button onclick="cancelAppointment({{ $appointment->id }})" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors" title="Cancel Appointment">
+                                            <button onclick="cancelAppointment({{ $appointment->id }})" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('Cancel Appointment') }}" aria-label="{{ __('Cancel Appointment') }}">
                                                 <i class="fas fa-times text-red-600 text-sm"></i>
                                             </button>
                                         @endif
@@ -262,7 +262,7 @@
                     <div class="flex items-center space-x-3">
                         <button onclick="openRecordsFilters()" class="filter-btn">
                             <i class="fas fa-filter"></i>
-                            <span>Filter</span>
+                            <span>{{ __('Filter') }}</span>
                         </button>
                         <a href="{{ route('medical-records.create') }}" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2">
                             <i class="fas fa-plus"></i>
@@ -285,7 +285,7 @@
                                         <h3 class="font-semibold text-gray-900">{{ $record->patient->full_name }}</h3>
                                         <p class="text-sm text-gray-500 flex items-center space-x-2">
                                             <i class="fas fa-calendar w-3"></i>
-                                            <span>{{ $record->visit_date->format('M j, Y') }}</span>
+                                            <span>{{ $record->visit_date->translatedFormat('M j, Y') }}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -339,25 +339,25 @@
         <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Filter Appointments</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('Filter Appointments') }}</h3>
                     <button onclick="closeAppointmentFilters()" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
                 <form method="GET" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Search Patient</label>
-                        <input type="text" name="patient_search" class="modal-input focus:ring-blue-500" placeholder="Search by name, phone, CIN, or patient ID..." value="{{ request('patient_search') }}">
-                        <p class="text-xs text-gray-500 mt-1">Search across: name, phone number, CIN, patient ID</p>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Search Patient') }}</label>
+                        <input type="text" name="patient_search" class="modal-input focus:ring-blue-500" placeholder="{{ __('Search by name, phone, CIN, or patient ID...') }}" value="{{ request('patient_search') }}">
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Search across: name, phone number, CIN, patient ID') }}</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Status') }}</label>
                         <select name="status_filter" class="modal-input focus:ring-blue-500">
-                            <option value="">All Statuses</option>
-                            <option value="scheduled" {{ request('status_filter') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                            <option value="in_progress" {{ request('status_filter') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                            <option value="completed" {{ request('status_filter') == 'completed' ? 'selected' : '' }}>Completed</option>
-                            <option value="cancelled" {{ request('status_filter') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                            <option value="">{{ __('All Statuses') }}</option>
+                            <option value="scheduled" {{ request('status_filter') == 'scheduled' ? 'selected' : '' }}>{{ __('Scheduled') }}</option>
+                            <option value="in_progress" {{ request('status_filter') == 'in_progress' ? 'selected' : '' }}>{{ __('In Progress') }}</option>
+                            <option value="completed" {{ request('status_filter') == 'completed' ? 'selected' : '' }}>{{ __('Completed') }}</option>
+                            <option value="cancelled" {{ request('status_filter') == 'cancelled' ? 'selected' : '' }}>{{ __('Cancelled') }}</option>
                         </select>
                     </div>
                     <div class="flex space-x-3 pt-4">
@@ -379,19 +379,19 @@
         <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Filter Medical Records</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('Filter Medical Records') }}</h3>
                     <button onclick="closeRecordsFilters()" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
                 <form method="GET" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Search Patient</label>
-                        <input type="text" name="record_patient_search" class="modal-input focus:ring-emerald-500" placeholder="Search by name, phone, CIN, or patient ID..." value="{{ request('record_patient_search') }}">
-                        <p class="text-xs text-gray-500 mt-1">Search across: name, phone number, CIN, patient ID</p>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Search Patient') }}</label>
+                        <input type="text" name="record_patient_search" class="modal-input focus:ring-emerald-500" placeholder="{{ __('Search by name, phone, CIN, or patient ID...') }}" value="{{ request('record_patient_search') }}">
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Search across: name, phone number, CIN, patient ID') }}</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Date Range') }}</label>
                         <div class="grid grid-cols-2 gap-3">
                             <input type="date" name="record_date_from" class="modal-input focus:ring-emerald-500" value="{{ request('record_date_from') }}">
                             <input type="date" name="record_date_to" class="modal-input focus:ring-emerald-500" value="{{ request('record_date_to') }}">
@@ -459,7 +459,7 @@ function submitAction(url, confirmMessage = null) {
 
 // Quick action functions
 function setAsCurrent(appointmentId) {
-    if (confirm('Set this appointment as the current patient?')) {
+    if (confirm(@json(__('Set this appointment as the current patient?')))) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/appointments/${appointmentId}/set-current`;
@@ -476,7 +476,7 @@ function setAsCurrent(appointmentId) {
 }
 
 function cancelAppointment(appointmentId) {
-    if (confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+    if (confirm(@json(__('Are you sure you want to cancel this appointment? This action cannot be undone.')))) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/appointments/${appointmentId}/cancel`;
@@ -499,12 +499,12 @@ function rescheduleAppointment(appointmentId) {
 
 // Action functions
 function setAsCurrent(appointmentId) {
-    if (confirm('Set this appointment as the current patient?')) {
+    if (confirm(@json(__('Set this appointment as the current patient?')))) {
         // Show loading state
         const button = event.target.closest('button');
         if (button) {
             const originalContent = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Starting...';
+            button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>' + @json(__('Starting...'));
             button.disabled = true;
         }
         
@@ -525,12 +525,12 @@ function setAsCurrent(appointmentId) {
 }
 
 function cancelAppointment(appointmentId) {
-    if (confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+    if (confirm(@json(__('Are you sure you want to cancel this appointment? This action cannot be undone.')))) {
         // Show loading state
         const button = event.target.closest('button');
         if (button) {
             const originalContent = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Cancelling...';
+            button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>' + @json(__('Cancelling...'));
             button.disabled = true;
         }
         

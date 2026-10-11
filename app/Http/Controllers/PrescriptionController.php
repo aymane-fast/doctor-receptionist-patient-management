@@ -18,16 +18,19 @@ class PrescriptionController extends Controller
             abort(403);
         }
 
-        $request->validate(['search' => 'nullable|string|max:255', 'date' => 'nullable|date']);
+        $request->validate(['search' => 'nullable|string|max:255', 'date' => 'nullable|date', 'patient_id' => 'nullable|integer|exists:patients,id']);
         $prescriptions = collect(); // Empty collection by default
         $hasSearchQuery = false;
 
         // Only query prescriptions if there's a search term or date filter
-        if ($request->filled('search') || $request->filled('date')) {
+        if ($request->filled('search') || $request->filled('date') || $request->filled('patient_id')) {
             $hasSearchQuery = true;
             
             $query = Prescription::with(['patient', 'doctor', 'medicalRecord'])
                 ->where('doctor_id', Auth::id());
+            if ($request->filled('patient_id')) {
+                $query->where('patient_id', $request->integer('patient_id'));
+            }
 
             // Search by patient information
             if ($request->filled('search')) {
@@ -40,7 +43,7 @@ class PrescriptionController extends Controller
                 $query->whereDate('prescribed_date', $request->date);
             }
 
-            $prescriptions = $query->latest('prescribed_date')->paginate(15);
+            $prescriptions = $query->latest('prescribed_date')->paginate(15)->withQueryString();
         }
 
         return view('prescriptions.index', compact('prescriptions', 'hasSearchQuery'));
@@ -51,6 +54,8 @@ class PrescriptionController extends Controller
         if (!Auth::user()->isDoctor()) {
             abort(403);
         }
+
+        $request->validate(['patient_id' => 'nullable|integer|exists:patients,id']);
 
         $selectedPatient = null;
         
@@ -100,8 +105,8 @@ class PrescriptionController extends Controller
         }
 
         $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'medical_record_id' => 'nullable|exists:medical_records,id',
+            'patient_id' => 'required|integer|exists:patients,id',
+            'medical_record_id' => 'nullable|integer|exists:medical_records,id',
             'prescribed_date' => 'required|date|before_or_equal:today',
             'items' => 'required|array|min:1',
             'items.*.medication_name' => 'required|string|max:255',
@@ -135,7 +140,7 @@ class PrescriptionController extends Controller
         });
 
         return redirect()->route('prescriptions.show', $prescription)
-            ->with('success', 'Prescription created successfully!');
+            ->with('success', __('Prescription created successfully!'));
     }
 
     /**
@@ -200,8 +205,8 @@ class PrescriptionController extends Controller
         }
 
         $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'medical_record_id' => 'nullable|exists:medical_records,id',
+            'patient_id' => 'required|integer|exists:patients,id',
+            'medical_record_id' => 'nullable|integer|exists:medical_records,id',
             'prescribed_date' => 'required|date|before_or_equal:today',
             'items' => 'required|array|min:1',
             'items.*.medication_name' => 'required|string|max:255',
@@ -238,7 +243,7 @@ class PrescriptionController extends Controller
         });
 
         return redirect()->route('prescriptions.show', $prescription)
-            ->with('success', 'Prescription updated successfully!');
+            ->with('success', __('Prescription updated successfully!'));
     }
 
     public function destroy(Prescription $prescription)
@@ -248,6 +253,6 @@ class PrescriptionController extends Controller
         }
 
         $prescription->delete();
-        return redirect()->route('prescriptions.index')->with('success', 'Prescription deleted successfully!');
+        return redirect()->route('prescriptions.index')->with('success', __('Prescription deleted successfully!'));
     }
 }

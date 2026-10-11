@@ -10,7 +10,7 @@
         :title="__('patients.patient_management')"
         :description="__('patients.manage_efficiently')"
         icon="fa-user-group"
-        eyebrow="Patient registry"
+        :eyebrow="__('Patient registry')"
     >
         <x-slot:actions>
                 <a href="{{ route('patients.create') }}" class="btn-primary px-6 py-3">
@@ -378,8 +378,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
-                    <p class="text-sm font-medium">No patients found</p>
-                    <p class="text-xs text-gray-400 mt-1">Try a different search term</p>
+                    <p class="text-sm font-medium">{{ __('No patients found') }}</p>
+                    <p class="text-xs text-gray-400 mt-1">{{ __('Try a different search term') }}</p>
                 </div>
             `;
         } else {

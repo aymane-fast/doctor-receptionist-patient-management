@@ -93,7 +93,7 @@ it('exports patients as CSV with real IDs', function () {
 
     $csv = $response->getContent();
 
-    expect($csv)->toContain('ID Patient')
+    expect($csv)->toContain(__('Patient ID'))
         ->toContain('Exportine')
         ->toContain($patient->id . ',Exportine');
 });

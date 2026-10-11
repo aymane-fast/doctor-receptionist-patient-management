@@ -6,9 +6,9 @@
 <div class="max-w-7xl mx-auto space-y-6">
     <x-ui.page-header
         :title="__('appointments.appointment_details')"
-        :description="'Appointment #' . $appointment->id . ' - ' . \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y')"
+        :description="__('Appointment #:id - :date', ['id' => $appointment->id, 'date' => \Carbon\Carbon::parse($appointment->appointment_date)->translatedFormat('M d, Y')])"
         icon="fa-calendar-check"
-        eyebrow="Booking record"
+        :eyebrow="__('Booking record')"
     >
         <x-slot:actions>
                 <button onclick="history.back()" 
@@ -111,12 +111,12 @@
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-600">{{ __('appointments.date') }}</label>
                             <p class="font-bold text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('l, M d, Y') }}
+                                {{ \Carbon\Carbon::parse($appointment->appointment_date)->translatedFormat('l, M d, Y') }}
                             </p>
                         </div>
 
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-600">{{ $appointment->isQueueMode() ? 'Estimated Time' : __('appointments.time') }}</label>
+                            <label class="block text-sm font-medium text-gray-600">{{ $appointment->isQueueMode() ? __('Estimated Time') : __('appointments.time') }}</label>
                             <p class="font-bold text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center space-x-2">
                                 <i class="fas fa-clock text-gray-400"></i>
                                 <span>{{ $appointment->displayTime() }}</span>
@@ -138,9 +138,9 @@
                         </div>
 
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-600">Mode</label>
+                            <label class="block text-sm font-medium text-gray-600">{{ __('Mode') }}</label>
                             <p class="font-bold text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                {{ $appointment->isQueueMode() ? 'Queue' : 'Scheduled' }}
+                                {{ $appointment->isQueueMode() ? __('Queue') : __('Scheduled') }}
                                 @if($appointment->isQueueMode())
                                     <span class="text-teal-700">#{{ $appointment->queue_number }}</span>
                                 @endif
@@ -149,7 +149,7 @@
 
                         @if($appointment->reason)
                         <div class="md:col-span-2 space-y-2">
-                            <label class="block text-sm font-medium text-gray-600">Purpose</label>
+                            <label class="block text-sm font-medium text-gray-600">{{ __('Purpose') }}</label>
                             <p class="text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-200 leading-relaxed">{{ $appointment->reason }}</p>
                         </div>
                         @endif
@@ -194,7 +194,7 @@
                             @csrf
                             <button type="submit" class="btn-ghost w-full px-4 py-3">
                                 <i class="fas fa-play-circle"></i>
-                                <span>{{ __('appointments.start_consultation') ?? 'Start consultation' }}</span>
+                                <span>{{ __('appointments.start_consultation') }}</span>
                             </button>
                         </form>
                     @endif
@@ -206,7 +206,7 @@
                             <input type="hidden" name="status" value="completed">
                             <button type="submit" class="btn-primary w-full px-4 py-3">
                                 <i class="fas fa-check"></i>
-                                <span>{{ __('appointments.mark_completed') ?? 'Mark as completed' }}</span>
+                                <span>{{ __('appointments.mark_completed') }}</span>
                             </button>
                         </form>
                     @endif
@@ -269,11 +269,11 @@
                 <div class="space-y-3">
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('appointments.created') }}:</span>
-                        <span class="text-gray-900 font-bold">{{ $appointment->created_at->format('M j, Y') }}</span>
+                        <span class="text-gray-900 font-bold">{{ $appointment->created_at->translatedFormat('M j, Y') }}</span>
                     </div>
                     <div class="flex justify-between items-center py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('appointments.last_updated') }}:</span>
-                        <span class="text-gray-900 font-bold">{{ $appointment->updated_at->format('M j, Y') }}</span>
+                        <span class="text-gray-900 font-bold">{{ $appointment->updated_at->translatedFormat('M j, Y') }}</span>
                     </div>
                     <div class="flex justify-between items-center py-2">
                         <span class="text-gray-600 font-medium">{{ __('appointments.appointment_id') }}:</span>
@@ -313,7 +313,7 @@
                                 </div>
                             </div>
                             <div class="text-xs text-gray-500 whitespace-nowrap ml-3">
-                                {{ $log->created_at->format('M j, g:i A') }}
+                                {{ $log->created_at->translatedFormat('M j, g:i A') }}
                             </div>
                         </div>
                         @endforeach

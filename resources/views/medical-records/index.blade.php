@@ -8,7 +8,7 @@
         :title="__('medical_records.title')"
         :description="__('medical_records.complete_medical_history')"
         icon="fa-notes-medical"
-        eyebrow="Clinical history"
+        :eyebrow="__('Clinical history')"
     >
         <x-slot:actions>
                 <a href="{{ route('medical-records.create') }}" class="btn-primary px-6 py-3">
@@ -118,8 +118,8 @@
                                         <i class="fas fa-calendar text-blue-600 text-xs"></i>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($record->visit_date)->format('M d, Y') }}</p>
-                                        <p class="text-xs text-gray-500">Visit Date</p>
+                                        <p class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($record->visit_date)->translatedFormat('M d, Y') }}</p>
+                                        <p class="text-xs text-gray-500">{{ __('Visit Date') }}</p>
                                     </div>
                                 </div>
                                 <div class="flex items-center text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
@@ -128,7 +128,7 @@
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-900">{{ $record->doctor->professional_name }}</p>
-                                        <p class="text-xs text-gray-500">Doctor</p>
+                                        <p class="text-xs text-gray-500">{{ __('Doctor') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -164,7 +164,7 @@
                                     <i class="fas fa-stethoscope text-blue-600 text-xs"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-semibold text-blue-800 mb-1">Diagnosis</h4>
+                                    <h4 class="text-sm font-semibold text-blue-800 mb-1">{{ __('Diagnosis') }}</h4>
                                     <p class="text-sm text-blue-700 leading-relaxed">{{ Str::limit($record->diagnosis, 100) }}</p>
                                 </div>
                             </div>
@@ -180,7 +180,7 @@
                                     <div class="w-6 h-6 bg-red-200 rounded-full flex items-center justify-center mx-auto mb-1">
                                         <i class="fas fa-heartbeat text-red-600 text-xs"></i>
                                     </div>
-                                    <p class="text-xs text-red-600 font-medium">Blood Pressure</p>
+                                    <p class="text-xs text-red-600 font-medium">{{ __('Blood Pressure') }}</p>
                                     <p class="text-sm font-bold text-red-800">{{ $record->blood_pressure }}</p>
                                 </div>
                                 @endif
@@ -189,7 +189,7 @@
                                     <div class="w-6 h-6 bg-pink-200 rounded-full flex items-center justify-center mx-auto mb-1">
                                         <i class="fas fa-heart text-pink-600 text-xs"></i>
                                     </div>
-                                    <p class="text-xs text-pink-600 font-medium">Heart Rate</p>
+                                    <p class="text-xs text-pink-600 font-medium">{{ __('Heart Rate') }}</p>
                                     <p class="text-sm font-bold text-pink-800">{{ $record->heart_rate }} bpm</p>
                                 </div>
                                 @endif
@@ -198,7 +198,7 @@
                                     <div class="w-6 h-6 bg-orange-200 rounded-full flex items-center justify-center mx-auto mb-1">
                                         <i class="fas fa-thermometer-half text-orange-600 text-xs"></i>
                                     </div>
-                                    <p class="text-xs text-orange-600 font-medium">Temperature</p>
+                                    <p class="text-xs text-orange-600 font-medium">{{ __('Temperature') }}</p>
                                     <p class="text-sm font-bold text-orange-800">{{ $record->temperature }}°F</p>
                                 </div>
                                 @endif
@@ -207,7 +207,7 @@
                                     <div class="icon-tile w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1">
                                         <i class="fas fa-weight text-xs"></i>
                                     </div>
-                                    <p class="text-xs text-emerald-700 font-medium">Weight</p>
+                                    <p class="text-xs text-emerald-700 font-medium">{{ __('Weight') }}</p>
                                     <p class="text-sm font-bold text-gray-900">{{ $record->weight }} kg</p>
                                 </div>
                                 @endif
@@ -228,7 +228,7 @@
                                 <a href="{{ route('appointments.show', $record->appointment) }}" 
                                    class="bg-gradient-to-r from-blue-100 to-blue-50 hover:from-blue-200 hover:to-blue-100 text-blue-800 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center space-x-2 border border-blue-200">
                                     <i class="fas fa-calendar"></i>
-                                    <span>View Appointment</span>
+                                    <span>{{ __('View Appointment') }}</span>
                                 </a>
                                 @endif
                             </div>
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 resultsContainer.innerHTML = `
                     <div class="p-3 text-gray-500 text-center">
                         <i class="fas fa-search mr-2"></i>
-                        No patients found
+                    {{ __('No patients found') }}
                     </div>
                 `;
             } else {

@@ -24,6 +24,7 @@ Homestead.yaml
 Thumbs.db
 /outputs
 /output
+/database-schema.html
 
 # Presentation decks (generated assets are covered by /outputs and /output)
 *.pptx

@@ -1,13 +1,13 @@
 @if ($paginator->hasPages())
-    <nav role="navigation" aria-label="Pagination Navigation" class="flex items-center justify-center">
+    <nav role="navigation" aria-label="{{ __('Pagination Navigation') }}" class="flex items-center justify-center">
         <div class="flex items-center space-x-1">
             {{-- Previous Page Link --}}
             @if ($paginator->onFirstPage())
-                <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+                <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed" aria-label="{{ __('Previous page') }}">
                     <i class="fas fa-chevron-left text-xs"></i>
                 </span>
             @else
-                <a href="{{ $paginator->previousPageUrl() }}" 
+                <a href="{{ $paginator->previousPageUrl() }}" aria-label="{{ __('Previous page') }}"
                    class="px-3 py-2 text-gray-600 hover:text-blue-600 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-lg transition-colors duration-200">
                     <i class="fas fa-chevron-left text-xs"></i>
                 </a>
@@ -58,12 +58,12 @@
 
             {{-- Next Page Link --}}
             @if ($paginator->hasMorePages())
-                <a href="{{ $paginator->nextPageUrl() }}" 
+                <a href="{{ $paginator->nextPageUrl() }}" aria-label="{{ __('Next page') }}"
                    class="px-3 py-2 text-gray-600 hover:text-blue-600 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-lg transition-colors duration-200">
                     <i class="fas fa-chevron-right text-xs"></i>
                 </a>
             @else
-                <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+                <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed" aria-label="{{ __('Next page') }}">
                     <i class="fas fa-chevron-right text-xs"></i>
                 </span>
             @endif

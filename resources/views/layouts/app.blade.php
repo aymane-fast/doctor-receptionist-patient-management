@@ -11,7 +11,7 @@
 <body>
     @auth
         @php
-            $clinicName = \App\Models\Setting::get('clinic_name', __('common.medical_management') ?? 'Medical Management');
+            $clinicName = \App\Models\Setting::get('clinic_name', __('common.medical_management'));
             $todayQuery = \App\Models\Appointment::whereDate('appointment_date', today());
             $pendingQuery = \App\Models\Appointment::whereDate('appointment_date', today())->where('status', 'scheduled');
 
@@ -25,20 +25,20 @@
         @endphp
 
         <div class="app-shell">
-            <aside id="app-sidebar" class="app-sidebar" aria-label="Primary navigation">
+            <aside id="app-sidebar" class="app-sidebar" aria-label="{{ __('Primary navigation') }}">
                 <a href="{{ route('dashboard') }}" class="app-brand">
                     <span class="brand-mark" aria-hidden="true">
                         <i class="fas fa-heartbeat"></i>
                     </span>
                     <span class="app-brand-copy">
-                        <span class="app-brand-kicker">Clinic workspace</span>
+                        <span class="app-brand-kicker">{{ __('Clinic workspace') }}</span>
                         <span class="app-brand-title">{{ $clinicName }}</span>
-                        <span class="text-xs text-white/65">{{ $clinicSpecialty['label'] }}</span>
+                        <span class="text-xs text-white/65">{{ __($clinicSpecialty['label']) }}</span>
                     </span>
                 </a>
 
                 <nav class="app-sidebar-nav">
-                    <span class="app-nav-label">Workspace</span>
+                    <span class="app-nav-label">{{ __('Workspace') }}</span>
                     <a href="{{ route('dashboard') }}" class="app-nav-link {{ request()->routeIs('dashboard') ? 'is-active' : '' }}">
                         <i class="fas fa-border-all"></i>
                         <span>{{ __('common.dashboard') }}</span>
@@ -53,7 +53,7 @@
                     </a>
                     <a href="{{ route('appointments.queue') }}" class="app-nav-link {{ request()->routeIs('appointments.queue') ? 'is-active' : '' }}">
                         <i class="fas fa-list-ol"></i>
-                        <span>Queue</span>
+                        <span>{{ __('Queue') }}</span>
                     </a>
                     <a href="{{ route('waitlist.index') }}" class="app-nav-link {{ request()->routeIs('waitlist.*') ? 'is-active' : '' }}">
                         <i class="fas fa-hourglass-half"></i>
@@ -61,7 +61,7 @@
                     </a>
 
                     @if(auth()->user()->isDoctor())
-                        <span class="app-nav-label">Clinical</span>
+                        <span class="app-nav-label">{{ __('Clinical') }}</span>
                         <a href="{{ route('doctor.current') }}" class="app-nav-link {{ request()->routeIs('doctor.current') ? 'is-active' : '' }}">
                             <i class="fas fa-user-clock"></i>
                             <span>{{ __('dashboard.current_patient') }}</span>
@@ -76,7 +76,7 @@
                         </a>
                     @endif
 
-                    <span class="app-nav-label">Management</span>
+                    <span class="app-nav-label">{{ __('Management') }}</span>
                     @if(auth()->user()->isDoctor())
                         <a href="{{ route('statistics.index') }}" class="app-nav-link {{ request()->routeIs('statistics.*') ? 'is-active' : '' }}">
                             <i class="fas fa-chart-line"></i>
@@ -86,7 +86,7 @@
                     @if(auth()->user()->isDoctor())
                         <a href="{{ route('exports.index') }}" class="app-nav-link {{ request()->routeIs('exports.*') ? 'is-active' : '' }}">
                             <i class="fas fa-file-export"></i>
-                            <span>Export</span>
+                            <span>{{ __('Export') }}</span>
                         </a>
                     @endif
                     <a href="{{ route('settings.index') }}" class="app-nav-link {{ request()->routeIs('settings.*') ? 'is-active' : '' }}">
@@ -112,16 +112,16 @@
                 </div>
             </aside>
 
-            <button id="sidebar-backdrop" class="sidebar-backdrop" type="button" aria-label="Close navigation"></button>
+            <button id="sidebar-backdrop" class="sidebar-backdrop" type="button" aria-label="{{ __('Close navigation') }}"></button>
 
             <div class="app-main">
                 <header class="app-topbar">
                     <div class="flex min-w-0 items-center gap-3">
-                        <button id="mobile-menu-btn" type="button" class="topbar-icon-button mobile-nav-button" aria-controls="app-sidebar" aria-expanded="false" aria-label="Open navigation">
+                        <button id="mobile-menu-btn" type="button" class="topbar-icon-button mobile-nav-button" aria-controls="app-sidebar" aria-expanded="false" aria-label="{{ __('Open navigation') }}">
                             <i class="fas fa-bars"></i>
                         </button>
                         <div class="topbar-context">
-                            <span class="topbar-eyebrow">{{ now()->translatedFormat('l, j F') }} · {{ $clinicSpecialty['label'] }}</span>
+                            <span class="topbar-eyebrow">{{ now()->translatedFormat('l, j F') }} · {{ __($clinicSpecialty['label']) }}</span>
                             <h1 class="topbar-title">@yield('title', __('common.medical_management_system'))</h1>
                         </div>
                     </div>
@@ -181,7 +181,7 @@
                                     @endif
                                 </p>
                             </div>
-                            <button type="button" onclick="dismissAlert()" class="p-1 opacity-70 hover:opacity-100" aria-label="Dismiss">
+                            <button type="button" onclick="dismissAlert()" class="p-1 opacity-70 hover:opacity-100" aria-label="{{ __('Dismiss') }}">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>

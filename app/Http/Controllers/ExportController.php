@@ -24,7 +24,7 @@ class ExportController extends Controller
     {
         // Only doctors can access exports
         if (!Auth::user()->isDoctor()) {
-            abort(403, 'Seuls les médecins peuvent accéder aux exports de données.');
+            abort(403, __('Only doctors can access data exports.'));
         }
 
         return view('exports.index');
@@ -37,7 +37,7 @@ class ExportController extends Controller
     {
         // Only doctors can export data
         if (!Auth::user()->isDoctor()) {
-            abort(403, 'Seuls les médecins peuvent exporter des données.');
+            abort(403, __('Only doctors can export data.'));
         }
 
         $request->validate([
@@ -63,7 +63,7 @@ class ExportController extends Controller
             return $this->downloadCSV($exportResult, $request->data_types);
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Échec de l\'export : ' . $e->getMessage());
+            return back()->with('error', __('Export failed: :message', ['message' => $e->getMessage()]));
         }
     }
 

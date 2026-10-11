@@ -8,7 +8,7 @@
         :title="__('common.settings')"
         :description="__('common.configure_preferences')"
         icon="fa-sliders"
-        eyebrow="Clinic configuration"
+        :eyebrow="__('Clinic configuration')"
     />
 
     <!-- Language Settings -->
@@ -18,7 +18,7 @@
                 <i class="fas fa-language text-teal-700 mr-2"></i>
                 {{ __('common.language') }} {{ __('common.settings') }}
             </h3>
-            <p class="text-gray-600 text-sm">Choose your preferred language for the application interface.</p>
+            <p class="text-gray-600 text-sm">{{ __('Choose your preferred language for the application interface.') }}</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -56,12 +56,12 @@
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
                 <i class="fas fa-clinic-medical text-teal-700 mr-2"></i>
-                Informations de la Clinique
+                {{ __('Clinic Information') }}
             </h3>
-            <p class="text-gray-600 text-sm">Configurez les informations de votre clinique pour les prescriptions et documents officiels.</p>
+            <p class="text-gray-600 text-sm">{{ __('Configure your clinic details for prescriptions and official documents.') }}</p>
             <p class="text-red-600 text-sm mt-1">
                 <i class="fas fa-info-circle mr-1"></i>
-                Les champs marqués d'un <span class="text-red-500">*</span> sont obligatoires.
+                {{ __('Fields marked with') }} <span class="text-red-500">*</span> {{ __('are required.') }}
             </p>
         </div>
 
@@ -70,7 +70,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Nom de la Clinique <span class="text-red-500">*</span>
+                        {{ __('Clinic name') }} <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="clinic_name" value="{{ \App\Models\Setting::get('clinic_name', '') }}" 
                            required
@@ -78,7 +78,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Téléphone <span class="text-red-500">*</span>
+                        {{ __('Phone') }} <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="clinic_phone" value="{{ \App\Models\Setting::get('clinic_phone', '') }}" 
                            required
@@ -88,7 +88,7 @@
             
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Adresse Complète <span class="text-red-500">*</span>
+                    {{ __('Full address') }} <span class="text-red-500">*</span>
                 </label>
                 <textarea name="clinic_address" rows="3" 
                           required
@@ -97,12 +97,12 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Email') }}</label>
                     <input type="email" name="clinic_email" value="{{ \App\Models\Setting::get('clinic_email', '') }}" 
                            class="form-control w-full px-3 py-2">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Site Web</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Website') }}</label>
                     <input type="url" name="clinic_website" value="{{ \App\Models\Setting::get('clinic_website', '') }}" 
                            class="form-control w-full px-3 py-2">
                 </div>
@@ -110,7 +110,7 @@
             
             <div class="flex justify-end">
                 <button type="submit" class="btn-primary px-6 py-2">
-                    Sauvegarder les Informations
+                    {{ __('Save Information') }}
                 </button>
             </div>
         </form>
@@ -123,30 +123,30 @@
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
                 <i class="fas {{ $currentSpecialty['icon'] }} text-teal-700 mr-2"></i>
-                Practice Specialty
+                {{ __('Practice Specialty') }}
             </h3>
-            <p class="text-gray-600 text-sm">Choose the optional patient details, clinical fields, appointment suggestions, and demo data that fit your practice.</p>
-            <p class="mt-2 text-sm text-teal-900"><strong>{{ $currentSpecialty['label'] }}:</strong> {{ $currentSpecialty['description'] }} Suggested consultation duration: {{ $currentSpecialty['defaults']['appointment_duration'] }} minutes; suggested workflow: {{ $currentSpecialty['defaults']['appointment_mode'] }}.</p>
+            <p class="text-gray-600 text-sm">{{ __('Choose the optional patient details, clinical fields, appointment suggestions, and demo data that fit your practice.') }}</p>
+            <p class="mt-2 text-sm text-teal-900"><strong>{{ __($currentSpecialty['label']) }}:</strong> {{ __($currentSpecialty['description']) }} {{ __('Suggested consultation duration: :duration minutes; suggested workflow: :mode.', ['duration' => $currentSpecialty['defaults']['appointment_duration'], 'mode' => __($currentSpecialty['defaults']['appointment_mode'])]) }}</p>
         </div>
 
         <form action="{{ route('settings.specialty') }}" method="POST" class="space-y-4">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
                 <div class="md:col-span-2">
-                    <label for="clinic_specialty" class="block text-sm font-medium text-gray-700 mb-2">Clinic specialty</label>
+                    <label for="clinic_specialty" class="block text-sm font-medium text-gray-700 mb-2">{{ __('Clinic specialty') }}</label>
                     <select name="clinic_specialty" id="clinic_specialty" class="form-control w-full px-3 py-2 bg-white" required>
                         @foreach($specialtyProfiles as $key => $profile)
                             <option value="{{ $key }}" @selected(old('clinic_specialty', $currentSpecialty['key']) === $key)>
-                                {{ $profile['label'] }} ({{ $profile['defaults']['appointment_duration'] }} min, {{ $profile['defaults']['appointment_mode'] }})
+                                {{ __($profile['label']) }} ({{ $profile['defaults']['appointment_duration'] }} {{ __('min') }}, {{ $profile['defaults']['appointment_mode'] === 'queue' ? __('Queue mode') : __('Scheduled mode') }})
                             </option>
                         @endforeach
                     </select>
                 </div>
-                <button type="submit" class="btn-primary px-6 py-2"><i class="fas fa-save text-sm"></i><span>Save Specialty</span></button>
+                <button type="submit" class="btn-primary px-6 py-2"><i class="fas fa-save text-sm"></i><span>{{ __('Save Specialty') }}</span></button>
             </div>
             <label class="flex items-start gap-3 rounded-lg bg-teal-50 p-4 text-sm text-teal-950">
                 <input type="checkbox" name="apply_specialty_defaults" value="1" class="mt-1 rounded border-teal-300 text-teal-700 focus:ring-teal-600">
-                <span>Also apply this specialty's suggested consultation duration and appointment mode to my account. Existing appointments, patients, and clinical records are never changed.</span>
+                <span>{{ __('Also apply this specialty\'s suggested consultation duration and appointment mode to my account. Existing appointments, patients, and clinical records are never changed.') }}</span>
             </label>
         </form>
     </div>
@@ -204,37 +204,37 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-list-ol text-teal-600 mr-1"></i>
-                        Appointment Mode
+                        {{ __('Appointment Mode') }}
                     </label>
                     <select name="appointment_mode"
                             id="appointment_mode"
                             onchange="toggleQueueLimit()"
                             class="form-control w-full px-3 py-2 bg-white">
-                        <option value="scheduled" {{ auth()->user()->appointment_mode !== 'queue' ? 'selected' : '' }}>Scheduled appointments</option>
-                        <option value="queue" {{ auth()->user()->appointment_mode === 'queue' ? 'selected' : '' }}>Queue mode</option>
+                        <option value="scheduled" {{ auth()->user()->appointment_mode !== 'queue' ? 'selected' : '' }}>{{ __('Scheduled appointments') }}</option>
+                        <option value="queue" {{ auth()->user()->appointment_mode === 'queue' ? 'selected' : '' }}>{{ __('Queue mode') }}</option>
                     </select>
-                    <p class="text-xs text-gray-500 mt-1">Scheduled mode uses fixed times. Queue mode assigns automatic numbers and estimated times.</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('Scheduled mode uses fixed times. Queue mode assigns automatic numbers and estimated times.') }}</p>
                 </div>
 
                 <div id="queue_limit_wrapper">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-users text-teal-600 mr-1"></i>
-                        Daily Queue Limit
+                        {{ __('Daily Queue Limit') }}
                     </label>
                     <input type="number"
                            name="queue_daily_limit"
                            min="1"
                            max="500"
                            value="{{ old('queue_daily_limit', auth()->user()->queue_daily_limit) }}"
-                           placeholder="No limit"
+                           placeholder="{{ __('No limit') }}"
                            class="form-control w-full px-3 py-2">
-                    <p class="text-xs text-gray-500 mt-1">Leave empty if the queue should not have a daily cap.</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('Leave empty if the queue should not have a daily cap.') }}</p>
                 </div>
 
                 <div class="flex items-end">
                     <button type="submit" class="btn-primary px-6 py-2">
                         <i class="fas fa-save text-sm"></i>
-                        <span>Save Mode</span>
+                        <span>{{ __('Save Mode') }}</span>
                     </button>
                 </div>
             </div>
@@ -323,7 +323,7 @@
                         @php $nextWorking = \App\Models\Setting::getNextWorkingTime(); @endphp
                         @if($nextWorking)
                         <span class="text-sm text-gray-600">
-                            Next opening: {{ $nextWorking->format('M d, Y H:i') }}
+                            {{ __('Next opening') }}: {{ $nextWorking->translatedFormat('M d, Y H:i') }}
                         </span>
                         @endif
                     @endif
@@ -338,7 +338,7 @@
                 
                 <button type="button" onclick="setDefaultHours()" class="btn-secondary px-6 py-2">
                     <i class="fas fa-undo"></i>
-                    <span>Reset to Default</span>
+                    <span>{{ __('Reset to Default') }}</span>
                 </button>
             </div>
         </form>
@@ -351,9 +351,9 @@
         <div class="mb-6">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center mb-2">
                 <i class="fas fa-chart-bar text-teal-700 mr-2"></i>
-                Analytiques et Données
+                {{ __('Analytics and Data') }}
             </h3>
-            <p class="text-gray-600 text-sm">Accédez aux statistiques de votre clinique et exportez vos données.</p>
+            <p class="text-gray-600 text-sm">{{ __('Access your clinic statistics and export your data.') }}</p>
         </div>
 
         <div class="grid md:grid-cols-2 gap-6">
@@ -363,12 +363,12 @@
                     <div class="w-16 h-16 brand-mark rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-chart-line text-white text-2xl"></i>
                     </div>
-                    <h4 class="font-semibold text-gray-900 mb-2">Statistiques</h4>
-                    <p class="text-sm text-gray-600 mb-4">Visualisez les tendances, graphiques et rapports de votre clinique</p>
+                    <h4 class="font-semibold text-gray-900 mb-2">{{ __('Statistics') }}</h4>
+                    <p class="text-sm text-gray-600 mb-4">{{ __('View your clinic trends, charts, and reports.') }}</p>
                     <a href="{{ route('statistics.index') }}" 
                        class="btn-primary px-6 py-3">
                         <i class="fas fa-chart-bar"></i>
-                        <span>Voir les Statistiques</span>
+                        <span>{{ __('View Statistics') }}</span>
                     </a>
                 </div>
             </div>
@@ -379,12 +379,12 @@
                     <div class="w-16 h-16 brand-mark rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-download text-white text-2xl"></i>
                     </div>
-                    <h4 class="font-semibold text-gray-900 mb-2">Export de Données</h4>
-                    <p class="text-sm text-gray-600 mb-4">Exportez patients, rendez-vous, ordonnances en format Excel</p>
+                    <h4 class="font-semibold text-gray-900 mb-2">{{ __('Data Export') }}</h4>
+                    <p class="text-sm text-gray-600 mb-4">{{ __('Export patients, appointments, and prescriptions to Excel.') }}</p>
                     <a href="{{ route('exports.index') }}" 
                        class="btn-primary px-6 py-3">
                         <i class="fas fa-file-export"></i>
-                        <span>Exporter les Données</span>
+                        <span>{{ __('Export Data') }}</span>
                     </a>
                 </div>
             </div>
@@ -401,21 +401,22 @@
                 {{ __('common.today_schedule') }}
             </h4>
             @php 
-                $today = strtolower(\Illuminate\Support\Carbon::now()->format('l'));
+                    $today = strtolower(\Illuminate\Support\Carbon::now()->format('l'));
+                    $todayName = \Illuminate\Support\Carbon::now()->translatedFormat('l');
                 $todayHours = $workingHours[$today];
             @endphp
             @if($todayHours['is_working'])
                 <p class="text-sm text-gray-600">
-                    <span class="font-medium">{{ ucfirst($today) }}</span><br>
+                    <span class="font-medium">{{ $todayName }}</span><br>
                     {{ $todayHours['start_time'] }} - {{ $todayHours['end_time'] }}
                 </p>
                 <div class="mt-3 text-xs">
-                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full">Open Today</span>
+                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full">{{ __('Open Today') }}</span>
                 </div>
             @else
-                <p class="text-sm text-gray-600">Closed today</p>
+                <p class="text-sm text-gray-600">{{ __('Closed today') }}</p>
                 <div class="mt-3 text-xs">
-                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full">Closed Today</span>
+                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full">{{ __('Closed Today') }}</span>
                 </div>
             @endif
         </div>
@@ -424,14 +425,14 @@
         <div class="section-card p-6">
             <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
                 <i class="fas fa-calendar-week text-teal-700 mr-2"></i>
-                Weekly Summary
+                {{ __('Weekly Summary') }}
             </h4>
             @php
                 $workingDaysCount = collect($workingHours)->filter(function($day) { return $day['is_working']; })->count();
             @endphp
             <p class="text-sm text-gray-600">
-                <span class="font-medium">{{ $workingDaysCount }} working days</span><br>
-                {{ 7 - $workingDaysCount }} days closed
+                <span class="font-medium">{{ $workingDaysCount }} {{ __('working days') }}</span><br>
+                {{ 7 - $workingDaysCount }} {{ __('days closed') }}
             </p>
         </div>
 
@@ -439,19 +440,19 @@
         <div class="section-card p-6">
             <h4 class="font-semibold text-gray-900 mb-3 flex items-center">
                 <i class="fas fa-database text-teal-700 mr-2"></i>
-                Data Status
+                {{ __('Data Status') }}
             </h4>
             <div class="space-y-2 text-sm text-gray-600">
                 <div class="flex justify-between">
-                    <span>Patients:</span>
+                    <span>{{ __('Patients:') }}</span>
                     <span class="font-medium">{{ \App\Models\Patient::count() }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span>Appointments:</span>
+                    <span>{{ __('Appointments:') }}</span>
                     <span class="font-medium">{{ \App\Models\Appointment::count() }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span>Records:</span>
+                    <span>{{ __('Records:') }}</span>
                     <span class="font-medium">{{ \App\Models\MedicalRecord::count() }}</span>
                 </div>
             </div>
@@ -467,6 +468,10 @@ function toggleDayHours(day) {
     const startInput = document.querySelector(`input[name="${day}_start"]`);
     const endInput = document.querySelector(`input[name="${day}_end"]`);
     
+    if (!checkbox || !hoursDiv || !startInput || !endInput) {
+        return;
+    }
+
     if (checkbox.checked) {
         hoursDiv.classList.remove('opacity-50', 'pointer-events-none');
         startInput.setAttribute('required', 'required');
@@ -563,14 +568,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Reset export button if page loads with success message (after successful export)
     @if(session('success'))
-        setTimeout(resetExportBtn, 1000);
-        showNotification('{{ session('success') }}', 'success');
+        showNotification(@json(session('success')), 'success');
     @endif
     
     // Show error message if export failed
     @if(session('error'))
-        setTimeout(resetExportBtn, 1000);
-        showNotification('{{ session('error') }}', 'error');
+        showNotification(@json(session('error')), 'error');
     @endif
 });
 </script>

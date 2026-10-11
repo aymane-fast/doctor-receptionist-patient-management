@@ -8,7 +8,7 @@
         :title="__('current_patient.title')"
         :description="__('current_patient.subtitle')"
         icon="fa-user-doctor"
-        eyebrow="Consultation workspace"
+        :eyebrow="__('Consultation workspace')"
     >
         <x-slot:actions>
             <button onclick="history.back()" class="btn-secondary px-4 py-2">
@@ -157,7 +157,7 @@
                                             <i class="fas fa-calendar"></i>
                                         </div>
                                         <div>
-                                            <div class="font-semibold text-gray-900">{{ $ap->appointment_date->format('M j, Y') }} at {{ $ap->displayTime() }}</div>
+                                            <div class="font-semibold text-gray-900">{{ $ap->appointment_date->translatedFormat('M j, Y') }} {{ __('at') }} {{ $ap->displayTime() }}</div>
                                             <div class="text-sm text-gray-600">{{ $ap->doctor->professional_name }}</div>
                                             <div class="flex items-center space-x-2 mt-1">
                                                 @if($ap->status === 'completed')
@@ -214,7 +214,7 @@
                                             <i class="fas fa-stethoscope text-emerald-600"></i>
                                         </div>
                                         <div>
-                                            <div class="font-semibold text-gray-900">{{ $rec->visit_date->format('M j, Y') }}</div>
+                                            <div class="font-semibold text-gray-900">{{ $rec->visit_date->translatedFormat('M j, Y') }}</div>
                                             <div class="text-sm text-gray-600">{{ $rec->doctor->professional_name }}</div>
                                             @if($rec->diagnosis)
                                             <div class="text-xs text-gray-500 mt-1">{{ Str::limit($rec->diagnosis, 50) }}</div>
@@ -265,7 +265,7 @@
                                         <div>
                                             <div class="font-semibold text-gray-900">{{ $rx->medication_name }}</div>
                                             <div class="text-sm text-emerald-700 font-medium">{{ $rx->dosage }}</div>
-                                            <div class="text-xs text-gray-500">{{ $rx->prescribed_date->format('M j, Y') }} • {{ $rx->doctor->professional_name }}</div>
+                                            <div class="text-xs text-gray-500">{{ $rx->prescribed_date->translatedFormat('M j, Y') }} • {{ $rx->doctor->professional_name }}</div>
                                         </div>
                                     </div>
                                     <a href="{{ route('prescriptions.show', $rx) }}" class="btn-ghost px-3 py-2">

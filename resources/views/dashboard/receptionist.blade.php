@@ -6,14 +6,14 @@
 <div class="space-y-8">
     <x-ui.page-header
         :title="__('dashboard.reception_dashboard')"
-        description="Coordinate patient arrivals, appointments, and the clinic queue from one workspace."
+        :description="__('Coordinate patient arrivals, appointments, and the clinic queue from one workspace.')"
         icon="fa-headset"
-        eyebrow="Front desk"
+        :eyebrow="__('Front desk')"
     >
         <x-slot:actions>
             <a href="{{ route('appointments.queue') }}" class="btn-secondary px-5 py-3">
                 <i class="fas fa-list-ol"></i>
-                <span>Open queue</span>
+                <span>{{ __('Open queue') }}</span>
             </a>
             <a href="{{ route('patients.create') }}" class="btn-primary px-5 py-3">
                 <i class="fas fa-user-plus"></i>
@@ -115,7 +115,7 @@
                             <div class="flex items-center space-x-4 text-sm text-gray-600">
                                 <div class="flex items-center space-x-2">
                                     <i class="fas fa-clock text-blue-500"></i>
-                                    <span class="font-medium">Started: {{ $curr->displayTime() }}</span>
+                                    <span class="font-medium">{{ __('Started:') }} {{ $curr->displayTime() }}</span>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <i class="fas fa-id-card text-blue-500"></i>
@@ -145,22 +145,22 @@
                                 <a href="{{ route('appointments.show', $curr) }}" 
                                    class="bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-3 px-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-1">
                                     <i class="fas fa-eye"></i>
-                                    <span class="text-sm">View</span>
+                                    <span class="text-sm">{{ __('View') }}</span>
                                 </a>
                                 
                                 <!-- Reschedule -->
                                 <a href="{{ route('appointments.reschedule', $curr) }}" 
                                    class="bg-amber-100 hover:bg-amber-200 text-amber-700 font-medium py-3 px-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-1">
                                     <i class="fas fa-calendar-alt"></i>
-                                    <span class="text-sm">Reschedule</span>
+                                    <span class="text-sm">{{ __('Reschedule') }}</span>
                                 </a>
                                 
                                 <!-- Cancel -->
                                 <button onclick="cancelAppointment({{ $curr->id }})" 
                                         class="bg-red-100 hover:bg-red-200 text-red-700 font-medium py-3 px-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-1" 
-                                        title="Cancel">
+                                        title="{{ __('Cancel') }}" aria-label="{{ __('Cancel') }}">
                                     <i class="fas fa-times"></i>
-                                    <span class="text-sm">Cancel</span>
+                                    <span class="text-sm">{{ __('Cancel') }}</span>
                                 </button>
                             </div>
                         </div>
@@ -197,15 +197,15 @@
                             <div class="flex items-center space-x-3">
                                 <button onclick="setAsCurrent({{ $nextByDoctor[$docId]->id }})" 
                                         class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1" 
-                                        title="Start Session with Next Patient">
+                                        title="{{ __('Start Session with Next Patient') }}" aria-label="{{ __('Start Session with Next Patient') }}">
                                     <i class="fas fa-play text-lg"></i>
                                     <span>{{ __('dashboard.start_session') }}</span>
                                 </button>
                                 <button onclick="cancelAppointment({{ $nextByDoctor[$docId]->id }})" 
                                         class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2" 
-                                        title="Cancel Next Patient">
+                                        title="{{ __('Cancel Next Patient') }}" aria-label="{{ __('Cancel Next Patient') }}">
                                     <i class="fas fa-times"></i>
-                                    <span class="hidden sm:inline">Cancel</span>
+                                    <span class="hidden sm:inline">{{ __('Cancel') }}</span>
                                 </button>
                             </div>
                         </div>
@@ -288,7 +288,7 @@
                                         {{ \App\Models\Appointment::statusLabel($appointment->status) }}
                                     </span>
                                     <div class="appointment-action-buttons flex items-center space-x-1">
-                                        <a href="{{ route('appointments.show', $appointment) }}" class="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors" title="View Details">
+                                        <a href="{{ route('appointments.show', $appointment) }}" class="w-8 h-8 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('View Details') }}" aria-label="{{ __('View Details') }}">
                                             <i class="fas fa-eye text-blue-600 text-sm"></i>
                                         </a>
                                         @if($appointment->status === 'scheduled')
@@ -297,16 +297,16 @@
                                                     <i class="fas fa-user-check text-teal-600 text-sm"></i>
                                                 </button>
                                             @endif
-                                            <button onclick="setAsCurrent({{ $appointment->id }})" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="Set as Current Patient">
+                                            <button onclick="setAsCurrent({{ $appointment->id }})" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('Set as Current Patient') }}" aria-label="{{ __('Set as Current Patient') }}">
                                                 <i class="fas fa-play text-green-600 text-sm"></i>
                                             </button>
-                                            <a href="{{ route('appointments.reschedule', $appointment) }}" class="btn-ghost w-8 h-8 p-0" title="Reschedule Appointment">
+                                            <a href="{{ route('appointments.reschedule', $appointment) }}" class="btn-ghost w-8 h-8 p-0" title="{{ __('Reschedule Appointment') }}" aria-label="{{ __('Reschedule Appointment') }}">
                                                 <i class="fas fa-clock text-sm"></i>
                                             </a>
                                             <button onclick="submitAction('{{ route('appointments.no-show', $appointment) }}', '{{ __('appointments.mark_no_show') }}?')" class="w-8 h-8 bg-orange-100 hover:bg-orange-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('appointments.mark_no_show') }}">
                                                 <i class="fas fa-user-slash text-orange-600 text-sm"></i>
                                             </button>
-                                            <button onclick="cancelAppointment({{ $appointment->id }})" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors" title="Cancel Appointment">
+                                            <button onclick="cancelAppointment({{ $appointment->id }})" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('Cancel Appointment') }}" aria-label="{{ __('Cancel Appointment') }}">
                                                 <i class="fas fa-times text-red-600 text-sm"></i>
                                             </button>
                                         @endif
@@ -389,7 +389,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center space-x-3">
-                                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">{{ $patient->created_at->format('M j') }}</span>
+                                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">{{ $patient->created_at->translatedFormat('M j') }}</span>
                                     <a href="{{ route('patients.show', $patient) }}" class="w-8 h-8 bg-emerald-100 hover:bg-emerald-200 rounded-lg flex items-center justify-center transition-colors">
                                         <i class="fas fa-eye text-emerald-600 text-sm"></i>
                                     </a>
@@ -475,7 +475,7 @@
                                     {{ $appointment->doctor->professional_name }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ $appointment->appointment_date->format('M j, Y') }}</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ $appointment->appointment_date->translatedFormat('M j, Y') }}</div>
                                     <div class="text-xs text-gray-500">{{ $appointment->displayTime() }}</div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -529,27 +529,27 @@
                 </div>
                 <form method="GET" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Search Patient</label>
-                        <input type="text" name="patient_search" class="modal-input focus:ring-blue-500" placeholder="Search by name, phone, CIN, or patient ID..." value="{{ request('patient_search') }}">
-                        <p class="text-xs text-gray-500 mt-1">Search across: name, phone number, CIN, patient ID</p>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Search Patient') }}</label>
+                        <input type="text" name="patient_search" class="modal-input focus:ring-blue-500" placeholder="{{ __('Search by name, phone, CIN, or patient ID...') }}" value="{{ request('patient_search') }}">
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Search across: name, phone number, CIN, patient ID') }}</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Doctor</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Doctor') }}</label>
                         <select name="doctor_filter" class="modal-input focus:ring-blue-500">
-                            <option value="">All Doctors</option>
+                            <option value="">{{ __('All Doctors') }}</option>
                             @foreach(\App\Models\User::where('role', 'doctor')->get() as $doctor)
                             <option value="{{ $doctor->id }}" {{ request('doctor_filter') == $doctor->id ? 'selected' : '' }}>{{ $doctor->professional_name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Status') }}</label>
                         <select name="status_filter" class="modal-input focus:ring-blue-500">
-                            <option value="">All Statuses</option>
-                            <option value="scheduled" {{ request('status_filter') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                            <option value="in_progress" {{ request('status_filter') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                            <option value="completed" {{ request('status_filter') == 'completed' ? 'selected' : '' }}>Completed</option>
-                            <option value="cancelled" {{ request('status_filter') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                            <option value="">{{ __('All Statuses') }}</option>
+                            <option value="scheduled" {{ request('status_filter') == 'scheduled' ? 'selected' : '' }}>{{ __('Scheduled') }}</option>
+                            <option value="in_progress" {{ request('status_filter') == 'in_progress' ? 'selected' : '' }}>{{ __('In Progress') }}</option>
+                            <option value="completed" {{ request('status_filter') == 'completed' ? 'selected' : '' }}>{{ __('Completed') }}</option>
+                            <option value="cancelled" {{ request('status_filter') == 'cancelled' ? 'selected' : '' }}>{{ __('Cancelled') }}</option>
                         </select>
                     </div>
                     <div class="flex space-x-3 pt-4">
@@ -571,26 +571,26 @@
         <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Filter Patients</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('Filter Patients') }}</h3>
                     <button onclick="closeReceptionPatientFilters()" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
                 <form method="GET" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Search Patient</label>
-                        <input type="text" name="patient_name_search" class="modal-input focus:ring-emerald-500" placeholder="Search by name, phone, CIN, or patient ID..." value="{{ request('patient_name_search') }}">
-                        <p class="text-xs text-gray-500 mt-1">Search across: name, phone number, CIN, patient ID</p>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Search Patient') }}</label>
+                        <input type="text" name="patient_name_search" class="modal-input focus:ring-emerald-500" placeholder="{{ __('Search by name, phone, CIN, or patient ID...') }}" value="{{ request('patient_name_search') }}">
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Search across: name, phone number, CIN, patient ID') }}</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Age Range</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Age Range') }}</label>
                         <div class="grid grid-cols-2 gap-3">
-                            <input type="number" name="age_from" class="modal-input focus:ring-emerald-500" placeholder="From" value="{{ request('age_from') }}">
-                            <input type="number" name="age_to" class="modal-input focus:ring-emerald-500" placeholder="To" value="{{ request('age_to') }}">
+                            <input type="number" name="age_from" class="modal-input focus:ring-emerald-500" placeholder="{{ __('From') }}" value="{{ request('age_from') }}">
+                            <input type="number" name="age_to" class="modal-input focus:ring-emerald-500" placeholder="{{ __('To') }}" value="{{ request('age_to') }}">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Registration Date</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Registration Date') }}</label>
                         <div class="grid grid-cols-2 gap-3">
                             <input type="date" name="reg_date_from" class="modal-input focus:ring-emerald-500" value="{{ request('reg_date_from') }}">
                             <input type="date" name="reg_date_to" class="modal-input focus:ring-emerald-500" value="{{ request('reg_date_to') }}">
@@ -658,7 +658,7 @@ function submitAction(url, confirmMessage = null) {
 
 // Quick action functions
 function setAsCurrent(appointmentId) {
-    if (confirm('Set this appointment as the current patient?')) {
+    if (confirm(@json(__('Set this appointment as the current patient?')))) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/appointments/${appointmentId}/set-current`;
@@ -675,7 +675,7 @@ function setAsCurrent(appointmentId) {
 }
 
 function cancelAppointment(appointmentId) {
-    if (confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+    if (confirm(@json(__('Are you sure you want to cancel this appointment? This action cannot be undone.')))) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/appointments/${appointmentId}/cancel`;
@@ -699,7 +699,7 @@ function rescheduleAppointment(appointmentId) {
 // Handle mark complete form submission
 function handleMarkComplete(form) {
     const button = form.querySelector('button[type="submit"]');
-    button.innerHTML = '<i class="fas fa-spinner animate-spin text-xl mr-3"></i><span class="text-lg">Completing...</span>';
+    button.innerHTML = '<i class="fas fa-spinner animate-spin text-xl mr-3"></i><span class="text-lg">' + @json(__('Completing...')) + '</span>';
     button.disabled = true;
     
     return true; // Allow form to submit normally
@@ -707,11 +707,11 @@ function handleMarkComplete(form) {
 
 // Enhanced action functions with immediate sync trigger
 function setAsCurrent(appointmentId) {
-    if (confirm('Set this appointment as the current patient?')) {
+    if (confirm(@json(__('Set this appointment as the current patient?')))) {
         // Show loading state
         const button = event.target.closest('button');
         const originalContent = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Starting...';
+        button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>' + @json(__('Starting...'));
         button.disabled = true;
         
         const form = document.createElement('form');
@@ -731,11 +731,11 @@ function setAsCurrent(appointmentId) {
 }
 
 function cancelAppointment(appointmentId) {
-    if (confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+    if (confirm(@json(__('Are you sure you want to cancel this appointment? This action cannot be undone.')))) {
         // Show loading state
         const button = event.target.closest('button');
         const originalContent = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Cancelling...';
+        button.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>' + @json(__('Cancelling...'));
         button.disabled = true;
         
         const form = document.createElement('form');

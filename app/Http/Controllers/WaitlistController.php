@@ -47,9 +47,10 @@ class WaitlistController extends Controller
         }
 
         $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
+            'patient_id' => 'required|integer|exists:patients,id',
             'doctor_id' => [
                 'required',
+                'integer',
                 Rule::exists('users', 'id')->where('role', 'doctor'),
             ],
             'preferred_date' => 'nullable|date|after_or_equal:today',

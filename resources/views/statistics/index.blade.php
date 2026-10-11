@@ -8,7 +8,7 @@
         :title="__('statistics.title')"
         :description="__('statistics.comprehensive_insights')"
         icon="fa-chart-line"
-        :eyebrow="$clinicSpecialty['label'].' intelligence'"
+        :eyebrow="__($clinicSpecialty['label']).' '. __('intelligence')"
     >
         <x-slot:actions>
             <div class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
@@ -102,7 +102,7 @@
             <div class="analytics-card p-6 lg:p-8">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
                     <h3 class="text-xl font-bold text-gray-900">{{ __('statistics.appointments_trend') }}</h3>
-                    <div class="timeframe-switch" aria-label="Trend timeframe">
+                    <div class="timeframe-switch" aria-label="{{ __('Trend timeframe') }}">
                         <button onclick="changeTimeframe('week')" class="timeframe-button is-active" id="week-btn">{{ __('statistics.week') }}</button>
                         <button onclick="changeTimeframe('month')" class="timeframe-button" id="month-btn">{{ __('statistics.month') }}</button>
                         <button onclick="changeTimeframe('year')" class="timeframe-button" id="year-btn">{{ __('statistics.year') }}</button>
@@ -196,7 +196,7 @@
                     <thead>
                         <tr class="text-left text-xs font-bold text-gray-500 uppercase">
                             <th class="px-4 py-3">{{ __('appointments.doctor') }}</th>
-                            <th class="px-4 py-3">Mode</th>
+                            <th class="px-4 py-3">{{ __('Mode') }}</th>
                             <th class="px-4 py-3">{{ __('statistics.total_appointments') }}</th>
                             <th class="px-4 py-3">{{ __('appointments.completed') }}</th>
                             <th class="px-4 py-3">{{ __('appointments.cancelled') }}</th>
@@ -263,7 +263,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-lg font-bold text-emerald-700">{{ $patient['visits'] }}</p>
-                            <p class="text-xs text-gray-500">visits</p>
+                            <p class="text-xs text-gray-500">{{ __('visits') }}</p>
                         </div>
                     </div>
                     @endforeach
@@ -338,7 +338,7 @@ function initializeCharts() {
     statusChart = new Chart(ctx2, {
         type: 'doughnut',
         data: {
-            labels: ['Completed', 'Scheduled', 'In Progress', 'Cancelled'],
+            labels: [@json(__('Completed')), @json(__('Scheduled')), @json(__('In Progress')), @json(__('Cancelled'))],
             datasets: [{
                 data: [
                     {{ $statistics['completed_appointments'] ?? 0 }},

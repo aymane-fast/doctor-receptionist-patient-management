@@ -8,7 +8,7 @@
         :title="__('patients.add_new_patient')"
         :description="__('patients.create_comprehensive_profile')"
         icon="fa-user-plus"
-        eyebrow="Patient registry"
+        :eyebrow="__('Patient registry')"
     >
         <x-slot:actions>
             <button onclick="history.back()" class="btn-secondary px-6 py-3">
@@ -86,7 +86,7 @@
                                     <button type="button" 
                                             id="refresh_slots" 
                                             class="px-3 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-xl transition-colors"
-                                            title="Refresh available slots">
+                                            title="{{ __('Refresh available slots') }}" aria-label="{{ __('Refresh available slots') }}">
                                         <i class="fas fa-sync-alt"></i>
                                     </button>
                                 </div>
@@ -94,7 +94,7 @@
                             
                             <!-- Available slots preview -->
                             <div id="available_slots_preview" class="mt-2 hidden">
-                                <p class="text-xs font-medium text-gray-600 mb-1">Available slots today:</p>
+                                <p class="text-xs font-medium text-gray-600 mb-1">{{ __('Available slots today:') }}</p>
                                 <div id="slots_container" class="flex flex-wrap gap-1">
                                     <!-- Slots will be populated by JavaScript -->
                                 </div>
@@ -111,7 +111,7 @@
                                    class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-green-500">
                             <datalist id="specialty-appointment-reasons">
                                 @foreach($clinicSpecialty['appointment_reasons'] as $suggestion)
-                                    <option value="{{ $suggestion }}"></option>
+                                    <option value="{{ __($suggestion) }}"></option>
                                 @endforeach
                             </datalist>
                         </div>
@@ -404,8 +404,8 @@
             <div class="p-8 pt-6">
                 <x-specialty.fields
                     :fields="$clinicSpecialty['patient_fields']"
-                    :title="$clinicSpecialty['label'].' patient details'"
-                    :description="'Optional information tailored to '.$clinicSpecialty['label'].' care.'"
+                    :title="__($clinicSpecialty['label']).' '. __('patient details')"
+                    :description="__('Optional information tailored to :specialty care.', ['specialty' => __($clinicSpecialty['label'])])"
                     :icon="$clinicSpecialty['icon']"
                 />
             </div>
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const slotsContainer = document.getElementById('slots_container');
         
         // Show loading state
-        slotInfo.textContent = 'Loading available slots...';
+        slotInfo.textContent = @json(__('Loading available slots...'));
         
         try {
             const dateParam = date || appointmentDateInput.value;
@@ -487,7 +487,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Update the main info text
                 const mainInfo = document.querySelector('.text-green-700 strong');
                 if (mainInfo) {
-                    mainInfo.textContent = `Smart scheduling: ${data.next_slot.display} automatically selected based on availability`;
+                    mainInfo.textContent = @json(__('Smart scheduling: :time automatically selected based on availability', ['time' => ':time']))
+                        .replace(':time', data.next_slot.display);
                 }
             } else {
                 // No slots available
@@ -512,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error fetching available slots:', error);
-            slotInfo.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-1"></i>Error loading slots. Using default time.`;
+            slotInfo.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-1"></i>${@json(__('Error loading slots. Using default time.'))}`;
             slotsPreview.classList.add('hidden');
             
             // Fallback to simple time calculation
@@ -525,13 +526,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to refresh slots
     function refreshSlots() {
-        const refreshBtn = document.getElementById('refresh_slots_btn');
+        const refreshBtn = document.getElementById('refresh_slots');
         if (!refreshBtn) return;
         
         const originalHtml = refreshBtn.innerHTML;
         
         // Show loading state
-        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Refreshing...';
+        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>' + @json(__('Refreshing...'));
         refreshBtn.disabled = true;
         
         setNextAvailableSlot().then(() => {
@@ -549,6 +550,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    document.getElementById('refresh_slots').addEventListener('click', refreshSlots);
+
     // Set default time on page load
     setNextAvailableSlot();
     

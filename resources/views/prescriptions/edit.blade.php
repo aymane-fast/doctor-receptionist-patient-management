@@ -12,9 +12,9 @@
     <div class="max-w-3xl mx-auto">
         <x-ui.page-header
             :title="__('prescriptions.edit_prescription')"
-            description="Update medication details, dosage, and instructions."
+            :description="__('Update medication details, dosage, and instructions.')"
             icon="fa-prescription-bottle-medical"
-            eyebrow="Medication plan"
+            :eyebrow="__('Medication plan')"
             class="mb-6"
         >
             <x-slot:actions>
@@ -66,7 +66,7 @@
                                     <option value="{{ $record->id }}"
                                             {{ old('medical_record_id', $prescription->medical_record_id) == $record->id ? 'selected' : '' }}>
                                         {{ $record->patient->first_name }} {{ $record->patient->last_name }} -
-                                        {{ \Carbon\Carbon::parse($record->visit_date)->format('M j, Y') }}
+                                        {{ \Carbon\Carbon::parse($record->visit_date)->translatedFormat('M j, Y') }}
                                     </option>
                                 @endforeach
                             </select>

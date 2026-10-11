@@ -228,7 +228,7 @@ class DashboardController extends Controller
     public function initializeFirstPatient(Request $request)
     {
         $request->validate([
-            'doctor_id' => ['nullable', \Illuminate\Validation\Rule::exists('users', 'id')->where('role', 'doctor')],
+            'doctor_id' => ['nullable', 'integer', \Illuminate\Validation\Rule::exists('users', 'id')->where('role', 'doctor')],
         ]);
 
         $doctorId = $request->doctor_id ?: Auth::id();
@@ -252,17 +252,17 @@ class DashboardController extends Controller
                 ->exists();
 
             if ($existing) {
-                return ['success' => false, 'message' => 'A patient is already set as current.'];
+                return ['success' => false, 'message' => __('A patient is already set as current.')];
             }
 
             // Call the next patient (arrived patients first)
             $next = app(\App\Services\AppointmentSchedulingService::class)->promoteNextPatient($doctorId);
 
             if (! $next) {
-                return ['success' => false, 'message' => 'No scheduled appointments found for today.'];
+                return ['success' => false, 'message' => __('No scheduled appointments found for today.')];
             }
 
-            return ['success' => true, 'message' => "Next patient ({$next->patient->full_name}) is now ready."];
+            return ['success' => true, 'message' => __('Next patient (:name) is now ready.', ['name' => $next->patient->full_name])];
         });
 
         if ($result['success']) {

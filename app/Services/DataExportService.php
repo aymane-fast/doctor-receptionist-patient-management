@@ -93,25 +93,10 @@ class DataExportService
 
         return [
             'headers' => [
-                'ID Patient',
-                'Prénom',
-                'Nom',
-                'Email',
-                'Téléphone',
-                'Sexe',
-                'Date de naissance',
-                'Age',
-                'Adresse',
-                'Numéro de carte d\'identité',
-                'Contact d\'urgence',
-                'Téléphone d\'urgence',
-                'Allergies',
-                'Conditions chroniques',
-                'Détails de spécialité',
-                'Total rendez-vous',
-                'Dernière visite',
-                'Date d\'inscription',
-                'Contacts parent / responsable',
+                __('Patient ID'), __('First Name'), __('Last Name'), __('Email'), __('Phone'), __('Gender'),
+                __('Date of Birth'), __('Age'), __('Address'), __('ID Card Number'), __('Emergency Contact'),
+                __('Emergency Phone'), __('Allergies'), __('Chronic Conditions'), __('Specialty Details'),
+                __('Total Appointments'), __('Last Visit'), __('Registration Date'), __('Parent / Guardian Contacts'),
             ],
             'data' => $patients->map(function ($patient) {
                 $lastAppointment = $patient->appointments->first();
@@ -122,7 +107,7 @@ class DataExportService
                     $patient->last_name,
                     $patient->email ?? '',
                     $patient->phone ?? '',
-                    $patient->gender === 'male' ? 'Homme' : ($patient->gender === 'female' ? 'Femme' : 'Non spécifié'),
+                    $patient->gender === 'male' ? __('Male') : ($patient->gender === 'female' ? __('Female') : __('Not specified')),
                     $patient->birth_date ? $patient->birth_date->format('Y-m-d') : '',
                     $patient->age ?? '',
                     $patient->address ?? '',
@@ -135,7 +120,7 @@ class DataExportService
                     $patient->appointments->count(),
                     $lastAppointment ? $this->formatDate($lastAppointment->appointment_date) : '',
                     $patient->created_at->format('Y-m-d H:i:s'),
-                    $patient->guardians->map(fn ($guardian) => ($guardian->is_primary ? 'Primary: ' : '').$guardian->name.' ('.$guardian->relationship.') '.$guardian->phone.' '.($guardian->email ?? ''))->implode('; '),
+                    $patient->guardians->map(fn ($guardian) => ($guardian->is_primary ? __('Primary').': ' : '').$guardian->name.' ('.$guardian->relationship.') '.$guardian->phone.' '.($guardian->email ?? ''))->implode('; '),
                 ];
             })->toArray(),
             'summary' => [
@@ -168,32 +153,24 @@ class DataExportService
 
         return [
             'headers' => [
-                'ID Rendez-vous',
-                'ID Patient',
-                'Nom du Patient',
-                'Nom du Médecin',
-                'Date du Rendez-vous',
-                'Heure du Rendez-vous',
-                'Statut',
-                'Motif',
-                'Notes',
-                'Date de Création',
+                __('Appointment ID'), __('Patient ID'), __('Patient Name'), __('Doctor Name'), __('Appointment Date'),
+                __('Appointment Time'), __('Status'), __('Reason'), __('Notes'), __('Created Date'),
             ],
             'data' => $appointments->map(function ($appointment) {
                 return [
                     $appointment->id,
                     $appointment->patient->id,
                     $appointment->patient->first_name.' '.$appointment->patient->last_name,
-                    $appointment->doctor->name ?? 'Not assigned',
+                    $appointment->doctor->name ?? __('Not assigned'),
                     $this->formatDate($appointment->appointment_date),
                     $appointment->displayTime(),
                     match ($appointment->status) {
-                        'completed' => 'Terminé',
-                        'scheduled' => 'Planifié',
-                        'cancelled' => 'Annulé',
-                        'in_progress' => 'En cours',
-                        'no_show' => 'Absent',
-                        default => ucfirst($appointment->status)
+                        'completed' => __('Completed'),
+                        'scheduled' => __('Scheduled'),
+                        'cancelled' => __('Cancelled'),
+                        'in_progress' => __('In Progress'),
+                        'no_show' => __('No Show'),
+                        default => __(ucfirst(str_replace('_', ' ', $appointment->status)))
                     },
                     $appointment->reason ?? '',
                     $appointment->notes ?? '',
@@ -230,30 +207,20 @@ class DataExportService
 
         return [
             'headers' => [
-                'Record ID',
-                'Patient ID',
-                'Patient Name',
-                'Doctor Name',
-                'Visit Date',
-                'Symptoms',
-                'Diagnosis',
-                'Treatment',
+                __('Record ID'), __('Patient ID'), __('Patient Name'), __('Doctor Name'), __('Visit Date'),
+                __('Symptoms'), __('Diagnosis'), __('Treatment'),
                 'Weight (kg)',
                 'Height (cm)',
-                'Blood Pressure',
-                'Temperature',
-                'Heart Rate',
-                'Oxygen Saturation',
-                'Détails de spécialité',
-                'Notes',
-                'Created Date',
+                __('Blood Pressure'), __('Temperature'), __('Heart Rate'), __('Oxygen Saturation'),
+                __('Specialty Details'), __('Notes'), __('Created Date'),
+                __('medical_records.visit_type'), __('medical_records.history_present_illness'), __('medical_records.physical_examination'),
             ],
             'data' => $records->map(function ($record) {
                 return [
                     $record->id,
                     $record->patient->id,
                     $record->patient->first_name.' '.$record->patient->last_name,
-                    $record->doctor->name ?? 'Not specified',
+                    $record->doctor->name ?? __('Not specified'),
                     $this->formatDate($record->visit_date),
                     $record->symptoms ?? '',
                     $record->diagnosis ?? '',
@@ -267,6 +234,9 @@ class DataExportService
                     $this->specialties->formatData('record', $record->specialty_data),
                     $record->notes ?? '',
                     $record->created_at->format('Y-m-d H:i:s'),
+                    $record->visit_type ? __('medical_records.visit_types.'.($record->visit_type === 'routine-checkup' ? 'routine' : $record->visit_type)) : '',
+                    $record->history_present_illness ?? '',
+                    $record->physical_examination ?? '',
                 ];
             })->toArray(),
             'summary' => [
@@ -336,18 +306,8 @@ class DataExportService
 
         return [
             'headers' => [
-                'Prescription ID',
-                'Patient ID',
-                'Patient Name',
-                'Doctor Name',
-                'Prescribed Date',
-                'Medication Name',
-                'Dosage',
-                'Frequency',
-                'Duration (Days)',
-                'Instructions',
-                'Notes',
-                'Created Date',
+                __('Prescription ID'), __('Patient ID'), __('Patient Name'), __('Doctor Name'), __('Prescribed Date'),
+                __('Medication Name'), __('Dosage'), __('Frequency'), __('Duration (Days)'), __('Instructions'), __('Notes'), __('Created Date'),
             ],
             'data' => $prescriptionData,
             'summary' => [
@@ -377,20 +337,15 @@ class DataExportService
 
         return [
             'headers' => [
-                'User ID',
-                'Name',
-                'Email',
-                'Role',
-                'Email Verified',
-                'Created Date',
+                __('User ID'), __('Name'), __('Email'), __('Role'), __('Email Verified'), __('Created Date'),
             ],
             'data' => $users->map(function ($user) {
                 return [
                     $user->id,
                     $user->name,
                     $user->email,
-                    ucfirst($user->role),
-                    $user->email_verified_at ? 'Yes' : 'No',
+                    __(ucfirst($user->role)),
+                    $user->email_verified_at ? __('Yes') : __('No'),
                     $user->created_at->format('Y-m-d H:i:s'),
                 ];
             })->toArray(),
@@ -414,20 +369,20 @@ class DataExportService
         fwrite($output, "\xEF\xBB\xBF");
 
         // Export info
-        fputcsv($output, ['Export des Données de la Clinique']);
-        fputcsv($output, ['Généré le:', $exportResult['info']['generated_at']->format('d/m/Y H:i:s')]);
-        fputcsv($output, ['Spécialité de la clinique:', $exportResult['info']['clinic_specialty']]);
+        fputcsv($output, [__('Clinic Data Export')]);
+        fputcsv($output, [__('Generated at:'), $exportResult['info']['generated_at']->format('d/m/Y H:i:s')]);
+        fputcsv($output, [__('Clinic specialty:'), $exportResult['info']['clinic_specialty']]);
         $rangeStart = $exportResult['info']['date_range']['start'];
         $rangeEnd = $exportResult['info']['date_range']['end'];
         if ($rangeStart || $rangeEnd) {
-            fputcsv($output, ['Période:', ($rangeStart ? $rangeStart->format('d/m/Y') : '...').' au '.($rangeEnd ? $rangeEnd->format('d/m/Y') : '...')]);
+            fputcsv($output, [__('Date range:'), ($rangeStart ? $rangeStart->format('d/m/Y') : '...').' '.__('to').' '.($rangeEnd ? $rangeEnd->format('d/m/Y') : '...')]);
         }
-        fputcsv($output, ['Types de données:', implode(', ', $exportResult['info']['data_types'])]);
+        fputcsv($output, [__('Data types:'), implode(', ', array_map(fn ($type) => __(ucwords(str_replace('_', ' ', $type))), $exportResult['info']['data_types']))]);
         fputcsv($output, []);
 
         // Export each data type
         foreach ($exportResult['data'] as $dataType => $data) {
-            fputcsv($output, [strtoupper(str_replace('_', ' ', $dataType))]);
+            fputcsv($output, [__(ucwords(str_replace('_', ' ', $dataType)))]);
             fputcsv($output, $data['headers']);
 
             foreach ($data['data'] as $row) {
@@ -442,29 +397,29 @@ class DataExportService
             }
 
             fputcsv($output, []);
-            fputcsv($output, ['Résumé:']);
+            fputcsv($output, [__('Summary:')]);
             foreach ($data['summary'] as $key => $value) {
                 $translatedKey = match ($key) {
-                    'total_count' => 'Total',
-                    'male_count' => 'Hommes',
-                    'female_count' => 'Femmes',
-                    'with_emergency_contact' => 'Avec contact d\'urgence',
-                    'completed' => 'Terminés',
-                    'scheduled' => 'Planifiés',
-                    'cancelled' => 'Annulés',
-                    'in_progress' => 'En cours',
-                    'no_show' => 'Absents',
-                    'with_diagnosis' => 'Avec diagnostic',
-                    'with_treatment' => 'Avec traitement',
-                    'with_vitals' => 'Avec signes vitaux',
-                    'total_prescriptions' => 'Total ordonnances',
-                    'total_medication_items' => 'Total médicaments',
-                    'unique_patients' => 'Patients uniques',
-                    'pending' => 'En attente',
-                    'doctors' => 'Médecins',
-                    'receptionists' => 'Réceptionnistes',
-                    'verified_users' => 'Utilisateurs vérifiés',
-                    default => ucfirst(str_replace('_', ' ', $key))
+                    'total_count' => __('Total'),
+                    'male_count' => __('Male'),
+                    'female_count' => __('Female'),
+                    'with_emergency_contact' => __('With emergency contact'),
+                    'completed' => __('Completed'),
+                    'scheduled' => __('Scheduled'),
+                    'cancelled' => __('Cancelled'),
+                    'in_progress' => __('In Progress'),
+                    'no_show' => __('No Show'),
+                    'with_diagnosis' => __('With diagnosis'),
+                    'with_treatment' => __('With treatment'),
+                    'with_vitals' => __('With vital signs'),
+                    'total_prescriptions' => __('Total prescriptions'),
+                    'total_medication_items' => __('Total medication items'),
+                    'unique_patients' => __('Unique patients'),
+                    'pending' => __('Pending'),
+                    'doctors' => __('Doctors'),
+                    'receptionists' => __('Receptionists'),
+                    'verified_users' => __('Verified users'),
+                    default => __(ucfirst(str_replace('_', ' ', $key)))
                 };
                 fputcsv($output, [$translatedKey.':', $value]);
             }

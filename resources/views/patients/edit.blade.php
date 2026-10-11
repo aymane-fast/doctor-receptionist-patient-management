@@ -8,7 +8,7 @@
         :title="__('patients.edit_patient_title') . ' - ' . $patient->full_name"
         :description="__('patients.update_patient_info')"
         icon="fa-user-pen"
-        eyebrow="Patient registry"
+        :eyebrow="__('Patient registry')"
     >
         <x-slot:actions>
                 <a href="{{ route('patients.show', $patient) }}" class="btn-primary px-6 py-3">
@@ -299,8 +299,8 @@
                 <x-specialty.fields
                     :fields="$clinicSpecialty['patient_fields']"
                     :values="$patient->specialty_data ?? []"
-                    :title="$clinicSpecialty['label'].' patient details'"
-                    :description="'Optional information tailored to '.$clinicSpecialty['label'].' care.'"
+                    :title="__($clinicSpecialty['label']).' '. __('patient details')"
+                    :description="__('Optional information tailored to :specialty care.', ['specialty' => __($clinicSpecialty['label'])])"
                     :icon="$clinicSpecialty['icon']"
                 />
             </div>
@@ -312,7 +312,7 @@
                     <div>
                         @if(auth()->user()->isDoctor())
                             <button type="button"
-                                    onclick="document.getElementById('delete-form').submit()"
+                                    id="delete-patient-button"
                                     class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-2xl font-medium transition-all duration-200 flex items-center space-x-2 group">
                                 <i class="fas fa-trash group-hover:scale-110 transition-transform"></i>
                                 <span>{{ __('patients.delete_patient') }}</span>
@@ -348,7 +348,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Add confirmation dialog for delete action
-    const deleteButton = document.querySelector('button[onclick*="delete-form"]');
+    const deleteButton = document.getElementById('delete-patient-button');
     if (deleteButton) {
         deleteButton.addEventListener('click', function(e) {
             e.preventDefault();

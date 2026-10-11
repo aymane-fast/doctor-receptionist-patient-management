@@ -8,12 +8,12 @@
         :title="__('appointments.title')"
         :description="__('appointments.manage_appointments_scheduling')"
         icon="fa-calendar-check"
-        eyebrow="Scheduling"
+        :eyebrow="__('Scheduling')"
     >
         <x-slot:actions>
                 <a href="{{ route('appointments.queue') }}" class="btn-secondary px-6 py-3 rounded-2xl">
                     <i class="fas fa-list-ol"></i>
-                    <span>Queue</span>
+                    <span>{{ __('Queue') }}</span>
                 </a>
                 <a href="{{ route('waitlist.index') }}" class="btn-secondary px-6 py-3 rounded-2xl">
                     <i class="fas fa-hourglass-half"></i>
@@ -77,17 +77,18 @@
                             <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
                             <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
                             <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('appointments.cancelled') }}</option>
+                            <option value="no_show" {{ request('status') == 'no_show' ? 'selected' : '' }}>{{ __('appointments.no_show') }}</option>
                         </select>
                     </div>
 
                     <div class="space-y-2">
-                        <label for="appointment_mode" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">Mode</label>
+                        <label for="appointment_mode" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide">{{ __('Mode') }}</label>
                         <select id="appointment_mode"
                                 name="appointment_mode"
                                 class="form-control w-full px-4 py-3 bg-white/80 backdrop-blur-sm focus:bg-white">
-                            <option value="">All Modes</option>
-                            <option value="scheduled" {{ request('appointment_mode') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                            <option value="queue" {{ request('appointment_mode') == 'queue' ? 'selected' : '' }}>Queue</option>
+                            <option value="">{{ __('All Modes') }}</option>
+                            <option value="scheduled" {{ request('appointment_mode') == 'scheduled' ? 'selected' : '' }}>{{ __('Scheduled') }}</option>
+                            <option value="queue" {{ request('appointment_mode') == 'queue' ? 'selected' : '' }}>{{ __('Queue') }}</option>
                         </select>
                     </div>
 
@@ -151,7 +152,7 @@
                     </a>
                     <a href="{{ route('appointments.queue') }}" class="btn-secondary px-6 py-3 rounded-2xl">
                         <i class="fas fa-list-ol"></i>
-                        <span>Queue</span>
+                        <span>{{ __('Queue') }}</span>
                     </a>
                 </div>
             </div>
@@ -192,14 +193,14 @@
                             </td>
                             <td class="px-8 py-6">
                                 <div class="space-y-1">
-                                    <div class="text-base font-semibold text-gray-900">{{ $appointment->appointment_date->format('M j, Y') }}</div>
+                                    <div class="text-base font-semibold text-gray-900">{{ $appointment->appointment_date->translatedFormat('M j, Y') }}</div>
                                     <div class="text-sm text-gray-500 flex items-center space-x-1">
                                         <i class="fas fa-clock text-xs"></i>
                                         <span>{{ $appointment->displayTime() }}</span>
                                     </div>
                                     @if($appointment->isQueueMode())
                                     <div class="text-xs text-teal-700 font-semibold">
-                                        Queue #{{ $appointment->queue_number }} estimated
+                                        {{ __('Queue') }} #{{ $appointment->queue_number }} {{ __('Estimated Time') }}
                                     </div>
                                     @endif
                                 </div>
@@ -291,7 +292,7 @@
                                     @if(auth()->user()->isDoctor() && $appointment->status == 'completed' && !$appointment->medicalRecord)
                                     <a href="{{ route('medical-records.create', ['appointment_id' => $appointment->id]) }}" 
                                        class="w-10 h-10 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl flex items-center justify-center transition-all duration-200 group" 
-                                       title="Add Medical Record">
+                                       title="{{ __('Add Medical Record') }}" aria-label="{{ __('Add Medical Record') }}">
                                         <i class="fas fa-file-medical text-sm group-hover:scale-110"></i>
                                     </a>
                                     @endif
@@ -424,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 resultsContainer.innerHTML = `
                     <div class="p-3 text-gray-500 text-center">
                         <i class="fas fa-search mr-2"></i>
-                        No patients found
+                        {{ __('No patients found') }}
                     </div>
                 `;
             } else {

@@ -15,19 +15,19 @@
                     <span class="brand-mark h-10 w-10 rounded-xl"><i class="fas fa-heartbeat"></i></span>
                     <span>{{ __('auth.medical_management_system') }}</span>
                 </div>
-                <h1 class="auth-story-title">Care runs better when the day stays clear.</h1>
-                <p class="auth-story-copy">A focused workspace for appointments, queue flow, patient records, and the clinical decisions that matter.</p>
+                <h1 class="auth-story-title">{{ __('Care runs better when the day stays clear.') }}</h1>
+                <p class="auth-story-copy">{{ __('A focused workspace for appointments, queue flow, patient records, and the clinical decisions that matter.') }}</p>
             </div>
 
-            <div class="auth-feature-list" aria-label="System capabilities">
-                <div class="auth-feature"><i class="fas fa-calendar-check"></i><span>Scheduled appointments and flexible queue mode</span></div>
-                <div class="auth-feature"><i class="fas fa-file-medical"></i><span>Patient history and clinical records in one place</span></div>
-                <div class="auth-feature"><i class="fas fa-user-shield"></i><span>Role-based access for doctors and reception staff</span></div>
+            <div class="auth-feature-list" aria-label="{{ __('System capabilities') }}">
+                <div class="auth-feature"><i class="fas fa-calendar-check"></i><span>{{ __('Scheduled appointments and flexible queue mode') }}</span></div>
+                <div class="auth-feature"><i class="fas fa-file-medical"></i><span>{{ __('Patient history and clinical records in one place') }}</span></div>
+                <div class="auth-feature"><i class="fas fa-user-shield"></i><span>{{ __('Role-based access for doctors and reception staff') }}</span></div>
             </div>
         </section>
 
         <section class="auth-panel">
-            <span class="auth-kicker">Secure workspace</span>
+            <span class="auth-kicker">{{ __('Secure workspace') }}</span>
             <h2 class="auth-title">{{ __('auth.sign_in') }}</h2>
             <p class="auth-subtitle">{{ __('auth.sign_in_to_account') }}</p>
 

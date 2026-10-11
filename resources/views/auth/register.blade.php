@@ -8,7 +8,7 @@
         :title="__('auth.create_new_user')"
         :description="__('auth.register_doctor_receptionist')"
         icon="fa-user-plus"
-        eyebrow="Staff access"
+        :eyebrow="__('Staff access')"
     >
         <x-slot:actions>
             <a href="{{ route('settings.index') }}" class="btn-secondary px-5 py-3">
@@ -21,7 +21,7 @@
     <section class="section-card mx-auto max-w-5xl p-6 md:p-8">
         <x-ui.section-heading
             :title="__('auth.create_new_user')"
-            description="Create a secure staff profile and assign the correct clinic role."
+            :description="__('Create a secure staff profile and assign the correct clinic role.')"
             icon="fa-id-badge"
             class="mb-7"
         />

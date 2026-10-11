@@ -24,9 +24,9 @@
     <x-ui.page-header
         class="flex-wrap"
         :title="$patient->full_name"
-        :description="'Patient #' . $patient->id . ' — ' . $patient->contact_label"
+        :description="__('Patient #:id — :contact', ['id' => $patient->id, 'contact' => $patient->contact_label])"
         icon="fa-user"
-        eyebrow="Patient profile"
+        :eyebrow="__('Patient profile')"
     >
         <x-slot:actions>
                 @if(auth()->user()->isDoctor())
@@ -74,7 +74,7 @@
         @if($patient->appointments->where('status', 'completed')->isNotEmpty())
             <span class="text-gray-600">
                 <i class="fas fa-calendar-check mr-1 text-[var(--clinic-primary)]"></i>
-                Last visit: {{ $patient->appointments->where('status', 'completed')->sortByDesc('appointment_date')->first()->appointment_date->format('M d, Y') }}
+                {{ __('Last visit') }}: {{ $patient->appointments->where('status', 'completed')->sortByDesc('appointment_date')->first()->appointment_date->translatedFormat('M d, Y') }}
             </span>
         @endif
     </div>
@@ -85,7 +85,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-3xl font-bold text-emerald-600">{{ $patient->appointments->count() }}</p>
-                    <p class="text-gray-600 font-medium">Total Visits</p>
+                    <p class="text-gray-600 font-medium">{{ __('Total Visits') }}</p>
                 </div>
                 <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
                     <i class="fas fa-calendar-check text-emerald-600 text-xl"></i>
@@ -97,7 +97,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-3xl font-bold text-blue-600">{{ $patient->appointments->where('status', 'completed')->count() }}</p>
-                    <p class="text-gray-600 font-medium">Completed</p>
+                    <p class="text-gray-600 font-medium">{{ __('Completed') }}</p>
                 </div>
                 <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                     <i class="fas fa-check-circle text-blue-600 text-xl"></i>
@@ -110,7 +110,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-3xl font-bold text-emerald-700">{{ $patient->medicalRecords->count() }}</p>
-                    <p class="text-gray-600 font-medium">Medical Records</p>
+                    <p class="text-gray-600 font-medium">{{ __('Medical Records') }}</p>
                 </div>
                 <div class="icon-tile w-12 h-12 rounded-xl flex items-center justify-center">
                     <i class="fas fa-file-medical text-xl"></i>
@@ -122,7 +122,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-3xl font-bold text-orange-600">{{ $patient->medicalRecords->filter(function($record) { return $record->prescriptions->count() > 0; })->count() }}</p>
-                    <p class="text-gray-600 font-medium">Prescriptions</p>
+                    <p class="text-gray-600 font-medium">{{ __('Prescriptions') }}</p>
                 </div>
                 <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                     <i class="fas fa-prescription-bottle text-orange-600 text-xl"></i>
@@ -134,7 +134,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-3xl font-bold text-amber-600">{{ $patient->appointments->where('status', 'scheduled')->count() }}</p>
-                    <p class="text-gray-600 font-medium">Upcoming</p>
+                    <p class="text-gray-600 font-medium">{{ __('Upcoming') }}</p>
                 </div>
                 <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
                     <i class="fas fa-clock text-amber-600 text-xl"></i>
@@ -146,7 +146,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-3xl font-bold text-red-600">{{ $patient->appointments->where('status', 'cancelled')->count() }}</p>
-                    <p class="text-gray-600 font-medium">Cancelled</p>
+                    <p class="text-gray-600 font-medium">{{ __('Cancelled') }}</p>
                 </div>
                 <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
                     <i class="fas fa-times-circle text-red-600 text-xl"></i>
@@ -182,7 +182,7 @@
                     </div>
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('patients.birth_date') }}</span>
-                        <span class="font-semibold text-gray-900">{{ $patient->birth_date?->format('M d, Y') ?? 'Not provided' }}</span>
+                        <span class="font-semibold text-gray-900">{{ $patient->birth_date?->translatedFormat('M d, Y') ?? __('Not provided') }}</span>
                     </div>
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('patients.id_card') }}</span>
@@ -235,7 +235,7 @@
             <x-specialty.summary
                 :fields="$patient->is_pediatric ? array_filter($specialtyFieldCatalog['patient'], fn ($field) => !in_array($field['key'], ['guardian_name', 'guardian_relationship'])) : $specialtyFieldCatalog['patient']"
                 :values="$patient->specialty_data ?? []"
-                title="Specialty patient details"
+                title="{{ __('Specialty patient details') }}"
                 :icon="$clinicSpecialty['icon']"
             />
 
@@ -294,7 +294,7 @@
                                         <i class="fas fa-{{ $appointment->status === 'completed' ? 'check' : ($appointment->status === 'cancelled' ? 'times' : 'clock') }} text-{{ $appointment->status === 'completed' ? 'emerald' : ($appointment->status === 'cancelled' ? 'red' : 'blue') }}-600"></i>
                                     </div>
                                     <div>
-                                        <p class="font-bold text-gray-900">{{ $appointment->appointment_date->format('M d, Y') }}</p>
+                                        <p class="font-bold text-gray-900">{{ $appointment->appointment_date->translatedFormat('M d, Y') }}</p>
                                         <p class="text-sm text-gray-600">{{ $appointment->appointment_time }} • {{ __('appointments.' . $appointment->status) }}</p>
                                     </div>
                                 </div>
@@ -315,7 +315,7 @@
                             <i class="fas fa-calendar-times text-gray-400 text-2xl"></i>
                         </div>
                         <p class="text-gray-500 font-medium">{{ __('patients.no_appointments_yet') }}</p>
-                        <p class="text-gray-400 text-sm mt-1">Book the first appointment to get started</p>
+                        <p class="text-gray-400 text-sm mt-1">{{ __('Book the first appointment to get started') }}</p>
                     </div>
                 @endif
                 </div>
@@ -347,8 +347,8 @@
                             <div class="flex items-start justify-between">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center space-x-3 mb-2">
-                                        <p class="font-bold text-gray-900">{{ $record->created_at->format('M d, Y') }}</p>
-                                        <span class="text-sm text-gray-500">{{ $record->created_at->format('H:i') }}</span>
+                                        <p class="font-bold text-gray-900">{{ $record->created_at->translatedFormat('M d, Y') }}</p>
+                                        <span class="text-sm text-gray-500">{{ $record->created_at->translatedFormat('H:i') }}</span>
                                         @if($record->prescriptions->count() > 0)
                                         <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-semibold">Rx {{ $record->prescriptions->count() }}</span>
                                         @endif
@@ -384,7 +384,7 @@
                             <i class="fas fa-file-medical text-gray-400 text-2xl"></i>
                         </div>
                         <p class="text-gray-500 font-medium">{{ __('patients.no_medical_records_yet') }}</p>
-                        <p class="text-gray-400 text-sm mt-1">Create the first medical record for this patient</p>
+                        <p class="text-gray-400 text-sm mt-1">{{ __('Create the first medical record for this patient') }}</p>
                     </div>
                 @endif
                 </div>
@@ -405,8 +405,8 @@
                         <i class="fas fa-brain text-white text-xl"></i>
                     </div>
                     <div>
-                        <h3 class="text-2xl font-bold text-white">AI Medical Summary</h3>
-                        <p class="text-white/75 text-sm">Powered by Advanced AI</p>
+                        <h3 class="text-2xl font-bold text-white">{{ __('AI Medical Summary') }}</h3>
+                        <p class="text-white/75 text-sm">{{ __('Powered by Advanced AI') }}</p>
                     </div>
                 </div>
                 <button id="closeAiModal" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">
@@ -421,8 +421,8 @@
             <div id="aiLoading" class="text-center py-12">
                 <div class="inline-block">
                     <div class="w-16 h-16 border-4 border-emerald-100 border-t-emerald-700 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p class="text-gray-600 text-lg font-medium">Analyzing patient history...</p>
-                    <p class="text-gray-400 text-sm mt-2">This may take a few seconds</p>
+                    <p class="text-gray-600 text-lg font-medium">{{ __('Analyzing patient history...') }}</p>
+                    <p class="text-gray-400 text-sm mt-2">{{ __('This may take a few seconds') }}</p>
                 </div>
             </div>
             
@@ -431,7 +431,7 @@
                 <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
                 </div>
-                <h4 class="text-xl font-bold text-gray-800 mb-2">Failed to Generate Summary</h4>
+                <h4 class="text-xl font-bold text-gray-800 mb-2">{{ __('Failed to Generate Summary') }}</h4>
                 <p class="text-gray-600 mb-6" id="aiErrorMessage"></p>
                 <button onclick="generateAISummary()" class="btn-primary px-6 py-2">
                     <i class="fas fa-redo mr-2"></i>Try Again
@@ -452,11 +452,11 @@
                     <div class="flex space-x-3">
                         <button onclick="copyToClipboard(this)" class="btn-secondary px-4 py-2">
                             <i class="fas fa-copy"></i>
-                            <span>Copy</span>
+                            <span>{{ __('Copy') }}</span>
                         </button>
                         <button onclick="generateAISummary()" class="btn-primary px-4 py-2">
                             <i class="fas fa-sync-alt"></i>
-                            <span>Regenerate</span>
+                            <span>{{ __('Regenerate') }}</span>
                         </button>
                     </div>
                 </div>
@@ -530,14 +530,15 @@ function generateAISummary() {
             if (data.success) {
                 aiSuccess.classList.remove('hidden');
                 aiSummaryText.innerHTML = formatSummary(data.summary);
-                aiGeneratedTime.textContent = `Generated: ${new Date(data.generated_at).toLocaleString()}`;
+                aiGeneratedTime.textContent = @json(__('Generated: :date', ['date' => ':date']))
+                    .replace(':date', new Date(data.generated_at).toLocaleString(@json(app()->getLocale())));
             } else {
-                showError(data.error || 'An unexpected error occurred');
+                showError(data.error || @json(__('An unexpected error occurred')));
             }
         })
         .catch(error => {
             aiLoading.classList.add('hidden');
-            showError('Network error. Please check your connection and try again.');
+            showError(@json(__('Network error. Please check your connection and try again.')));
             console.error('AI Summary Error:', error);
         });
 }
@@ -568,13 +569,13 @@ function formatSummary(text) {
 function copyToClipboard(btn) {
     const text = aiSummaryText.innerText;
     if (!navigator.clipboard?.writeText) {
-        showError('Clipboard access is unavailable. Select and copy the summary manually.');
+        showError(@json(__('Clipboard access is unavailable. Select and copy the summary manually.')));
         return;
     }
     navigator.clipboard.writeText(text).then(() => {
         // Show success feedback
         const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i><span>Copied!</span>';
+        btn.innerHTML = '<i class="fas fa-check"></i><span>' + @json(__('Copied!')) + '</span>';
         btn.classList.add('bg-green-600', 'hover:bg-green-700');
         btn.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
         
@@ -583,7 +584,7 @@ function copyToClipboard(btn) {
             btn.classList.remove('bg-green-600', 'hover:bg-green-700');
             btn.classList.add('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
         }, 2000);
-    }).catch(() => showError('Clipboard access was denied. Select and copy the summary manually.'));
+    }).catch(() => showError(@json(__('Clipboard access was denied. Select and copy the summary manually.'))));
 }
 
 // Close modal with ESC key

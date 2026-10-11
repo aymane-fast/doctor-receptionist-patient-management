@@ -13,8 +13,8 @@
                 <i class="fas {{ $icon }}"></i>
             </div>
             <div>
-                <h3 class="text-lg font-semibold text-slate-900">{{ $title }}</h3>
-                <p class="mt-1 text-sm text-slate-600">{{ $description }}</p>
+        <h3 class="text-lg font-semibold text-slate-900">{{ __($title) }}</h3>
+        <p class="mt-1 text-sm text-slate-600">{{ __($description) }}</p>
             </div>
         </div>
 
@@ -29,7 +29,7 @@
                 @endphp
                 <div class="{{ $isWide ? 'md:col-span-2' : '' }}">
                     <label for="specialty_{{ $key }}" class="mb-2 block text-sm font-semibold text-slate-700">
-                        {{ $field['label'] }}
+                        {{ __($field['label']) }}
                         <span class="font-normal text-slate-400">({{ __('common.optional') }})</span>
                     </label>
 
@@ -41,7 +41,7 @@
                             class="form-control w-full @error($errorKey) border-red-500 @enderror">
                             <option value="">{{ __('common.select') }}</option>
                             @foreach($field['options'] ?? [] as $option)
-                                <option value="{{ $option }}" @selected((string) $value === (string) $option)>{{ $option }}</option>
+                                <option value="{{ $option }}" @selected((string) $value === (string) $option)>{{ __($option) }}</option>
                             @endforeach
                         </select>
                     @else

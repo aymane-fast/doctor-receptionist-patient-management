@@ -1,19 +1,19 @@
 @extends('layouts.app')
 
-@section('title', 'Export des Données')
+@section('title', __('Export Data'))
 
 @section('content')
 <div class="space-y-6">
     <x-ui.page-header
-        title="Export des Données"
-        description="Exportez les données de la clinique dans des formats organisés et professionnels."
+        :title="__('Export Data')"
+        :description="__('Export clinic data in organized, professional formats.')"
         icon="fa-file-export"
-        :eyebrow="$clinicSpecialty['label'].' data'"
+        :eyebrow="__($clinicSpecialty['label']).' '. __('data')"
     >
         <x-slot:actions>
             <button onclick="history.back()" class="btn-secondary px-4 py-2">
                 <i class="fas fa-arrow-left text-sm"></i>
-                <span>Retour</span>
+                <span>{{ __('Back') }}</span>
             </button>
         </x-slot:actions>
     </x-ui.page-header>
@@ -29,7 +29,7 @@
                     <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                         <i class="fas fa-database text-white text-sm"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900">Sélectionner les Données à Exporter</h3>
+                    <h3 class="text-lg font-bold text-gray-900">{{ __('Select Data to Export') }}</h3>
                 </div>
                 
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -43,8 +43,8 @@
                                     <i class="fas fa-users"></i>
                                 </div>
                                 <div>
-                                    <div class="font-semibold text-gray-900">Patients</div>
-                                    <div class="text-sm text-gray-600">Dossiers patients et démographie</div>
+                                    <div class="font-semibold text-gray-900">{{ __('Patients') }}</div>
+                                    <div class="text-sm text-gray-600">{{ __('Patient records and demographics') }}</div>
                                 </div>
                             </div>
                             <div class="ml-auto">
@@ -65,8 +65,8 @@
                                     <i class="fas fa-calendar-alt"></i>
                                 </div>
                                 <div>
-                                    <div class="font-semibold text-gray-900">Rendez-vous</div>
-                                    <div class="text-sm text-gray-600">Planification et historique des visites</div>
+                                    <div class="font-semibold text-gray-900">{{ __('Appointments') }}</div>
+                                    <div class="text-sm text-gray-600">{{ __('Scheduling and visit history') }}</div>
                                 </div>
                             </div>
                             <div class="ml-auto">
@@ -87,8 +87,8 @@
                                     <i class="fas fa-file-medical"></i>
                                 </div>
                                 <div>
-                                    <div class="font-semibold text-gray-900">Dossiers Médicaux</div>
-                                    <div class="text-sm text-gray-600">Diagnostics et notes cliniques</div>
+                                    <div class="font-semibold text-gray-900">{{ __('Medical Records') }}</div>
+                                    <div class="text-sm text-gray-600">{{ __('Diagnoses and clinical notes') }}</div>
                                 </div>
                             </div>
                             <div class="ml-auto">
@@ -109,8 +109,8 @@
                                     <i class="fas fa-pills"></i>
                                 </div>
                                 <div>
-                                    <div class="font-semibold text-gray-900">Ordonnances</div>
-                                    <div class="text-sm text-gray-600">Médicaments et posologies</div>
+                                    <div class="font-semibold text-gray-900">{{ __('Prescriptions') }}</div>
+                                    <div class="text-sm text-gray-600">{{ __('Medications and dosages') }}</div>
                                 </div>
                             </div>
                             <div class="ml-auto">
@@ -133,8 +133,8 @@
                                     <i class="fas fa-user-md"></i>
                                 </div>
                                 <div>
-                                    <div class="font-semibold text-gray-900">Personnel</div>
-                                    <div class="text-sm text-gray-600">Médecins et réceptionnistes</div>
+                                    <div class="font-semibold text-gray-900">{{ __('Staff') }}</div>
+                                    <div class="text-sm text-gray-600">{{ __('Doctors and receptionists') }}</div>
                                 </div>
                             </div>
                             <div class="ml-auto">
@@ -162,13 +162,13 @@
                     <div class="gradient-bg w-10 h-10 rounded-xl flex items-center justify-center">
                         <i class="fas fa-calendar-week text-white text-sm"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900">Période (Optionnelle)</h3>
+                    <h3 class="text-lg font-bold text-gray-900">{{ __('Date range (optional)') }}</h3>
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
                         <label for="start_date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                            Date de Début
+                            {{ __('Start date') }}
                         </label>
                         <input type="date" id="start_date" name="start_date" 
                                value="{{ old('start_date') }}"
@@ -184,7 +184,7 @@
 
                     <div>
                         <label for="end_date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                            Date de Fin
+                            {{ __('End date') }}
                         </label>
                         <input type="date" id="end_date" name="end_date" 
                                value="{{ old('end_date') }}"
@@ -202,8 +202,7 @@
                 <div class="app-alert app-alert-info mt-4 mb-0">
                     <span class="app-alert-icon"><i class="fas fa-info-circle"></i></span>
                         <div class="text-sm">
-                            <strong>Note :</strong> Si aucune période n'est spécifiée, toutes les données disponibles seront exportées. 
-                            Le filtrage par date s'applique aux dates de création pour la plupart des types de données (dates de rendez-vous pour les rendez-vous, dates de visite pour les dossiers médicaux, etc.).
+                            <strong>{{ __('Note:') }}</strong> {{ __('If no date range is specified, all available data will be exported. Date filtering uses creation dates for most data types (appointment dates for appointments, visit dates for medical records, and so on).') }}
                         </div>
                     </div>
             </div>
@@ -215,12 +214,12 @@
                 <div class="flex flex-col sm:flex-row items-center justify-end space-y-3 sm:space-y-0 sm:space-x-3">
                     <button type="button" onclick="history.back()" 
                             class="btn-secondary w-full sm:w-auto px-6 py-3">
-                        Annuler
+                        {{ __('Cancel') }}
                     </button>
                     <button type="submit" id="exportBtn"
                             class="btn-primary w-full sm:w-auto px-6 py-3">
                         <i class="fas fa-download"></i>
-                        <span>Exporter les Données</span>
+                        <span>{{ __('Export Data') }}</span>
                     </button>
                 </div>
             </div>
@@ -241,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (checkedBoxes.length === 0) {
             e.preventDefault();
-            alert('Veuillez sélectionner au moins un type de données à exporter.');
+            alert(@json(__('Select at least one type of data to export.')));
             return false;
         }
 
@@ -251,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span>Export en cours...</span>
+            <span>${@json(__('Exporting...'))}</span>
         `;
         exportBtn.disabled = true;
         exportBtn.classList.add('opacity-75', 'cursor-not-allowed');
@@ -260,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             exportBtn.innerHTML = `
                 <i class="fas fa-download"></i>
-                <span>Exporter les Données</span>
+                <span>${@json(__('Export Data'))}</span>
             `;
             exportBtn.disabled = false;
             exportBtn.classList.remove('opacity-75', 'cursor-not-allowed');

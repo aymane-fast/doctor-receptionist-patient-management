@@ -37,7 +37,7 @@ class AIService
             
             return [
                 'success' => false,
-                'error' => 'Failed to generate AI summary. Please try again.'
+                'error' => __('Failed to generate AI summary. Please try again.')
             ];
         }
     }
@@ -237,6 +237,11 @@ class AIService
         
         $data = $response->json();
         
-        return $data['choices'][0]['message']['content'] ?? 'No summary generated';
+        $summary = data_get($data, 'choices.0.message.content');
+        if (!is_string($summary) || trim($summary) === '') {
+            throw new \RuntimeException('Groq API returned an empty or invalid summary.');
+        }
+
+        return $summary;
     }
 }

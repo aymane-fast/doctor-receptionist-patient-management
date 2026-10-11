@@ -148,7 +148,7 @@ class SetupController extends Controller
         Auth::login($primaryDoctor);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard')->with('success', 'Clinic setup completed successfully.');
+        return redirect()->route('dashboard')->with('success', __('Clinic setup completed successfully.'));
     }
 
     private function normalizeStaffRows(array $rows): array

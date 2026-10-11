@@ -6,9 +6,9 @@
 <div class="container mx-auto px-4 py-6">
     <x-ui.page-header
         :title="__('prescriptions.prescription_details')"
-        :description="'Prescription #' . $prescription->id . ' - ' . $prescription->prescribed_date->format('M d, Y')"
+        :description="__('Prescription #:id - :date', ['id' => $prescription->id, 'date' => $prescription->prescribed_date->translatedFormat('M d, Y')])"
         icon="fa-prescription"
-        eyebrow="Medication record"
+        :eyebrow="__('Medication record')"
         class="mb-6 print:hidden"
     >
         <x-slot:actions>
@@ -21,6 +21,14 @@
             <a href="{{ route('prescriptions.print', $prescription) }}" target="_blank" class="btn-primary px-4 py-2">
                 <i class="fas fa-print mr-2"></i>{{ __('common.print') }}
             </a>
+            <form action="{{ route('prescriptions.destroy', $prescription) }}" method="POST"
+                  onsubmit="return confirm(@js(__('Delete this prescription? This action cannot be undone.')))">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn-danger px-4 py-2">
+                    <i class="fas fa-trash mr-2"></i>{{ __('common.delete') }}
+                </button>
+            </form>
         </x-slot:actions>
     </x-ui.page-header>
     <x-patients.guardian-summary :patient="$prescription->patient" :compact="true" />
@@ -65,7 +73,7 @@
                     @endif
                 </div>
                 <div class="text-right">
-                    <p class="text-gray-600 text-sm">Date:</p>
+                    <p class="text-gray-600 text-sm">{{ __('Date:') }}</p>
                     <p class="font-semibold">{{ $prescription->prescribed_date->locale(app()->getLocale())->isoFormat('D MMMM YYYY') }}</p>
                 </div>
             </div>
@@ -73,7 +81,7 @@
             <!-- Patient Name Only -->
             <div class="mb-5 text-center">
                 <h3 class="text-base font-bold text-gray-800">
-                    Patient: {{ $prescription->patient->first_name }} {{ $prescription->patient->last_name }}
+                    {{ __('Patient') }}: {{ $prescription->patient->first_name }} {{ $prescription->patient->last_name }}
                 </h3>
             </div>
 
@@ -95,23 +103,23 @@
                                     </h4>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-gray-700 text-sm">
                                         <div>
-                                            <span class="font-semibold text-blue-600">Dosage:</span>
+                                            <span class="font-semibold text-blue-600">{{ __('Dosage:') }}</span>
                                             <p>{{ $item->dosage }}</p>
                                         </div>
                                         <div>
-                                            <span class="font-semibold text-blue-600">Fréquence:</span>
+                                            <span class="font-semibold text-blue-600">{{ __('Frequency:') }}</span>
                                             <p>{{ $item->frequency }}</p>
                                         </div>
                                         @if($item->duration_days)
                                         <div>
-                                            <span class="font-semibold text-blue-600">Durée:</span>
+                                            <span class="font-semibold text-blue-600">{{ __('Duration:') }}</span>
                                             <p>{{ $item->duration_days }} jours</p>
                                         </div>
                                         @endif
                                     </div>
                                     @if($item->instructions)
                                     <div class="mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-400">
-                                        <span class="font-semibold text-yellow-800 text-sm">Instructions:</span>
+                                        <span class="font-semibold text-yellow-800 text-sm">{{ __('Instructions:') }}</span>
                                         <p class="text-yellow-800 text-sm">{{ $item->instructions }}</p>
                                     </div>
                                     @endif
@@ -130,23 +138,23 @@
                                 </h4>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-gray-700 text-sm">
                                     <div>
-                                        <span class="font-semibold text-blue-600">Dosage:</span>
+                                        <span class="font-semibold text-blue-600">{{ __('Dosage:') }}</span>
                                         <p>{{ $prescription->dosage }}</p>
                                     </div>
                                     <div>
-                                        <span class="font-semibold text-blue-600">Fréquence:</span>
+                                        <span class="font-semibold text-blue-600">{{ __('Frequency:') }}</span>
                                         <p>{{ $prescription->frequency }}</p>
                                     </div>
                                     @if($prescription->duration)
                                     <div>
-                                        <span class="font-semibold text-blue-600">Durée:</span>
+                                        <span class="font-semibold text-blue-600">{{ __('Duration:') }}</span>
                                         <p>{{ $prescription->duration }}</p>
                                     </div>
                                     @endif
                                 </div>
                                 @if($prescription->instructions)
                                 <div class="mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-400">
-                                    <span class="font-semibold text-yellow-800 text-sm">Instructions:</span>
+                                    <span class="font-semibold text-yellow-800 text-sm">{{ __('Instructions:') }}</span>
                                     <p class="text-yellow-800 text-sm">{{ $prescription->instructions }}</p>
                                 </div>
                                 @endif
@@ -177,7 +185,7 @@
                     </div>
                     <div class="text-right">
                         <div class="border-t-2 border-gray-400 pt-1 mt-6" style="min-width: 180px;">
-                            <p class="text-xs text-gray-600">Signature du médecin</p>
+                            <p class="text-xs text-gray-600">{{ __('Doctor signature') }}</p>
                             <p class="font-semibold text-sm mt-1">{{ $prescription->doctor->professional_name }}</p>
                         </div>
                     </div>

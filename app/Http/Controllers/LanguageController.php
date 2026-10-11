@@ -14,7 +14,7 @@ class LanguageController extends Controller
     {
         // Validate the language
         if (!Setting::isLanguageSupported($language)) {
-            return redirect()->back()->with('error', 'Language not supported');
+            return redirect()->back()->with('error', __('Language not supported'));
         }
 
         // Only staff may change the clinic-wide default; guests only switch their session
@@ -25,7 +25,7 @@ class LanguageController extends Controller
         // Update session
         session(['locale' => $language]);
 
-        return redirect()->back()->with('success', 'Language changed successfully');
+        return redirect()->back()->with('success', __('Language changed successfully'));
     }
 
     /**

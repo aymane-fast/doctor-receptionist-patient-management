@@ -8,7 +8,7 @@
         :title="__('prescriptions.title')"
         :description="__('prescriptions.subtitle')"
         icon="fa-prescription-bottle-medical"
-        eyebrow="Medication"
+        :eyebrow="__('Medication')"
     >
         <x-slot:actions>
                     <a href="{{ route('prescriptions.create') }}" class="btn-primary px-6 py-3">
@@ -184,7 +184,7 @@
                                 </span>
                                 
                                 <!-- Prescribed Date -->
-                                <p class="font-medium text-gray-900 mt-3">{{ \Carbon\Carbon::parse($prescription->prescribed_date)->format('M j, Y') }}</p>
+                                <p class="font-medium text-gray-900 mt-3">{{ \Carbon\Carbon::parse($prescription->prescribed_date)->translatedFormat('M j, Y') }}</p>
                                 <p class="text-xs text-gray-500 mt-1">{{ __('prescriptions.prescribed') }}</p>
                                 
                                 <!-- End Date if available -->
@@ -192,7 +192,7 @@
                                     @php 
                                         $endDate = \Carbon\Carbon::parse($prescription->prescribed_date)->addDays($prescription->items->first()->duration_days);
                                     @endphp
-                                    <p class="text-sm text-gray-600 mt-2">{{ $endDate->format('M j, Y') }}</p>
+                                    <p class="text-sm text-gray-600 mt-2">{{ $endDate->translatedFormat('M j, Y') }}</p>
                                     <p class="text-xs text-gray-400">{{ __('prescriptions.est_end') }}</p>
                                 @endif
                             </td>

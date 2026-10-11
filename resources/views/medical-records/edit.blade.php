@@ -7,9 +7,9 @@
     <div class="max-w-4xl mx-auto">
         <x-ui.page-header
             :title="__('medical_records.edit_record')"
-            description="Review and update the clinical information for this visit."
+            :description="__('Review and update the clinical information for this visit.')"
             icon="fa-file-pen"
-            eyebrow="Clinical documentation"
+            :eyebrow="__('Clinical documentation')"
             class="mb-6"
         >
             <x-slot:actions>
@@ -55,7 +55,7 @@
                                 {{ __('medical_records.visit_date') }} <span class="text-red-500">*</span>
                             </label>
                             <input type="date" id="visit_date" name="visit_date" 
-                                   value="{{ old('visit_date', $medicalRecord->visit_date) }}" required
+                                   value="{{ old('visit_date', $medicalRecord->visit_date?->format('Y-m-d')) }}" required
                                    max="{{ date('Y-m-d') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             @error('visit_date')
@@ -92,7 +92,7 @@
                                     <option value="{{ $appointment->id }}" 
                                             {{ old('appointment_id', $medicalRecord->appointment_id) == $appointment->id ? 'selected' : '' }}>
                                         {{ $appointment->patient->first_name }} {{ $appointment->patient->last_name }} - 
-                                        {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M j, Y') }}
+                                        {{ \Carbon\Carbon::parse($appointment->appointment_date)->translatedFormat('M j, Y') }}
                                     </option>
                                 @endforeach
                             </select>
@@ -270,8 +270,8 @@
                         <x-specialty.fields
                             :fields="$clinicSpecialty['record_fields']"
                             :values="$medicalRecord->specialty_data ?? []"
-                            :title="$clinicSpecialty['label'].' clinical details'"
-                            :description="'Optional clinical observations used by this practice profile.'"
+                            :title="__($clinicSpecialty['label']).' '. __('clinical details')"
+                            :description="__('Optional clinical observations used by this practice profile.')"
                             :icon="$clinicSpecialty['icon']"
                         />
                     </div>

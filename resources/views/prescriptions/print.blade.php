@@ -655,7 +655,7 @@
     <main class="sheet">
         <header class="document-header">
             <div>
-                <p class="clinic-kicker">{{ $clinicName }} · {{ $clinicSpecialty['label'] }}</p>
+                <p class="clinic-kicker">{{ $clinicName }} · {{ __($clinicSpecialty['label']) }}</p>
                 <h2 class="doctor-name">{{ $doctor->professional_name }}</h2>
                 @if($doctorContacts)
                     <p class="doctor-contact">{{ $doctorContacts }}</p>

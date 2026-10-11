@@ -8,7 +8,7 @@
         :title="__('appointments.waitlist')"
         :description="__('appointments.waitlist_subtitle')"
         icon="fa-hourglass-half"
-        eyebrow="Scheduling support"
+        :eyebrow="__('Scheduling support')"
     >
         <x-slot:actions>
             <a href="{{ route('appointments.index') }}" class="btn-secondary px-4 py-2">
@@ -63,11 +63,11 @@
             </div>
 
             <div class="md:col-span-5">
-                <label for="reason" class="block text-sm font-medium text-gray-700 mb-2">{{ $clinicSpecialty['label'] }} {{ strtolower(__('appointments.reason')) }}</label>
+                <label for="reason" class="block text-sm font-medium text-gray-700 mb-2">{{ __($clinicSpecialty['label']) }} {{ strtolower(__('appointments.reason')) }}</label>
                 <input type="text" id="reason" name="reason" maxlength="500" list="specialty-appointment-reasons" value="{{ old('reason') }}" class="form-control w-full px-3 py-2">
                 <datalist id="specialty-appointment-reasons">
                     @foreach($clinicSpecialty['appointment_reasons'] as $reason)
-                        <option value="{{ $reason }}"></option>
+                        <option value="{{ __($reason) }}"></option>
                     @endforeach
                 </datalist>
             </div>
@@ -86,7 +86,7 @@
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('appointments.preferred_date') }}</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('appointments.reason') }}</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('appointments.waiting_since') }}</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">Actions</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -97,7 +97,7 @@
                                 <div class="text-sm text-gray-500">{{ $entry->patient->phone }}</div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-700">{{ $entry->doctor->professional_name }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-700">{{ $entry->preferred_date?->format('M j, Y') ?? '—' }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">{{ $entry->preferred_date?->translatedFormat('M j, Y') ?? '—' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-700">{{ $entry->reason ?: '—' }}</td>
                             <td class="px-6 py-4 text-sm text-gray-500">{{ $entry->created_at->diffForHumans() }}</td>
                             <td class="px-6 py-4">
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('form[action="{{ route('waitlist.store') }}"]').addEventListener('submit', function (e) {
         if (!patientIdInput.value) {
             e.preventDefault();
-            alert('{{ __('appointments.patient') }}?');
+            alert(@json(__('Please select a patient.')));
             searchInput.focus();
         }
     });

@@ -27,37 +27,21 @@ class SettingsController extends Controller
     public function updateWorkingHours(Request $request)
     {
         if (!auth()->user()->isDoctor()) {
-            abort(403, 'Only doctors can modify working hours.');
+            abort(403, __('Only doctors can modify working hours.'));
         }
 
-        $request->validate([
-            'monday_working' => 'boolean',
-            'monday_start' => 'required_if:monday_working,1|date_format:H:i',
-            'monday_end' => 'required_if:monday_working,1|date_format:H:i|after:monday_start',
-            'tuesday_working' => 'boolean',
-            'tuesday_start' => 'required_if:tuesday_working,1|date_format:H:i',
-            'tuesday_end' => 'required_if:tuesday_working,1|date_format:H:i|after:tuesday_start',
-            'wednesday_working' => 'boolean',
-            'wednesday_start' => 'required_if:wednesday_working,1|date_format:H:i',
-            'wednesday_end' => 'required_if:wednesday_working,1|date_format:H:i|after:wednesday_start',
-            'thursday_working' => 'boolean',
-            'thursday_start' => 'required_if:thursday_working,1|date_format:H:i',
-            'thursday_end' => 'required_if:thursday_working,1|date_format:H:i|after:thursday_start',
-            'friday_working' => 'boolean',
-            'friday_start' => 'required_if:friday_working,1|date_format:H:i',
-            'friday_end' => 'required_if:friday_working,1|date_format:H:i|after:friday_start',
-            'saturday_working' => 'boolean',
-            'saturday_start' => 'required_if:saturday_working,1|date_format:H:i',
-            'saturday_end' => 'required_if:saturday_working,1|date_format:H:i|after:saturday_start',
-            'sunday_working' => 'boolean',
-            'sunday_start' => 'required_if:sunday_working,1|date_format:H:i',
-            'sunday_end' => 'required_if:sunday_working,1|date_format:H:i|after:sunday_start',
-        ]);
-
         $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        $rules = [];
+        foreach ($days as $day) {
+            $rules["{$day}_working"] = ['sometimes', 'boolean'];
+            $closed = Rule::excludeIf(fn () => ! $request->boolean("{$day}_working"));
+            $rules["{$day}_start"] = [$closed, 'required', 'date_format:H:i'];
+            $rules["{$day}_end"] = [$closed, 'required', 'date_format:H:i', "after:{$day}_start"];
+        }
+        $request->validate($rules);
         
         foreach ($days as $day) {
-            $working = $request->has("{$day}_working");
+            $working = $request->boolean("{$day}_working");
             Setting::set("{$day}_working", $working, 'boolean');
             
             if ($working) {
@@ -67,7 +51,7 @@ class SettingsController extends Controller
         }
 
         return redirect()->route('settings.index')
-            ->with('success', 'Working hours updated successfully!');
+            ->with('success', __('Working hours updated successfully!'));
     }
 
     /**
@@ -76,7 +60,7 @@ class SettingsController extends Controller
     public function updateClinicInfo(Request $request)
     {
         if (!auth()->user()->isDoctor()) {
-            abort(403, 'Only doctors can modify clinic information.');
+            abort(403, __('Only doctors can modify clinic information.'));
         }
 
         $request->validate([
@@ -98,7 +82,7 @@ class SettingsController extends Controller
         Setting::setClinicInfo($clinicData);
 
         return redirect()->route('settings.index')
-            ->with('success', 'Clinic information updated successfully!');
+            ->with('success', __('Clinic information updated successfully!'));
     }
 
     /**
@@ -133,7 +117,7 @@ class SettingsController extends Controller
     public function updateAppointmentMode(Request $request)
     {
         if (!auth()->user()->isDoctor()) {
-            abort(403, 'Only doctors can modify appointment mode.');
+            abort(403, __('Only doctors can modify appointment mode.'));
         }
 
         $validated = $request->validate([
@@ -149,14 +133,14 @@ class SettingsController extends Controller
         ]);
 
         return redirect()->route('settings.index')
-            ->with('success', 'Appointment mode updated successfully.');
+            ->with('success', __('Appointment mode updated successfully.'));
     }
 
     /** Change the practice profile without modifying any existing records. */
     public function updateSpecialty(Request $request, SpecialtyService $specialties)
     {
         if (! auth()->user()->isDoctor()) {
-            abort(403, 'Only doctors can modify the clinic specialty.');
+            abort(403, __('Only doctors can modify the clinic specialty.'));
         }
 
         $validated = $request->validate([
@@ -178,6 +162,6 @@ class SettingsController extends Controller
         }
 
         return redirect()->route('settings.index')
-            ->with('success', 'Clinic specialty updated successfully.');
+            ->with('success', __('Clinic specialty updated successfully.'));
     }
 }

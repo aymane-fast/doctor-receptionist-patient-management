@@ -96,6 +96,6 @@ class AuthController extends Controller
             'address' => $request->address,
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'User created successfully!');
+        return redirect()->route('dashboard')->with('success', __('User created successfully!'));
     }
 }

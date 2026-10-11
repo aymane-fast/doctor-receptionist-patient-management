@@ -19,7 +19,7 @@
                             <p style="margin:0 0 16px; color:#111827; font-size:16px;">
                                 {{ __('appointments.reminder_greeting', ['name' => $appointment->patient->primary_guardian?->name ?? $appointment->patient->full_name]) }}
                                 @if($appointment->patient->is_pediatric)
-                                    <br>{{ __('Child') }}: {{ $appointment->patient->full_name }} ({{ $appointment->patient->birth_date?->format('Y-m-d') }})
+                                    <br>{{ __('Child') }}: {{ $appointment->patient->full_name }} ({{ $appointment->patient->birth_date?->translatedFormat('Y-m-d') }})
                                 @endif
                             </p>
 

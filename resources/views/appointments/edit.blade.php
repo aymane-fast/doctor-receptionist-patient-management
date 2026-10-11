@@ -8,7 +8,7 @@
         :title="__('appointments.edit_appointment')"
         :description="__('appointments.update_appointment_description')"
         icon="fa-calendar-days"
-        eyebrow="Booking details"
+        :eyebrow="__('Booking details')"
     >
         <x-slot:actions>
             <button onclick="history.back()" class="btn-secondary px-4 py-2">
@@ -61,11 +61,11 @@
                         <div>
                             @if(auth()->user()->isReceptionist())
                             <label for="doctor_id" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                Doctor <span class="text-red-500">*</span>
+                                {{ __('Doctor') }} <span class="text-red-500">*</span>
                             </label>
                             <select id="doctor_id" name="doctor_id" required 
                                     class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('doctor_id') border-red-500 @enderror">
-                                <option value="">Select a doctor</option>
+                                <option value="">{{ __('Select a doctor') }}</option>
                                 @foreach($doctors as $doctor)
                                     <option value="{{ $doctor->id }}" 
                                             {{ (old('doctor_id', $appointment->doctor_id) == $doctor->id) ? 'selected' : '' }}>
@@ -81,7 +81,7 @@
                             @enderror
                             @else
                             <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                Assigned Doctor
+                                {{ __('Assigned Doctor') }}
                             </label>
                             <div class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600">
                                 {{ $appointment->doctor->professional_name }}
@@ -100,14 +100,14 @@
                         <div class="w-8 h-8 brand-mark rounded-xl flex items-center justify-center">
                             <i class="fas fa-calendar-alt text-white text-sm"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900">Appointment Details</h3>
+                        <h3 class="text-lg font-bold text-gray-900">{{ __('Appointment Details') }}</h3>
                     </div>
                     
                     <div class="grid md:grid-cols-3 gap-4">
                         <!-- Appointment Date -->
                         <div>
                             <label for="appointment_date" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                Date <span class="text-red-500">*</span>
+                                {{ __('Date') }} <span class="text-red-500">*</span>
                             </label>
                             <input type="date" id="appointment_date" name="appointment_date" 
                                    value="{{ old('appointment_date', \Carbon\Carbon::parse($appointment->appointment_date)->format('Y-m-d')) }}" required
@@ -123,14 +123,14 @@
                         <!-- Appointment Time -->
                         <div>
                             <label for="appointment_time" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                {{ $appointment->isQueueMode() ? 'Estimated Time' : 'Time' }} <span class="text-red-500">*</span>
+                                {{ $appointment->isQueueMode() ? __('Estimated Time') : __('Time') }} <span class="text-red-500">*</span>
                             </label>
                             @if($appointment->isQueueMode())
                             <div class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-700">
-                                Queue #{{ $appointment->queue_number }} - {{ $appointment->displayTime() }}
+                                {{ __('Queue') }} #{{ $appointment->queue_number }} - {{ $appointment->displayTime() }}
                             </div>
                             <input type="hidden" name="appointment_time" value="{{ $appointment->appointment_time->format('H:i') }}">
-                            <p class="text-xs text-gray-500 mt-1">Queue estimated time is recalculated automatically when the queue order changes.</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('Queue estimated time is recalculated automatically when the queue order changes.') }}</p>
                             @else
                             <input type="time" id="appointment_time" name="appointment_time" 
                                    value="{{ old('appointment_time', \Carbon\Carbon::parse($appointment->appointment_time)->format('H:i')) }}" required
@@ -147,7 +147,7 @@
                         <!-- Status -->
                         <div>
                             <label for="status" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                Status
+                                {{ __('Status') }}
                             </label>
                             <select id="status" name="status" 
                                     class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('status') border-red-500 @enderror">
@@ -170,10 +170,10 @@
                         <!-- Purpose -->
                         <div>
                         <label for="reason" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                {{ $clinicSpecialty['label'] }} visit reason
+                                {{ __($clinicSpecialty['label']) }} {{ __('visit reason') }}
                             </label>
                             <textarea id="reason" name="reason" rows="3" 
-                                      placeholder="Brief description of the reason for this appointment..."
+                                      placeholder="{{ __('Brief description of the reason for this appointment...') }}"
                                       class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white resize-none @error('reason') border-red-500 @enderror">{{ old('reason', $appointment->reason) }}</textarea>
                         @error('reason')
                         <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
@@ -182,10 +182,10 @@
                         </p>
                         @enderror
                         @if(! empty($clinicSpecialty['appointment_reasons']))
-                            <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $clinicSpecialty['label'] }} suggestions</p>
+                            <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __($clinicSpecialty['label']) }} {{ __('suggestions') }}</p>
                             <div class="mt-2 flex flex-wrap gap-2">
                                 @foreach($clinicSpecialty['appointment_reasons'] as $suggestion)
-                                    <button type="button" data-reason-suggestion="{{ $suggestion }}" class="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100">{{ $suggestion }}</button>
+                                    <button type="button" data-reason-suggestion="{{ __($suggestion) }}" class="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100">{{ __($suggestion) }}</button>
                                 @endforeach
                             </div>
                         @endif
@@ -194,10 +194,10 @@
                         <!-- Notes -->
                         <div>
                             <label for="notes" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
-                                Additional Notes
+                                {{ __('Additional Notes') }}
                             </label>
                             <textarea id="notes" name="notes" rows="3" 
-                                      placeholder="Any additional notes or special instructions..."
+                                      placeholder="{{ __('Any additional notes or special instructions...') }}"
                                       class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white resize-none @error('notes') border-red-500 @enderror">{{ old('notes', $appointment->notes) }}</textarea>
                             @error('notes')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">
@@ -213,31 +213,32 @@
                 <div class="bg-gray-50/80 p-4 border-t border-gray-200 flex items-center justify-between">
                     <div>
                         @if($appointment->status != 'completed' && $appointment->status != 'cancelled')
-                        <form action="{{ route('appointments.destroy', $appointment) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
                             <button type="submit" 
+                                    form="delete-appointment-form"
                                     class="btn-danger px-4 py-2"
                                     onclick="return confirm('{{ __('appointments.confirm_delete') }}')">
                                 <i class="fas fa-trash text-sm"></i>
-                                <span>Delete</span>
+                                <span>{{ __('Delete') }}</span>
                             </button>
-                        </form>
                         @endif
                     </div>
                     
                     <div class="flex items-center space-x-3">
                         <a href="{{ route('appointments.show', $appointment) }}" 
                            class="btn-secondary px-5 py-2">
-                            Cancel
+                            {{ __('Cancel') }}
                         </a>
                         <button type="submit" 
                                 class="btn-primary px-5 py-2">
                             <i class="fas fa-save text-sm"></i>
-                            <span>Update Appointment</span>
+                            <span>{{ __('Update Appointment') }}</span>
                         </button>
                     </div>
                 </div>
+            </form>
+            <form id="delete-appointment-form" action="{{ route('appointments.destroy', $appointment) }}" method="POST" class="hidden">
+                @csrf
+                @method('DELETE')
             </form>
         </div>
     </div>

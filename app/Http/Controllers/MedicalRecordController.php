@@ -19,19 +19,22 @@ class MedicalRecordController extends Controller
     {
         // Only doctors can access medical records
         if (!Auth::user()->isDoctor()) {
-            abort(403, 'Unauthorized access to medical records.');
+            abort(403, __('Unauthorized access to medical records.'));
         }
 
-        $request->validate(['search' => 'nullable|string|max:255', 'date' => 'nullable|date']);
+        $request->validate(['search' => 'nullable|string|max:255', 'date' => 'nullable|date', 'patient_id' => 'nullable|integer|exists:patients,id']);
         $medicalRecords = collect(); // Empty collection by default
         $hasSearchQuery = false;
 
         // Only query records if there's a search term or date filter
-        if ($request->filled('search') || $request->filled('date')) {
+        if ($request->filled('search') || $request->filled('date') || $request->filled('patient_id')) {
             $hasSearchQuery = true;
             
             $query = MedicalRecord::with(['patient', 'doctor', 'appointment'])
                                  ->where('doctor_id', Auth::id());
+            if ($request->filled('patient_id')) {
+                $query->where('patient_id', $request->integer('patient_id'));
+            }
 
             // Search by patient information
             if ($request->filled('search')) {
@@ -44,7 +47,7 @@ class MedicalRecordController extends Controller
                 $query->whereDate('visit_date', $request->date);
             }
 
-            $medicalRecords = $query->latest('visit_date')->paginate(15);
+            $medicalRecords = $query->latest('visit_date')->paginate(15)->withQueryString();
         }
 
         return view('medical-records.index', compact('medicalRecords', 'hasSearchQuery'));
@@ -55,8 +58,12 @@ class MedicalRecordController extends Controller
      */
     public function create(Request $request)
     {
+        $request->validate([
+            'patient_id' => 'nullable|integer|exists:patients,id',
+            'appointment_id' => 'nullable|integer|exists:appointments,id',
+        ]);
         if (!Auth::user()->isDoctor()) {
-            abort(403, 'Unauthorized access to medical records.');
+            abort(403, __('Unauthorized access to medical records.'));
         }
 
         $appointment = null;
@@ -109,13 +116,16 @@ class MedicalRecordController extends Controller
     public function store(Request $request, SpecialtyService $specialties)
     {
         if (!Auth::user()->isDoctor()) {
-            abort(403, 'Unauthorized access to medical records.');
+            abort(403, __('Unauthorized access to medical records.'));
         }
 
         $validated = $request->validate(array_merge([
-            'patient_id' => 'required|exists:patients,id',
-            'appointment_id' => 'nullable|exists:appointments,id',
+            'patient_id' => 'required|integer|exists:patients,id',
+            'appointment_id' => 'nullable|integer|exists:appointments,id',
             'visit_date' => 'required|date|before_or_equal:today',
+            'visit_type' => 'nullable|in:consultation,follow-up,emergency,routine-checkup',
+            'history_present_illness' => 'nullable|string',
+            'physical_examination' => 'nullable|string',
             'symptoms' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'treatment' => 'nullable|string',
@@ -137,6 +147,7 @@ class MedicalRecordController extends Controller
         }
 
         $validated['doctor_id'] = Auth::id();
+        $appointment = null;
 
         if (!empty($validated['appointment_id'])) {
             $appointment = Appointment::where('id', $validated['appointment_id'])
@@ -146,15 +157,24 @@ class MedicalRecordController extends Controller
             $validated['patient_id'] = $appointment->patient_id;
         }
 
-        $record = MedicalRecord::create($validated);
+        $record = \DB::transaction(function () use ($validated, $appointment) {
+            $record = MedicalRecord::create($validated);
+            if ($appointment) {
+                $wasCurrent = $appointment->status === 'in_progress';
+                $appointment->update(['status' => 'completed']);
+                if ($wasCurrent && $appointment->appointment_date->isToday()) {
+                    app(\App\Services\AppointmentSchedulingService::class)->promoteNextPatient($appointment->doctor_id);
+                }
+                if ($appointment->isQueueMode()) {
+                    app(\App\Services\AppointmentSchedulingService::class)->recalculateQueue($appointment->doctor_id, $appointment->appointment_date);
+                }
+            }
 
-        // Update appointment status if linked
-        if (!empty($validated['appointment_id'])) {
-            $appointment->update(['status' => 'completed']);
-        }
+            return $record;
+        });
 
         return redirect()->route('medical-records.show', $record)
-                        ->with('success', 'Medical record created successfully!');
+                        ->with('success', __('Medical record created successfully!'));
     }
 
     /**
@@ -163,7 +183,7 @@ class MedicalRecordController extends Controller
     public function show(MedicalRecord $medicalRecord)
     {
         if (!Auth::user()->isDoctor() || $medicalRecord->doctor_id !== Auth::id()) {
-            abort(403, 'Unauthorized access to this medical record.');
+            abort(403, __('Unauthorized access to this medical record.'));
         }
 
         $medicalRecord->load(['patient', 'doctor', 'appointment', 'prescriptions']);
@@ -177,7 +197,7 @@ class MedicalRecordController extends Controller
     public function edit(MedicalRecord $medicalRecord)
     {
         if (!Auth::user()->isDoctor() || $medicalRecord->doctor_id !== Auth::id()) {
-            abort(403, 'Unauthorized access to this medical record.');
+            abort(403, __('Unauthorized access to this medical record.'));
         }
 
         $patients = Patient::orderBy('first_name')->orderBy('last_name')->get();
@@ -196,13 +216,16 @@ class MedicalRecordController extends Controller
     public function update(Request $request, MedicalRecord $medicalRecord, SpecialtyService $specialties)
     {
         if (!Auth::user()->isDoctor() || $medicalRecord->doctor_id !== Auth::id()) {
-            abort(403, 'Unauthorized access to this medical record.');
+            abort(403, __('Unauthorized access to this medical record.'));
         }
 
         $validated = $request->validate(array_merge([
-            'patient_id' => 'required|exists:patients,id',
-            'appointment_id' => 'nullable|exists:appointments,id',
+            'patient_id' => 'required|integer|exists:patients,id',
+            'appointment_id' => 'nullable|integer|exists:appointments,id',
             'visit_date' => 'required|date|before_or_equal:today',
+            'visit_type' => 'nullable|in:consultation,follow-up,emergency,routine-checkup',
+            'history_present_illness' => 'nullable|string',
+            'physical_examination' => 'nullable|string',
             'symptoms' => 'nullable|string',
             'diagnosis' => 'nullable|string',
             'treatment' => 'nullable|string',
@@ -231,10 +254,16 @@ class MedicalRecordController extends Controller
             $validated['patient_id'] = $appointment->patient_id;
         }
 
+        if ((int) $validated['patient_id'] !== $medicalRecord->patient_id && $medicalRecord->prescriptions()->exists()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'patient_id' => __('A record with prescriptions cannot be moved to another patient.'),
+            ]);
+        }
+
         $medicalRecord->update($validated);
 
         return redirect()->route('medical-records.show', $medicalRecord)
-                        ->with('success', 'Medical record updated successfully!');
+                        ->with('success', __('Medical record updated successfully!'));
     }
 
     /**
@@ -243,12 +272,12 @@ class MedicalRecordController extends Controller
     public function destroy(MedicalRecord $medicalRecord)
     {
         if (!Auth::user()->isDoctor() || $medicalRecord->doctor_id !== Auth::id()) {
-            abort(403, 'Unauthorized access to this medical record.');
+            abort(403, __('Unauthorized access to this medical record.'));
         }
 
         $medicalRecord->delete();
 
         return redirect()->route('medical-records.index')
-                        ->with('success', 'Medical record deleted successfully!');
+                        ->with('success', __('Medical record deleted successfully!'));
     }
 }

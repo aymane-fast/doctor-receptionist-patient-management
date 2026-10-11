@@ -114,14 +114,14 @@ class PatientController extends Controller
             }
 
             return redirect()->route('dashboard')
-                ->with('success', 'Patient created successfully and appointment booked!');
+                ->with('success', __('Patient created successfully and appointment booked!'));
         }
 
         $patient = app(PatientProfileService::class)->save($validated);
 
         // For regular patient creation, redirect to the patient's profile
         return redirect()->route('patients.show', $patient)
-            ->with('success', 'Patient created successfully!');
+            ->with('success', __('Patient created successfully!'));
     }
 
     /**
@@ -136,7 +136,7 @@ class PatientController extends Controller
         if (! $doctor) {
             return [
                 'success' => false,
-                'message' => 'No doctor available for appointment booking.',
+                'message' => __('No doctor available for appointment booking.'),
             ];
         }
 
@@ -175,14 +175,14 @@ class PatientController extends Controller
             if (! $slot) {
                 return [
                     'success' => false,
-                    'message' => 'No available slots remain within working hours for this day.',
+                    'message' => __('No available slots remain within working hours for this day.'),
                 ];
             }
 
             $appointmentTime = $slot['time'];
         } else {
             if (Carbon::parse($appointmentDate.' '.$appointmentTime)->isPast()) {
-                return ['success' => false, 'message' => 'Appointment time has already passed. Please choose a future time.'];
+                return ['success' => false, 'message' => __('Appointment time has already passed. Please choose a future time.')];
             }
 
             $workingHoursError = $scheduler->validateScheduledTime($appointmentDate, $appointmentTime);
@@ -196,7 +196,7 @@ class PatientController extends Controller
             if ($scheduler->hasScheduledConflict($doctor->id, $appointmentDate, $appointmentTime)) {
                 return [
                     'success' => false,
-                    'message' => 'Doctor already has an appointment at this time.',
+                    'message' => __('Doctor already has an appointment at this time.'),
                 ];
             }
         }
@@ -217,7 +217,7 @@ class PatientController extends Controller
                     ->count();
 
                 if ($scheduler->hasScheduledConflict($doctor->id, $appointmentDate, $appointmentTime)) {
-                    throw new \InvalidArgumentException('Doctor already has an appointment at this time.');
+                    throw new \InvalidArgumentException(__('Doctor already has an appointment at this time.'));
                 }
 
                 Appointment::create([
@@ -301,7 +301,7 @@ class PatientController extends Controller
         app(PatientProfileService::class)->save($validated, $patient);
 
         return redirect()->route('patients.show', $patient)
-            ->with('success', 'Patient updated successfully!');
+            ->with('success', __('Patient updated successfully!'));
     }
 
     /**
@@ -312,13 +312,13 @@ class PatientController extends Controller
         // Deleting a patient cascades to appointments, medical records and
         // prescriptions — restrict this to doctors.
         if (! auth()->user()->isDoctor()) {
-            abort(403, 'Only doctors can delete patient records.');
+            abort(403, __('Only doctors can delete patient records.'));
         }
 
         $patient->delete();
 
         return redirect()->route('patients.index')
-            ->with('success', 'Patient deleted successfully!');
+            ->with('success', __('Patient deleted successfully!'));
     }
 
     /**
