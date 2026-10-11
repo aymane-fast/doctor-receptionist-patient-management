@@ -142,6 +142,22 @@ class AppointmentSchedulingService
         return null;
     }
 
+    /** Serialize against an existing doctor row, including an empty first day. */
+    public function createScheduledAppointment(array $data): Appointment
+    {
+        return DB::transaction(function () use ($data) {
+            \App\Models\User::whereKey($data['doctor_id'])->lockForUpdate()->firstOrFail();
+            if ($this->hasActiveSameDayAppointment($data['patient_id'], $data['doctor_id'], $data['appointment_date'])) {
+                throw new \InvalidArgumentException(__('appointments.already_has_appointment_today'));
+            }
+            if ($this->hasScheduledConflict($data['doctor_id'], $data['appointment_date'], $data['appointment_time'])) {
+                throw new \InvalidArgumentException(__('Doctor already has an appointment at this time.'));
+            }
+
+            return Appointment::create(array_merge($data, ['appointment_mode' => 'scheduled']));
+        }, 3);
+    }
+
     public function createQueueAppointment(array $data): Appointment
     {
         if (! $this->workingWindow($data['appointment_date'])) {
@@ -182,6 +198,27 @@ class AppointmentSchedulingService
 
             return $appointment->refresh();
         });
+    }
+
+    public function validateReopeningAppointment(Appointment $appointment): ?string
+    {
+        $date = $appointment->appointment_date->toDateString();
+        if ($appointment->appointment_date->lt(today()) || !$this->workingWindow($date)) {
+            return __('Choose a future working day for this appointment.');
+        }
+        if ($this->hasActiveSameDayAppointment($appointment->patient_id, $appointment->doctor_id, $date, $appointment->id)) {
+            return __('appointments.already_has_appointment_today');
+        }
+        if ($appointment->isQueueMode()) {
+            return $this->validateQueueCapacity($appointment->doctor_id, $date);
+        }
+        $time = $appointment->appointment_time->format('H:i');
+        if (Carbon::parse($date.' '.$time)->isPast()) {
+            return __('Appointment time has already passed. Please choose a future time.');
+        }
+        return $this->validateScheduledTime($date, $time)
+            ?? ($this->hasScheduledConflict($appointment->doctor_id, $date, $time, $appointment->id)
+                ? __('appointments.slot_taken_reschedule') : null);
     }
 
     /**

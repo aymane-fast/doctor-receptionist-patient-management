@@ -56,7 +56,7 @@
                                 <input type="hidden" 
                                        id="patient_id" 
                                        name="patient_id" 
-                                       value="{{ $selectedPatient ? $selectedPatient->id : old('patient_id') }}" 
+                                       value="{{ $selectedPatient?->id ?? '' }}"
                                        required>
                                 
                                 <!-- Autocomplete dropdown -->
@@ -114,52 +114,61 @@
                     </div>
                     
                     <div id="items" class="space-y-4">
+                        @php
+                            $submittedItems = old('items', []);
+                            $oldItems = collect(is_array($submittedItems) ? $submittedItems : [])
+                                ->filter(fn ($item) => is_array($item))->take(100)->values();
+                            if ($oldItems->isEmpty()) $oldItems = collect([[]]);
+                            $frequencies = collect(['once_daily', 'twice_daily', 'three_times_daily', 'four_times_daily',
+                                'every_4_hours', 'every_6_hours', 'every_8_hours', 'every_12_hours', 'as_needed', 'weekly', 'other'])
+                                ->map(fn ($key) => __('prescriptions.'.$key));
+                        @endphp
+                        @foreach($oldItems as $index => $submittedItem)
+                        @php
+                            $item = collect($submittedItem)->map(fn ($value) => is_scalar($value) ? (string) $value : '')->all();
+                        @endphp
                         <div class="item bg-white border-2 border-gray-200 rounded-xl p-4">
                             <div class="grid md:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.medication_name') }} <span class="text-red-500">*</span></label>
-                                    <input type="text" name="items[0][medication_name]" list="specialty-medication-suggestions" required
+                                    <input type="text" name="items[{{ $index }}][medication_name]" value="{{ $item['medication_name'] ?? '' }}" list="specialty-medication-suggestions" required
                                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                            placeholder="{{ __('prescriptions.medication_placeholder') }}">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.dosage') }} <span class="text-red-500">*</span></label>
-                                    <input type="text" name="items[0][dosage]" required 
+                                    <input type="text" name="items[{{ $index }}][dosage]" value="{{ $item['dosage'] ?? '' }}" required
                                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                            placeholder="{{ __('prescriptions.dosage_placeholder') }}">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.frequency') }} <span class="text-red-500">*</span></label>
-                                    <select name="items[0][frequency]" required 
+                                    <select name="items[{{ $index }}][frequency]" required
                                             class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200">
                                         <option value="">{{ __('prescriptions.select_frequency') }}</option>
-                                        <option>{{ __('prescriptions.once_daily') }}</option>
-                                        <option>{{ __('prescriptions.twice_daily') }}</option>
-                                        <option>{{ __('prescriptions.three_times_daily') }}</option>
-                                        <option>{{ __('prescriptions.four_times_daily') }}</option>
-                                        <option>{{ __('prescriptions.every_4_hours') }}</option>
-                                        <option>{{ __('prescriptions.every_6_hours') }}</option>
-                                        <option>{{ __('prescriptions.every_8_hours') }}</option>
-                                        <option>{{ __('prescriptions.every_12_hours') }}</option>
-                                        <option>{{ __('prescriptions.as_needed') }}</option>
-                                        <option>{{ __('prescriptions.weekly') }}</option>
-                                        <option>{{ __('prescriptions.other') }}</option>
+                                        @if(!empty($item['frequency']) && !$frequencies->contains($item['frequency']))
+                                            <option selected>{{ $item['frequency'] }}</option>
+                                        @endif
+                                        @foreach($frequencies as $frequency)
+                                            <option @selected(($item['frequency'] ?? '') === $frequency)>{{ $frequency }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.duration_days') }}</label>
-                                    <input type="number" name="items[0][duration_days]" min="1" 
+                                    <input type="number" name="items[{{ $index }}][duration_days]" value="{{ $item['duration_days'] ?? '' }}" min="1"
                                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                            placeholder="7">
                                 </div>
                             </div>
                             <div class="mt-3">
                                 <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.instructions') }}</label>
-                                <input type="text" name="items[0][instructions]" 
+                                <input type="text" name="items[{{ $index }}][instructions]" value="{{ $item['instructions'] ?? '' }}"
                                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                        placeholder="{{ __('prescriptions.instructions_placeholder') }}">
                             </div>
                         </div>
+                        @endforeach
                     </div>
                     
                     <button type="button" id="add-item" class="btn-secondary mt-4 px-4 py-2">
@@ -281,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Form validation before submit
-    const form = document.querySelector('form');
+    const form = document.querySelector('form[action="{{ route('prescriptions.store') }}"]');
     form.addEventListener('submit', function(e) {
         if (!patientIdInput.value) {
             e.preventDefault();
@@ -292,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 // Original medication items functionality
-let itemIndex = 1;
+let itemIndex = document.querySelectorAll('#items .item').length;
 document.getElementById('add-item').addEventListener('click', () => {
   const wrapper = document.createElement('div');
   wrapper.className = 'item soft-panel p-4';

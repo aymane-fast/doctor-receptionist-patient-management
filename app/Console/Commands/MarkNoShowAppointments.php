@@ -28,6 +28,12 @@ class MarkNoShowAppointments extends Command
      */
     public function handle(AppointmentSchedulingService $scheduler): int
     {
+        if (($date = $this->option('date')) && \Illuminate\Support\Facades\Validator::make(
+            ['date' => $date], ['date' => 'required|date_format:Y-m-d|before_or_equal:today']
+        )->fails()) {
+            $this->error('Use a valid date in YYYY-MM-DD format, not a future day.');
+            return self::FAILURE;
+        }
         $dateFilter = function ($query) {
             if ($date = $this->option('date')) {
                 $query->whereDate('appointment_date', $date);

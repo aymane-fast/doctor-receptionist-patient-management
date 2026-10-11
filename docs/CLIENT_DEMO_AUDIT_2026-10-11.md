@@ -58,6 +58,8 @@ passed, not that all possible defects have been eliminated.
 
 ## Remaining release checks / limits
 
+Follow-up: the [second-pass audit](CLIENT_DEMO_SECOND_PASS_2026-10-11.md) now covers real MySQL races, local SMTP transport, larger synthetic datasets, additional responsive/form checks and local synthetic backup/restore. The results below describe this original pass, not the later evidence.
+
 No failures remain in the recorded checks. This is evidence for these cases, not a guarantee against every possible defect.
 
 - Real SMTP delivery and a real Groq API call were deliberately not sent; provider responses/failures were simulated. Verify credentials, recipient delivery and consent/data handling before enabling external services.

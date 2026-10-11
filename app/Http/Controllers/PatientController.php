@@ -38,7 +38,7 @@ class PatientController extends Controller
                 $query->whereDate('created_at', $request->date);
             }
 
-            $patients = $query->latest()->paginate(15);
+            $patients = $query->latest()->paginate(15)->withQueryString();
         }
 
         return view('patients.index', compact('patients', 'hasSearchQuery'));
@@ -210,27 +210,16 @@ class PatientController extends Controller
         // Create inside a per-doctor/day lock so a simultaneous booking at
         // the front desk cannot land in the same slot.
         try {
-            \DB::transaction(function () use ($patient, $doctor, $appointmentDate, $appointmentTime, $scheduler, $request, $notes, $specialties) {
-                Appointment::where('doctor_id', $doctor->id)
-                    ->whereDate('appointment_date', $appointmentDate)
-                    ->lockForUpdate()
-                    ->count();
-
-                if ($scheduler->hasScheduledConflict($doctor->id, $appointmentDate, $appointmentTime)) {
-                    throw new \InvalidArgumentException(__('Doctor already has an appointment at this time.'));
-                }
-
-                Appointment::create([
-                    'patient_id' => $patient->id,
-                    'doctor_id' => $doctor->id,
-                    'appointment_date' => $appointmentDate,
-                    'appointment_time' => $appointmentTime,
-                    'reason' => $request->appointment_reason ?: $specialties->defaultAppointmentReason(),
-                    'status' => 'scheduled',
-                    'checked_in_at' => Carbon::parse($appointmentDate)->isToday() ? now() : null,
-                    'notes' => $notes,
-                ]);
-            });
+            $scheduler->createScheduledAppointment([
+                'patient_id' => $patient->id,
+                'doctor_id' => $doctor->id,
+                'appointment_date' => $appointmentDate,
+                'appointment_time' => $appointmentTime,
+                'reason' => $request->appointment_reason ?: $specialties->defaultAppointmentReason(),
+                'status' => 'scheduled',
+                'checked_in_at' => Carbon::parse($appointmentDate)->isToday() ? now() : null,
+                'notes' => $notes,
+            ]);
         } catch (\InvalidArgumentException $e) {
             return [
                 'success' => false,

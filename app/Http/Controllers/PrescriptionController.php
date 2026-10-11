@@ -62,6 +62,9 @@ class PrescriptionController extends Controller
         if ($request->has('patient_id')) {
             $selectedPatient = Patient::find($request->patient_id);
         }
+        if (!$selectedPatient && is_scalar($request->old('patient_id'))) {
+            $selectedPatient = Patient::find((int) $request->old('patient_id'));
+        }
 
         $medicalRecords = MedicalRecord::with('patient')
             ->where('doctor_id', Auth::id())
@@ -108,11 +111,11 @@ class PrescriptionController extends Controller
             'patient_id' => 'required|integer|exists:patients,id',
             'medical_record_id' => 'nullable|integer|exists:medical_records,id',
             'prescribed_date' => 'required|date|before_or_equal:today',
-            'items' => 'required|array|min:1',
+            'items' => 'required|array|min:1|max:100',
             'items.*.medication_name' => 'required|string|max:255',
             'items.*.dosage' => 'required|string|max:255',
             'items.*.frequency' => 'required|string|max:255',
-            'items.*.duration_days' => 'nullable|integer|min:1',
+            'items.*.duration_days' => 'nullable|integer|min:1|max:2147483647',
             'items.*.instructions' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
@@ -208,11 +211,11 @@ class PrescriptionController extends Controller
             'patient_id' => 'required|integer|exists:patients,id',
             'medical_record_id' => 'nullable|integer|exists:medical_records,id',
             'prescribed_date' => 'required|date|before_or_equal:today',
-            'items' => 'required|array|min:1',
+            'items' => 'required|array|min:1|max:100',
             'items.*.medication_name' => 'required|string|max:255',
             'items.*.dosage' => 'required|string|max:255',
             'items.*.frequency' => 'required|string|max:255',
-            'items.*.duration_days' => 'nullable|integer|min:1',
+            'items.*.duration_days' => 'nullable|integer|min:1|max:2147483647',
             'items.*.instructions' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);

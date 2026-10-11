@@ -600,5 +600,7 @@
     "Choose a future working day for this queue ticket.": "Choisissez un jour d’ouverture à venir pour ce ticket de file d’attente.",
     "Delete this prescription? This action cannot be undone.": "Supprimer cette ordonnance ? Cette action est irréversible.",
     "Appointment time is required for scheduled appointments.": "L’heure est obligatoire pour les rendez-vous planifiés.",
-    "Failed to generate AI summary. Please try again.": "Impossible de générer le résumé IA. Veuillez réessayer."
+    "Failed to generate AI summary. Please try again.": "Impossible de générer le résumé IA. Veuillez réessayer.",
+    "A consultation record already exists for this appointment.": "Un dossier de consultation existe déjà pour ce rendez-vous.",
+    "Choose a future working day for this appointment.": "Choisissez un jour d’ouverture à venir pour ce rendez-vous."
 }

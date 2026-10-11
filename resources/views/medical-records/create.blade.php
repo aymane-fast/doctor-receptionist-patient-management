@@ -54,7 +54,7 @@
                                 <input type="hidden" 
                                        id="patient_id" 
                                        name="patient_id" 
-                                       value="{{ $selectedPatient ? $selectedPatient->id : old('patient_id') }}" 
+                                       value="{{ $selectedPatient?->id ?? '' }}"
                                        required>
                                 
                                 <!-- Autocomplete dropdown -->
@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Form validation before submit
-    const form = document.querySelector('form');
+    const form = document.querySelector('form[action="{{ route('medical-records.store') }}"]');
     form.addEventListener('submit', function(e) {
         if (!patientIdInput.value) {
             e.preventDefault();

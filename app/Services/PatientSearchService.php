@@ -12,6 +12,7 @@ class PatientSearchService
      */
     public static function search(string $query): Collection
     {
+        $query = trim($query);
         if (strlen($query) < 2) {
             return collect();
         }

@@ -31,6 +31,10 @@ class SendAppointmentReminders extends Command
     public function handle(): int
     {
         $date = $this->option('date') ?: now()->addDay()->toDateString();
+        if (\Illuminate\Support\Facades\Validator::make(['date' => $date], ['date' => 'required|date_format:Y-m-d'])->fails()) {
+            $this->error('Use a valid date in YYYY-MM-DD format.');
+            return self::FAILURE;
+        }
 
         $appointments = Appointment::with(['patient', 'doctor'])
             ->whereDate('appointment_date', $date)

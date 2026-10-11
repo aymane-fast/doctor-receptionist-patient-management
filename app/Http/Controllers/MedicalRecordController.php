@@ -77,6 +77,9 @@ class MedicalRecordController extends Controller
         } elseif ($request->has('patient_id')) {
             $selectedPatient = Patient::find($request->patient_id);
         }
+        if (!$selectedPatient && is_scalar($request->old('patient_id'))) {
+            $selectedPatient = Patient::find((int) $request->old('patient_id'));
+        }
 
         return view('medical-records.create', compact('selectedPatient', 'appointment'));
     }
@@ -121,20 +124,20 @@ class MedicalRecordController extends Controller
 
         $validated = $request->validate(array_merge([
             'patient_id' => 'required|integer|exists:patients,id',
-            'appointment_id' => 'nullable|integer|exists:appointments,id',
+            'appointment_id' => ['nullable', 'integer', 'exists:appointments,id', \Illuminate\Validation\Rule::unique('medical_records', 'appointment_id')],
             'visit_date' => 'required|date|before_or_equal:today',
             'visit_type' => 'nullable|in:consultation,follow-up,emergency,routine-checkup',
-            'history_present_illness' => 'nullable|string',
-            'physical_examination' => 'nullable|string',
-            'symptoms' => 'nullable|string',
-            'diagnosis' => 'nullable|string',
-            'treatment' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'weight' => 'nullable|numeric|min:0',
-            'height' => 'nullable|numeric|min:0',
-            'blood_pressure' => 'nullable|string',
-            'temperature' => 'nullable|numeric|min:0',
-            'heart_rate' => 'nullable|integer|min:0',
+            'history_present_illness' => 'nullable|string|max:16000',
+            'physical_examination' => 'nullable|string|max:16000',
+            'symptoms' => 'nullable|string|max:16000',
+            'diagnosis' => 'nullable|string|max:16000',
+            'treatment' => 'nullable|string|max:16000',
+            'notes' => 'nullable|string|max:16000',
+            'weight' => 'nullable|numeric|min:0|max:999.99',
+            'height' => 'nullable|numeric|min:0|max:999.99',
+            'blood_pressure' => 'nullable|string|max:255',
+            'temperature' => 'nullable|numeric|min:0|max:999.9',
+            'heart_rate' => 'nullable|integer|min:0|max:2147483647',
             'oxygen_saturation' => 'nullable|integer|min:0|max:100',
         ], $specialties->validationRules('record')));
 
@@ -158,6 +161,15 @@ class MedicalRecordController extends Controller
         }
 
         $record = \DB::transaction(function () use ($validated, $appointment) {
+            if ($appointment) {
+                \App\Models\User::whereKey($appointment->doctor_id)->lockForUpdate()->firstOrFail();
+                $appointment->refresh();
+                if (MedicalRecord::where('appointment_id', $appointment->id)->exists()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'appointment_id' => __('A consultation record already exists for this appointment.'),
+                    ]);
+                }
+            }
             $record = MedicalRecord::create($validated);
             if ($appointment) {
                 $wasCurrent = $appointment->status === 'in_progress';
@@ -221,20 +233,20 @@ class MedicalRecordController extends Controller
 
         $validated = $request->validate(array_merge([
             'patient_id' => 'required|integer|exists:patients,id',
-            'appointment_id' => 'nullable|integer|exists:appointments,id',
+            'appointment_id' => ['nullable', 'integer', 'exists:appointments,id', \Illuminate\Validation\Rule::unique('medical_records', 'appointment_id')->ignore($medicalRecord->id)],
             'visit_date' => 'required|date|before_or_equal:today',
             'visit_type' => 'nullable|in:consultation,follow-up,emergency,routine-checkup',
-            'history_present_illness' => 'nullable|string',
-            'physical_examination' => 'nullable|string',
-            'symptoms' => 'nullable|string',
-            'diagnosis' => 'nullable|string',
-            'treatment' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'weight' => 'nullable|numeric|min:0',
-            'height' => 'nullable|numeric|min:0',
-            'blood_pressure' => 'nullable|string',
-            'temperature' => 'nullable|numeric|min:0',
-            'heart_rate' => 'nullable|integer|min:0',
+            'history_present_illness' => 'nullable|string|max:16000',
+            'physical_examination' => 'nullable|string|max:16000',
+            'symptoms' => 'nullable|string|max:16000',
+            'diagnosis' => 'nullable|string|max:16000',
+            'treatment' => 'nullable|string|max:16000',
+            'notes' => 'nullable|string|max:16000',
+            'weight' => 'nullable|numeric|min:0|max:999.99',
+            'height' => 'nullable|numeric|min:0|max:999.99',
+            'blood_pressure' => 'nullable|string|max:255',
+            'temperature' => 'nullable|numeric|min:0|max:999.9',
+            'heart_rate' => 'nullable|integer|min:0|max:2147483647',
             'oxygen_saturation' => 'nullable|integer|min:0|max:100',
         ], $specialties->validationRules('record')));
 

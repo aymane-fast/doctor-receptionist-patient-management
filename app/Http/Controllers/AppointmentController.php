@@ -103,6 +103,9 @@ class AppointmentController extends Controller
         if ($request->has('patient_id')) {
             $selectedPatient = Patient::find($request->patient_id);
         }
+        if (!$selectedPatient && is_scalar($request->old('patient_id'))) {
+            $selectedPatient = Patient::find((int) $request->old('patient_id'));
+        }
 
         $doctors = Auth::user()->isDoctor()
             ? User::where('id', Auth::id())->get()
@@ -321,18 +324,7 @@ class AppointmentController extends Controller
         // Conflict check + create inside one transaction, serialized per
         // doctor/day, so two receptionists cannot land in the same slot.
         try {
-            $appointment = \DB::transaction(function () use ($validated) {
-                Appointment::where('doctor_id', $validated['doctor_id'])
-                    ->whereDate('appointment_date', $validated['appointment_date'])
-                    ->lockForUpdate()
-                    ->count();
-
-                if ($this->hasAppointmentConflict($validated['doctor_id'], $validated['appointment_date'], $validated['appointment_time'])) {
-                    throw new \InvalidArgumentException(__('Doctor already has an appointment at this time.'));
-                }
-
-                return Appointment::create($validated);
-            });
+            $appointment = $this->scheduler()->createScheduledAppointment($validated);
         } catch (\InvalidArgumentException $e) {
             return back()->withErrors(['appointment_time' => $e->getMessage()])->withInput();
         }
@@ -496,6 +488,34 @@ class AppointmentController extends Controller
         }
 
         \DB::transaction(function () use ($appointment, $validated) {
+            // Lock doctors in a stable order, including reassignment, and
+            // recheck after the lock: an earlier availability check can go stale.
+            User::whereIn('id', [$appointment->doctor_id, $validated['doctor_id']])
+                ->orderBy('id')->lockForUpdate()->get();
+            $appointment->refresh();
+            $fail = fn (string $field, string $message) => throw \Illuminate\Validation\ValidationException::withMessages([$field => $message]);
+            if ($validated['status'] !== $appointment->status && !$appointment->canTransitionTo($validated['status'])) {
+                $fail('status', __('appointments.cannot_change_finished'));
+            }
+            $moved = (int) $validated['doctor_id'] !== $appointment->doctor_id
+                || Carbon::parse($validated['appointment_date'])->toDateString() !== $appointment->appointment_date->toDateString();
+            if (in_array($validated['status'], Appointment::ACTIVE_STATUSES, true)) {
+                if ($this->scheduler()->hasActiveSameDayAppointment((int) $validated['patient_id'], (int) $validated['doctor_id'], $validated['appointment_date'], $appointment->id)) {
+                    $fail('patient_id', __('appointments.already_has_appointment_today'));
+                }
+                if ($appointment->isScheduledMode() && $this->hasAppointmentConflict($validated['doctor_id'], $validated['appointment_date'], $validated['appointment_time'], $appointment->id)) {
+                    $fail('appointment_time', __('Doctor already has an appointment at this time.'));
+                }
+                if ($appointment->isQueueMode() && ($moved || !in_array($appointment->status, Appointment::ACTIVE_STATUSES, true))) {
+                    if ($error = $this->scheduler()->validateQueueCapacity((int) $validated['doctor_id'], $validated['appointment_date'])) {
+                        $fail('appointment_date', $error);
+                    }
+                }
+            }
+            if ($appointment->isQueueMode() && $moved) {
+                $validated['queue_number'] = $this->scheduler()->nextQueueNumber((int) $validated['doctor_id'], $validated['appointment_date']);
+                $validated['queue_position'] = $this->scheduler()->nextQueuePosition((int) $validated['doctor_id'], $validated['appointment_date']);
+            }
             $wasCurrent = $appointment->status === 'in_progress';
             if ($validated['status'] === 'in_progress' && $appointment->status !== 'in_progress') {
                 Appointment::where('doctor_id', $validated['doctor_id'])
@@ -574,20 +594,6 @@ class AppointmentController extends Controller
             return $this->setCurrent($request, $appointment);
         }
 
-        // Resurrecting a cancelled/no-show slot must not double-book it.
-        if ($newStatus === 'scheduled'
-            && $appointment->isScheduledMode()
-            && $this->hasAppointmentConflict($appointment->doctor_id, $appointment->appointment_date->toDateString(), $appointment->appointment_time->format('H:i'), $appointment->id)) {
-            return back()->with('error', __('appointments.slot_taken_reschedule'));
-        }
-
-        if ($newStatus === 'scheduled' && $appointment->isQueueMode() && in_array($appointment->status, ['cancelled', 'no_show'], true)) {
-            $capacityError = $this->scheduler()->validateQueueCapacity($appointment->doctor_id, $appointment->appointment_date);
-            if ($capacityError) {
-                return back()->with('error', $capacityError);
-            }
-        }
-
         $changes = ['status' => $newStatus];
 
         // Patients who cancelled or never showed are not in the waiting room.
@@ -595,13 +601,31 @@ class AppointmentController extends Controller
             $changes['checked_in_at'] = null;
         }
 
-        \DB::transaction(function () use ($appointment, $changes) {
-            $wasCurrent = $appointment->status === 'in_progress';
-            $appointment->update($changes);
-            if ($wasCurrent && in_array($changes['status'], ['completed', 'cancelled'], true) && $appointment->appointment_date->isToday()) {
-                $this->scheduler()->promoteNextPatient($appointment->doctor_id);
-            }
-        });
+        try {
+            \DB::transaction(function () use ($appointment, $changes) {
+                User::whereKey($appointment->doctor_id)->lockForUpdate()->firstOrFail();
+                $appointment->refresh();
+                if ($appointment->status === $changes['status']) {
+                    return;
+                }
+                if (!$appointment->canTransitionTo($changes['status'])) {
+                    throw new \InvalidArgumentException(__('appointments.cannot_change_finished'));
+                }
+                if ($changes['status'] === 'scheduled' && in_array($appointment->status, ['cancelled', 'no_show'], true)) {
+                    $error = $this->scheduler()->validateReopeningAppointment($appointment);
+                    if ($error) {
+                        throw new \InvalidArgumentException($error);
+                    }
+                }
+                $wasCurrent = $appointment->status === 'in_progress';
+                $appointment->update($changes);
+                if ($wasCurrent && in_array($changes['status'], ['completed', 'cancelled'], true) && $appointment->appointment_date->isToday()) {
+                    $this->scheduler()->promoteNextPatient($appointment->doctor_id);
+                }
+            }, 3);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         if ($appointment->isQueueMode()) {
             $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
@@ -770,27 +794,32 @@ class AppointmentController extends Controller
         }
 
         // Use database transaction to ensure atomicity
-        \DB::transaction(function () use ($appointment) {
-            // Serialize against another staff member starting a patient at
-            // the same moment (two "current" patients otherwise).
-            Appointment::where('doctor_id', $appointment->doctor_id)
-                ->whereDate('appointment_date', today())
-                ->lockForUpdate()
-                ->count();
+        try {
+            \DB::transaction(function () use ($appointment) {
+                // Serialize against another staff member starting a patient at
+                // the same moment (two "current" patients otherwise).
+                User::whereKey($appointment->doctor_id)->lockForUpdate()->firstOrFail();
+                $appointment->refresh();
+                if (!$appointment->canTransitionTo('in_progress') || !$appointment->appointment_date->isToday()) {
+                    throw new \InvalidArgumentException(__('appointments.cannot_start_finished'));
+                }
 
-            // Return the previous current patient to the waiting list
-            Appointment::where('doctor_id', $appointment->doctor_id)
-                ->whereDate('appointment_date', today())
-                ->where('status', 'in_progress')
-                ->where('id', '!=', $appointment->id)
-                ->update(['status' => 'scheduled']);
+                // Return the previous current patient to the waiting list
+                Appointment::where('doctor_id', $appointment->doctor_id)
+                    ->whereDate('appointment_date', today())
+                    ->where('status', 'in_progress')
+                    ->where('id', '!=', $appointment->id)
+                    ->update(['status' => 'scheduled']);
 
-            // The patient is in the room, so they have arrived
-            $appointment->update([
-                'status' => 'in_progress',
-                'checked_in_at' => $appointment->checked_in_at ?? now(),
-            ]);
-        });
+                // The patient is in the room, so they have arrived
+                $appointment->update([
+                    'status' => 'in_progress',
+                    'checked_in_at' => $appointment->checked_in_at ?? now(),
+                ]);
+            }, 3);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         if ($appointment->isQueueMode()) {
             $this->scheduler()->recalculateQueue($appointment->doctor_id, $appointment->appointment_date->toDateString());
@@ -819,10 +848,7 @@ class AppointmentController extends Controller
         // Use database transaction to ensure atomicity
         $result = \DB::transaction(function () use ($doctorId, $request) {
             // Serialize with other staff completing/starting consultations
-            Appointment::where('doctor_id', $doctorId)
-                ->whereDate('appointment_date', today())
-                ->lockForUpdate()
-                ->count();
+            User::whereKey($doctorId)->lockForUpdate()->firstOrFail();
 
             // Find current appointment for today (in_progress status)
             $current = Appointment::where('doctor_id', $doctorId)
@@ -906,7 +932,7 @@ class AppointmentController extends Controller
             return back()->with('error', __('No working day was found near the requested follow-up date.'));
         }
 
-        $reason = $validated['follow_up_reason'] ?: app(\App\Services\SpecialtyService::class)->defaultFollowUpReason();
+        $reason = ($validated['follow_up_reason'] ?? null) ?: app(\App\Services\SpecialtyService::class)->defaultFollowUpReason();
         $notes = __('Follow-up from appointment on :date', ['date' => Carbon::parse($currentAppointment->appointment_date)->translatedFormat('M j, Y')]);
 
         if ($this->scheduler()->hasActiveSameDayAppointment($patient->id, Auth::id(), $targetDate->toDateString())) {
@@ -942,15 +968,19 @@ class AppointmentController extends Controller
             $slot = $next['slot'];
         }
 
-        Appointment::create([
-            'patient_id' => $patient->id,
-            'doctor_id' => Auth::id(),
-            'appointment_date' => $targetDate->toDateString(),
-            'appointment_time' => $slot['time'],
-            'status' => 'scheduled',
-            'reason' => $reason,
-            'notes' => $notes,
-        ]);
+        try {
+            $this->scheduler()->createScheduledAppointment([
+                'patient_id' => $patient->id,
+                'doctor_id' => Auth::id(),
+                'appointment_date' => $targetDate->toDateString(),
+                'appointment_time' => $slot['time'],
+                'status' => 'scheduled',
+                'reason' => $reason,
+                'notes' => $notes,
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         $timeAmount = $validated['follow_up_number'];
         $timeUnit = $validated['follow_up_unit'];
