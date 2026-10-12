@@ -218,6 +218,7 @@
                         <option value="queue" {{ auth()->user()->appointment_mode === 'queue' ? 'selected' : '' }}>{{ __('Queue mode') }}</option>
                     </select>
                     <p class="text-xs text-gray-500 mt-1">{{ __('Scheduled mode uses fixed times. Queue mode assigns automatic numbers and estimated times.') }}</p>
+                    <p class="text-xs text-slate-500 mt-2">{{ __('clinical_ui.mode_help') }}</p>
                 </div>
 
                 <div id="queue_limit_wrapper">

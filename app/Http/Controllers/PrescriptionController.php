@@ -18,12 +18,17 @@ class PrescriptionController extends Controller
             abort(403);
         }
 
-        $request->validate(['search' => 'nullable|string|max:255', 'date' => 'nullable|date', 'patient_id' => 'nullable|integer|exists:patients,id']);
+        $request->validate([
+            'search' => 'nullable|string|max:255', 'date' => 'nullable|date_format:Y-m-d',
+            'patient_id' => 'nullable|integer|exists:patients,id',
+            'from_date' => 'nullable|date_format:Y-m-d',
+            'to_date' => ['nullable', 'date_format:Y-m-d', ...($request->filled('from_date') ? ['after_or_equal:from_date'] : [])],
+        ]);
         $prescriptions = collect(); // Empty collection by default
         $hasSearchQuery = false;
 
         // Only query prescriptions if there's a search term or date filter
-        if ($request->filled('search') || $request->filled('date') || $request->filled('patient_id')) {
+        if ($request->filled('search') || $request->filled('date') || $request->filled('patient_id') || $request->filled('from_date') || $request->filled('to_date')) {
             $hasSearchQuery = true;
             
             $query = Prescription::with(['patient', 'doctor', 'medicalRecord'])
@@ -43,10 +48,18 @@ class PrescriptionController extends Controller
                 $query->whereDate('prescribed_date', $request->date);
             }
 
+            if ($request->filled('from_date')) {
+                $query->whereDate('prescribed_date', '>=', $request->from_date);
+            }
+            if ($request->filled('to_date')) {
+                $query->whereDate('prescribed_date', '<=', $request->to_date);
+            }
+
             $prescriptions = $query->latest('prescribed_date')->paginate(15)->withQueryString();
         }
 
-        return view('prescriptions.index', compact('prescriptions', 'hasSearchQuery'));
+        $filterPatient = $request->filled('patient_id') ? Patient::find($request->integer('patient_id')) : null;
+        return view('prescriptions.index', compact('prescriptions', 'hasSearchQuery', 'filterPatient'));
     }
 
     public function create(Request $request)

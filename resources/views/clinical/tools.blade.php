@@ -4,8 +4,8 @@
     $documents = $documents ?? \App\Models\MedicalDocument::where('doctor_id', auth()->id())->where('patient_id', $patient->id)
         ->when($medicalRecord, fn($q) => $q->where('medical_record_id', $medicalRecord->id))->latest()->limit(30)->get();
 @endphp
-<section id="examinations" class="workflow-panel">
-    <h2><i class="fas fa-flask mr-2 text-teal-700"></i>{{ __('workflow.examinations') }}</h2>
+<section id="examinations" class="{{ ($inWorkspace ?? false) ? 'care-pane' : 'workflow-panel' }}" @if($inWorkspace ?? false) data-workspace-panel @endif>
+    <x-ui.care-heading icon="fa-flask" tone="blue" :title="__('workflow.examinations')" />
     <form method="POST" action="{{ route('clinical.orders.store', $patient) }}">@csrf
         <input type="hidden" name="workspace_form" value="examinations">
         <input type="hidden" name="medical_record_id" value="{{ $medicalRecord?->id }}">
@@ -23,10 +23,11 @@
     @endforeach
     @if($orders instanceof \Illuminate\Contracts\Pagination\Paginator)<div class="mt-3">{{ $orders->links() }}</div>@else<a class="mt-3 inline-block text-sm text-teal-700" href="{{ route('clinical.history', ['patient' => $patient, 'medical_record_id' => $medicalRecord?->id]) }}#examinations">{{ __('workflow.view_all_examinations') }}</a>@endif
 </section>
-<section id="documents" class="workflow-panel">
-    <h2><i class="fas fa-file-medical mr-2 text-teal-700"></i>{{ __('workflow.documents') }}</h2>
+<section id="documents" class="{{ ($inWorkspace ?? false) ? 'care-pane' : 'workflow-panel' }}" @if($inWorkspace ?? false) data-workspace-panel @endif>
+    <x-ui.care-heading icon="fa-folder-open" :title="__('workflow.documents')" />
     <p class="mb-3 text-xs text-slate-500">{{ __('workflow.document_help') }}</p>
     <form method="POST" enctype="multipart/form-data" action="{{ route('clinical.documents.store', $patient) }}">@csrf
+        <input type="hidden" name="workspace_form" value="documents">
         <input type="hidden" name="medical_record_id" value="{{ $medicalRecord?->id }}">
         <div class="workflow-grid"><div><label for="document_title">{{ __('workflow.document_title') }}</label><input id="document_title" name="title" maxlength="255" value="{{ old('title') }}" required></div><div><label for="document_file">{{ __('workflow.file') }}</label><input id="document_file" name="document" type="file" accept="application/pdf,image/jpeg,image/png" required></div>
         <div class="full-width"><label for="document_order">{{ __('workflow.link_result') }}</label><select id="document_order" name="order_id"><option value="">{{ __('common.optional') }}</option>@foreach($orders as $order)<option value="{{ $order->id }}">#{{ $order->id }} · {{ $order->test_name }}</option>@endforeach</select></div></div>

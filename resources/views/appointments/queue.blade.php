@@ -6,11 +6,12 @@
 <div class="space-y-6">
     <x-ui.page-header
         :title="__('Appointment Queue')"
-        :description="__('workflow.priority_help')"
+        :description="__('clinical_ui.active_only')"
         icon="fa-list-ol"
         :eyebrow="__('Daily flow')"
     >
         <x-slot:actions>
+            <a href="{{ route('appointments.index', ['date' => $date, 'doctor_id' => $selectedDoctor?->id]) }}" class="btn-secondary px-4 py-2"><i class="fas fa-calendar-days"></i>{{ __('clinical_ui.daily_schedule') }}</a>
             <a href="{{ route('appointments.create') }}" class="btn-primary px-4 py-2">
                 <i class="fas fa-plus text-sm"></i>
                 <span>{{ __('Add Patient') }}</span>
@@ -46,22 +47,20 @@
         </form>
     </div>
 
-    @if($selectedDoctor && $selectedDoctor->appointment_mode !== 'queue')
-        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-yellow-800">
-            <i class="fas fa-info-circle mr-2"></i>
-            {{ $selectedDoctor->professional_name }} {{ __('is currently using scheduled appointment mode.') }}
-        </div>
+    @if($selectedDoctor)
+        <div class="mode-summary"><div><strong><i class="fas {{ $selectedDoctor->usesQueueMode() ? 'fa-list-ol' : 'fa-calendar-days' }} mr-2"></i>{{ $selectedDoctor->professional_name }} · {{ __('clinical_ui.booking_mode') }} {{ $selectedDoctor->usesQueueMode() ? __('Queue') : __('Scheduled') }}</strong><p>{{ __('clinical_ui.mode_help') }}</p></div><span class="care-badge">{{ __('clinical_ui.all_modes') }}</span></div>
     @endif
 
     <div class="section-card overflow-hidden">
         @if($queueAppointments->count())
+            <p class="px-6 py-3 text-sm text-slate-500 border-b border-slate-100"><i class="fas fa-arrow-down-short-wide mr-2" aria-hidden="true"></i>{{ __('clinical_ui.priority_help') }}</p>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-100">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Queue') }}</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Patient') }}</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ $selectedDoctor?->usesQueueMode() ? __('Estimated Time') : __('appointments.time') }}</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('appointments.time') }}</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Status') }}</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Reason') }}</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase">{{ __('Actions') }}</th>
@@ -99,7 +98,7 @@
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-700">{{ $appointment->reason ?: '-' }}</td>
                             <td class="px-6 py-4">
-                                <div class="flex flex-wrap gap-2">
+                                <div class="queue-actions">
                                     @if($appointment->status === 'scheduled')
                                         <form method="POST" action="{{ route('appointments.queue-up', $appointment) }}">
                                             @csrf
@@ -128,25 +127,27 @@
                                                 {{ __('Start') }}
                                             </button>
                                         </form>
+                                        <details><summary aria-label="{{ __('Actions') }}"><i class="fas fa-ellipsis"></i></summary>
                                         <form method="POST" action="{{ route('appointments.no-show', $appointment) }}">
                                             @csrf
-                                            <button class="px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium" onclick="return confirm('{{ __('appointments.mark_no_show') }}?')">
+                                            <button class="px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium" onclick="return confirm(@js(__('appointments.mark_no_show').'?'))">
                                                 {{ __('appointments.mark_no_show') }}
                                             </button>
                                         </form>
                                         <form method="POST" action="{{ route('appointments.cancel', $appointment) }}">
                                             @csrf
-                                            <button class="btn-danger px-3 py-2 text-sm" onclick="return confirm('{{ __('Cancel this queue entry?') }}')">
+                                            <button class="btn-danger px-3 py-2 text-sm" onclick="return confirm(@js(__('Cancel this queue entry?')))">
                                                 {{ __('Cancel') }}
                                             </button>
                                         </form>
+                                        </details>
                                     @elseif($appointment->status === 'in_progress')
                                         <form method="POST" action="{{ route('appointments.update-status', $appointment) }}">
                                             @csrf
                                             @method('PATCH')
                                             <input type="hidden" name="status" value="completed">
                                             <button class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm font-medium">
-                                                Complete
+                                                {{ __('common.completed') }}
                                             </button>
                                         </form>
                                     @endif
@@ -165,8 +166,8 @@
                 <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-list-ol text-gray-400 text-2xl"></i>
                 </div>
-                <h3 class="text-lg font-bold text-gray-900">{{ __('No queue entries found') }}</h3>
-                <p class="text-gray-500 mt-1">{{ __('Queue-mode appointments for the selected day will appear here.') }}</p>
+                <h3 class="text-lg font-bold text-gray-900">{{ __('clinical_ui.no_active') }}</h3>
+                <p class="text-gray-500 mt-1">{{ __('clinical_ui.active_only') }}</p>
             </div>
         @endif
     </div>

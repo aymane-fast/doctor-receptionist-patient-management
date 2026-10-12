@@ -22,12 +22,17 @@ class MedicalRecordController extends Controller
             abort(403, __('Unauthorized access to medical records.'));
         }
 
-        $request->validate(['search' => 'nullable|string|max:255', 'date' => 'nullable|date', 'patient_id' => 'nullable|integer|exists:patients,id']);
+        $request->validate([
+            'search' => 'nullable|string|max:255', 'date' => 'nullable|date_format:Y-m-d',
+            'patient_id' => 'nullable|integer|exists:patients,id',
+            'from_date' => 'nullable|date_format:Y-m-d',
+            'to_date' => ['nullable', 'date_format:Y-m-d', ...($request->filled('from_date') ? ['after_or_equal:from_date'] : [])],
+        ]);
         $medicalRecords = collect(); // Empty collection by default
         $hasSearchQuery = false;
 
         // Only query records if there's a search term or date filter
-        if ($request->filled('search') || $request->filled('date') || $request->filled('patient_id')) {
+        if ($request->filled('search') || $request->filled('date') || $request->filled('patient_id') || $request->filled('from_date') || $request->filled('to_date')) {
             $hasSearchQuery = true;
             
             $query = MedicalRecord::with(['patient', 'doctor', 'appointment'])
@@ -47,10 +52,18 @@ class MedicalRecordController extends Controller
                 $query->whereDate('visit_date', $request->date);
             }
 
+            if ($request->filled('from_date')) {
+                $query->whereDate('visit_date', '>=', $request->from_date);
+            }
+            if ($request->filled('to_date')) {
+                $query->whereDate('visit_date', '<=', $request->to_date);
+            }
+
             $medicalRecords = $query->latest('visit_date')->paginate(15)->withQueryString();
         }
 
-        return view('medical-records.index', compact('medicalRecords', 'hasSearchQuery'));
+        $filterPatient = $request->filled('patient_id') ? Patient::find($request->integer('patient_id')) : null;
+        return view('medical-records.index', compact('medicalRecords', 'hasSearchQuery', 'filterPatient'));
     }
 
     /**

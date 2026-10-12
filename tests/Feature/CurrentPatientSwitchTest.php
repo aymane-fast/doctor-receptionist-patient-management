@@ -20,6 +20,16 @@ beforeEach(function () {
 
 afterEach(fn () => Carbon::setTestNow());
 
+it('shows transition failures inside the modal rather than behind its backdrop', function () {
+    $response = $this->withSession(['error' => 'The selected time is unavailable.'])
+        ->get(route('appointments.switch-current', $this->next))->assertOk();
+    $dom = new \DOMDocument;
+    @$dom->loadHTML($response->getContent());
+    $xpath = new \DOMXPath($dom);
+    expect($xpath->evaluate('string(//dialog[@id="current-switch-dialog"]//*[@role="alert"])'))
+        ->toContain('The selected time is unavailable.');
+});
+
 it('asks before changing either patient from all start entry points', function ($method, $route, $payload) {
     $this->{$method}(route($route, $this->next), $payload)
         ->assertRedirect(route('appointments.switch-current', $this->next));
@@ -27,7 +37,7 @@ it('asks before changing either patient from all start entry points', function (
         ->and($this->next->fresh()->status)->toBe('scheduled');
     $this->get(route('appointments.switch-current', $this->next))->assertOk()
         ->assertSee($this->current->patient->full_name)->assertSee($this->next->patient->full_name)
-        ->assertSee('previous_appointment_id')->assertSee('Do nothing');
+        ->assertSee('previous_appointment_id')->assertSee(__('clinical_ui.stay_current'));
 })->with([
     ['post', 'appointments.set-current', []],
     ['patch', 'appointments.update-status', ['status' => 'in_progress']],

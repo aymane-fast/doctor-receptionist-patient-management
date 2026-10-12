@@ -1,0 +1,24 @@
+                <form id="active-consultation-form" method="POST" action="{{ $record ? route('medical-records.update', $record) : route('medical-records.store') }}">
+                    @csrf @if($record) @method('PUT') @endif
+                    <input type="hidden" name="workspace_form" value="consultation">
+                    <input type="hidden" name="patient_id" value="{{ $patient->id }}"><input type="hidden" name="appointment_id" value="{{ $currentAppointment->id }}"><input type="hidden" name="return_to_workspace" value="1">
+                    <div class="workflow-grid">
+                        <div><label for="visit_date">{{ __('medical_records.visit_date') }}</label><input id="visit_date" type="date" name="visit_date" max="{{ today()->toDateString() }}" value="{{ old('visit_date', $record?->visit_date?->toDateString() ?? today()->toDateString()) }}" required></div>
+                        <div><label for="visit_type">{{ __('medical_records.visit_type') }}</label><select id="visit_type" name="visit_type">@foreach(['consultation', 'follow-up', 'emergency', 'routine-checkup'] as $type)<option value="{{ $type }}" @selected(old('visit_type', $record?->visit_type ?? 'consultation') === $type)>{{ __('medical_records.visit_types.'.($type === 'routine-checkup' ? 'routine' : $type)) }}</option>@endforeach</select></div>
+                        @foreach(['symptoms' => 'chief_complaint', 'diagnosis' => 'assessment_diagnosis', 'treatment' => 'treatment_plan', 'notes' => 'notes'] as $field => $label)<div><label for="{{ $field }}">{{ __('medical_records.'.$label) }}</label><textarea id="{{ $field }}" name="{{ $field }}" rows="2" maxlength="16000">{{ $clinicalOld($field, $record?->$field) }}</textarea></div>@endforeach
+                    </div>
+                    <details class="my-3"><summary class="cursor-pointer font-semibold text-sm">{{ __('medical_records.vital_signs') }} · {{ __('common.optional') }}</summary>
+                        @if($record?->temperature && !$record->temperature_unit)<p class="my-2 text-amber-800 text-sm">{{ __('workflow.legacy_temperature_help') }}</p>@endif
+                        <div class="workflow-grid mt-3">
+                            @foreach(['weight' => 'kg', 'height' => 'cm', 'temperature' => $record?->temperature_unit ? '°'.$record->temperature_unit : ($record?->temperature ? __('workflow.legacy_unit') : '°C'), 'blood_pressure' => 'mmHg', 'heart_rate' => 'bpm', 'oxygen_saturation' => '%'] as $field => $unit)
+                            <div><label for="{{ $field }}">{{ __('medical_records.'.$field) }} ({{ $unit }})</label><input id="{{ $field }}" name="{{ $field }}" type="{{ $field === 'blood_pressure' ? 'text' : 'number' }}" @if($field !== 'blood_pressure') min="0" step="{{ in_array($field, ['heart_rate', 'oxygen_saturation']) ? '1' : '.1' }}" @endif value="{{ old($field, $record?->$field) }}"></div>
+                            @endforeach
+                            <div><label for="temperature_unit">{{ __('workflow.temperature_unit') }}</label><select id="temperature_unit" name="temperature_unit">@if($record)<option value="" @selected(!$clinicalOld('temperature_unit', $record->temperature_unit))>{{ __('workflow.legacy_unit') }}</option>@endif<option value="C" @selected($clinicalOld('temperature_unit', $record ? $record->temperature_unit : 'C') === 'C')>°C</option>@if($record)<option value="F" @selected($clinicalOld('temperature_unit', $record->temperature_unit) === 'F')>°F</option>@endif</select></div>
+                        </div>
+                    </details>
+                    <details class="my-3"><summary class="cursor-pointer font-semibold text-sm">{{ __('workflow.additional_clinical_details') }}</summary>
+                        <div class="workflow-grid my-3">@foreach(['history_present_illness', 'physical_examination'] as $field)<div><label for="{{ $field }}">{{ __('medical_records.'.$field) }}</label><textarea id="{{ $field }}" name="{{ $field }}" rows="2">{{ old($field, $record?->$field) }}</textarea></div>@endforeach</div>
+                        <x-specialty.fields :fields="$clinicSpecialty['record_fields']" :values="$record?->specialty_data ?? []" :title="__('workflow.additional_clinical_details')" />
+                    </details>
+                    <div class="consultation-savebar"><button class="btn-primary"><i class="fas fa-save"></i> {{ __('workflow.save_stay') }}</button><span class="save-state" data-save-state data-saved="{{ __('clinical_ui.saved') }}" data-dirty="{{ __('clinical_ui.unsaved') }}">{{ $record ? __('clinical_ui.saved') : __('clinical_ui.new_consultation') }}</span></div>
+                </form>

@@ -15,7 +15,7 @@ return [
     'history' => 'Medical history',
     'save_stay' => 'Save consultation & stay',
     'save_not_finish' => 'Saving does not finish the visit or call the next patient.',
-    'save_first' => 'Save the consultation above first so clinical tools are linked to the correct visit.',
+    'save_first' => 'Save the consultation first so clinical tools are linked to the correct visit.',
     'this_consultation' => 'This consultation',
     'historical' => 'Historical record',
     'today_queue' => 'Today’s patients — arrival & priority',

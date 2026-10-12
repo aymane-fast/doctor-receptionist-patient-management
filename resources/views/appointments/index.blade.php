@@ -25,6 +25,10 @@
                 </a>
         </x-slot:actions>
     </x-ui.page-header>
+    @php($modeDoctor = auth()->user()->isDoctor() ? auth()->user() : $doctors->firstWhere('id', request()->integer('doctor_id')))
+    @if($modeDoctor)
+        <div class="mode-summary"><div><strong><i class="fas {{ $modeDoctor->usesQueueMode() ? 'fa-list-ol' : 'fa-calendar-days' }} mr-2"></i>{{ __('clinical_ui.booking_mode') }} {{ $modeDoctor->usesQueueMode() ? __('Queue') : __('Scheduled') }}</strong><p>{{ __('clinical_ui.mode_help') }}</p></div><a href="{{ route('appointments.queue', ['date' => request('date', today()->toDateString()), 'doctor_id' => $modeDoctor->id]) }}" class="text-link">{{ __('clinical_ui.all_active') }} <i class="fas fa-arrow-right"></i></a></div>
+    @endif
 
     <!-- Modern Filters -->
     <div class="glass-effect rounded-3xl p-8 modern-shadow relative z-[10001]">

@@ -3,7 +3,7 @@
 @section('title', __('medical_records.title'))
 
 @section('content')
-<div class="space-y-8">
+<div class="space-y-6 clinical-registry">
     <x-ui.page-header
         :title="__('medical_records.title')"
         :description="__('medical_records.complete_medical_history')"
@@ -18,63 +18,7 @@
         </x-slot:actions>
     </x-ui.page-header>
 
-    <!-- Modern Search and Filters -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow relative z-[10001]">
-        <form method="GET" action="{{ route('medical-records.index') }}" class="space-y-6">
-            <!-- Search Bar and Date Filter -->
-            <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-                <div class="flex-1 w-full relative z-[10000]">
-                    <label for="patient_search" class="sr-only">{{ __('medical_records.search_patients') }}</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
-                        </div>
-                        <input type="text" 
-                               id="patient_search" 
-                               placeholder="{{ __('medical_records.search_patients') }}"
-                               class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200"
-                               autocomplete="off"
-                               value="{{ request('search') }}">
-                        
-                        <!-- Hidden input for search -->
-                        <input type="hidden" id="search" name="search" value="{{ request('search') }}">
-                        
-                        <!-- Autocomplete dropdown -->
-                        <div id="patient_results" 
-                             class="absolute z-[99999] w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-auto hidden">
-                            <!-- Results will be populated by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-                <!-- Date Filter -->
-                <div class="w-full md:w-auto">
-                    <label for="date" class="sr-only">{{ __('medical_records.filter_by_date') }}</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fas fa-calendar text-gray-400"></i>
-                        </div>
-                        <input type="date" 
-                               id="date" 
-                               name="date" 
-                               value="{{ request('date') }}"
-                               class="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-emerald-500 focus:bg-white transition-all duration-200">
-                    </div>
-                </div>
-                <div class="flex space-x-3">
-                    <button type="submit" class="btn-primary px-6 py-3">
-                        <i class="fas fa-search"></i>
-                        <span>{{ __('medical_records.search') }}</span>
-                    </button>
-                    @if(request('search') || request('date'))
-                    <a href="{{ route('medical-records.index') }}" class="btn-secondary px-6 py-3">
-                        <i class="fas fa-times"></i>
-                        <span>{{ __('medical_records.clear') }}</span>
-                    </a>
-                    @endif
-                </div>
-            </div>
-        </form>
-    </div>
+    <x-ui.clinical-filters :action="route('medical-records.index')" :patient="$filterPatient" />
 
     <!-- Modern Medical Records Grid -->
     @if($hasSearchQuery)
@@ -101,10 +45,10 @@
                                 </div>
                             </div>
                             <div class="flex space-x-2">
-                                <a href="{{ route('medical-records.show', $record) }}" class="w-9 h-9 bg-emerald-100 hover:bg-emerald-200 rounded-xl flex items-center justify-center transition-colors group/btn">
+                                <a href="{{ route('medical-records.show', $record) }}" title="{{ __('common.view') }}" aria-label="{{ __('common.view') }}" class="w-9 h-9 bg-emerald-100 hover:bg-emerald-200 rounded-xl flex items-center justify-center transition-colors group/btn">
                                     <i class="fas fa-eye text-emerald-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                 </a>
-                                <a href="{{ route('medical-records.edit', $record) }}" class="w-9 h-9 bg-blue-100 hover:bg-blue-200 rounded-xl flex items-center justify-center transition-colors group/btn">
+                                <a href="{{ route('medical-records.edit', $record) }}" title="{{ __('common.edit') }}" aria-label="{{ __('common.edit') }}" class="w-9 h-9 bg-blue-100 hover:bg-blue-200 rounded-xl flex items-center justify-center transition-colors group/btn">
                                     <i class="fas fa-edit text-blue-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                 </a>
                             </div>
@@ -298,98 +242,4 @@
     @endif
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('patient_search');
-    const searchHidden = document.getElementById('search');
-    const resultsContainer = document.getElementById('patient_results');
-    let searchTimeout;
-
-    function escapeHtml(value) {
-        return String(value ?? '').replace(/[&<>'"]/g, character => ({
-            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
-        })[character]);
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            const query = this.value.trim();
-            
-            // Update hidden field
-            searchHidden.value = query;
-            
-            if (query.length < 2) {
-                hideResults();
-                return;
-            }
-            
-            searchTimeout = setTimeout(() => {
-                searchPatients(query);
-            }, 300);
-        });
-
-        // Hide results when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
-                hideResults();
-            }
-        });
-
-        function searchPatients(query) {
-            fetch(`{{ route('api.medical-records.patients.search') }}?query=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(patients => {
-                    displayResults(patients);
-                })
-                .catch(error => {
-                    console.error('Search error:', error);
-                    hideResults();
-                });
-        }
-
-        function displayResults(patients) {
-            if (patients.length === 0) {
-                resultsContainer.innerHTML = `
-                    <div class="p-3 text-gray-500 text-center">
-                        <i class="fas fa-search mr-2"></i>
-                    {{ __('No patients found') }}
-                    </div>
-                `;
-            } else {
-                resultsContainer.innerHTML = patients.map(patient => `
-                    <div class="patient-result p-3 hover:bg-emerald-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
-                         data-search="${escapeHtml(patient.display)}">
-                        <div class="font-medium text-gray-900">${escapeHtml(patient.name)}</div>
-                        <div class="text-sm text-gray-600">${escapeHtml(patient.phone)} • ${escapeHtml(patient.email)}</div>
-                    </div>
-                `).join('');
-
-                // Add click handlers to results
-                document.querySelectorAll('.patient-result').forEach(result => {
-                    result.addEventListener('click', function() {
-                        selectPatient(this.dataset.search);
-                    });
-                });
-            }
-            
-            showResults();
-        }
-
-        function selectPatient(display) {
-            searchInput.value = display;
-            searchHidden.value = display;
-            hideResults();
-        }
-
-        function showResults() {
-            resultsContainer.classList.remove('hidden');
-        }
-
-        function hideResults() {
-            resultsContainer.classList.add('hidden');
-        }
-    }
-});
-</script>
 @endsection

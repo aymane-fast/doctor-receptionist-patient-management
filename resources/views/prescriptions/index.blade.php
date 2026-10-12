@@ -3,7 +3,7 @@
 @section('title', __('prescriptions.title'))
 
 @section('content')
-<div class="space-y-8">
+<div class="space-y-6 clinical-registry">
     <x-ui.page-header
         :title="__('prescriptions.title')"
         :description="__('prescriptions.subtitle')"
@@ -18,63 +18,7 @@
         </x-slot:actions>
     </x-ui.page-header>
 
-    <!-- Enhanced Search and Filter Controls -->
-    <div class="glass-effect rounded-3xl p-8 modern-shadow relative z-[10001]">
-        <form method="GET" action="{{ route('prescriptions.index') }}" class="space-y-6">
-            <!-- Search Bar and Date Filter -->
-            <div class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-6">
-                <div class="flex-1 w-full relative z-[10000]">
-                    <label for="patient_search" class="sr-only">{{ __('prescriptions.search_patients') }}</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-teal-500"></i>
-                        </div>
-                        <input type="text" 
-                               id="patient_search"
-                               placeholder="{{ __('prescriptions.search_patients') }}"
-                               class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 placeholder-gray-500 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900"
-                               autocomplete="off"
-                               value="{{ request('search') }}">
-                        
-                        <!-- Hidden input for search -->
-                        <input type="hidden" id="search" name="search" value="{{ request('search') }}">
-                        
-                        <!-- Autocomplete dropdown -->
-                        <div id="patient_results" 
-                             class="absolute z-[99999] w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-auto hidden">
-                            <!-- Results will be populated by JavaScript -->
-                        </div>
-                    </div>
-                </div>
-                <!-- Date Filter -->
-                <div class="w-full lg:w-auto">
-                    <label for="date" class="sr-only">{{ __('prescriptions.filter_by_date') }}</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fas fa-calendar text-teal-500"></i>
-                        </div>
-                        <input type="date" 
-                               id="date" 
-                               name="date" 
-                               value="{{ request('date') }}"
-                               class="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 focus:outline-none focus:border-teal-500 focus:bg-white transition-all duration-200 text-gray-900">
-                    </div>
-                </div>
-                <div class="flex space-x-4">
-                    <button type="submit" class="btn-primary px-6 py-3">
-                        <i class="fas fa-search"></i>
-                        <span>{{ __('prescriptions.search') }}</span>
-                    </button>
-                    @if(request('search') || request('date'))
-                    <a href="{{ route('prescriptions.index') }}" class="btn-secondary px-6 py-3">
-                        <i class="fas fa-times"></i>
-                        <span>{{ __('prescriptions.clear') }}</span>
-                    </a>
-                    @endif
-                </div>
-            </div>
-        </form>
-    </div>
+    <x-ui.clinical-filters :action="route('prescriptions.index')" :patient="$filterPatient" />
 
     <!-- Professional Prescription Table -->
     @if($hasSearchQuery)
@@ -200,11 +144,11 @@
                             <!-- Actions Column -->
                             <td class="py-6 px-6">
                                 <div class="flex items-center justify-center space-x-2">
-                                    <a href="{{ route('prescriptions.show', $prescription) }}" 
+                                    <a href="{{ route('prescriptions.show', $prescription) }}" title="{{ __('common.view') }}" aria-label="{{ __('common.view') }}"
                                        class="w-9 h-9 bg-teal-100 hover:bg-teal-200 rounded-xl flex items-center justify-center transition-all duration-200 group/btn">
                                         <i class="fas fa-eye text-teal-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                     </a>
-                                    <a href="{{ route('prescriptions.edit', $prescription) }}" 
+                                    <a href="{{ route('prescriptions.edit', $prescription) }}" title="{{ __('common.edit') }}" aria-label="{{ __('common.edit') }}"
                                        class="w-9 h-9 bg-blue-100 hover:bg-blue-200 rounded-xl flex items-center justify-center transition-all duration-200 group/btn">
                                         <i class="fas fa-edit text-blue-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                     </a>
@@ -307,119 +251,3 @@
     @endif
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const patientSearchInput = document.getElementById('patient_search');
-        const searchInput = document.getElementById('search');
-        const resultsDiv = document.getElementById('patient_results');
-        let searchTimeout;
-
-        function escapeHtml(value) {
-            return String(value ?? '').replace(/[&<>'"]/g, character => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
-            })[character]);
-        }
-
-        if (!patientSearchInput) return;
-
-        patientSearchInput.addEventListener('input', function() {
-            const query = this.value.trim();
-            
-            clearTimeout(searchTimeout);
-             
-            if (query.length < 2) {
-                resultsDiv.classList.add('hidden');
-                return;
-            }
-
-            searchTimeout = setTimeout(() => {
-                fetch(`/api/patients/search?q=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        resultsDiv.innerHTML = '';
-                        
-                        if (data.length === 0) {
-                            resultsDiv.innerHTML = `
-                                <div class="p-4 text-gray-500 text-center">
-                                    <i class="fas fa-search-minus mb-2"></i>
-                                    <p>{{ __('prescriptions.no_patients_found') }}</p>
-                                </div>
-                            `;
-                        } else {
-                            data.forEach(patient => {
-                                const patientDiv = document.createElement('div');
-                                patientDiv.className = 'patient-result p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0';
-                                patientDiv.innerHTML = `
-                                    <div class="flex items-center space-x-3">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
-                                                <i class="fas fa-user text-teal-600 text-sm"></i>
-                                            </div>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-gray-900 truncate">${escapeHtml(patient.name)}</p>
-                                            <p class="text-sm text-gray-500 truncate">
-                                                ${patient.phone ? `📞 ${escapeHtml(patient.phone)}` : ''}
-                                                ${patient.phone && patient.email ? ' • ' : ''}
-                                                ${patient.email ? `📧 ${escapeHtml(patient.email)}` : ''}
-                                            </p>
-                                            ${patient.id_card ? `<p class="text-xs text-gray-400">ID: ${escapeHtml(patient.id_card)}</p>` : ''}
-                                        </div>
-                                    </div>
-                                `;
-                                
-                                patientDiv.addEventListener('click', function() {
-                                    patientSearchInput.value = patient.name;
-                                    searchInput.value = patient.name;
-                                    resultsDiv.classList.add('hidden');
-                                    
-                                    // Trigger search by submitting the form
-                                    const form = patientSearchInput.closest('form');
-                                    if (form) {
-                                        form.submit();
-                                    } else {
-                                        // If no form found, trigger page reload with search parameter
-                                        const url = new URL(window.location);
-                                        url.searchParams.set('search', patient.name);
-                                        window.location.href = url.toString();
-                                    }
-                                });
-                                
-                                resultsDiv.appendChild(patientDiv);
-                            });
-                        }
-                        
-                        resultsDiv.classList.remove('hidden');
-                    })
-                    .catch(error => {
-                        console.error('Error searching patients:', error);
-                        resultsDiv.innerHTML = `
-                            <div class="p-4 text-red-500 text-center">
-                                <i class="fas fa-exclamation-triangle mb-2"></i>
-                                <p>{{ __('prescriptions.search_error') }}</p>
-                            </div>
-                        `;
-                        resultsDiv.classList.remove('hidden');
-                    });
-            }, 300);
-        });
-
-        // Hide results when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!patientSearchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
-                resultsDiv.classList.add('hidden');
-            }
-        });
-
-        // Handle form submission to ensure search value is set
-        const form = patientSearchInput.closest('form');
-        if (form) {
-            form.addEventListener('submit', function() {
-                searchInput.value = patientSearchInput.value;
-            });
-        }
-    });
-</script>
-@endpush

@@ -764,12 +764,12 @@ class AppointmentController extends Controller
                 abort(403);
             }
 
-            $queueAppointments = $selectedDoctor->usesQueueMode()
-                ? $this->scheduler()->queueAppointments($selectedDoctor->id, $date)
-                : Appointment::with('patient', 'doctor')->where('doctor_id', $selectedDoctor->id)
-                    ->whereDate('appointment_date', $date)->whereIn('status', Appointment::ACTIVE_STATUSES)
-                    ->orderByRaw("CASE WHEN status = 'in_progress' THEN 0 ELSE 1 END")
-                    ->inOperationalOrder()->get();
+            // The setting controls new bookings, not which existing patients
+            // staff can see after switching between scheduled and queue mode.
+            $queueAppointments = Appointment::with('patient', 'doctor')->where('doctor_id', $selectedDoctor->id)
+                ->whereDate('appointment_date', $date)->whereIn('status', Appointment::ACTIVE_STATUSES)
+                ->orderByRaw("CASE WHEN status = 'in_progress' THEN 0 ELSE 1 END")
+                ->inOperationalOrder()->get();
         }
 
         return view('appointments.queue', compact('queueAppointments', 'doctors', 'selectedDoctor', 'date'));

@@ -15,7 +15,7 @@ return [
     'history' => 'Historique médical',
     'save_stay' => 'Enregistrer et rester',
     'save_not_finish' => 'L’enregistrement ne termine pas la visite et n’appelle pas le patient suivant.',
-    'save_first' => 'Enregistrez d’abord la consultation ci-dessus pour y associer les outils cliniques.',
+    'save_first' => 'Enregistrez d’abord la consultation pour y associer les outils cliniques.',
     'this_consultation' => 'Cette consultation',
     'historical' => 'Consultation antérieure',
     'today_queue' => 'Patients du jour — arrivée et priorité',
