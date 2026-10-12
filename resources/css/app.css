@@ -1293,26 +1293,37 @@ tbody td { border-color: #e6ece9 !important; }
 .dialog-actions button,.dialog-actions a { padding:.65rem 1rem; }
 .finish-summary { display:flex; justify-content:space-between; flex-wrap:wrap; gap:.8rem; padding:1rem; border:1px solid #dce5ee; background:#f3f7fb; border-radius:.7rem; margin:1.3rem 0; font-size:.8rem; }
 .finish-summary span { color:#8192a1; }
-/* Keep the green foundation; color identifies sections, not every surface. */
-.care-workspace .care-tabs a,.care-workspace .care-pane { --section-accent:#2c7868; --section-wash:#edf6f1; --section-border:#d1e7dc; }
-.care-workspace :is([data-workspace-tab=history],[data-workspace-tab=examinations],#history,#examinations) { --section-accent:#4c7094; --section-wash:#edf3fa; --section-border:#d4e1ee; }
-.care-workspace :is([data-workspace-tab=prescription],#prescription) { --section-accent:#75628f; --section-wash:#f3eff8; --section-border:#e0d7eb; }
-.care-workspace :is([data-workspace-tab=documents],#documents) { --section-accent:#8b6a3f; --section-wash:#f8f2e9; --section-border:#e9ddc9; }
+/* Warm ivory surfaces and richer accents, concentrated on navigation. */
+.app-main:has(.care-workspace) { background:radial-gradient(ellipse at top left,#e7f0e580,transparent 55%),#f7f4ed; }
+.care-workspace .section-card { border-color:#e4e2d7; box-shadow:0 12px 30px -22px #564c3540,0 2px 6px #443e2905; }
+.care-workspace .care-tabs { background:linear-gradient(#fffefb,#f5f3eb); border-color:#e5e3d8; }
+.care-workspace .care-tabs a,.care-workspace .care-pane { --section-accent:#146b55; --section-wash:#edf5eb; --section-border:#c6dfcc; }
+.care-workspace :is([data-workspace-tab=history],[data-workspace-tab=examinations],#history,#examinations) { --section-accent:#27638a; --section-wash:#eef5f8; --section-border:#c7dce8; }
+.care-workspace :is([data-workspace-tab=prescription],#prescription) { --section-accent:#864c76; --section-wash:#faf0f6; --section-border:#e5cddd; }
+.care-workspace :is([data-workspace-tab=documents],#documents) { --section-accent:#aa542f; --section-wash:#fcf2e8; --section-border:#edcfb9; }
 .care-workspace .care-tabs a > i { color:var(--section-accent); }
+.care-workspace .care-tabs a[aria-selected=true] { color:var(--section-accent); border-bottom-color:var(--section-accent); background:#fffefb; }
 .care-workspace .care-pane > .care-section-heading h2 { color:var(--section-accent); }
-.care-workspace .care-pane > .care-section-heading .care-icon { color:var(--section-accent); background:linear-gradient(140deg,var(--section-wash),#fff); border-color:var(--section-border); }
+.care-workspace .care-pane > .care-section-heading .care-icon { color:#fff; background:var(--section-accent); border-color:var(--section-accent); box-shadow:0 4px 10px -5px var(--section-accent); }
+.care-workspace .active-patient-card { background:linear-gradient(110deg,#edf5ef,#fffdf7 75%); border-color:#c8dccc; }
+.care-workspace .patient-avatar { color:#fff; background:#27638a; border-color:#27638a; }
+.care-workspace .btn-care-primary { background:linear-gradient(135deg,#276b91,#225574); border-color:#225574; }
+.care-workspace .btn-care-primary:hover { background:#1b4d6b; }
+.care-workspace .consultation-savebar { background:#fffdf5f5; border-color:#e3dfcb; box-shadow:0 5px 18px #65542a12; }
+.care-workspace .care-section-heading p,.care-workspace .dialog-description { color:#657567; }
 /* Preserve the compact next-patient / follow-up rail, with clearer grouping. */
 .care-workspace .care-rail .rail-card { padding:1.1rem; }
 .care-workspace .care-rail .rail-heading { margin-bottom:1.05rem; }
-.care-workspace .care-count { min-width:1.55rem; text-align:center; background:#edf2f8; color:#536f8d; }
-.care-workspace .next-visit-first { padding:.9rem; border-color:#d1dfed; }
+.care-workspace .care-count { min-width:1.55rem; text-align:center; background:#e4eee7; color:#256348; }
+.care-workspace .care-rail .care-icon.blue { color:#fff; background:#27638a; border-color:#27638a; }
+.care-workspace .next-visit-first { padding:.9rem; border-color:#d7decf; background:linear-gradient(130deg,#f3f7ee,#fffdf7); }
 .care-workspace .next-visit h3 { margin:.55rem 0 .65rem; line-height:1.45; overflow-wrap:anywhere; }
 .care-workspace .next-visit-time { gap:.45rem; font-size:.73rem; color:#5f7388; }
 .care-workspace .next-visit-time .care-badge { font-size:.65rem; line-height:1.45; }
 .care-workspace .care-rail .rail-link { padding-top:.3rem; font-size:.73rem; }
 .care-workspace .care-rail .rail-description { line-height:1.65; color:#687d72; }
-.care-workspace .care-rail .rail-card:has(.workspace-follow-up) .care-icon { color:#8b6a3f; background:linear-gradient(140deg,#f8f2e9,#fff); border-color:#e9ddc9; }
-.care-workspace .workspace-mode { border:1px solid #e0e8e3; border-radius:.65rem; padding:.65rem .75rem; background:#f8fbf9; line-height:1.55; }
+.care-workspace .care-rail .rail-card:has(.workspace-follow-up) .care-icon { color:#fff; background:#a96620; border-color:#a96620; }
+.care-workspace .workspace-mode { border:1px solid #e5e1d2; border-radius:.65rem; padding:.65rem .75rem; background:#fcfaf3; line-height:1.55; color:#69755e; }
 /* Global field padding must respect the space reserved for search icons. */
 input[class~="pl-12"] { padding-left:3rem; }
 input[class~="pl-10"] { padding-left:2.5rem; }
