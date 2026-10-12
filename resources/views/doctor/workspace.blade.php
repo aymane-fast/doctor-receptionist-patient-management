@@ -70,7 +70,7 @@
                     <div class="rail-heading"><span class="care-icon blue"><i class="fas fa-users"></i></span><h2>{{ __('clinical_ui.up_next') }}</h2><span class="care-count">{{ $waiting->count() }}</span></div>
                     @forelse($waiting->take(3) as $visit)
                         <div class="next-visit {{ $loop->first ? 'next-visit-first' : '' }}">
-                            <div class="next-visit-time">{{ $visit->displayTime() }}<span class="care-badge {{ $visit->checked_in_at ? 'arrived' : '' }}">{{ $visit->checked_in_at ? __('workflow.waiting_room') : __('workflow.not_arrived') }}</span></div>
+                            <div class="next-visit-time"><span><i class="far fa-clock" aria-hidden="true"></i> {{ $visit->displayTime() }}</span><span class="care-badge {{ $visit->checked_in_at ? 'arrived' : '' }}">{{ $visit->checked_in_at ? __('workflow.waiting_room') : __('workflow.not_arrived') }}</span></div>
                             <h3>{{ $visit->patient->full_name }}</h3>
                             <form method="POST" action="{{ route('appointments.set-current', $visit) }}">@csrf<input type="hidden" name="return_to_workspace" value="1"><button class="{{ $loop->first ? 'btn-care w-full' : 'text-link' }}"><i class="fas fa-arrow-right-arrow-left" aria-hidden="true"></i>{{ __('clinical_ui.switch_patient') }}</button></form>
                         </div>
