@@ -1215,9 +1215,15 @@ tbody td { border-color: #e6ece9 !important; }
 .patient-identity h2 { font-size:1.45rem; font-weight:800; letter-spacing:-.04em; color:#263f5b; margin:.15rem 0 .3rem; overflow-wrap:anywhere; }
 .patient-meta { display:flex; flex-wrap:wrap; gap:.35rem 1rem; color:#596e83; font-size:.8rem; }
 .patient-contact { color:#6c7c8b; font-size:.75rem; margin-top:.35rem; }
-.patient-header-actions { display:flex; flex-direction:column; align-items:flex-end; gap:.8rem; }
+.patient-header-actions { display:flex; flex-direction:column; align-items:flex-end; flex-wrap:wrap; gap:.8rem; max-width:100%; }
 .btn-care { display:inline-flex; justify-content:center; align-items:center; gap:.55rem; padding:.7rem 1.1rem; border:1px solid #c4d6e6; border-radius:.7rem; color:#315c81; background:#f9fcff; box-shadow:0 3px 8px #294a6910; font-weight:750; font-size:.82rem; }
 .btn-care:hover { background:#e5eff9; border-color:#a4bed6; }
+.btn-care-primary { min-height:2.9rem; padding:.8rem 1.15rem; color:#fff; background:linear-gradient(135deg,#426d96,#345a80); border-color:#345a80; box-shadow:0 7px 16px -9px #294a6970; text-align:center; }
+.btn-care-primary:hover { color:#fff; background:#2d5073; border-color:#2d5073; }
+.btn-care:focus-visible,.workspace-follow-up:focus-visible { outline:3px solid #86aeca; outline-offset:3px; }
+.workspace-follow-up { min-height:2.9rem; padding:.8rem 1rem; line-height:1.4; }
+.workspace-follow-up > i,.btn-care > i { flex-shrink:0; font-size:1rem; }
+.care-pane .clinical-label-icon { width:1rem; margin-right:.4rem; color:#65867a; text-align:center; }
 .patient-alert { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; flex-basis:100%; border:1px solid #ecd4d0; border-radius:.7rem; padding:.65rem .8rem; background:#fdf3f0; color:#994e49; font-size:.8rem; }
 .care-layout { display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:1.3rem; align-items:start; }
 .care-main { min-width:0; overflow:visible; }

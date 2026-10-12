@@ -13,7 +13,7 @@
     </div>
     <template id="workspace-item-template">@include('clinical.prescription-row', ['index' => '__INDEX__', 'item' => []])</template>
     <label for="rx_notes" class="mt-3">{{ __('prescriptions.notes') }}</label><textarea id="rx_notes" name="notes" rows="2">{{ old('workspace_form') === 'prescription' ? old('notes') : '' }}</textarea>
-    <div class="workflow-actions mt-3"><button type="button" id="workspace-add-item" class="btn-secondary"><i class="fas fa-plus"></i> {{ __('prescriptions.add_another_medication') }}</button><button class="btn-primary">{{ __('prescriptions.create_prescription') }}</button></div>
+    <div class="workflow-actions mt-3"><button type="button" id="workspace-add-item" class="btn-secondary"><i class="fas fa-plus" aria-hidden="true"></i> {{ __('prescriptions.add_another_medication') }}</button><button class="btn-primary"><i class="fas fa-prescription" aria-hidden="true"></i>{{ __('prescriptions.create_prescription') }}</button></div>
 </form>
 @push('scripts')
 <script>

@@ -30,7 +30,7 @@
             </div>
             <div class="patient-header-actions">
                 <a href="{{ route('patients.show', $patient) }}" class="text-link"><i class="far fa-address-card"></i>{{ __('clinical_ui.patient_profile') }}</a>
-                <button type="button" class="btn-care" data-dialog-open="finish-visit"><i class="fas fa-check"></i>{{ __('clinical_ui.finish_visit') }}</button>
+                <button type="button" class="btn-care btn-care-primary" data-dialog-open="finish-visit"><i class="fas {{ $waiting->isNotEmpty() ? 'fa-user-check' : 'fa-circle-check' }}" aria-hidden="true"></i><span>{{ $waiting->isNotEmpty() ? __('clinical_ui.finish_next') : __('clinical_ui.finish_visit') }}</span>@if($waiting->isNotEmpty())<i class="fas fa-arrow-right" aria-hidden="true"></i>@endif</button>
             </div>
             @if($patient->allergies)<div class="patient-alert"><i class="fas fa-triangle-exclamation"></i><strong>{{ __('patients.allergies') }}</strong><span>{{ $patient->allergies }}</span></div>@endif
         </section>
@@ -51,7 +51,7 @@
                         <article class="history-entry"><span class="timeline-marker"><i class="fas fa-file-medical"></i></span><div><div class="history-entry-meta">{{ $previous->visit_date->translatedFormat('d M Y') }}<span class="care-badge">{{ $previous->id === $record?->id ? __('workflow.this_consultation') : __('workflow.historical') }}</span></div><h3>{{ $previous->diagnosis ?: __('workflow.consultation') }}</h3>@if($previous->symptoms)<p>{{ Str::limit($previous->symptoms, 180) }}</p>@endif<a class="text-link" href="{{ route('medical-records.show', $previous) }}">{{ __('common.view') }} #{{ $previous->id }} <i class="fas fa-arrow-right"></i></a></div></article>
                     @empty<div class="care-empty"><i class="fas fa-clock-rotate-left"></i><p>{{ __('current_patient.no_medical_records') }}</p></div>@endforelse
                     </div>
-                    <a class="btn-secondary px-4 py-2 mt-4" href="{{ route('patients.show', $patient) }}">{{ __('current_patient.view_full_patient_history') }}</a>
+                    <a class="btn-secondary px-4 py-2 mt-4" href="{{ route('patients.show', $patient) }}"><i class="fas fa-book-medical" aria-hidden="true"></i>{{ __('current_patient.view_full_patient_history') }}</a>
                 </section>
                 <section id="prescription" class="care-pane" data-workspace-panel>
                     <x-ui.care-heading icon="fa-prescription" :title="__('workflow.prescription')" :description="__('clinical_ui.prescription_help')" />
@@ -72,7 +72,7 @@
                         <div class="next-visit {{ $loop->first ? 'next-visit-first' : '' }}">
                             <div class="next-visit-time">{{ $visit->displayTime() }}<span class="care-badge {{ $visit->checked_in_at ? 'arrived' : '' }}">{{ $visit->checked_in_at ? __('workflow.waiting_room') : __('workflow.not_arrived') }}</span></div>
                             <h3>{{ $visit->patient->full_name }}</h3>
-                            <form method="POST" action="{{ route('appointments.set-current', $visit) }}">@csrf<input type="hidden" name="return_to_workspace" value="1"><button class="text-link"><i class="fas fa-arrow-right-arrow-left"></i>{{ __('clinical_ui.switch_patient') }}</button></form>
+                            <form method="POST" action="{{ route('appointments.set-current', $visit) }}">@csrf<input type="hidden" name="return_to_workspace" value="1"><button class="{{ $loop->first ? 'btn-care w-full' : 'text-link' }}"><i class="fas fa-arrow-right-arrow-left" aria-hidden="true"></i>{{ __('clinical_ui.switch_patient') }}</button></form>
                         </div>
                     @empty<div class="care-empty compact"><i class="far fa-calendar-check"></i><p>{{ __('workflow.no_waiting') }}</p></div>@endforelse
                     <a href="{{ route('appointments.queue') }}" class="rail-link">{{ __('workflow.manage_queue') }}<i class="fas fa-arrow-right"></i></a>
@@ -80,7 +80,7 @@
                 <section class="section-card rail-card">
                     <div class="rail-heading"><span class="care-icon"><i class="fas fa-calendar-plus"></i></span><h2>{{ __('clinical_ui.after_visit') }}</h2></div>
                     <p class="rail-description">{{ __('clinical_ui.follow_up_help') }}</p>
-                    <button type="button" class="btn-secondary w-full px-3 py-2" data-dialog-open="follow-up-dialog"><i class="fas fa-calendar-plus"></i>{{ __('current_patient.schedule_follow_up') }}</button>
+                    <button type="button" class="btn-primary workspace-follow-up w-full" data-dialog-open="follow-up-dialog"><i class="fas fa-calendar-plus" aria-hidden="true"></i><span>{{ __('current_patient.schedule_follow_up') }}</span></button>
                 </section>
                 <p class="workspace-mode"><i class="fas {{ auth()->user()->usesQueueMode() ? 'fa-list-ol' : 'fa-calendar-days' }}"></i>{{ __('clinical_ui.booking_mode') }}<strong>{{ auth()->user()->usesQueueMode() ? __('Queue') : __('Scheduled') }}</strong></p>
             </aside>
@@ -89,7 +89,7 @@
             <p class="dialog-patient">{{ $patient->full_name }}</p>
                             <form method="POST" action="{{ route('appointments.create-follow-up', $patient) }}">@csrf<input type="hidden" name="workspace_form" value="follow-up"><input type="hidden" name="current_appointment_id" value="{{ $currentAppointment->id }}">
                     <div class="workflow-grid"><div><label for="follow_up_number">{{ __('current_patient.time_amount') }}</label><input id="follow_up_number" type="number" name="follow_up_number" min="1" max="365" value="{{ old('follow_up_number', 7) }}" required></div><div><label for="follow_up_unit">{{ __('current_patient.time_unit') }}</label><select id="follow_up_unit" name="follow_up_unit">@foreach(['days', 'weeks', 'months'] as $unit)<option value="{{ $unit }}" @selected(old('follow_up_unit', 'days') === $unit)>{{ __('current_patient.'.$unit) }}</option>@endforeach</select></div><div class="full-width"><label for="follow_up_reason">{{ __('current_patient.reason_optional') }}</label><input id="follow_up_reason" name="follow_up_reason" value="{{ old('follow_up_reason', app(\App\Services\SpecialtyService::class)->defaultFollowUpReason()) }}"></div></div>
-                    <p class="my-2 text-xs text-slate-500">{{ __('current_patient.auto_scheduling_description') }}</p><button class="btn-secondary px-3 py-2">{{ __('current_patient.schedule_appointment') }}</button>
+                    <p class="my-2 text-xs text-slate-500">{{ __('current_patient.auto_scheduling_description') }}</p><button class="btn-primary px-4 py-3"><i class="fas fa-calendar-check" aria-hidden="true"></i>{{ __('current_patient.schedule_appointment') }}</button>
                 </form>
         </x-ui.dialog>
         <x-ui.dialog id="finish-visit" :title="__('clinical_ui.finish_visit')" icon="fa-circle-check" tone="blue">
@@ -97,7 +97,7 @@
             <p class="dialog-description">{{ __('clinical_ui.finish_help') }}</p>
             <div class="finish-summary"><span>{{ __('workflow.next_patient') }}</span><strong>{{ $waiting->first()?->patient->full_name ?? __('workflow.no_waiting') }}</strong></div>
             <div class="patient-alert" data-unsaved-warning hidden>{{ __('clinical_ui.save_before_finish') }}</div>
-            <div class="dialog-actions"><button type="button" class="btn-secondary" data-dialog-close>{{ __('common.cancel') }}</button><button type="button" class="btn-primary" data-save-before-finish hidden>{{ __('clinical_ui.return_notes') }}</button><form method="POST" action="{{ route('appointments.mark-current-done') }}" data-finish-form>@csrf<input type="hidden" name="appointment_id" value="{{ $currentAppointment->id }}"><button class="btn-care"><i class="fas fa-check"></i>{{ __('current_patient.complete_visit_next_patient') }}</button></form></div>
+            <div class="dialog-actions"><button type="button" class="btn-secondary" data-dialog-close>{{ __('common.cancel') }}</button><button type="button" class="btn-primary" data-save-before-finish hidden><i class="fas fa-pen-to-square" aria-hidden="true"></i>{{ __('clinical_ui.return_notes') }}</button><form method="POST" action="{{ route('appointments.mark-current-done') }}" data-finish-form>@csrf<input type="hidden" name="appointment_id" value="{{ $currentAppointment->id }}"><button class="btn-care btn-care-primary"><i class="fas fa-circle-check" aria-hidden="true"></i>{{ $waiting->isNotEmpty() ? __('clinical_ui.finish_next') : __('clinical_ui.finish_visit') }}</button></form></div>
         </x-ui.dialog>
     @endif
 </div>

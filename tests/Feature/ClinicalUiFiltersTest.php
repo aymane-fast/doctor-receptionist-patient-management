@@ -67,6 +67,25 @@ it('renders the tabbed workspace and recovered notes in both languages', functio
     expect(array_keys($french))->toBe(array_keys($english));
 })->with(['en', 'fr']);
 
+it('emphasizes workspace actions without bypassing confirmation', function ($locale, $hasNext) {
+    $doctor = User::factory()->doctor()->create();
+    Appointment::factory()->create(['doctor_id' => $doctor->id, 'status' => 'in_progress']);
+    if ($hasNext) {
+        Appointment::factory()->create(['doctor_id' => $doctor->id, 'status' => 'scheduled']);
+    }
+    $response = $this->actingAs($doctor)->withSession(['locale' => $locale])
+        ->get(route('doctor.current'))->assertOk();
+    $dom = new \DOMDocument;
+    @$dom->loadHTML($response->getContent());
+    $xpath = new \DOMXPath($dom);
+    $nextButton = '//button[@data-dialog-open="finish-visit"]';
+    expect($xpath->evaluate('string('.$nextButton.'/@type)'))->toBe('button')
+        ->and($xpath->evaluate('string('.$nextButton.'/@class)'))->toContain('btn-care-primary')
+        ->and($xpath->evaluate('string('.$nextButton.')'))->toContain(__($hasNext ? 'clinical_ui.finish_next' : 'clinical_ui.finish_visit'))
+        ->and($xpath->evaluate('string(//button[@data-dialog-open="follow-up-dialog"]/@class)'))->toContain('btn-primary')
+        ->and($xpath->evaluate('count(//label[@for="diagnosis"]/i[@aria-hidden="true"])'))->toBe(1.0);
+})->with(['en', 'fr'])->with([true, false]);
+
 it('keeps follow-up validation feedback and entered values inside the open dialog', function () {
     $doctor = User::factory()->doctor()->create();
     Appointment::factory()->create(['doctor_id' => $doctor->id, 'status' => 'in_progress']);

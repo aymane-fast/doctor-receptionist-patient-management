@@ -6,6 +6,7 @@ return [
     'new_consultation' => 'New consultation',
     'patient_profile' => 'Patient profile',
     'finish_visit' => 'Finish visit',
+    'finish_next' => 'Finish & next patient',
     'consultation_help' => 'Record the essentials. Save when ready, then continue with care.',
     'history_help' => 'Previous consultations and the patient’s background.',
     'prescription_help' => 'Create a prescription for this consultation.',

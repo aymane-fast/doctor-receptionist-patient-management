@@ -6,6 +6,7 @@ return [
     'new_consultation' => 'Nouvelle consultation',
     'patient_profile' => 'Fiche patient',
     'finish_visit' => 'Terminer la visite',
+    'finish_next' => 'Terminer et passer au suivant',
     'consultation_help' => 'Notez l’essentiel, enregistrez, puis poursuivez les soins.',
     'history_help' => 'Consultations précédentes et antécédents du patient.',
     'prescription_help' => 'Créez une ordonnance pour cette consultation.',
