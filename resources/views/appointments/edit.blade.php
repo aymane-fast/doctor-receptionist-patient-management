@@ -218,7 +218,7 @@
                             <button type="submit" 
                                     form="delete-appointment-form"
                                     class="btn-danger px-4 py-2"
-                                    onclick="return confirm('{{ __('appointments.confirm_delete') }}')">
+                                    onclick="return confirm(@js(__('appointments.confirm_delete')))">
                                 <i class="fas fa-trash text-sm"></i>
                                 <span>{{ __('Delete') }}</span>
                             </button>

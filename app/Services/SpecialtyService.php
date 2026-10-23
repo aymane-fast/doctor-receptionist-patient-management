@@ -24,6 +24,18 @@ class SpecialtyService
         return array_intersect_key($this->all(), array_flip(['general_practice', 'pediatrics', 'dentistry', 'cardiology']));
     }
 
+    public function selectableProfiles(): array
+    {
+        // Keep a legacy installation usable without advertising additional
+        // workflows that this release does not meaningfully support.
+        $profiles = $this->setupProfiles();
+        $current = $this->currentKey();
+        if (!array_key_exists($current, $profiles)) {
+            $profiles[$current] = $this->profile($current);
+        }
+        return $profiles;
+    }
+
     public function supports(string $capability, ?string $specialty = null): bool
     {
         return (bool) data_get($this->profile($specialty), 'capabilities.'.$capability, false);

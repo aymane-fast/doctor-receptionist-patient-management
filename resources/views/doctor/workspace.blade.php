@@ -5,7 +5,7 @@
     $clinicalOld = fn($key, $default = null) => old('workspace_form') === 'consultation' ? old($key, $default) : $default;
     $workspaceTabs = ['consultation' => 'fa-stethoscope', 'history' => 'fa-clock-rotate-left', 'prescription' => 'fa-prescription', 'examinations' => 'fa-flask', 'documents' => 'fa-folder-open'];
 @endphp
-<div class="care-workspace" data-workspace data-visit="{{ $currentAppointment?->id }}" data-initial-tab="{{ $errors->any() && is_string(old('workspace_form', 'consultation')) ? old('workspace_form', 'consultation') : '' }}">
+<div class="care-workspace" data-workspace data-has-record="{{ $record ? '1' : '0' }}" data-visit="{{ $currentAppointment?->id }}" data-initial-tab="{{ $errors->any() && is_string(old('workspace_form', 'consultation')) ? old('workspace_form', 'consultation') : '' }}">
     <div class="workspace-heading">
         <div><p class="page-header-eyebrow">{{ __($clinicSpecialty['label']) }}</p><h1>{{ __('current_patient.title') }}</h1></div>
         <a href="{{ route('dashboard') }}" class="btn-secondary px-3 py-2"><i class="fas fa-arrow-left" aria-hidden="true"></i>{{ __('common.back') }}</a>
@@ -55,7 +55,7 @@
                 </section>
                 <section id="prescription" class="care-pane" data-workspace-panel>
                     <x-ui.care-heading icon="fa-prescription" :title="__('workflow.prescription')" :description="__('clinical_ui.prescription_help')" />
-                    @if($record) @include('clinical.prescription-form') @else <div class="care-empty"><i class="fas fa-file-circle-plus"></i><p>{{ __('workflow.save_first') }}</p><a class="btn-primary px-4 py-2" href="#consultation" data-workspace-go="consultation">{{ __('clinical_ui.return_notes') }}</a></div> @endif
+                    @if($record) @include('clinical.prescription-form') @else <div class="care-empty"><i class="fas fa-file-circle-plus"></i><p>{{ __('clinical_ui.prescription_prepare_help') }}</p><button type="button" class="btn-primary px-4 py-2" data-dialog-open="prepare-prescription">{{ __('clinical_ui.save_open_prescription') }}</button></div> @endif
                     @if($prescriptions->isNotEmpty())<h3 class="care-subheading">{{ __('current_patient.recent_prescriptions') }}</h3>@endif
                     @foreach($prescriptions as $rx)<div class="clinical-row"><div><strong>{{ $rx->prescribed_date->format('d/m/Y') }} · #{{ $rx->id }}</strong><p class="text-sm text-slate-500">{{ $rx->medical_record_id === $record?->id ? __('workflow.this_consultation') : __('workflow.historical') }}</p></div><div class="workflow-actions"><a class="btn-secondary" href="{{ route('prescriptions.show', $rx) }}">{{ __('common.view') }}</a><a class="btn-secondary" target="_blank" rel="noopener" href="{{ route('prescriptions.print', $rx) }}"><i class="fas fa-print"></i>{{ __('common.print') }}</a></div></div>@endforeach
                 </section>
@@ -85,6 +85,16 @@
                 <p class="workspace-mode"><i class="fas {{ auth()->user()->usesQueueMode() ? 'fa-list-ol' : 'fa-calendar-days' }}"></i>{{ __('clinical_ui.booking_mode') }}<strong>{{ auth()->user()->usesQueueMode() ? __('Queue') : __('Scheduled') }}</strong></p>
             </aside>
         </div>
+        @if(!$record)
+        <x-ui.dialog id="prepare-prescription" :title="__('clinical_ui.prescription_prepare_title')" icon="fa-prescription">
+            <p class="dialog-patient">{{ $patient->full_name }}</p>
+            <p class="dialog-description">{{ __('clinical_ui.prescription_prepare_help') }}</p>
+            <div class="dialog-actions">
+                <button type="button" class="btn-secondary" data-review-consultation>{{ __('clinical_ui.back_to_notes') }}</button>
+                <button type="submit" form="active-consultation-form" name="workspace_next" value="prescription" class="btn-primary" data-save-open-prescription><i class="fas fa-save" aria-hidden="true"></i>{{ __('clinical_ui.save_open_prescription') }}</button>
+            </div>
+        </x-ui.dialog>
+        @endif
         <x-ui.dialog id="follow-up-dialog" :title="__('current_patient.schedule_follow_up')" icon="fa-calendar-plus" form="follow-up">
             <p class="dialog-patient">{{ $patient->full_name }}</p>
                             <form method="POST" action="{{ route('appointments.create-follow-up', $patient) }}">@csrf<input type="hidden" name="workspace_form" value="follow-up"><input type="hidden" name="current_appointment_id" value="{{ $currentAppointment->id }}">

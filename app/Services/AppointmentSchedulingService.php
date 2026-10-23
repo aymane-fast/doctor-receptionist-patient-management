@@ -33,7 +33,7 @@ class AppointmentSchedulingService
 
         return [
             'start' => Carbon::parse($appointmentDate->toDateString().' '.$workingHours['start_time']),
-            'end' => Carbon::parse($appointmentDate->toDateString().' '.$workingHours['end_time']),
+            'end' => Setting::demoAlwaysOpen() ? $appointmentDate->copy()->startOfDay()->addDay() : Carbon::parse($appointmentDate->toDateString().' '.$workingHours['end_time']),
             'raw' => $workingHours,
         ];
     }

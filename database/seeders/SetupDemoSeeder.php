@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Setting;
+
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
@@ -141,6 +143,10 @@ class SetupDemoSeeder extends Seeder
         }
 
         $current = $window['start']->copy();
+        if (Setting::demoAlwaysOpen() && $date->isToday()) {
+            $latestStart = $window['end']->copy()->subMinutes($appointmentCount * $this->scheduler->duration());
+            $current = now()->startOfHour()->min($latestStart)->max($window['start']);
+        }
 
         for ($i = 0; $i < $appointmentCount; $i++) {
             $patient = $patientPool[$patientIndex % $patientPool->count()];

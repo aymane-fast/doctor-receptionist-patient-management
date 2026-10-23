@@ -156,6 +156,7 @@ class MedicalRecordController extends Controller
             'heart_rate' => 'nullable|integer|min:0|max:2147483647',
             'oxygen_saturation' => 'nullable|integer|min:0|max:100',
             'return_to_workspace' => 'nullable|boolean',
+            'workspace_next' => 'nullable|in:prescription',
         ], $specialties->validationRules('record')));
 
         if ($request->has('specialty_data')) {
@@ -168,7 +169,7 @@ class MedicalRecordController extends Controller
 
         $validated['doctor_id'] = Auth::id();
         $validated['temperature_unit'] = 'C';
-        unset($validated['return_to_workspace']);
+        unset($validated['return_to_workspace'], $validated['workspace_next']);
         $appointment = null;
 
         if (!empty($validated['appointment_id'])) {
@@ -197,6 +198,12 @@ class MedicalRecordController extends Controller
 
             return $record;
         });
+
+        if ($request->boolean('return_to_workspace') && $request->input('workspace_next') === 'prescription'
+            && $appointment?->fresh()->status === 'in_progress') {
+            return redirect()->route('doctor.current')->withFragment('prescription')
+                ->with('success', __('Medical record created successfully!'));
+        }
 
         return redirect()->route($request->boolean('return_to_workspace') && $appointment?->fresh()->status === 'in_progress'
             ? 'doctor.current' : 'medical-records.show', $request->boolean('return_to_workspace') && $appointment?->fresh()->status === 'in_progress' ? [] : [$record])

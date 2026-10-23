@@ -1,6 +1,22 @@
 <?php
 
 return [
+    'demo_24h' => 'Garder la démonstration ouverte 24 h/24, tous les jours',
+    'demo_24h_help' => 'Démonstration uniquement : autorise les rendez-vous à toute heure, même le week-end. Désactivez cette option dans les paramètres pour retrouver les horaires habituels. Les rendez-vous existants restent inchangés.',
+    'demo_hours_saved' => 'Les horaires de démonstration ont été mis à jour.',
+    'follow_up_booked' => 'Le rendez-vous de suivi est prévu le :datetime.',
+    'status_actions' => 'Modifier le statut de :patient',
+    'practice_general_practice' => 'Parcours commun : patients, rendez-vous, consultations et ordonnances. Adapté aux généralistes et aux spécialistes sans besoin de champs supplémentaires.',
+    'practice_pediatrics' => 'Ajoute l’identité et l’âge de l’enfant, les contacts distincts des responsables et des notes facultatives sur le développement et la nutrition. Le planning et les ordonnances restent identiques.',
+    'practice_dentistry' => 'Conserve le parcours commun, avec des notes facultatives sur la dent ou zone, les actes et les radiographies dentaires. Il ne s’agit pas d’un odontogramme.',
+    'practice_cardiology' => 'Conserve le parcours commun, avec des antécédents cardiaques, un résumé ECG et une évaluation du risque facultatifs. Sans connexion aux appareils ni interprétation automatique.',
+    'practice_legacy' => 'Profil existant conservé pour ce cabinet. Les données historiques restent disponibles après un changement de spécialité.',
+    'prescription_prepare_title' => 'Préparer cette consultation ?',
+    'prescription_prepare_help' => 'Enregistrez vos notes pour associer l’ordonnance à cette visite. Le diagnostic est facultatif et peut être complété plus tard. Vous resterez dans cet espace.',
+    'save_open_prescription' => 'Enregistrer et ouvrir l’ordonnance',
+    'back_to_notes' => 'Revoir les notes de consultation',
+    'quick_reschedule' => 'Replanifier rapidement',
+    'quick_reschedule_help' => 'Déplacer ce rendez-vous au prochain créneau disponible ? Sa date et son heure peuvent changer.',
     'saved' => 'Modifications enregistrées',
     'unsaved' => 'Modifications non enregistrées',
     'new_consultation' => 'Nouvelle consultation',

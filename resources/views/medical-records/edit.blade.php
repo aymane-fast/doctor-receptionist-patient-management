@@ -289,7 +289,7 @@
                         <button type="submit"
                                 form="delete-medical-record-form"
                                 class="btn-danger px-4 py-2"
-                                onclick="return confirm('{{ __('medical_records.confirm_delete_record') }}')">
+                                onclick="return confirm(@js(__('medical_records.confirm_delete_record')))">
                             <i class="fas fa-trash mr-2"></i>{{ __('common.delete') }}
                         </button>
                     </div>

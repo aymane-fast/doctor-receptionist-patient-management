@@ -219,6 +219,11 @@
                         @include('clinical.context-bar')
                     @endif
                     @yield('content')
+                    <x-ui.dialog id="quick-reschedule-dialog" :title="__('clinical_ui.quick_reschedule')" icon="fa-calendar-day" tone="blue">
+                        <p class="dialog-patient" data-reschedule-patient></p>
+                        <p class="dialog-description">{{ __('clinical_ui.quick_reschedule_help') }}</p>
+                        <div class="dialog-actions"><button type="button" class="btn-secondary" data-dialog-close>{{ __('common.cancel') }}</button><button type="button" class="btn-care btn-care-primary" data-confirm-reschedule-submit>{{ __('clinical_ui.quick_reschedule') }}</button></div>
+                    </x-ui.dialog>
                 </main>
             </div>
         </div>

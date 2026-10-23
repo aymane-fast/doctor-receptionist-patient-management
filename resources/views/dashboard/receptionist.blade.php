@@ -194,7 +194,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-3">
+                            <div class="reception-next-actions">
+                                <x-appointments.reschedule-actions :appointment="$nextByDoctor[$docId]" />
                                 <button onclick="setAsCurrent({{ $nextByDoctor[$docId]->id }}, this)"
                                         class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1" 
                                         title="{{ __('Start Session with Next Patient') }}" aria-label="{{ __('Start Session with Next Patient') }}">
@@ -300,10 +301,8 @@
                                             <button onclick="setAsCurrent({{ $appointment->id }}, this)" class="w-8 h-8 bg-green-100 hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('Set as Current Patient') }}" aria-label="{{ __('Set as Current Patient') }}">
                                                 <i class="fas fa-play text-green-600 text-sm"></i>
                                             </button>
-                                            <a href="{{ route('appointments.reschedule', $appointment) }}" class="btn-ghost w-8 h-8 p-0" title="{{ __('Reschedule Appointment') }}" aria-label="{{ __('Reschedule Appointment') }}">
-                                                <i class="fas fa-clock text-sm"></i>
-                                            </a>
-                                            <button onclick="submitAction('{{ route('appointments.no-show', $appointment) }}', '{{ __('appointments.mark_no_show') }}?')" class="w-8 h-8 bg-orange-100 hover:bg-orange-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('appointments.mark_no_show') }}">
+                                            <x-appointments.reschedule-actions :appointment="$appointment" :compact="true" />
+                                            <button onclick="submitAction(@js(route('appointments.no-show', $appointment)), @js(__('appointments.mark_no_show').'?'))" class="w-8 h-8 bg-orange-100 hover:bg-orange-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('appointments.mark_no_show') }}" aria-label="{{ __('appointments.mark_no_show') }}">
                                                 <i class="fas fa-user-slash text-orange-600 text-sm"></i>
                                             </button>
                                             <button onclick="cancelAppointment({{ $appointment->id }}, this)" class="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors" title="{{ __('Cancel Appointment') }}" aria-label="{{ __('Cancel Appointment') }}">

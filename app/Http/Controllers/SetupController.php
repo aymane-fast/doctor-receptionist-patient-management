@@ -37,8 +37,8 @@ class SetupController extends Controller
             $request->input('environment_mode') === 'demo'
             && ($request->boolean('launch_demo') || !$request->filled('clinic_name'))
         ) {
-            $request->validate(['clinic_specialty' => ['sometimes', 'required', Rule::in(array_keys($specialties->setupProfiles()))]]);
-            $primaryDoctor = $setupService->completeDemo($request->input('clinic_specialty', SpecialtyService::DEFAULT_SPECIALTY));
+            $request->validate(['clinic_specialty' => ['sometimes', 'required', Rule::in(array_keys($specialties->setupProfiles()))], 'demo_always_open' => ['sometimes', 'boolean']]);
+            $primaryDoctor = $setupService->completeDemo($request->input('clinic_specialty', SpecialtyService::DEFAULT_SPECIALTY), $request->boolean('demo_always_open'));
 
             Auth::login($primaryDoctor);
             $request->session()->regenerate();

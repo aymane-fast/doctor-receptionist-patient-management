@@ -217,11 +217,11 @@
                                     
                                     <!-- Quick Status Update -->
                                     <div class="relative">
-                                        <button onclick="toggleStatusDropdown({{ $appointment->id }})" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-all duration-200">
+                                        <button type="button" popovertarget="status-dropdown-{{ $appointment->id }}" aria-label="{{ __('clinical_ui.status_actions', ['patient' => $appointment->patient->full_name]) }}" class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-all duration-200">
                                             <i class="fas fa-edit text-gray-500 text-xs"></i>
                                         </button>
-                                        <div id="status-dropdown-{{ $appointment->id }}" class="absolute right-0 top-10 bg-white border border-gray-200 rounded-2xl shadow-xl py-2 z-20 hidden min-w-40">
-                                            @if($appointment->status != 'scheduled')
+                                        <div id="status-dropdown-{{ $appointment->id }}" popover class="appointment-status-menu bg-white border border-gray-200 rounded-2xl shadow-xl py-2 min-w-40">
+                                            @if($appointment->canTransitionTo('scheduled'))
                                             <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
@@ -232,7 +232,7 @@
                                             </form>
                                             @endif
                                             
-                                            @if($appointment->status != 'in_progress')
+                                            @if($appointment->canTransitionTo('in_progress') && $appointment->appointment_date->isToday())
                                             <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
@@ -243,7 +243,7 @@
                                             </form>
                                             @endif
                                             
-                                            @if($appointment->status != 'completed')
+                                            @if($appointment->canTransitionTo('completed'))
                                             <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
@@ -254,7 +254,7 @@
                                             </form>
                                             @endif
                                             
-                                            @if($appointment->status == 'scheduled')
+                                            @if($appointment->canTransitionTo('no_show') && !$appointment->appointment_date->isFuture())
                                             <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
@@ -265,13 +265,13 @@
                                             </form>
                                             @endif
 
-                                            @if($appointment->status != 'cancelled')
+                                            @if($appointment->canTransitionTo('cancelled'))
                                             <form method="POST" action="{{ route('appointments.update-status', $appointment) }}" class="inline">
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="cancelled">
                                                 <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors"
-                                                        onclick="return confirm('{{ __('appointments.confirm_cancel') }}')">
+                                                        onclick="return confirm(@js(__('appointments.confirm_cancel')))">
                                                     <i class="fas fa-times text-red-600 mr-2"></i>{{ __('appointments.cancelled') }}
                                                 </button>
                                             </form>
@@ -287,12 +287,13 @@
                             </td>
                             <td class="px-8 py-6">
                                 <div class="flex items-center space-x-2">
-                                    <a href="{{ route('appointments.show', $appointment) }}" class="w-10 h-10 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-xl flex items-center justify-center transition-all duration-200 group">
+                                    <a href="{{ route('appointments.show', $appointment) }}" aria-label="{{ __('View Details') }}" class="w-10 h-10 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-xl flex items-center justify-center transition-all duration-200 group">
                                         <i class="fas fa-eye text-sm group-hover:scale-110"></i>
                                     </a>
-                                    <a href="{{ route('appointments.edit', $appointment) }}" class="w-10 h-10 bg-sky-100 hover:bg-sky-200 text-sky-700 rounded-xl flex items-center justify-center transition-all duration-200 group">
+                                    <a href="{{ route('appointments.edit', $appointment) }}" aria-label="{{ __('appointments.edit_appointment') }}" class="w-10 h-10 bg-sky-100 hover:bg-sky-200 text-sky-700 rounded-xl flex items-center justify-center transition-all duration-200 group">
                                         <i class="fas fa-edit text-sm group-hover:scale-110"></i>
                                     </a>
+                                    <x-appointments.reschedule-actions :appointment="$appointment" :compact="true" />
                                     @if(auth()->user()->isDoctor() && $appointment->status == 'completed' && !$appointment->medicalRecord)
                                     <a href="{{ route('medical-records.create', ['appointment_id' => $appointment->id]) }}" 
                                        class="w-10 h-10 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl flex items-center justify-center transition-all duration-200 group" 
@@ -338,43 +339,7 @@
 
 @push('scripts')
 <script>
-// Toggle status dropdown for specific appointment
-function toggleStatusDropdown(appointmentId) {
-    const dropdown = document.getElementById('status-dropdown-' + appointmentId);
-    const allDropdowns = document.querySelectorAll('[id^="status-dropdown-"]');
-    
-    // Hide all other dropdowns first
-    allDropdowns.forEach(dd => {
-        if (dd.id !== 'status-dropdown-' + appointmentId) {
-            dd.classList.add('hidden');
-        }
-    });
-    
-    // Toggle current dropdown
-    dropdown.classList.toggle('hidden');
-}
-
-// Close dropdowns when clicking outside
-document.addEventListener('click', function(event) {
-    // Check if click is outside any dropdown button or dropdown content
-    if (!event.target.closest('[onclick^="toggleStatusDropdown"]') && 
-        !event.target.closest('[id^="status-dropdown-"]')) {
-        const allDropdowns = document.querySelectorAll('[id^="status-dropdown-"]');
-        allDropdowns.forEach(dropdown => {
-            dropdown.classList.add('hidden');
-        });
-    }
-});
-
-// Prevent dropdown from closing when clicking inside it
 document.addEventListener('DOMContentLoaded', function() {
-    const dropdowns = document.querySelectorAll('[id^="status-dropdown-"]');
-    dropdowns.forEach(dropdown => {
-        dropdown.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    });
-
     // Patient Search Autocomplete for Index
     const searchInput = document.getElementById('patient_search');
     const searchHidden = document.getElementById('search');
@@ -435,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 resultsContainer.innerHTML = patients.map(patient => `
                     <div class="patient-result p-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
-                         data-search="${escapeHtml(patient.display)}">
+                         data-search="${escapeHtml(patient.patient_name || patient.name)}">
                         <div class="font-medium text-gray-900">${escapeHtml(patient.name)}</div>
                         <div class="text-sm text-gray-600">${escapeHtml(patient.phone)} • ${escapeHtml(patient.email)}</div>
                     </div>

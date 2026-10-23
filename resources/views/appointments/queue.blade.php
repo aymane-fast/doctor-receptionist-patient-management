@@ -128,6 +128,7 @@
                                             </button>
                                         </form>
                                         <details><summary aria-label="{{ __('Actions') }}"><i class="fas fa-ellipsis"></i></summary>
+                                        <x-appointments.reschedule-actions :appointment="$appointment" />
                                         <form method="POST" action="{{ route('appointments.no-show', $appointment) }}">
                                             @csrf
                                             <button class="px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium" onclick="return confirm(@js(__('appointments.mark_no_show').'?'))">

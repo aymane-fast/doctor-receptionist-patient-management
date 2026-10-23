@@ -9,7 +9,7 @@
                                         <option value="{{ $key }}"
                                             data-duration="{{ $specialty['defaults']['appointment_duration'] }}"
                                             data-mode="{{ $specialty['defaults']['appointment_mode'] }}"
-                                            data-description="{{ __($specialty['description']) }}"
+                                            data-description="{{ __('clinical_ui.practice_'.$key) }}"
                                             @selected(old('clinic_specialty', 'general_practice') === $key)>
                                             {{ __($specialty['label']) }}
                                         </option>

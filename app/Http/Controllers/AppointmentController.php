@@ -1107,12 +1107,11 @@ class AppointmentController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        $timeAmount = $validated['follow_up_number'];
-        $timeUnit = $validated['follow_up_unit'];
-        $appointmentDateTime = Carbon::parse($targetDate->toDateString().' '.$slot['time'])->translatedFormat('M j, Y \a\t g:i A');
+        $appointmentDateTime = Carbon::parse($targetDate->toDateString().' '.$slot['time'])
+            ->locale(app()->getLocale())->isoFormat('LLL');
 
         return redirect()->route('doctor.current')->with('success',
-            __('Follow-up appointment scheduled for :amount :unit from now on :datetime', ['amount' => $timeAmount, 'unit' => __($timeUnit), 'datetime' => $appointmentDateTime]));
+            __('clinical_ui.follow_up_booked', ['datetime' => $appointmentDateTime]));
     }
 
     /**

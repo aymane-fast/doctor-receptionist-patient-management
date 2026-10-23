@@ -54,10 +54,11 @@ class SetupService
      * The same accounts are documented in the README and can be used after
      * logging out to demonstrate the receptionist experience as well.
      */
-    public function completeDemo(string $specialty = SpecialtyService::DEFAULT_SPECIALTY): User
+    public function completeDemo(string $specialty = SpecialtyService::DEFAULT_SPECIALTY, bool $alwaysOpen = false): User
     {
         $data = [
             'environment_mode' => 'demo',
+            'demo_always_open' => $alwaysOpen,
             'clinic_name' => 'Demo Medical Clinic',
             'clinic_phone' => '+1234567890',
             'clinic_address' => '123 Medical Center Dr, City, State 12345',
@@ -112,6 +113,7 @@ class SetupService
         $this->specialties->setCurrent($data['clinic_specialty']);
         Setting::setAppointmentDuration($data['appointment_duration']);
         Setting::set('deployment_mode', $data['environment_mode'], 'string');
+        Setting::set('demo_always_open', $data['environment_mode'] === 'demo' && !empty($data['demo_always_open']), 'boolean');
         Setting::set('default_appointment_mode', $data['appointment_mode'], 'string');
         Setting::set(
             'default_queue_daily_limit',

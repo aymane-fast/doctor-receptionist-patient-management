@@ -9,13 +9,25 @@ use Illuminate\Validation\Rule;
 
 class SettingsController extends Controller
 {
+    public function updateDemoHours(Request $request)
+    {
+        abort_unless($request->user()->isDoctor() && Setting::get('deployment_mode') === 'demo', 403);
+        $request->validate(['demo_always_open' => ['required', 'boolean']]);
+        Setting::set('demo_always_open', $request->boolean('demo_always_open'), 'boolean');
+        return back()->with('success', __('clinical_ui.demo_hours_saved'));
+    }
+
     /**
      * Display the settings page
      */
     public function index(SpecialtyService $specialties)
     {
         $workingHours = Setting::getAllWorkingHours();
-        $specialtyProfiles = $specialties->all();
+        // Edit the saved schedule, not the temporary demo override.
+        foreach (array_keys($workingHours) as $day) {
+            $workingHours[$day] = Setting::getWorkingHours($day, false);
+        }
+        $specialtyProfiles = $specialties->selectableProfiles();
         $currentSpecialty = $specialties->current();
 
         return view('settings.index', compact('workingHours', 'specialtyProfiles', 'currentSpecialty'));
@@ -144,7 +156,7 @@ class SettingsController extends Controller
         }
 
         $validated = $request->validate([
-            'clinic_specialty' => ['required', Rule::in($specialties->keys())],
+            'clinic_specialty' => ['required', Rule::in(array_keys($specialties->selectableProfiles()))],
             'apply_specialty_defaults' => ['nullable', 'boolean'],
         ]);
 

@@ -182,7 +182,7 @@
                 </div>
                 <div class="p-6">
                 <div class="space-y-3">
-                    @if($appointment->status == 'scheduled' && !$appointment->isCheckedIn())
+                    @if($appointment->status == 'scheduled' && !$appointment->isCheckedIn() && $appointment->appointment_date->isToday())
                         <form action="{{ route('appointments.check-in', $appointment) }}" method="POST" class="w-full">
                             @csrf
                             <button type="submit" class="btn-primary w-full px-4 py-3">
@@ -192,7 +192,7 @@
                         </form>
                     @endif
 
-                    @if($appointment->status == 'scheduled')
+                    @if($appointment->status == 'scheduled' && $appointment->appointment_date->isToday())
                         <form action="{{ route('appointments.set-current', $appointment) }}" method="POST" class="w-full">
                             @csrf
                             @if(auth()->user()->isDoctor())<input type="hidden" name="return_to_workspace" value="1">@endif
@@ -216,32 +216,25 @@
                     @endif
 
                     @if($appointment->status == 'scheduled')
-                        @if(!$appointment->isQueueMode())
-                            <form action="{{ route('appointments.rebook-next-slot', $appointment) }}" method="POST" class="w-full">
-                                @csrf
-                                <button type="submit" class="btn-ghost w-full px-4 py-3"
-                                        onclick="return confirm('{{ __('appointments.rebook_next_slot') }}?')">
-                                    <i class="fas fa-calendar-day"></i>
-                                    <span>{{ __('appointments.rebook_next_slot') }}</span>
-                                </button>
-                            </form>
-                        @endif
+                        <x-appointments.reschedule-actions :appointment="$appointment" />
 
+                        @if(!$appointment->appointment_date->isFuture())
                         <form action="{{ route('appointments.no-show', $appointment) }}" method="POST" class="w-full">
                             @csrf
                             <button type="submit" class="btn-ghost w-full px-4 py-3"
-                                    onclick="return confirm('{{ __('appointments.mark_no_show') }}?')">
+                                    onclick="return confirm(@js(__('appointments.mark_no_show').'?'))">
                                 <i class="fas fa-user-slash"></i>
                                 <span>{{ __('appointments.mark_no_show') }}</span>
                             </button>
                         </form>
+                        @endif
                     @endif
 
                     @if($appointment->isCancellable())
                         <form action="{{ route('appointments.cancel', $appointment) }}" method="POST" class="w-full">
                             @csrf
                             <button type="submit" class="btn-danger w-full px-4 py-3"
-                                    onclick="return confirm('{{ __('appointments.cancel_confirmation') }}')">
+                                    onclick="return confirm(@js(__('appointments.cancel_confirmation')))">
                                 <i class="fas fa-times"></i>
                                 <span>{{ __('appointments.cancel_appointment') ?? 'Cancel appointment' }}</span>
                             </button>

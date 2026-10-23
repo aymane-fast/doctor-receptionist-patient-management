@@ -137,6 +137,7 @@
                                     <div class="rounded-xl bg-white p-3 text-slate-700"><strong>{{ __('Doctor:') }}</strong> doctor@example.com<br><strong>{{ __('Password:') }}</strong> password</div>
                                     <div class="rounded-xl bg-white p-3 text-slate-700"><strong>{{ __('Receptionist:') }}</strong> receptionist@example.com<br><strong>{{ __('Password:') }}</strong> password</div>
                                 </div>
+                                <label class="mt-4 flex items-start gap-3"><input type="checkbox" name="demo_always_open" value="1" @checked(old('demo_always_open'))><span>{{ __('clinical_ui.demo_24h') }}<small class="block mt-1">{{ __('clinical_ui.demo_24h_help') }}</small></span></label>
                                 <button type="submit" id="launch-demo-btn" name="launch_demo" value="1" formnovalidate class="mt-5 brand-gradient rounded-full px-6 py-3 font-semibold text-white shadow-lg shadow-teal-900/10">
                                     {{ __('Launch demo') }} <i class="fas fa-arrow-right ml-2"></i>
                                 </button>

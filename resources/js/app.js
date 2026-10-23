@@ -6,6 +6,47 @@ window.Chart = Chart;
 // Patient and date filters are submitted together; choosing a suggestion never
 // navigates away before the user has entered the date range.
 document.addEventListener('DOMContentLoaded', () => {
+    // The top layer keeps row actions outside the table's scrolling/clipping area.
+    document.querySelectorAll('.appointment-status-menu[popover]').forEach(menu => {
+        const trigger = document.querySelector('[popovertarget="' + menu.id + '"]');
+        const position = () => {
+            if (!menu.matches(':popover-open') || !trigger) return;
+            const rect = trigger.getBoundingClientRect();
+            const width = menu.offsetWidth, height = menu.offsetHeight;
+            menu.style.left = Math.max(8, Math.min(rect.right - width, innerWidth - width - 8)) + 'px';
+            menu.style.top = Math.max(8, Math.min(rect.bottom + 6, innerHeight - height - 8)) + 'px';
+        };
+        menu.addEventListener('toggle', position);
+        window.addEventListener('resize', position);
+        document.addEventListener('scroll', position, true);
+    });
+    const rescheduleDialog = document.getElementById('quick-reschedule-dialog');
+    let pendingReschedule = null;
+    const approvedReschedules = new WeakSet();
+    document.querySelectorAll('form[data-confirm-reschedule]').forEach(form => {
+        form.addEventListener('submit', event => {
+            if (approvedReschedules.has(form) || !rescheduleDialog) return;
+            event.preventDefault();
+            pendingReschedule = form;
+            rescheduleDialog.querySelector('[data-reschedule-patient]').textContent = form.dataset.patientName;
+            rescheduleDialog.showModal();
+        });
+    });
+    document.querySelector('[data-confirm-reschedule-submit]')?.addEventListener('click', () => {
+        const form = pendingReschedule;
+        if (!form) return;
+        approvedReschedules.add(form);
+        rescheduleDialog.close();
+        form.requestSubmit();
+    });
+    rescheduleDialog?.addEventListener('close', () => { pendingReschedule = null; });
+    const practice = document.getElementById('clinic_specialty');
+    const practiceSummary = document.querySelector('[data-practice-summary]');
+    if (practice && practiceSummary) {
+        const showSummary = () => { practiceSummary.textContent = practice.selectedOptions[0]?.dataset.summary || ''; };
+        practice.addEventListener('change', showSummary);
+        showSummary();
+    }
     document.querySelectorAll('[data-clinical-filters]').forEach(form => {
         const input = form.querySelector('[name=search]');
         const patientId = form.querySelector('[data-patient-id]');
@@ -101,6 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (selected && focus) tab.focus();
         });
         try { sessionStorage.setItem(stateKey, name); } catch {}
+        if (name === 'prescription' && workspace?.dataset.hasRecord === '0') {
+            const prompt = document.getElementById('prepare-prescription');
+            if (prompt && !prompt.open) prompt.showModal();
+        }
     }
     if (tabs.length) {
         document.querySelector('[data-workspace-tabs]').setAttribute('role', 'tablist');
@@ -127,6 +172,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const form = document.getElementById('active-consultation-form');
+    document.querySelector('[data-review-consultation]')?.addEventListener('click', event => {
+        event.currentTarget.closest('dialog').close();
+        selectTab('consultation', true);
+        form?.querySelector('#diagnosis')?.focus();
+    });
+    document.querySelector('[data-save-open-prescription]')?.addEventListener('click', event => {
+        event.currentTarget.closest('dialog').close();
+        // Reveal inputs before native validation focuses any invalid field.
+        selectTab('consultation');
+    });
     let dirty = false;
     const saveState = document.querySelector('[data-save-state]');
     const markDirty = () => { dirty = true; if (saveState) { saveState.textContent = saveState.dataset.dirty; saveState.classList.add('is-dirty'); } };

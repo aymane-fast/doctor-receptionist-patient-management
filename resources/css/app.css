@@ -71,6 +71,9 @@ html {
 .workflow-panel h2, .workflow-panel h3 { font-size: 1.05rem; font-weight: 750; margin-bottom: .65rem; }
 .workflow-panel label { display: block; font-size: .8rem; font-weight: 650; margin-bottom: .3rem; }
 .workflow-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+.reschedule-actions,.reception-next-actions { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
+.reception-next-actions { justify-content:flex-end; }
+.reception-next-actions .reschedule-actions { flex-basis:100%; justify-content:flex-end; }
 .workflow-actions > a, .workflow-actions > button, .workflow-actions button { padding: .55rem .85rem; }
 .workspace-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr); gap: 1rem; align-items: start; }
 .workspace-tabs { display: flex; gap: .5rem; flex-wrap: wrap; margin: .75rem 0; }
@@ -1328,6 +1331,17 @@ tbody td { border-color: #e6ece9 !important; }
 input[class~="pl-12"] { padding-left:3rem; }
 input[class~="pl-10"] { padding-left:2.5rem; }
 input[class~="pl-11"] { padding-left:2.75rem; }
+.appointment-status-menu { position:fixed; inset:auto; margin:0; max-width:calc(100vw - 16px); max-height:calc(100vh - 16px); overflow:auto; }
+.appointment-status-menu button { margin-inline:0; }
+/* Do not let the shared neutral field treatment hide validation failures. */
+html body :is(input, select, textarea):is(.border-red-500, [aria-invalid="true"]):not([type='checkbox']):not([type='radio']):not([type='hidden']) {
+    border-color:#b64b44 !important;
+    background-color:#fffafa;
+}
+html body :is(input, select, textarea):is(.border-red-500, [aria-invalid="true"]):not([type='checkbox']):not([type='radio']):not([type='hidden']):focus {
+    border-color:#b64b44 !important;
+    box-shadow:0 0 0 3px rgba(182,75,68,.12) !important;
+}
 @media(max-width:1199px) { .care-layout { grid-template-columns:minmax(0,1fr) 240px; gap:1rem; } .care-tabs a { padding:.85rem .65rem; } .care-tabs a span { font-size:.7rem; } }
 @media(max-width:850px) { .care-layout { grid-template-columns:1fr; } .care-rail { grid-template-columns:repeat(2,minmax(0,1fr)); } .workspace-mode { grid-column:1/-1; } }
 @media(max-width:600px) { .active-patient-card { padding:1rem; } .patient-identity { align-items:flex-start; gap:.75rem; } .patient-avatar { width:2.8rem; height:2.8rem; border-radius:.8rem; font-size:1.1rem; } .patient-header-actions { width:100%; flex-direction:row; align-items:center; justify-content:space-between; } .patient-identity h2 { font-size:1.2rem; } .care-pane { padding:1rem; } .care-rail { grid-template-columns:1fr; } .consultation-savebar { flex-wrap:wrap; margin-inline:0; } .workspace-heading h1 { font-size:1.4rem; } .care-tabs a { padding:.8rem .7rem; } .care-tabs a span { font-size:.75rem; } }

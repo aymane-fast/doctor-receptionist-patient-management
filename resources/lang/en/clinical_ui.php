@@ -1,6 +1,22 @@
 <?php
 
 return [
+    'demo_24h' => 'Keep the demo open 24 hours, every day',
+    'demo_24h_help' => 'Demo only: allow scheduling at any time, including weekends. Turn this off in Settings to restore normal working hours. Existing appointments stay unchanged.',
+    'demo_hours_saved' => 'Demo working hours updated.',
+    'follow_up_booked' => 'Follow-up appointment scheduled for :datetime.',
+    'status_actions' => 'Change status for :patient',
+    'practice_general_practice' => 'Shared patient, appointment, consultation and prescription workflow. Suitable for general care and specialists who do not need extra fields.',
+    'practice_pediatrics' => 'Adds child identity and age, separate parent/guardian contacts, and optional development and nutrition notes. Scheduling and prescriptions stay familiar.',
+    'practice_dentistry' => 'Keeps the shared workflow, with optional tooth/area, procedure and dental X-ray notes. This is not a dental charting system.',
+    'practice_cardiology' => 'Keeps the shared workflow, with optional cardiac history, ECG summary and risk-assessment notes. No device integration or automated interpretation.',
+    'practice_legacy' => 'Existing profile retained for this clinic. Historical data remains available when you change practice type.',
+    'prescription_prepare_title' => 'Prepare this consultation first?',
+    'prescription_prepare_help' => 'Save your current notes to link the prescription to this visit. A diagnosis is optional; you can complete it later. You will stay in this workspace.',
+    'save_open_prescription' => 'Save notes & open prescription',
+    'back_to_notes' => 'Review consultation notes',
+    'quick_reschedule' => 'Quick reschedule',
+    'quick_reschedule_help' => 'Move this appointment to the next available slot? Its date and time may change.',
     'saved' => 'All changes saved',
     'unsaved' => 'Unsaved changes',
     'new_consultation' => 'New consultation',

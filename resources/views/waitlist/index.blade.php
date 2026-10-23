@@ -110,7 +110,7 @@
                                     </form>
                                     <form method="POST" action="{{ route('waitlist.cancel', $entry) }}">
                                         @csrf
-                                        <button class="btn-danger px-3 py-2 text-sm" onclick="return confirm('{{ __('appointments.waitlist_removed') }}?')">
+                                        <button class="btn-danger px-3 py-2 text-sm" onclick="return confirm(@js(__('appointments.waitlist_removed').'?'))">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </form>

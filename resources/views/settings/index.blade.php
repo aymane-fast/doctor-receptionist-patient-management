@@ -15,6 +15,15 @@
         :eyebrow="__('Clinic configuration')"
     />
 
+    @if(auth()->user()->isDoctor() && \App\Models\Setting::get('deployment_mode') === 'demo')
+    <form method="POST" action="{{ route('settings.demo-hours') }}" class="section-card p-6">
+        @csrf
+        <input type="hidden" name="demo_always_open" value="0">
+        <label class="flex items-start gap-3"><input type="checkbox" name="demo_always_open" value="1" @checked(\App\Models\Setting::demoAlwaysOpen())><span class="font-semibold">{{ __('clinical_ui.demo_24h') }}</span></label>
+        <p class="text-sm mt-2 mb-4">{{ __('clinical_ui.demo_24h_help') }}</p>
+        <button class="btn-primary" type="submit">{{ __('common.save') }}</button>
+    </form>
+    @endif
     <!-- Language Settings -->
     <div class="section-card p-6">
         <div class="mb-6">
@@ -130,7 +139,7 @@
                 {{ __('Practice Specialty') }}
             </h3>
             <p class="text-gray-600 text-sm">{{ __('Choose the optional patient details, clinical fields, appointment suggestions, and demo data that fit your practice.') }}</p>
-            <p class="mt-2 text-sm text-teal-900"><strong>{{ __($currentSpecialty['label']) }}:</strong> {{ __($currentSpecialty['description']) }} {{ __('Suggested consultation duration: :duration minutes; suggested workflow: :mode.', ['duration' => $currentSpecialty['defaults']['appointment_duration'], 'mode' => __($currentSpecialty['defaults']['appointment_mode'])]) }}</p>
+            <p class="mt-2 text-sm text-teal-900"><strong>{{ __($currentSpecialty['label']) }}:</strong> {{ __($currentSpecialty['description']) }} {{ __('Suggested consultation duration: :duration minutes; suggested workflow: :mode.', ['duration' => $currentSpecialty['defaults']['appointment_duration'], 'mode' => $currentSpecialty['defaults']['appointment_mode'] === 'queue' ? __('Queue mode') : __('Scheduled mode')]) }}</p>
         </div>
 
         <form action="{{ route('settings.specialty') }}" method="POST" class="space-y-4">
@@ -140,11 +149,12 @@
                     <label for="clinic_specialty" class="block text-sm font-medium text-gray-700 mb-2">{{ __('Clinic specialty') }}</label>
                     <select name="clinic_specialty" id="clinic_specialty" class="form-control w-full px-3 py-2 bg-white" required>
                         @foreach($specialtyProfiles as $key => $profile)
-                            <option value="{{ $key }}" @selected(old('clinic_specialty', $currentSpecialty['key']) === $key)>
+                            <option value="{{ $key }}" data-summary="{{ __('clinical_ui.practice_'.(in_array($key, ['general_practice', 'pediatrics', 'dentistry', 'cardiology']) ? $key : 'legacy')) }}" @selected(old('clinic_specialty', $currentSpecialty['key']) === $key)>
                                 {{ __($profile['label']) }} ({{ $profile['defaults']['appointment_duration'] }} {{ __('min') }}, {{ $profile['defaults']['appointment_mode'] === 'queue' ? __('Queue mode') : __('Scheduled mode') }})
                             </option>
                         @endforeach
                     </select>
+                    <p class="mt-3 text-sm text-slate-600" data-practice-summary aria-live="polite"></p>
                 </div>
                 <button type="submit" class="btn-primary px-6 py-2"><i class="fas fa-save text-sm"></i><span>{{ __('Save Specialty') }}</span></button>
             </div>
@@ -324,7 +334,7 @@
                     <div class="flex items-center space-x-3">
                         <div class="w-3 h-3 rounded-full {{ \App\Models\Setting::isWithinWorkingHours() ? 'bg-green-500' : 'bg-red-500' }}"></div>
                         <span class="font-medium text-gray-900">
-                            Current Status: 
+                            {{ __('dashboard.current_status') }}:
                             <span class="{{ \App\Models\Setting::isWithinWorkingHours() ? 'text-green-700' : 'text-red-700' }}">
                                 {{ \App\Models\Setting::isWithinWorkingHours() ? __('common.open') : __('common.closed') }}
                             </span>
@@ -403,6 +413,9 @@
     </div>
     @endif
 
+    @php
+        $workingHours = \App\Models\Setting::getAllWorkingHours();
+    @endphp
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Today's Schedule -->

@@ -112,6 +112,7 @@ Route::middleware(['auth', 'role:doctor'])->group(function () {
     Route::get('/api/statistics/trend', [StatisticsController::class, 'getTrendData'])->name('api.statistics.trend');
 
     // Doctor-only settings
+    Route::post('/settings/demo-hours', [SettingsController::class, 'updateDemoHours'])->name('settings.demo-hours');
     Route::post('/settings/working-hours', [SettingsController::class, 'updateWorkingHours'])->name('settings.working-hours');
     Route::post('/settings/clinic-info', [SettingsController::class, 'updateClinicInfo'])->name('settings.clinic-info');
     Route::post('/settings/specialty', [SettingsController::class, 'updateSpecialty'])->name('settings.specialty');

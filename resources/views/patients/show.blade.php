@@ -183,7 +183,7 @@
                     </div>
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ $patient->is_pediatric ? __('Primary guardian email') : __('patients.email') }}</span>
-                        <span class="font-semibold text-gray-900">{{ $patient->email ?: 'Not provided' }}</span>
+                        <span class="font-semibold text-gray-900">{{ $patient->email ?: __('Not provided') }}</span>
                     </div>
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('patients.birth_date') }}</span>
@@ -191,7 +191,7 @@
                     </div>
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('patients.id_card') }}</span>
-                        <span class="font-semibold text-gray-900">{{ $patient->id_card_number ?: 'Not provided' }}</span>
+                        <span class="font-semibold text-gray-900">{{ $patient->id_card_number ?: __('Not provided') }}</span>
                     </div>
                     <div class="pt-2">
                         <span class="text-gray-600 font-medium block mb-2">{{ __('patients.address') }}</span>
@@ -258,11 +258,11 @@
                 <div class="space-y-4">
                     <div class="flex items-center justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600 font-medium">{{ __('patients.name') }}</span>
-                        <span class="font-semibold text-gray-900">{{ $patient->emergency_contact_name ?: 'Not provided' }}</span>
+                        <span class="font-semibold text-gray-900">{{ $patient->emergency_contact_name ?: __('Not provided') }}</span>
                     </div>
                     <div class="flex items-center justify-between py-2">
                         <span class="text-gray-600 font-medium">{{ __('patients.phone') }}</span>
-                        <span class="font-semibold text-gray-900">{{ $patient->emergency_contact_phone ?: 'Not provided' }}</span>
+                        <span class="font-semibold text-gray-900">{{ $patient->emergency_contact_phone ?: __('Not provided') }}</span>
                     </div>
                 </div>
                 </div>

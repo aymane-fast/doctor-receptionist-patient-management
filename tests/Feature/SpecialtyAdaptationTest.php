@@ -121,12 +121,12 @@ it('lets a doctor change specialty and optionally apply its defaults to their ac
     ]);
 
     $this->actingAs($doctor)->post(route('settings.specialty'), [
-        'clinic_specialty' => 'psychiatry',
+        'clinic_specialty' => 'dentistry',
         'apply_specialty_defaults' => '1',
     ])->assertRedirect(route('settings.index'));
 
-    expect(Setting::get('clinic_specialty'))->toBe('psychiatry')
-        ->and(Setting::getAppointmentDuration())->toBe(45)
+    expect(Setting::get('clinic_specialty'))->toBe('dentistry')
+        ->and(Setting::getAppointmentDuration())->toBe(30)
         ->and($doctor->fresh()->appointment_mode)->toBe('scheduled')
         ->and($doctor->fresh()->queue_daily_limit)->toBeNull();
 });

@@ -84,8 +84,16 @@ class Setting extends Model
     /**
      * Get working hours for a specific day
      */
-    public static function getWorkingHours($day = null)
+    public static function demoAlwaysOpen(): bool
     {
+        return self::get('deployment_mode') === 'demo' && filter_var(self::get('demo_always_open', false), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    public static function getWorkingHours($day = null, bool $applyDemoOverride = true)
+    {
+        if ($applyDemoOverride && self::demoAlwaysOpen()) {
+            return ['is_working' => true, 'start_time' => '00:00', 'end_time' => '23:59'];
+        }
         if (!$day) {
             $day = strtolower(Carbon::now()->format('l')); // monday, tuesday, etc.
         }
