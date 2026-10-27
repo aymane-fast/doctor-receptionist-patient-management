@@ -13,7 +13,7 @@
         <input type="hidden" name="workspace_form" value="examinations">
         <input type="hidden" name="medical_record_id" value="{{ $medicalRecord?->id }}">
         <div class="workflow-grid">
-            <div><label for="order_type">{{ __('workflow.examination_type') }}</label><select name="order_type" id="order_type"><option value="lab">{{ __('workflow.lab') }}</option><option value="scan">{{ __('workflow.scan') }}</option></select></div>
+            <div><label for="order_type">{{ __('workflow.examination_type') }}</label><select name="order_type" id="order_type"><option value="lab" @selected(old('workspace_form') !== 'examinations' || old('order_type', 'lab') === 'lab')>{{ __('workflow.lab') }}</option><option value="scan" @selected(old('workspace_form') === 'examinations' && old('order_type') === 'scan')>{{ __('workflow.scan') }}</option></select></div>
             <div><label for="test_name">{{ __('workflow.examination_name') }}</label><input id="test_name" name="test_name" list="examination-suggestions" maxlength="255" value="{{ old('test_name') }}" required></div>
             <div class="full-width"><label for="order_notes">{{ __('workflow.instructions') }}</label><input id="order_notes" name="notes" value="{{ old('workspace_form') === 'examinations' ? old('notes') : '' }}" maxlength="16000"></div>
         </div>
@@ -33,7 +33,7 @@
         <input type="hidden" name="workspace_form" value="documents">
         <input type="hidden" name="medical_record_id" value="{{ $medicalRecord?->id }}">
         <div class="workflow-grid"><div><label for="document_title">{{ __('workflow.document_title') }}</label><input id="document_title" name="title" maxlength="255" value="{{ old('title') }}" required></div><div><label for="document_file">{{ __('workflow.file') }}</label><input id="document_file" name="document" type="file" accept="application/pdf,image/jpeg,image/png" required></div>
-        <div class="full-width"><label for="document_order">{{ __('workflow.link_result') }}</label><select id="document_order" name="order_id"><option value="">{{ __('common.optional') }}</option>@foreach($orders as $order)<option value="{{ $order->id }}">#{{ $order->id }} · {{ $order->test_name }}</option>@endforeach</select></div></div>
+        <div class="full-width"><label for="document_order">{{ __('workflow.link_result') }}</label><select id="document_order" name="order_id"><option value="">{{ __('common.optional') }}</option>@foreach($orders as $order)<option value="{{ $order->id }}" @selected(old('workspace_form') === 'documents' && old('order_id') == $order->id)>#{{ $order->id }} · {{ $order->test_name }}</option>@endforeach</select></div></div>
         <button class="btn-secondary mt-3 px-3 py-2"><i class="fas fa-file-arrow-up" aria-hidden="true"></i>{{ __('workflow.upload_document') }}</button>
     </form>
     @foreach($documents as $document)<div class="clinical-row flex flex-wrap justify-between gap-3"><span>{{ $document->title }} <small class="text-slate-500">{{ $document->created_at->format('d/m/Y') }} · {{ round($document->size / 1024) }} KB @if($document->order_id) · {{ __('workflow.result_for') }} #{{ $document->order_id }} @endif</small></span><div class="flex gap-3 text-sm"><a class="text-teal-700" target="_blank" rel="noopener" href="{{ route('clinical.documents.view', $document) }}">{{ __('common.view') }}</a><a class="text-teal-700" href="{{ route('clinical.documents.view', ['document' => $document, 'download' => 1]) }}">{{ __('common.download') }}</a></div></div>@endforeach

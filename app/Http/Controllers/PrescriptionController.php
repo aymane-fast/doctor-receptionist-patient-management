@@ -70,24 +70,26 @@ class PrescriptionController extends Controller
 
         $request->validate(['patient_id' => 'nullable|integer|exists:patients,id', 'medical_record_id' => 'nullable|integer|exists:medical_records,id']);
 
-        $selectedPatient = null;
-        
-        if ($request->has('patient_id')) {
-            $selectedPatient = Patient::find($request->patient_id);
-        }
-        if (!$selectedPatient && is_scalar($request->old('patient_id'))) {
-            $selectedPatient = Patient::find((int) $request->old('patient_id'));
-        }
+        $restoringPatient = array_key_exists('patient_id', $request->session()->getOldInput());
+        $patientId = $restoringPatient ? $request->old('patient_id') : $request->patient_id;
+        $selectedPatient = is_scalar($patientId) ? Patient::find((int) $patientId) : null;
 
         $selectedRecord = null;
         $recordId = $request->old('medical_record_id', $request->medical_record_id);
         if ($recordId && is_scalar($recordId)) {
             $selectedRecord = MedicalRecord::where('doctor_id', Auth::id())->findOrFail($recordId);
-            $selectedPatient = $selectedRecord->patient;
+            // Initial record links prefill the patient. A rejected submission
+            // must retain the doctor's explicit patient choice for correction.
+            if (! $restoringPatient) {
+                $selectedPatient = $selectedRecord->patient;
+            }
         }
         $medicalRecords = MedicalRecord::where('doctor_id', Auth::id())
             ->when($selectedPatient, fn ($q) => $q->where('patient_id', $selectedPatient->id))
             ->latest('visit_date')->limit(100)->get();
+        if ($selectedRecord && ! $medicalRecords->contains('id', $selectedRecord->id)) {
+            $medicalRecords->prepend($selectedRecord);
+        }
 
         return view('prescriptions.create', compact('selectedPatient', 'selectedRecord', 'medicalRecords'));
     }
