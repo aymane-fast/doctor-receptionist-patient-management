@@ -95,10 +95,10 @@
                                 </div>
                             </div>
                             <div class="flex space-x-2">
-                                <a href="{{ route('patients.show', $patient) }}" class="w-9 h-9 bg-blue-100 hover:bg-blue-200 rounded-xl flex items-center justify-center transition-colors group/btn">
+                                <a href="{{ route('patients.show', $patient) }}" aria-label="{{ __('common.view') }} · {{ $patient->full_name }}" title="{{ __('common.view') }}" class="w-9 h-9 bg-blue-100 hover:bg-blue-200 rounded-xl flex items-center justify-center transition-colors group/btn">
                                     <i class="fas fa-eye text-blue-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                 </a>
-                                <a href="{{ route('patients.edit', $patient) }}" class="w-9 h-9 bg-emerald-100 hover:bg-emerald-200 rounded-xl flex items-center justify-center transition-colors group/btn" onclick="return confirmEdit({{ Js::from($patient->full_name) }})">
+                                <a href="{{ route('patients.edit', $patient) }}" aria-label="{{ __('common.edit') }} · {{ $patient->full_name }}" title="{{ __('common.edit') }}" class="w-9 h-9 bg-emerald-100 hover:bg-emerald-200 rounded-xl flex items-center justify-center transition-colors group/btn">
                                     <i class="fas fa-edit text-emerald-600 text-sm group-hover/btn:scale-110 transition-transform"></i>
                                 </a>
                             </div>
@@ -281,9 +281,6 @@
 @push('scripts')
 <script>
 // Confirmation dialog for editing patient
-function confirmEdit(patientName) {
-    return confirm(`{{ __('patients.confirm_edit_prefix') }} "${patientName}"?\n\n{{ __('patients.edit_warning') }}`);
-}
 
 // Confirmation dialog with allergy alert for appointment booking
 function confirmAppointment(patientName, hasAllergies, allergies) {

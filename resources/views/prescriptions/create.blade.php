@@ -56,6 +56,7 @@
                                 <!-- Patient Search Input with Autocomplete -->
                                 <input type="text" 
                                        id="patient_search" 
+                                       data-confirm-patient="{{ __('Please select a patient.') }}"
                                        placeholder="{{ __('Search patients by name, phone, or email...') }}"
                                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 @error('patient_id') border-red-500 @enderror"
                                        autocomplete="off"
@@ -139,20 +140,20 @@
                         <div class="item bg-white border-2 border-gray-200 rounded-xl p-4">
                             <div class="grid md:grid-cols-4 gap-4">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.medication_name') }} <span class="text-red-500">*</span></label>
-                                    <input type="text" name="items[{{ $index }}][medication_name]" value="{{ $item['medication_name'] ?? '' }}" list="specialty-medication-suggestions" required
+                                    <label for="rx_{{ $index }}_medication_name" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.medication_name') }} <span class="text-red-500">*</span></label>
+                                    <input type="text" id="rx_{{ $index }}_medication_name" name="items[{{ $index }}][medication_name]" value="{{ $item['medication_name'] ?? '' }}" list="specialty-medication-suggestions" required
                                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                            placeholder="{{ __('prescriptions.medication_placeholder') }}">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.dosage') }} <span class="text-red-500">*</span></label>
-                                    <input type="text" name="items[{{ $index }}][dosage]" value="{{ $item['dosage'] ?? '' }}" required
+                                    <label for="rx_{{ $index }}_dosage" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.dosage') }} <span class="text-red-500">*</span></label>
+                                    <input type="text" id="rx_{{ $index }}_dosage" name="items[{{ $index }}][dosage]" value="{{ $item['dosage'] ?? '' }}" required
                                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                            placeholder="{{ __('prescriptions.dosage_placeholder') }}">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.frequency') }} <span class="text-red-500">*</span></label>
-                                    <select name="items[{{ $index }}][frequency]" required
+                                    <label for="rx_{{ $index }}_frequency" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.frequency') }} <span class="text-red-500">*</span></label>
+                                    <select id="rx_{{ $index }}_frequency" name="items[{{ $index }}][frequency]" required
                                             class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200">
                                         <option value="">{{ __('prescriptions.select_frequency') }}</option>
                                         @if(!empty($item['frequency']) && !$frequencies->contains($item['frequency']))
@@ -164,15 +165,15 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.duration_days') }}</label>
-                                    <input type="number" name="items[{{ $index }}][duration_days]" value="{{ $item['duration_days'] ?? '' }}" min="1"
+                                    <label for="rx_{{ $index }}_duration_days" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.duration_days') }}</label>
+                                    <input type="number" id="rx_{{ $index }}_duration_days" name="items[{{ $index }}][duration_days]" value="{{ $item['duration_days'] ?? '' }}" min="1"
                                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                            placeholder="7">
                                 </div>
                             </div>
                             <div class="mt-3">
-                                <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.instructions') }}</label>
-                                <input type="text" name="items[{{ $index }}][instructions]" value="{{ $item['instructions'] ?? '' }}"
+                                <label for="rx_{{ $index }}_instructions" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.instructions') }}</label>
+                                <input type="text" id="rx_{{ $index }}_instructions" name="items[{{ $index }}][instructions]" value="{{ $item['instructions'] ?? '' }}"
                                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200"
                                        placeholder="{{ __('prescriptions.instructions_placeholder') }}">
                             </div>
@@ -247,6 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`{{ route('api.prescriptions.patients.search') }}?q=${encodeURIComponent(query)}`)
             .then(response => response.json())
             .then(patients => {
+                if (searchInput.value.trim() !== query) return;
                 displayResults(patients);
             })
             .catch(error => {
@@ -265,12 +267,12 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         } else {
             resultsContainer.innerHTML = patients.map(patient => `
-                <div class="patient-result p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
+                <button type="button" class="patient-result block w-full text-left p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                      data-id="${patient.id}" 
                      data-display="${escapeHtml(patient.display)}">
                     <div class="font-medium text-gray-900">${escapeHtml(patient.name)}</div>
                     <div class="text-sm text-gray-600">${escapeHtml(patient.phone)} • ${escapeHtml(patient.email)}</div>
-                </div>
+                </button>
             `).join('');
 
             // Add click handlers to results
@@ -317,16 +319,16 @@ document.getElementById('add-item').addEventListener('click', () => {
   wrapper.innerHTML = `
     <div class="grid md:grid-cols-4 gap-4">
       <div>
-        <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.medication_name') }} <span class="text-red-500">*</span></label>
-        <input type="text" name="items[${itemIndex}][medication_name]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="{{ __('prescriptions.medication_placeholder') }}">
+        <label for="rx_${itemIndex}_medication_name" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.medication_name') }} <span class="text-red-500">*</span></label>
+        <input type="text" id="rx_${itemIndex}_medication_name" name="items[${itemIndex}][medication_name]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="{{ __('prescriptions.medication_placeholder') }}">
       </div>
       <div>
-        <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.dosage') }} <span class="text-red-500">*</span></label>
-        <input type="text" name="items[${itemIndex}][dosage]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="{{ __('prescriptions.dosage_placeholder') }}">
+        <label for="rx_${itemIndex}_dosage" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.dosage') }} <span class="text-red-500">*</span></label>
+        <input type="text" id="rx_${itemIndex}_dosage" name="items[${itemIndex}][dosage]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="{{ __('prescriptions.dosage_placeholder') }}">
       </div>
       <div>
-        <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.frequency') }} <span class="text-red-500">*</span></label>
-        <select name="items[${itemIndex}][frequency]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200">
+        <label for="rx_${itemIndex}_frequency" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.frequency') }} <span class="text-red-500">*</span></label>
+        <select id="rx_${itemIndex}_frequency" name="items[${itemIndex}][frequency]" required class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200">
           <option value="">{{ __('prescriptions.select_frequency') }}</option>
           <option>{{ __('prescriptions.once_daily') }}</option>
           <option>{{ __('prescriptions.twice_daily') }}</option>
@@ -342,13 +344,13 @@ document.getElementById('add-item').addEventListener('click', () => {
         </select>
       </div>
       <div>
-        <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.duration_days') }}</label>
-        <input type="number" name="items[${itemIndex}][duration_days]" min="1" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="7">
+        <label for="rx_${itemIndex}_duration_days" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.duration_days') }}</label>
+        <input type="number" id="rx_${itemIndex}_duration_days" name="items[${itemIndex}][duration_days]" min="1" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="7">
       </div>
     </div>
     <div class="mt-3">
-      <label class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.instructions') }}</label>
-      <input type="text" name="items[${itemIndex}][instructions]" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="{{ __('prescriptions.instructions_placeholder') }}">
+      <label for="rx_${itemIndex}_instructions" class="block text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">{{ __('prescriptions.instructions') }}</label>
+      <input type="text" id="rx_${itemIndex}_instructions" name="items[${itemIndex}][instructions]" class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none transition-all duration-200" placeholder="{{ __('prescriptions.instructions_placeholder') }}">
     </div>
   `;
   wrapper.querySelector('input[name$="[medication_name]"]')?.setAttribute('list', 'specialty-medication-suggestions');

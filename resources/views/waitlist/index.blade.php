@@ -33,6 +33,7 @@
                 <label for="patient_search" class="block text-sm font-medium text-gray-700 mb-2">{{ __('appointments.patient') }} <span class="text-red-500">*</span></label>
                 <div class="relative">
                     <input type="text" id="patient_search" autocomplete="off" value="{{ $selectedPatient?->full_name }}"
+                           data-confirm-patient="{{ __('Please select a patient.') }}"
                            placeholder="{{ __('appointments.search_patients_placeholder') }}"
                            class="form-control w-full px-3 py-2">
                     <input type="hidden" id="patient_id" name="patient_id" value="{{ $selectedPatient?->id }}" required>
@@ -159,15 +160,16 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch(`{{ route('api.patients.search') }}?q=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(patients => {
+                    if (searchInput.value.trim() !== query) return;
                     if (!patients.length) {
                         resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-center">—</div>';
                     } else {
                         resultsContainer.innerHTML = patients.map(patient => `
-                            <div class="patient-result p-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            <button type="button" class="patient-result block w-full text-left p-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                                  data-id="${patient.id}" data-display="${escapeHtml(patient.display)}">
                                 <div class="font-medium text-gray-900">${escapeHtml(patient.name)}</div>
                                 <div class="text-sm text-gray-600">${escapeHtml(patient.phone)}</div>
-                            </div>
+                            </button>
                         `).join('');
 
                         resultsContainer.querySelectorAll('.patient-result').forEach(result => {

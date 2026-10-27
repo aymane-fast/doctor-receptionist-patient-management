@@ -155,6 +155,7 @@
                                 <option value="in_progress" {{ old('status', $appointment->status) == 'in_progress' ? 'selected' : '' }}>{{ __('appointments.in_progress') }}</option>
                                 <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>{{ __('appointments.completed') }}</option>
                                 <option value="cancelled" {{ old('status', $appointment->status) == 'cancelled' ? 'selected' : '' }}>{{ __('appointments.cancelled') }}</option>
+                                <option value="no_show" {{ old('status', $appointment->status) == 'no_show' ? 'selected' : '' }}>{{ __('appointments.no_show') }}</option>
                             </select>
                             @error('status')
                             <p class="mt-1 text-sm text-red-600 flex items-center space-x-2">

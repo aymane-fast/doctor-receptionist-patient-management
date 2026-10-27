@@ -61,6 +61,7 @@
                             <!-- Patient Search Input with Autocomplete -->
                             <input type="text" 
                                    id="patient_search" 
+                                   data-confirm-patient="{{ __('Please select a patient.') }}"
                                    placeholder="{{ __('appointments.search_patients_placeholder') }}" 
                                    class="form-control w-full px-3 py-2 bg-white/80 backdrop-blur-sm focus:bg-white @error('patient_id') border-red-500 @enderror"
                                    autocomplete="off"
@@ -279,7 +280,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const queueEstimate = document.getElementById('queue_mode_estimate');
     const reasonInput = document.getElementById('reason');
     let searchTimeout;
-    let selectedPatientId = patientIdInput.value;
     const doctorModes = @json($doctorModes);
 
     function escapeHtml(value) {
@@ -311,17 +311,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Clear search if patient was deselected
-    searchInput.addEventListener('focus', function() {
-        if (this.value && !patientIdInput.value) {
-            this.value = '';
-        }
-    });
-
     function searchPatients(query) {
         fetch(`{{ route('api.patients.search') }}?q=${encodeURIComponent(query)}`)
             .then(response => response.json())
             .then(patients => {
+                if (searchInput.value.trim() !== query) return;
                 displayResults(patients);
             })
             .catch(error => {
@@ -340,12 +334,12 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         } else {
             resultsContainer.innerHTML = patients.map(patient => `
-                <div class="patient-result p-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0" 
+                <button type="button" class="patient-result block w-full text-left p-3 hover:bg-teal-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                      data-id="${patient.id}" 
                      data-display="${escapeHtml(patient.display)}">
                     <div class="font-medium text-gray-900">${escapeHtml(patient.name)}</div>
                     <div class="text-sm text-gray-600">${escapeHtml(patient.phone)} • ${escapeHtml(patient.email)}</div>
-                </div>
+                </button>
             `).join('');
 
             // Add click handlers to results
@@ -362,7 +356,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function selectPatient(id, display) {
         patientIdInput.value = id;
         searchInput.value = display;
-        selectedPatientId = id;
         hideResults();
     }
 

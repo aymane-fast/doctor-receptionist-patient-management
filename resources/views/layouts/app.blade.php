@@ -224,6 +224,14 @@
                         <p class="dialog-description">{{ __('clinical_ui.quick_reschedule_help') }}</p>
                         <div class="dialog-actions"><button type="button" class="btn-secondary" data-dialog-close>{{ __('common.cancel') }}</button><button type="button" class="btn-care btn-care-primary" data-confirm-reschedule-submit>{{ __('clinical_ui.quick_reschedule') }}</button></div>
                     </x-ui.dialog>
+                    <x-ui.dialog id="confirm-appointment-action" :title="__('common.confirm')" icon="fa-circle-question">
+                        <p class="dialog-patient" data-action-patient></p>
+                        <p class="dialog-description" data-action-message></p>
+                        <div class="dialog-actions">
+                            <button type="button" class="btn-secondary" data-dialog-close>{{ __('common.cancel') }}</button>
+                            <button type="button" class="btn-danger" data-confirm-action-submit>{{ __('common.confirm') }}</button>
+                        </div>
+                    </x-ui.dialog>
                 </main>
             </div>
         </div>

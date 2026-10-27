@@ -222,7 +222,7 @@
                         <form action="{{ route('appointments.no-show', $appointment) }}" method="POST" class="w-full">
                             @csrf
                             <button type="submit" class="btn-ghost w-full px-4 py-3"
-                                    onclick="return confirm(@js(__('appointments.mark_no_show').'?'))">
+                                    data-action-patient="{{ $appointment->patient->full_name }}" data-confirm-action="{{ __('appointments.mark_no_show') }}?">
                                 <i class="fas fa-user-slash"></i>
                                 <span>{{ __('appointments.mark_no_show') }}</span>
                             </button>
@@ -234,7 +234,7 @@
                         <form action="{{ route('appointments.cancel', $appointment) }}" method="POST" class="w-full">
                             @csrf
                             <button type="submit" class="btn-danger w-full px-4 py-3"
-                                    onclick="return confirm(@js(__('appointments.cancel_confirmation')))">
+                                    data-action-patient="{{ $appointment->patient->full_name }}" data-confirm-action="{{ __('appointments.cancel_confirmation') }}">
                                 <i class="fas fa-times"></i>
                                 <span>{{ __('appointments.cancel_appointment') ?? 'Cancel appointment' }}</span>
                             </button>

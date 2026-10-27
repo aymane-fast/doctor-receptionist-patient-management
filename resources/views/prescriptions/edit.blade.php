@@ -150,20 +150,20 @@
                             <div class="item bg-white border-2 border-gray-200 rounded-xl p-4">
                                 <div class="grid md:grid-cols-4 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('prescriptions.medication_name') }} <span class="text-red-500">*</span></label>
-                                        <input type="text" name="items[{{ $index }}][medication_name]" list="specialty-medication-suggestions" required
+                                        <label for="rx_{{ $index }}_medication_name" class="block text-sm font-medium text-gray-700 mb-2">{{ __('prescriptions.medication_name') }} <span class="text-red-500">*</span></label>
+                                        <input type="text" id="rx_{{ $index }}_medication_name" name="items[{{ $index }}][medication_name]" list="specialty-medication-suggestions" required
                                                value="{{ $item['medication_name'] ?? '' }}"
                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('prescriptions.dosage') }} <span class="text-red-500">*</span></label>
-                                        <input type="text" name="items[{{ $index }}][dosage]" required
+                                        <label for="rx_{{ $index }}_dosage" class="block text-sm font-medium text-gray-700 mb-2">{{ __('prescriptions.dosage') }} <span class="text-red-500">*</span></label>
+                                        <input type="text" id="rx_{{ $index }}_dosage" name="items[{{ $index }}][dosage]" required
                                                value="{{ $item['dosage'] ?? '' }}"
                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('prescriptions.frequency') }} <span class="text-red-500">*</span></label>
-                                        <select name="items[{{ $index }}][frequency]" required
+                                        <label for="rx_{{ $index }}_frequency" class="block text-sm font-medium text-gray-700 mb-2">{{ __('prescriptions.frequency') }} <span class="text-red-500">*</span></label>
+                                        <select id="rx_{{ $index }}_frequency" name="items[{{ $index }}][frequency]" required
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                             <option value="">{{ __('prescriptions.select_frequency') }}</option>
                                             @foreach($frequencies as $frequency)
@@ -175,20 +175,20 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('prescriptions.duration_days') }}</label>
-                                        <input type="number" name="items[{{ $index }}][duration_days]" min="1"
+                                        <label for="rx_{{ $index }}_duration_days" class="block text-sm font-medium text-gray-700 mb-2">{{ __('prescriptions.duration_days') }}</label>
+                                        <input type="number" id="rx_{{ $index }}_duration_days" name="items[{{ $index }}][duration_days]" min="1"
                                                value="{{ $item['duration_days'] ?? '' }}"
                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                     </div>
                                 </div>
                                 <div class="mt-3 flex items-end gap-3">
                                     <div class="flex-1">
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('prescriptions.instructions') }}</label>
-                                        <input type="text" name="items[{{ $index }}][instructions]"
+                                        <label for="rx_{{ $index }}_instructions" class="block text-sm font-medium text-gray-700 mb-2">{{ __('prescriptions.instructions') }}</label>
+                                        <input type="text" id="rx_{{ $index }}_instructions" name="items[{{ $index }}][instructions]"
                                                value="{{ $item['instructions'] ?? '' }}"
                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                     </div>
-                                    <button type="button" class="remove-item bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg transition-colors" title="{{ __('common.delete') }}">
+                                    <button type="button" aria-label="{{ __('common.remove') }}" class="remove-item bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg transition-colors" title="{{ __('common.remove') }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -236,7 +236,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function reindexItems() {
         itemsContainer.querySelectorAll('.item').forEach((item, index) => {
             item.querySelectorAll('input, select').forEach(field => {
+                const label = item.querySelector('label[for="' + field.id + '"]');
                 field.name = field.name.replace(/items\[\d+\]/, `items[${index}]`);
+                const key = field.name.match(/\[([^\]]+)\]$/)?.[1];
+                if (key) {
+                    field.id = `rx_${index}_${key}`;
+                    if (label) label.htmlFor = field.id;
+                }
             });
         });
     }

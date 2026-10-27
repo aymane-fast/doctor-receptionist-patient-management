@@ -271,7 +271,7 @@
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="cancelled">
                                                 <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left rounded-xl mx-1 transition-colors"
-                                                        onclick="return confirm(@js(__('appointments.confirm_cancel')))">
+                                                        data-action-patient="{{ $appointment->patient->full_name }}" data-confirm-action="{{ __('appointments.confirm_cancel') }}">
                                                     <i class="fas fa-times text-red-600 mr-2"></i>{{ __('appointments.cancelled') }}
                                                 </button>
                                             </form>

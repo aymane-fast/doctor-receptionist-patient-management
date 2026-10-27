@@ -131,13 +131,13 @@
                                         <x-appointments.reschedule-actions :appointment="$appointment" />
                                         <form method="POST" action="{{ route('appointments.no-show', $appointment) }}">
                                             @csrf
-                                            <button class="px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium" onclick="return confirm(@js(__('appointments.mark_no_show').'?'))">
+                                            <button class="px-3 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium" data-action-patient="{{ $appointment->patient->full_name }}" data-confirm-action="{{ __('appointments.mark_no_show') }}?">
                                                 {{ __('appointments.mark_no_show') }}
                                             </button>
                                         </form>
                                         <form method="POST" action="{{ route('appointments.cancel', $appointment) }}">
                                             @csrf
-                                            <button class="btn-danger px-3 py-2 text-sm" onclick="return confirm(@js(__('Cancel this queue entry?')))">
+                                            <button class="btn-danger px-3 py-2 text-sm" data-action-patient="{{ $appointment->patient->full_name }}" data-confirm-action="{{ __('Cancel this queue entry?') }}">
                                                 {{ __('Cancel') }}
                                             </button>
                                         </form>
@@ -148,7 +148,7 @@
                                             @method('PATCH')
                                             <input type="hidden" name="status" value="completed">
                                             <button class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm font-medium">
-                                                {{ __('common.completed') }}
+                                                {{ __('appointments.mark_completed') }}
                                             </button>
                                         </form>
                                     @endif

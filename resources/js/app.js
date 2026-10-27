@@ -1,4 +1,5 @@
 import './bootstrap';
+import './patient-selection';
 import Chart from 'chart.js/auto';
 
 window.Chart = Chart;
@@ -6,6 +7,24 @@ window.Chart = Chart;
 // Patient and date filters are submitted together; choosing a suggestion never
 // navigates away before the user has entered the date range.
 document.addEventListener('DOMContentLoaded', () => {
+    const actionDialog = document.getElementById('confirm-appointment-action');
+    let pendingAction = null;
+    document.querySelectorAll('button[data-confirm-action]').forEach(button => {
+        button.addEventListener('click', event => {
+            if (!actionDialog || !button.form) return;
+            event.preventDefault();
+            pendingAction = button;
+            actionDialog.querySelector('[data-action-patient]').textContent = button.dataset.actionPatient || '';
+            actionDialog.querySelector('[data-action-message]').textContent = button.dataset.confirmAction;
+            actionDialog.showModal();
+        });
+    });
+    actionDialog?.querySelector('[data-confirm-action-submit]')?.addEventListener('click', () => {
+        const button = pendingAction;
+        pendingAction = null;
+        actionDialog.close();
+        button?.form.requestSubmit(button);
+    });
     // The top layer keeps row actions outside the table's scrolling/clipping area.
     document.querySelectorAll('.appointment-status-menu[popover]').forEach(menu => {
         const trigger = document.querySelector('[popovertarget="' + menu.id + '"]');
