@@ -111,7 +111,7 @@ class Patient extends Model
     public function scopeSearch($query, string $search)
     {
         $search = trim($search);
-        $terms = array_filter(explode(' ', $search));
+        $terms = preg_split('/\s+/u', $search, -1, PREG_SPLIT_NO_EMPTY);
         $fullName = self::fullNameSql();
 
         return $query->where(function ($q) use ($search, $terms, $fullName) {
@@ -125,26 +125,14 @@ class Patient extends Model
                   ->orWhere('phone', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%"));
 
-            // Match multi-term queries as first/last name in any order.
-            if (count($terms) >= 2) {
-                $q->orWhere(function ($subQuery) use ($terms) {
-                    foreach ($terms as $i => $firstTerm) {
-                        foreach ($terms as $j => $lastTerm) {
-                            if ($i !== $j) {
-                                $subQuery->orWhere(function ($combo) use ($firstTerm, $lastTerm) {
-                                    $combo->where('first_name', 'like', "%{$firstTerm}%")
-                                          ->where('last_name', 'like', "%{$lastTerm}%");
-                                });
-                            }
-                        }
+            // Every name term must match the same patient, in any order.
+            // An OR per word would return unrelated people sharing one name.
+            if ($terms) {
+                $q->orWhere(function ($nameQuery) use ($terms, $fullName) {
+                    foreach ($terms as $term) {
+                        $nameQuery->whereRaw("{$fullName} LIKE ?", ["%{$term}%"]);
                     }
                 });
-            }
-
-            foreach ($terms as $term) {
-                if (strlen($term) >= 2) {
-                    $q->orWhereRaw("{$fullName} LIKE ?", ["%{$term}%"]);
-                }
             }
         });
     }

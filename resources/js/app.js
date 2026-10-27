@@ -187,12 +187,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const markDirty = () => { dirty = true; if (saveState) { saveState.textContent = saveState.dataset.dirty; saveState.classList.add('is-dirty'); } };
     form?.addEventListener('input', markDirty);
     form?.addEventListener('change', markDirty);
-    form?.addEventListener('submit', () => { dirty = false; });
+    // A save reloads every panel. Keep clinical drafts in memory and guard
+    // submissions that would otherwise silently discard another panel's work.
+    const draftForms = [...(workspace?.querySelectorAll('form') || [])]
+        .filter(item => item.querySelector('[name="workspace_form"]'));
+    const snapshot = item => JSON.stringify([...new FormData(item)].map(([key, value]) =>
+        [key, value instanceof File ? (value.name ? [value.name, value.size, value.lastModified] : null) : value]));
+    const original = new Map(draftForms.map(item => [item, snapshot(item)]));
+    const changedForms = () => draftForms.filter(item => snapshot(item) !== original.get(item)
+        || item.querySelector('[name="workspace_form"]').value === workspace?.dataset.initialTab);
+    const draftDialog = document.getElementById('unsaved-workspace-drafts');
+    let pendingSubmit = null;
+    let allowSubmit = false;
+    let leaving = false;
+    window.addEventListener('pageshow', () => { leaving = false; });
+    document.addEventListener('submit', event => {
+        if (!workspace) return;
+        const otherDrafts = changedForms().filter(item => item !== event.target);
+        if (otherDrafts.length && !allowSubmit && draftDialog) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            pendingSubmit = { form: event.target, submitter: event.submitter, drafts: otherDrafts };
+            draftDialog.querySelector('[data-draft-sections]').textContent = otherDrafts.map(item => {
+                const section = item.querySelector('[name="workspace_form"]').value;
+                return tabs.find(tab => tab.dataset.workspaceTab === section)?.textContent.trim()
+                    || item.closest('dialog')?.querySelector('h2, h3')?.textContent.trim() || section;
+            }).join(', ');
+            draftDialog.showModal();
+            return;
+        }
+        queueMicrotask(() => { if (!event.defaultPrevented) leaving = true; });
+    }, true);
+    draftDialog?.querySelector('[data-review-draft]')?.addEventListener('click', () => {
+        const target = pendingSubmit?.drafts[0];
+        if (!target) return;
+        document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+        const panel = target.closest('[data-workspace-panel]');
+        if (panel) selectTab(panel.id, true);
+        target.closest('dialog')?.showModal();
+        target.querySelector('input:not([type=hidden]), textarea, select')?.focus();
+    });
+    draftDialog?.querySelector('[data-discard-other-drafts]')?.addEventListener('click', () => {
+        if (!pendingSubmit) return;
+        draftDialog.close();
+        allowSubmit = true;
+        try { pendingSubmit.form.requestSubmit(pendingSubmit.submitter || undefined); }
+        finally { allowSubmit = false; }
+    });
     // Validation restores submitted notes; they are not saved just because the
     // page reloaded. Keep the completion guard active until a successful save.
     if (workspace?.dataset.initialTab === 'consultation') markDirty();
     window.addEventListener('beforeunload', event => {
-        if (dirty) { event.preventDefault(); event.returnValue = ''; }
+        if (!leaving && (dirty || changedForms().length)) { event.preventDefault(); event.returnValue = ''; }
     });
 
     document.querySelectorAll('[data-dialog-open]').forEach(button => button.addEventListener('click', () => {

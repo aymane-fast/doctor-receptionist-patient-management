@@ -95,6 +95,15 @@
             </div>
         </x-ui.dialog>
         @endif
+        <x-ui.dialog id="unsaved-workspace-drafts" :title="__('clinical_ui.unsaved_drafts_title')" icon="fa-pen-to-square">
+            <p class="dialog-description">{{ __('clinical_ui.unsaved_drafts_help') }}</p>
+            <p class="patient-alert" data-draft-sections></p>
+            <div class="dialog-actions">
+                <button type="button" class="btn-secondary" data-dialog-close>{{ __('common.cancel') }}</button>
+                <button type="button" class="btn-secondary" data-discard-other-drafts>{{ __('clinical_ui.discard_other_drafts') }}</button>
+                <button type="button" class="btn-primary" data-review-draft>{{ __('clinical_ui.review_draft') }}</button>
+            </div>
+        </x-ui.dialog>
         <x-ui.dialog id="follow-up-dialog" :title="__('current_patient.schedule_follow_up')" icon="fa-calendar-plus" form="follow-up">
             <p class="dialog-patient">{{ $patient->full_name }}</p>
                             <form method="POST" action="{{ route('appointments.create-follow-up', $patient) }}">@csrf<input type="hidden" name="workspace_form" value="follow-up"><input type="hidden" name="current_appointment_id" value="{{ $currentAppointment->id }}">

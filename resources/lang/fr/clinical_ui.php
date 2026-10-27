@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'unsaved_drafts_title' => 'Des modifications ne sont pas enregistrées',
+    'unsaved_drafts_help' => 'Continuer supprimera les modifications non enregistrées dans les sections ci-dessous. Vérifiez-les ou abandonnez-les pour poursuivre cette action.',
+    'discard_other_drafts' => 'Abandonner ces modifications et continuer',
+    'review_draft' => 'Revoir les modifications',
     'demo_24h' => 'Garder la démonstration ouverte 24 h/24, tous les jours',
     'demo_24h_help' => 'Démonstration uniquement : autorise les rendez-vous à toute heure, même le week-end. Désactivez cette option dans les paramètres pour retrouver les horaires habituels. Les rendez-vous existants restent inchangés.',
     'demo_hours_saved' => 'Les horaires de démonstration ont été mis à jour.',

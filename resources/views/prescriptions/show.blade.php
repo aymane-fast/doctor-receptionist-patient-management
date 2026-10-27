@@ -54,7 +54,7 @@
                 </div>
                 <div class="text-right">
                     <div class="text-2xl font-bold border-2 border-white px-4 py-2 rounded">
-                        ORDONNANCE
+                        {{ __('prescriptions.prescription') }}
                     </div>
                     <p class="text-sm text-blue-100 mt-2">N° {{ $prescription->id }}</p>
                 </div>
@@ -89,7 +89,7 @@
             <div class="mb-6">
                 <h3 class="font-bold text-base text-gray-800 mb-4 flex items-center border-b pb-2">
                     <i class="fas fa-pills text-green-600 mr-2"></i>
-                    Médicaments Prescrits
+                    {{ __('prescriptions.medications') }}
                 </h3>
                 
                 @if($prescription->items && $prescription->items->count() > 0)
@@ -113,7 +113,7 @@
                                         @if($item->duration_days)
                                         <div>
                                             <span class="font-semibold text-blue-600">{{ __('Duration:') }}</span>
-                                            <p>{{ $item->duration_days }} jours</p>
+                                            <p>{{ $item->duration_days }} {{ __('prescriptions.days') }}</p>
                                         </div>
                                         @endif
                                     </div>
@@ -169,7 +169,7 @@
             <div class="mb-6">
                 <h3 class="font-bold text-sm text-gray-800 mb-2 flex items-center">
                     <i class="fas fa-sticky-note text-orange-600 mr-2"></i>
-                    Notes Additionnelles
+                    {{ __('prescriptions.additional_notes') }}
                 </h3>
                 <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
                     <p class="text-gray-700 text-sm">{{ $prescription->notes }}</p>
@@ -181,7 +181,7 @@
             <div class="border-t pt-4 mt-6">
                 <div class="flex justify-between items-end">
                     <div>
-                        <p class="text-xs text-gray-600">Prescription générée le {{ now()->locale(app()->getLocale())->isoFormat('D MMMM YYYY [à] HH:mm') }}</p>
+                        <p class="text-xs text-gray-600">{{ __('prescriptions.generated_on', ['date' => now()->locale(app()->getLocale())->isoFormat('LLL')]) }}</p>
                     </div>
                     <div class="text-right">
                         <div class="border-t-2 border-gray-400 pt-1 mt-6" style="min-width: 180px;">

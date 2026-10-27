@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'contact_phone' => 'Saisissez un numéro de téléphone contenant de 7 à 15 chiffres. Les espaces, +, parenthèses, points et tirets sont autorisés.',
     'accepted' => 'Le champ :attribute doit être accepté.',
     'accepted_if' => 'Le champ :attribute doit être accepté quand :other est :value.',
     'active_url' => 'Le champ :attribute doit être une URL valide.',

@@ -19,14 +19,15 @@ class PatientProfileService
 
         return [
             'birth_date' => [$pediatric ? 'required' : 'nullable', 'date', 'before_or_equal:today'],
-            'phone' => [$pediatric ? 'exclude' : 'required', 'string', 'max:255'],
+            'phone' => [$pediatric ? 'exclude' : 'required', 'string', 'max:255', new \App\Rules\ContactPhone],
+            'emergency_contact_phone' => ['nullable', 'string', 'max:255', new \App\Rules\ContactPhone],
             'email' => [$pediatric ? 'exclude' : 'nullable', 'email', 'max:255'],
             'id_card_number' => [$pediatric ? 'nullable' : 'required', 'string', 'max:255', Rule::unique('patients')->ignore($patient)],
             'guardians' => [$pediatric ? 'required' : 'exclude', 'array', 'list', 'min:1', 'max:5'],
             'guardians.*' => ['array:name,relationship,phone,email'],
             'guardians.*.name' => ['required', 'string', 'max:255'],
             'guardians.*.relationship' => ['required', 'string', 'max:100'],
-            'guardians.*.phone' => ['required', 'string', 'max:255'],
+            'guardians.*.phone' => ['required', 'string', 'max:255', new \App\Rules\ContactPhone],
             'guardians.*.email' => ['nullable', 'email', 'max:255'],
             'primary_guardian' => [$pediatric ? 'required' : 'exclude', 'integer', 'min:0', 'max:4'],
         ];

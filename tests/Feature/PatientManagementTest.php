@@ -144,6 +144,18 @@ it('finds patients by phone number', function () {
         ->assertSee('Karim');
 });
 
+it('requires every word in a patient name search to match the same patient', function () {
+    $receptionist = User::factory()->receptionist()->create();
+    Patient::factory()->create(['first_name' => 'Amina', 'last_name' => 'Berrada']);
+    Patient::factory()->create(['first_name' => 'Amina', 'last_name' => 'Unrelated']);
+    Patient::factory()->create(['first_name' => 'Unrelated', 'last_name' => 'Berrada']);
+
+    $this->actingAs($receptionist)->get('/patients?search=Berrada%20%20Amina')
+        ->assertOk()->assertSee('Amina')->assertDontSee('Unrelated');
+    $this->get('/patients?search=Missing%20Berrada')
+        ->assertOk()->assertDontSee('Amina')->assertDontSee('Unrelated');
+});
+
 it('shows an empty state until a search is performed', function () {
     $receptionist = User::factory()->receptionist()->create();
     Patient::factory()->count(3)->create();

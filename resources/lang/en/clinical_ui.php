@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'unsaved_drafts_title' => 'You have unfinished work',
+    'unsaved_drafts_help' => 'Continuing will discard unsaved changes in the sections below. Review them first, or explicitly discard them to continue this action.',
+    'discard_other_drafts' => 'Discard these drafts & continue',
+    'review_draft' => 'Review unfinished work',
     'demo_24h' => 'Keep the demo open 24 hours, every day',
     'demo_24h_help' => 'Demo only: allow scheduling at any time, including weekends. Turn this off in Settings to restore normal working hours. Existing appointments stay unchanged.',
     'demo_hours_saved' => 'Demo working hours updated.',
