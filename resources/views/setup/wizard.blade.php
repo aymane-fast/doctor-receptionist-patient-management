@@ -230,6 +230,7 @@
                                     <div class="flex items-center justify-between gap-3">
                                         <h4 class="font-semibold text-slate-900">{{ $label }}</h4>
                                         <label class="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+                                            <input type="hidden" name="{{ $day }}_working" value="0">
                                             <input type="checkbox" name="{{ $day }}_working" value="1" class="rounded border-slate-300" {{ $isWorking ? 'checked' : '' }} data-working-toggle="{{ $day }}">
                                             {{ __('Working day') }}
                                         </label>
@@ -483,6 +484,14 @@
 
             container.classList.toggle('opacity-40', !checkbox.checked);
             container.classList.toggle('pointer-events-none', !checkbox.checked);
+            const start = container.querySelector('input[name="' + day + '_start"]');
+            const end = container.querySelector('input[name="' + day + '_end"]');
+            [start, end].forEach(input => {
+                input.disabled = !checkbox.checked;
+                input.required = checkbox.checked;
+            });
+            end.setCustomValidity(checkbox.checked && start.value && end.value && end.value <= start.value
+                ? @json(__('validation.working_hours_order')) : '');
         }
 
         function addStaffCard(templateId, listId, prefix, index) {
@@ -518,6 +527,9 @@
 
         document.querySelectorAll('[data-working-toggle]').forEach((checkbox) => {
             checkbox.addEventListener('change', () => syncWorkingHoursState(checkbox.dataset.workingToggle));
+            document.querySelectorAll('[data-working-fields="' + checkbox.dataset.workingToggle + '"] input').forEach(input => {
+                input.addEventListener('input', () => syncWorkingHoursState(checkbox.dataset.workingToggle));
+            });
             syncWorkingHoursState(checkbox.dataset.workingToggle);
         });
 

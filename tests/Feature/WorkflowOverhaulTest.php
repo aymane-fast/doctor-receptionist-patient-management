@@ -119,8 +119,11 @@ it('stores an examination result privately with the correct inherited consultati
     Storage::disk('local')->assertExists($document->path);
     $this->get(route('clinical.documents.view', $document))->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff')
         ->assertHeader('Content-Security-Policy', "sandbox; default-src 'none'");
+    $this->get(route('clinical.documents.view', ['document' => $document, 'download' => 1]))
+        ->assertOk()->assertDownload('document-'.$document->id.'.pdf')->assertHeader('X-Content-Type-Options', 'nosniff');
     $this->actingAs(User::factory()->doctor()->create())->get(route('clinical.documents.view', $document))->assertForbidden();
     $this->actingAs(User::factory()->receptionist()->create())->get(route('clinical.documents.view', $document))->assertForbidden();
+    $this->get(route('clinical.documents.view', ['document' => $document, 'download' => 1]))->assertForbidden();
     $this->actingAs($this->doctor);
     Storage::disk('local')->delete($document->path);
     $this->get(route('clinical.documents.view', $document))->assertNotFound();

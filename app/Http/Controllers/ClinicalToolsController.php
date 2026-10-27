@@ -97,7 +97,7 @@ class ClinicalToolsController extends Controller
         return back()->with('success', __('workflow.document_saved'));
     }
 
-    public function viewDocument(MedicalDocument $document)
+    public function viewDocument(Request $request, MedicalDocument $document)
     {
         abort_unless($document->doctor_id === auth()->id(), 403);
         abort_unless(Storage::disk('local')->exists($document->path), 404);
@@ -106,7 +106,7 @@ class ClinicalToolsController extends Controller
         return Storage::disk('local')->response($document->path, 'document-'.$document->id.'.'.pathinfo($document->path, PATHINFO_EXTENSION), [
             'Content-Type' => $document->mime_type, 'X-Content-Type-Options' => 'nosniff',
             'Cache-Control' => 'private, no-store', 'Content-Security-Policy' => "sandbox; default-src 'none'",
-        ], 'inline');
+        ], $request->boolean('download') ? 'attachment' : 'inline');
     }
 
     public function medications(Request $request)

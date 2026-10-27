@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'valid_price' => 'Enter a valid consultation price.',
     'title' => 'Analytics Dashboard',
     'comprehensive_insights' => 'Comprehensive insights into your medical practice',
     'live_data' => 'Live Data',

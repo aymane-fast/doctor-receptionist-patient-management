@@ -133,19 +133,20 @@
                 <!-- Calculator Section -->
                 <div class="soft-panel mb-6 p-4">
                     <div class="flex items-center justify-between mb-4">
-                        <label class="text-sm font-semibold text-gray-700">{{ __('statistics.consultation_price') }}</label>
+                        <label for="consultationPrice" class="text-sm font-semibold text-gray-700">{{ __('statistics.consultation_price') }}</label>
                         <input type="number" id="consultationPrice" value="{{ $statistics['consultation_price'] ?? 50 }}" 
                                class="w-24 px-3 py-1 border border-gray-300 rounded-lg text-center font-bold"
-                               onchange="updateRevenue()">
+                               step="any" aria-describedby="consultation-price-error" oninput="updateRevenue()">
                     </div>
+                    <p id="consultation-price-error" class="hidden text-sm text-red-600 mb-3" role="alert">{{ __('statistics.valid_price') }}</p>
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div class="text-center p-3 bg-white rounded-lg">
                             <p class="text-gray-600">{{ __('statistics.completed_this_month') }}</p>
-                            <p class="text-xl font-bold text-emerald-700">{{ $statistics['completed_appointments'] ?? 0 }}</p>
+                            <p class="text-xl font-bold text-emerald-700">{{ $statistics['completed_this_month'] ?? 0 }}</p>
                         </div>
                         <div class="text-center p-3 bg-white rounded-lg">
                             <p class="text-gray-600">{{ __('statistics.estimated_revenue') }}</p>
-                            <p class="text-xl font-bold text-green-600" id="calculatedRevenue">${{ number_format(($statistics['completed_appointments'] ?? 0) * ($statistics['consultation_price'] ?? 50), 2) }}</p>
+                            <p class="text-xl font-bold text-green-600" id="calculatedRevenue">${{ number_format(($statistics['completed_this_month'] ?? 0) * ($statistics['consultation_price'] ?? 50), 2) }}</p>
                         </div>
                     </div>
                 </div>
@@ -468,8 +469,13 @@ function initializeCharts() {
 
 // Revenue Calculator Functions
 function updateRevenue() {
-    const price = parseFloat(document.getElementById('consultationPrice').value) || 0;
-    const completed = {{ $statistics['completed_appointments'] ?? 0 }};
+    const input = document.getElementById('consultationPrice');
+    const price = input.value === '' ? 0 : Number(input.value);
+    const completed = {{ $statistics['completed_this_month'] ?? 0 }};
+    const invalid = !input.validity.valid || !Number.isFinite(price) || !Number.isFinite(price * completed);
+    input.setAttribute('aria-invalid', String(invalid));
+    document.getElementById('consultation-price-error').classList.toggle('hidden', !invalid);
+    if (invalid) return;
     const revenue = price * completed;
     document.getElementById('calculatedRevenue').textContent = '$' + revenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 }

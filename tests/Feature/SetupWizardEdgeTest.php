@@ -69,3 +69,20 @@ it('rejects duplicate staff emails across roles', function () {
 
     expect(User::count())->toBe(0);
 });
+
+it('preserves a closed weekday when setup returns from a validation error', function () {
+    Setting::setSetupComplete(false);
+    $payload = productionSetupPayload();
+    $payload['monday_working'] = '0';
+    unset($payload['monday_start'], $payload['monday_end']);
+    $payload['owner_doctor']['email'] = 'invalid-email';
+    $this->from('/setup')->post(route('setup.store'), $payload)
+        ->assertSessionHasErrors('owner_doctor.email');
+    $page = $this->get(route('setup.show'))->assertOk();
+    $dom = new DOMDocument;
+    @$dom->loadHTML($page->getContent());
+    $xpath = new DOMXPath($dom);
+    expect($xpath->query('//input[@type="checkbox" and @name="monday_working" and @checked]')->length)->toBe(0)
+        ->and($xpath->query('//input[@type="hidden" and @name="monday_working" and @value="0"]')->length)->toBe(1)
+        ->and(User::count())->toBe(0);
+});

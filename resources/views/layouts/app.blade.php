@@ -219,6 +219,15 @@
                         @include('clinical.context-bar')
                     @endif
                     @yield('content')
+                    <x-ui.dialog id="unsaved-workspace-drafts" :title="__('clinical_ui.unsaved_drafts_title')" icon="fa-pen-to-square">
+                        <p class="dialog-description">{{ __('clinical_ui.unsaved_drafts_help') }}</p>
+                        <p class="patient-alert" data-draft-sections></p>
+                        <div class="dialog-actions">
+                            <button type="button" class="btn-secondary" data-dialog-close>{{ __('common.cancel') }}</button>
+                            <button type="button" class="btn-secondary" data-discard-other-drafts>{{ __('clinical_ui.discard_other_drafts') }}</button>
+                            <button type="button" class="btn-primary" data-review-draft>{{ __('clinical_ui.review_draft') }}</button>
+                        </div>
+                    </x-ui.dialog>
                     <x-ui.dialog id="quick-reschedule-dialog" :title="__('clinical_ui.quick_reschedule')" icon="fa-calendar-day" tone="blue">
                         <p class="dialog-patient" data-reschedule-patient></p>
                         <p class="dialog-description">{{ __('clinical_ui.quick_reschedule_help') }}</p>

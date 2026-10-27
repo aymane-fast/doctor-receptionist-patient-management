@@ -46,10 +46,10 @@ class ExportController extends Controller
             'start_date' => 'nullable|date|before_or_equal:today',
             'end_date' => 'nullable|date|after_or_equal:start_date|before_or_equal:today',
         ], [
-            'data_types.required' => 'Veuillez sélectionner au moins un type de données à exporter.',
-            'start_date.before_or_equal' => 'La date de début ne peut pas être dans le futur.',
-            'end_date.after_or_equal' => 'La date de fin doit être postérieure à la date de début.',
-            'end_date.before_or_equal' => 'La date de fin ne peut pas être dans le futur.',
+            'data_types.required' => __('exports.select_data'),
+            'start_date.before_or_equal' => __('exports.start_future'),
+            'end_date.after_or_equal' => __('exports.date_order'),
+            'end_date.before_or_equal' => __('exports.end_future'),
         ]);
 
         try {

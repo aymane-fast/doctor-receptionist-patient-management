@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'valid_price' => 'Saisissez un tarif de consultation valide.',
     'title' => 'Tableau de Bord Analytique',
     'comprehensive_insights' => 'Aperçus complets de votre pratique médicale',
     'live_data' => 'Données en Direct',

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'working_hours_order' => 'L’heure de fin doit être postérieure à l’heure de début.',
     'contact_phone' => 'Saisissez un numéro de téléphone contenant de 7 à 15 chiffres. Les espaces, +, parenthèses, points et tirets sont autorisés.',
     'accepted' => 'Le champ :attribute doit être accepté.',
     'accepted_if' => 'Le champ :attribute doit être accepté quand :other est :value.',

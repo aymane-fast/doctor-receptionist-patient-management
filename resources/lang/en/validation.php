@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'working_hours_order' => 'The end time must be later than the start time.',
     'contact_phone' => 'Enter a phone number containing 7 to 15 digits. Spaces, +, parentheses, dots and hyphens are allowed.',
     'accepted' => 'The :attribute field must be accepted.',
     'accepted_if' => 'The :attribute field must be accepted when :other is :value.',

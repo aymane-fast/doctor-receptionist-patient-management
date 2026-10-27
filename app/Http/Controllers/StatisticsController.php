@@ -120,14 +120,14 @@ class StatisticsController extends Controller
 
         $completedByMonth = Appointment::where('status', 'completed')
             ->whereBetween('appointment_date', [
-                Carbon::now()->subMonths(11)->startOfMonth()->toDateString(),
+                Carbon::now()->startOfMonth()->subMonths(11)->toDateString(),
                 Carbon::now()->endOfMonth()->toDateString(),
             ])
             ->get(['appointment_date'])
             ->countBy(fn ($appointment) => $appointment->appointment_date->format('Y-m'));
 
         for ($i = 11; $i >= 0; $i--) {
-            $month = Carbon::now()->subMonths($i);
+            $month = Carbon::now()->startOfMonth()->subMonths($i);
             $monthlyLabels[] = $month->format('M Y');
             $monthlyRevenue[] = ($completedByMonth[$month->format('Y-m')] ?? 0) * $pricePerConsultation;
         }
@@ -242,6 +242,7 @@ class StatisticsController extends Controller
             'appointments_this_week' => $appointmentsThisWeek,
             'success_rate' => $successRate,
             'completed_appointments' => $completedAppointments,
+            'completed_this_month' => $completedByMonth[Carbon::now()->format('Y-m')] ?? 0,
             'scheduled_appointments' => $scheduledAppointments,
             'in_progress_appointments' => $inProgressAppointments,
             'cancelled_appointments' => $cancelledAppointments,
@@ -322,14 +323,14 @@ class StatisticsController extends Controller
         $labels = [];
 
         $countsByMonth = Appointment::whereBetween('appointment_date', [
-            Carbon::now()->subMonths(11)->startOfMonth()->toDateString(),
+            Carbon::now()->startOfMonth()->subMonths(11)->toDateString(),
             Carbon::now()->endOfMonth()->toDateString(),
         ])
             ->get(['appointment_date'])
             ->countBy(fn ($appointment) => $appointment->appointment_date->format('Y-m'));
 
         for ($i = 11; $i >= 0; $i--) {
-            $month = Carbon::now()->subMonths($i);
+            $month = Carbon::now()->startOfMonth()->subMonths($i);
             $labels[] = $month->format('M Y');  // Jan 2025
             $data[] = $countsByMonth[$month->format('Y-m')] ?? 0;
         }

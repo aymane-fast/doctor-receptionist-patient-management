@@ -35,7 +35,7 @@
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Patients -->
                     <div class="relative">
-                        <input type="checkbox" id="patients" name="data_types[]" value="patients" 
+                        <input type="checkbox" id="patients" name="data_types[]" value="patients" @checked(in_array('patients', (array) old('data_types', []), true))
                                class="sr-only peer">
                         <label for="patients" class="export-choice">
                             <div class="flex items-center space-x-3">
@@ -57,7 +57,7 @@
 
                     <!-- Appointments -->
                     <div class="relative">
-                        <input type="checkbox" id="appointments" name="data_types[]" value="appointments" 
+                        <input type="checkbox" id="appointments" name="data_types[]" value="appointments" @checked(in_array('appointments', (array) old('data_types', []), true))
                                class="sr-only peer">
                         <label for="appointments" class="export-choice">
                             <div class="flex items-center space-x-3">
@@ -79,7 +79,7 @@
 
                     <!-- Medical Records -->
                     <div class="relative">
-                        <input type="checkbox" id="medical_records" name="data_types[]" value="medical_records" 
+                        <input type="checkbox" id="medical_records" name="data_types[]" value="medical_records" @checked(in_array('medical_records', (array) old('data_types', []), true))
                                class="sr-only peer">
                         <label for="medical_records" class="export-choice">
                             <div class="flex items-center space-x-3">
@@ -101,7 +101,7 @@
 
                     <!-- Prescriptions -->
                     <div class="relative">
-                        <input type="checkbox" id="prescriptions" name="data_types[]" value="prescriptions" 
+                        <input type="checkbox" id="prescriptions" name="data_types[]" value="prescriptions" @checked(in_array('prescriptions', (array) old('data_types', []), true))
                                class="sr-only peer">
                         <label for="prescriptions" class="export-choice">
                             <div class="flex items-center space-x-3">
@@ -125,7 +125,7 @@
 
                     <!-- Users -->
                     <div class="relative">
-                        <input type="checkbox" id="users" name="data_types[]" value="users" 
+                        <input type="checkbox" id="users" name="data_types[]" value="users" @checked(in_array('users', (array) old('data_types', []), true))
                                class="sr-only peer">
                         <label for="users" class="export-choice">
                             <div class="flex items-center space-x-3">
@@ -146,6 +146,7 @@
                     </div>
                 </div>
                 
+                <p id="export-selection-error" role="alert" class="mt-2 text-sm text-red-600 hidden">{{ __('exports.select_data') }}</p>
                 @error('data_types')
                 <p class="mt-2 text-sm text-red-600 flex items-center space-x-1">
                     <i class="fas fa-exclamation-circle text-xs"></i>
@@ -240,7 +241,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (checkedBoxes.length === 0) {
             e.preventDefault();
-            alert(@json(__('Select at least one type of data to export.')));
+            document.getElementById('export-selection-error').classList.remove('hidden');
+            form.querySelector('input[name="data_types[]"]').focus();
             return false;
         }
 
@@ -265,6 +267,10 @@ document.addEventListener('DOMContentLoaded', function() {
             exportBtn.classList.remove('opacity-75', 'cursor-not-allowed');
         }, 5000);
     });
+
+    form.querySelectorAll('input[name="data_types[]"]').forEach(input => input.addEventListener('change', () => {
+        document.getElementById('export-selection-error').classList.add('hidden');
+    }));
 
     // Date validation
     startDateInput.addEventListener('change', function() {

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'download' => 'Télécharger',
     'clinic_information' => 'Informations du cabinet',
     'remove' => 'Retirer',
     'add_user' => 'Ajouter un membre',

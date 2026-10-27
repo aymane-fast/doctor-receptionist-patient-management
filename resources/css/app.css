@@ -845,6 +845,10 @@ button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: no
     transform: translateY(-1px);
 }
 
+input[type='checkbox']:focus-visible + .export-choice {
+    outline: 2px solid var(--clinic-primary);
+    outline-offset: 3px;
+}
 input[type='checkbox']:checked + .export-choice {
     background: var(--clinic-primary-wash);
     border-color: var(--clinic-primary);

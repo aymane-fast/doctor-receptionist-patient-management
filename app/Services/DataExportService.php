@@ -36,7 +36,7 @@ class DataExportService
         $exportData = [];
         $exportInfo = [
             'generated_at' => Carbon::now(),
-            'clinic_specialty' => $this->specialties->current()['label'],
+            'clinic_specialty' => __($this->specialties->current()['label']),
             'date_range' => [
                 'start' => $startDate ? Carbon::parse($startDate) : null,
                 'end' => $endDate ? Carbon::parse($endDate) : null,
@@ -99,7 +99,8 @@ class DataExportService
                 __('Total Appointments'), __('Last Visit'), __('Registration Date'), __('Parent / Guardian Contacts'),
             ],
             'data' => $patients->map(function ($patient) {
-                $lastAppointment = $patient->appointments->first();
+                $lastAppointment = $patient->appointments->first(fn ($visit) =>
+                    $visit->status === 'completed' && $visit->appointment_date->lte(today()));
 
                 return [
                     $patient->id,

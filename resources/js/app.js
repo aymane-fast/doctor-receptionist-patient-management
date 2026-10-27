@@ -208,28 +208,30 @@ document.addEventListener('DOMContentLoaded', () => {
     form?.addEventListener('change', markDirty);
     // A save reloads every panel. Keep clinical drafts in memory and guard
     // submissions that would otherwise silently discard another panel's work.
-    const draftForms = [...(workspace?.querySelectorAll('form') || [])]
-        .filter(item => item.querySelector('[name="workspace_form"]'));
+    const draftScope = workspace || document.querySelector('[data-clinical-draft-scope]');
+    const draftForms = [...(draftScope?.querySelectorAll('form') || [])]
+        .filter(item => item.querySelector('[name="workspace_form"]') || item.hasAttribute('data-track-draft'));
     const snapshot = item => JSON.stringify([...new FormData(item)].map(([key, value]) =>
         [key, value instanceof File ? (value.name ? [value.name, value.size, value.lastModified] : null) : value]));
     const original = new Map(draftForms.map(item => [item, snapshot(item)]));
     const changedForms = () => draftForms.filter(item => snapshot(item) !== original.get(item)
-        || item.querySelector('[name="workspace_form"]').value === workspace?.dataset.initialTab);
+        || (draftScope?.dataset.initialTab && item.querySelector('[name="workspace_form"]')?.value === draftScope.dataset.initialTab));
     const draftDialog = document.getElementById('unsaved-workspace-drafts');
     let pendingSubmit = null;
     let allowSubmit = false;
     let leaving = false;
     window.addEventListener('pageshow', () => { leaving = false; });
     document.addEventListener('submit', event => {
-        if (!workspace) return;
+        if (!draftScope) return;
         const otherDrafts = changedForms().filter(item => item !== event.target);
         if (otherDrafts.length && !allowSubmit && draftDialog) {
             event.preventDefault();
             event.stopImmediatePropagation();
             pendingSubmit = { form: event.target, submitter: event.submitter, drafts: otherDrafts };
             draftDialog.querySelector('[data-draft-sections]').textContent = otherDrafts.map(item => {
-                const section = item.querySelector('[name="workspace_form"]').value;
+                const section = item.querySelector('[name="workspace_form"]')?.value;
                 return tabs.find(tab => tab.dataset.workspaceTab === section)?.textContent.trim()
+                    || item.closest('section')?.querySelector('h2, h3')?.textContent.trim()
                     || item.closest('dialog')?.querySelector('h2, h3')?.textContent.trim() || section;
             }).join(', ');
             draftDialog.showModal();
@@ -243,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
         const panel = target.closest('[data-workspace-panel]');
         if (panel) selectTab(panel.id, true);
+        target.closest('details')?.setAttribute('open', '');
         target.closest('dialog')?.showModal();
         target.querySelector('input:not([type=hidden]), textarea, select')?.focus();
     });

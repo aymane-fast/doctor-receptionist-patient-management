@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'download' => 'Download',
     'clinic_information' => 'Clinic information',
     'remove' => 'Remove',
     'add_user' => 'Add team member',
