@@ -204,7 +204,7 @@ php artisan migrate
 npm run build
 ```
 
-**Tests:** `php artisan test` uses in-memory SQLite; latest verified run was **378 passed**. For a quick browser acceptance run: receptionist creates a synthetic patient → book/check in → doctor saves notes → prescribe/print → request/upload a result → follow-up → complete/next → receptionist refreshes and verifies statuses. Also try one rejected booking and correct it. Automated tests do not replace that visible flow.
+**Tests:** `php artisan test` uses in-memory SQLite; latest verified run was **363 passed**. For a quick browser acceptance run: receptionist creates a synthetic patient → book/check in → doctor saves notes → prescribe/print → request/upload a result → follow-up → complete/next → receptionist refreshes and verifies statuses. Also try one rejected booking and correct it. Automated tests do not replace that visible flow.
 
 **Backup:** export the database using your database manager and copy `storage/app/private` to the same dated backup. Keep `.env`/application key securely. Restore both database and files to a separate test installation to verify recovery. CSV alone is insufficient.
 

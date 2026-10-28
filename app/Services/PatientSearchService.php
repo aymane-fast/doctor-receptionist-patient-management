@@ -47,14 +47,27 @@ class PatientSearchService
 
             // Individual name matches
             foreach ($terms as $term) {
-                // Score each term once, even when both names match.
-                if (strcasecmp($patient->first_name, $term) === 0 || strcasecmp($patient->last_name, $term) === 0) {
+                // Exact first name match
+                if (strcasecmp($patient->first_name, $term) === 0) {
                     $score += 600;
                 }
-                elseif (stripos($patient->first_name, $term) === 0 || stripos($patient->last_name, $term) === 0) {
+                // Exact last name match
+                elseif (strcasecmp($patient->last_name, $term) === 0) {
+                    $score += 600;
+                }
+                // First name starts with term
+                elseif (stripos($patient->first_name, $term) === 0) {
                     $score += 400;
                 }
-                elseif (stripos($patient->first_name, $term) !== false || stripos($patient->last_name, $term) !== false) {
+                // Last name starts with term
+                elseif (stripos($patient->last_name, $term) === 0) {
+                    $score += 400;
+                }
+                // Name contains term
+                elseif (stripos($patient->first_name, $term) !== false) {
+                    $score += 200;
+                }
+                elseif (stripos($patient->last_name, $term) !== false) {
                     $score += 200;
                 }
             }
@@ -87,18 +100,6 @@ class PatientSearchService
         ->sortByDesc('score') // Sort by relevance score
         ->take(20) // Limit final results
         ->values(); // Reset array keys
-    }
-
-    /** Shared response contract for medical-record and prescription selectors. */
-    public static function autocomplete(string $query): Collection
-    {
-        return self::search($query)->map(fn ($patient) => [
-            'id' => $patient['id'],
-            'name' => $patient['name'],
-            'phone' => $patient['phone'] ?? 'No phone',
-            'email' => $patient['email'] ?? 'No email',
-            'display' => $patient['display'],
-        ]);
     }
 
     /**

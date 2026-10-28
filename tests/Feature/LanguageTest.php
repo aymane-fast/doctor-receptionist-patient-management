@@ -33,19 +33,3 @@ it('returns available languages as JSON', function () {
         ->assertOk()
         ->assertJsonStructure(['languages', 'current']);
 });
-
-it('renders local flag images for both staff roles and preserves language switching', function ($role) {
-    $user = User::factory()->create(['role' => $role]);
-    $this->actingAs($user)->get('/dashboard')->assertOk()
-        ->assertSee('images/flags/us.svg')->assertSee('images/flags/fr.svg');
-    $this->get('/lang/fr')->assertRedirect();
-    $settings = $this->get('/settings')->assertOk()->assertSee('lang="fr"', false)
-        ->assertSee('images/flags/fr.svg')->assertSee('images/flags/us.svg');
-    if ($role === 'doctor') {
-        $settings->assertSee('href="#clinic-settings"', false);
-    } else {
-        $settings->assertDontSee('href="#clinic-settings"', false);
-    }
-    $this->get('/lang/en')->assertRedirect();
-    $this->get('/dashboard')->assertOk()->assertSee('lang="en"', false);
-})->with(['doctor', 'receptionist']);

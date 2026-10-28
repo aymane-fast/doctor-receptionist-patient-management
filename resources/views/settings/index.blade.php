@@ -5,8 +5,7 @@
 @section('content')
 <div class="settings-layout space-y-4">
     <nav class="settings-navigation" aria-label="{{ __('common.settings') }}">
-        @if(auth()->user()->isDoctor())<a href="#clinic-settings">{{ __('common.clinic_information') }}</a>@endif
-        <a href="#workflow-settings">{{ __('appointments.title') }}</a>
+        <a href="#clinic-settings">{{ __('common.clinic_information') }}</a><a href="#workflow-settings">{{ __('appointments.title') }}</a>
         @if(auth()->user()->isDoctor())<a href="#hours-settings">{{ __('common.working_hours') }}</a><a href="{{ route('register') }}">{{ __('common.add_user') }}</a>@endif
     </nav>
     <x-ui.page-header
@@ -41,7 +40,7 @@
                     {{ app()->getLocale() == $code ? 'border-teal-500 bg-teal-50' : 'border-gray-200 hover:border-gray-300' }}">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
-                            <x-language-flag :language="$code" />
+                            <span class="text-2xl">{{ language_flag($code) }}</span>
                             <div>
                                 <h4 class="font-semibold text-gray-900">{{ $name }}</h4>
                                 <p class="text-sm text-gray-500">{{ strtoupper($code) }}</p>

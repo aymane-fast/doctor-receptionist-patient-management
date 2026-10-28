@@ -106,7 +106,20 @@ class PrescriptionController extends Controller
             return response()->json([]);
         }
         
-        return response()->json(PatientSearchService::autocomplete($query));
+        $patients = PatientSearchService::search($query);
+        
+        // Format for autocomplete display
+        $formattedPatients = $patients->map(function ($patient) {
+            return [
+                'id' => $patient['id'],
+                'name' => $patient['name'],
+                'phone' => $patient['phone'] ?? 'No phone',
+                'email' => $patient['email'] ?? 'No email',
+                'display' => $patient['display']
+            ];
+        });
+        
+        return response()->json($formattedPatients);
     }
 
     public function store(Request $request)
