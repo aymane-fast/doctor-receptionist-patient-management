@@ -1,143 +1,95 @@
-# Clinic Appointment Manager
+# Setup & client demo
 
-A Laravel 12 application for running a small medical clinic: patient records,
-appointment scheduling (fixed time slots or a walk-in queue), medical records,
-prescriptions, statistics, and CSV exports. The interface is bilingual
-(English / French).
+## 1. Install once (Windows / Laragon)
 
-## Roles
+Have Git, PHP 8.2+, Composer, Node.js/npm and MySQL available in your terminal. Start MySQL in Laragon. Create an empty database called `doctor_apointment` using Laragon's database manager.
 
-| Role | Capabilities |
-|---|---|
-| **Doctor** | Everything: own appointments and queue, medical records, prescriptions, statistics, exports, staff registration, clinic settings |
-| **Receptionist** | Patients, appointments and queues for all doctors, appointment duration setting, dashboards |
-
-Medical records, prescriptions, statistics, and exports are doctor-only.
-Doctors only see their own appointments, records, and prescriptions.
-
-## Appointment modes
-
-Each doctor works in one of two modes (configurable in Settings, defaulted by
-the setup wizard):
-
-- **Scheduled** — patients book fixed time slots. Slot length comes from the
-  *appointment duration* setting; bookings are validated against working
-  hours, overlaps, and past times.
-- **Queue** — patients take a number for the day. Positions can be reordered,
-  estimated times are recalculated automatically, and an optional daily limit
-  caps the queue.
-
-## Getting started
-
-```bash
+```powershell
+git clone --branch variations https://github.com/aymane-fast/doctor-receptionist-patient-management.git
+cd doctor-receptionist-patient-management
 composer install
-cp .env.example .env          # then configure DB_* and APP_TIMEZONE
+Copy-Item .env.example .env
 php artisan key:generate
+```
+
+Already have the project? Open its folder and use `git pull origin variations` instead of cloning. Keep your existing `.env` and application key.
+
+Edit `.env` to match your MySQL account:
+
+```dotenv
+APP_URL=http://127.0.0.1:8000
+APP_TIMEZONE=Africa/Casablanca
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=doctor_apointment
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Then:
+
+```powershell
+php artisan optimize:clear
 php artisan migrate
-npm install && npm run build
-php artisan serve
+npm ci
+npm run build
+php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-Open the app and choose a launch mode. **Demo** starts immediately with the
-default doctor, receptionist, patients, and appointments — no form fields to
-complete. It signs you in as `doctor@example.com` (password `password`); log
-out and use `receptionist@example.com` with the same password to show the
-front-desk experience. **Production** opens the full wizard for clinic
-information, working hours, appointment mode, and staff accounts.
+Open **http://127.0.0.1:8000**. Keep that terminal running. Do **not** seed: the wizard creates its own demo data.
 
-### Practice type (variations branch)
+## 2. Choose the demo
 
-Choose **General Practice**, **Pediatrics**, **Dentistry**, or **Cardiology**
-on the first setup screen. General practice is the default; choosing a specialty
-also works with the one-click demo. Dentistry and cardiology keep the standard
-workflow and existing optional clinical notes.
+On the setup screen, select a practice type → **Demo** → optionally check **Keep the demo open 24 hours, every day** → launch. No clinic or account details needed; you enter as the doctor.
 
-Pediatrics registers the **child as the patient**, with a required birth date
-(newborns supported), optional national ID, and up to five parent/guardian
-contacts. Select one primary contact for calls and reminder emails. Siblings
-can share contact details. Search by child or guardian; the child remains the
-owner of appointments, consultations, and prescriptions. Existing allergies,
-conditions, weight/height, development and feeding notes remain shared.
+| Role | Email | Password |
+|---|---|---|
+| Doctor | `doctor@example.com` | `password` |
+| Receptionist | `receptionist@example.com` | `password` |
 
-For an existing installation, back up the database, switch to this branch, and
-run `php artisan migrate` and `npm run build`. The additive migration imports
-legacy guardian notes without removing clinical history. Guardian details stay
-available if the practice later switches specialty. Do not use `migrate:fresh`
-on a clinic database. The migration rollback removes the guardian table, so
-back up before rolling back as well.
+Use a separate browser profile/private window for the receptionist to keep both roles signed in. Two tabs in the same browser session share the same login.
 
-See [practice decisions and verification checklist](workspace-artifacts/docs/PRACTICE_VARIATIONS.md).
+**24-hour option:** Doctor → Settings → **Keep the demo open 24 hours, every day** → Save. Allows nights/weekends; switching it off restores saved working hours. Existing appointments stay unchanged. This controls opening hours, not the clock's display format.
 
-Generated presentations, diagrams, audit reports, captures and temporary files are consolidated in [workspace-artifacts](workspace-artifacts/README.md). This folder is separate from application/runtime files.
+## 3. Present it in this order
 
-Alternatively, seed everything from the command line (creates
-`doctor@example.com` / `receptionist@example.com`, password `password`):
+| Step | Show |
+|---|---|
+| Reception | Search/create a patient; in pediatrics, enter the child and primary guardian. |
+| Book | Choose doctor/date/time, create a visit, check arrival, reschedule or quick-reschedule. |
+| Queue | Show waiting patients and priority controls. Doctor Settings selects Scheduled or Queue for new bookings. Old bookings keep their mode. |
+| Doctor | Open Current Patient; save consultation notes, then use the workspace tabs for history, prescriptions and examinations. Diagnosis can be completed later. |
+| Documents | Upload a PDF/JPEG/PNG (max 10 MB); optionally link it to an examination; view/download or print requests. |
+| Finish | Schedule a follow-up; explicitly complete the visit and move to the next patient. Saving notes alone does not complete a visit. |
+| Switching | Select another current patient and choose what happens to the previous visit. Keep waiting, complete, no-show, cancel or reschedule as offered. |
+| Extra | Waitlist, patient/date filters, prescription printing, doctor statistics and CSV exports. Switch English/French in the language menu. |
 
-```bash
-php artisan migrate --seed
+- **Booking exception:** expand Manual scheduling exception and confirm to deliberately overlap or book outside hours. It keeps your chosen time.
+- **Practice types:** General = shared workflow. Pediatrics = child + guardians/development notes. Dentistry/Cardiology = shared workflow with optional specialty notes, not dedicated charting/device systems.
+- **Two browsers:** refresh the other browser after a change; cross-browser live push is not implemented.
+
+## 4. Run again / reset / test
+
+Every day: start Laragon MySQL, open the project terminal, run `php artisan serve --port=8000`. The compiled interface works without `npm run dev`. Rebuild with `npm run build` after frontend updates; `npm run dev` is for editing with live asset reload.
+
+If you land on Login, setup is already complete (including after `migrate --seed`). To restart the wizard **on a disposable demo database only**:
+
+```powershell
+php artisan optimize:clear
+php artisan migrate:fresh
 ```
 
-### Optional: AI patient summaries
+**This deletes every table in the configured database.** Open the site again; do not add `--seed`. For a second demo/specialty, use another empty database or reset the disposable demo.
 
-Patient profiles can generate an AI clinical summary via the Groq API. Set
-`GROQ_API_KEY` in `.env` (see `config/services.php`); the feature fails
-gracefully when unset.
-
-## Tests
-
-Feature tests run against an in-memory SQLite database:
-
-```bash
+```powershell
 php artisan test
 ```
 
-The suite covers authentication and throttling, role-based authorization,
-patient management and search, scheduled and queue booking rules, medical
-records, prescriptions, settings, CSV exports, dashboards, statistics, and
-the setup wizard.
+Tests use an in-memory SQLite database. Latest verified run: **363 passed**.
 
-## Configuration notes
+## 5. Real clinic setup
 
-### Updating an existing clinic
+Use a separate empty database → `php artisan migrate` → choose **Production** in the wizard → clinic/type → workflow/hours → doctor and receptionist accounts. No demo accounts/data are added. Configure real hosting separately before patient use; keep database + `storage/app/private` backups and preserve `APP_KEY`. Never fresh-migrate a real clinic.
 
-Back up the database **and** `storage/app/private` (uploaded documents), then run:
-
-```bash
-php artisan optimize:clear
-php artisan migrate --force
-npm run build
-```
-
-Clearing old route caches is important after updating workflow routes. Recreate
-production caches only after the update succeeds. Never use `migrate:fresh` on
-a clinic installation. Keep `APP_DEBUG=false` outside local development.
-
-The current-patient workspace saves observations without finishing the visit.
-Use **Complete Visit & Next Patient** explicitly when ready. Prescriptions,
-examination requests and private documents can be added after saving the
-consultation. Historical temperature values without a known unit stay unchanged
-until a doctor confirms their unit; changing that label does not convert them.
-
-Manual scheduled-booking exceptions require the confirmation checkbox. They
-retain the chosen date/time and record the authorizing staff member. Queue
-priority can be reordered without changing scheduled booking times or queue
-ticket identities. Each patient still has at most one active booking per
-doctor/day; reschedule that booking instead of creating an accidental duplicate.
-
-Medication autocomplete reuses the signed-in doctor's previous prescription
-names, not a verified Moroccan medication catalogue. Manual names, strengths,
-forms, dosage and frequency remain editable. A verified catalogue requires an
-approved reference dataset and its reuse conditions.
-
-Documents accept PDF/JPEG/PNG up to 10 MB and are served only through
-doctor-authorized routes, never public storage URLs. Configure PHP/web-server
-upload limits above 10 MB (for example `upload_max_filesize=12M`,
-`post_max_size=16M`). Back up private files with the database and keep production
-storage outside the public web root. This is document storage, not malware
-scanning or advanced medical imaging.
-
-- `APP_TIMEZONE` — working hours and "today" comparisons use this timezone;
-  set it to the clinic's local zone in production.
-- Working hours, clinic info, appointment duration, and language live in the
-  `settings` table and are editable from the Settings page.
-- Login attempts are rate-limited (5/minute per email + IP).
+Optional email reminders require working mail configuration and the scheduler; optional AI summaries require `GROQ_API_KEY`. Both are unnecessary for the core demo. Technical details: [TECHNOLOGY.md](TECHNOLOGY.md).
