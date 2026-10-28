@@ -9,7 +9,7 @@
 | Charts | Chart.js; statistics trend data fetched from the app's JSON endpoint. |
 | Authentication | Session login, hashed passwords, CSRF protection, login rate limiting. `users.role` stores `doctor` / `receptionist`; no separate roles table. |
 | Clinical files | Private local storage, authorized doctor routes, PDF/JPEG/PNG uploads. Printing uses browser print views. |
-| Tests | Pest/PHPUnit feature tests; latest verified run: 363 tests, 1,895 assertions. Browser QA is separate. |
+| Tests | Pest/PHPUnit feature tests; latest verified run: 378 tests, 1,945 assertions. Browser QA is separate. |
 
 ## Dashboard updates
 

@@ -148,14 +148,14 @@
 
                         <div class="relative">
                             <button id="language-menu-button" type="button" class="topbar-menu-button" aria-expanded="false" aria-controls="language-menu">
-                                <span class="text-base">{{ language_flag(app()->getLocale()) }}</span>
+                                <x-language-flag />
                                 <span>{{ strtoupper(app()->getLocale()) }}</span>
                                 <i class="fas fa-chevron-down text-[0.6rem]"></i>
                             </button>
                             <div id="language-menu" class="app-menu hidden">
                                 @foreach(\App\Models\Setting::getAvailableLanguages() as $code => $name)
                                     <a href="{{ route('language.switch', $code) }}" class="{{ app()->getLocale() === $code ? 'is-active' : '' }}">
-                                        <span>{{ language_flag($code) }}</span>
+                                        <x-language-flag :language="$code" />
                                         <span class="flex-1">{{ $name }}</span>
                                         @if(app()->getLocale() === $code)
                                             <i class="fas fa-check"></i>
